@@ -15,6 +15,8 @@ int ggt(int a, int b) {
 }
 
 Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), MReziprocal(), MRot(), reflections(), connectedProjectors(this), rotationAxis(1,0,0) {
+    spaceGroup = new SpaceGroup(this);
+    spaceGroup->setGroupSymbol("Pm3m");
     setCell(1.0, 1.0, 1.0, 90.0, 90.0, 90.0);
     Qmin=0.0;
     Qmax=1.0;
@@ -22,12 +24,13 @@ Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), M
     connect(&connectedProjectors, SIGNAL(objectRemoved()), this, SLOT(updateWavevectorsFromProjectors()));
     axisType=LabSystem;
     enableUpdate();
-    spaceGroup = new SpaceGroup(this);
-    spaceGroup->setGroupSymbol("Pm3m");
 }
 
 Crystal::Crystal(const Crystal& c) {
     cout << "Crystal Copy Constructor" << endl;
+    spaceGroup = new SpaceGroup(this);
+    spaceGroup->setGroupSymbol(c.spaceGroup->groupSymbol());
+
     setCell(c.a,c.b,c.c,c.alpha,c.beta,c.gamma);
     Qmin=c.Qmin;
     Qmax=c.Qmax;
@@ -35,8 +38,6 @@ Crystal::Crystal(const Crystal& c) {
     connect(&connectedProjectors, SIGNAL(objectRemoved()), this, SLOT(updateWavevectorsFromProjectors()));
     
     setRotation(c.getRotationMatrix());
-    spaceGroup = new SpaceGroup(this);
-    spaceGroup->setGroupSymbol(c.spaceGroup->groupSymbol());
     setRotationAxis(c.getRotationAxis(), c.getRotationAxisType());
     enableUpdate(c.updateEnabled);
 };
@@ -58,7 +59,7 @@ void Crystal::setCell(QList<double> cell) {
     QList<int> constrains = spaceGroup->getConstrains();
     for (int i=0; i<6; i++) {
         if (constrains[i]>0) cell[i]=constrains[i];
-        if (constrains[i]<0) cell[i]=cell[1-constrains[i]];
+        if (constrains[i]<0) cell[i]=cell[-constrains[i]-1];
     }
 
     double _a = cell[0];
@@ -498,3 +499,8 @@ void Crystal::setEulerAngles(double omega, double chi, double phi) {
         self.crystal.setRotation(OM)
   */  
 }
+
+void Crystal::slotSetSGConstrains() {
+    setCell(getCell());
+}
+

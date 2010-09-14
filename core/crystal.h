@@ -71,7 +71,8 @@ class Crystal: public QObject, public FitObject {
         void removeProjector(Projector*);
         void updateWavevectorsFromProjectors();
         void setRotationAxis(const Vec3D& axis, RotationAxisType type=LabSystem);
-        
+        void slotSetSGConstrains();
+
     signals:
         void cellChanged();
         void orientationChanged();

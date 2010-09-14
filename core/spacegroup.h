@@ -36,6 +36,7 @@ public:
 
 signals:
     void groupChanged();
+    void constrainsChanged();
 
 
 private:

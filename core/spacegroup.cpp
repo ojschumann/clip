@@ -46,13 +46,13 @@ SpaceGroup::SpaceGroup(QObject* parent=NULL): QObject(parent), groups() {
     groups << SpaceGroupCheck(    trigonal,   "32", "([PRH])(-?3[12]?)(?=21|12)(.)(.)");
     groups << SpaceGroupCheck(    trigonal,   "3m", "([PRH])(-?3)(?=[mnabcd]1?|1[mnabcd])(.)(.?)");
 
-    groups << SpaceGroupCheck(   hexagonal,    "6", "([PRH])(6[12345]?)");
-    groups << SpaceGroupCheck(   hexagonal,   "-6", "([PRH])(-6)");
-    groups << SpaceGroupCheck(   hexagonal,  "6/m", "([PRH])(63?/m)");
-    groups << SpaceGroupCheck(   hexagonal,  "622", "([PRH])(6[12345]?)(2)(2)");
-    groups << SpaceGroupCheck(   hexagonal,  "6mm", "([PRH])(63?)([mc])([mc])");
-    groups << SpaceGroupCheck(   hexagonal, "-6m2", "([PRH])(-6)(?=2[mc]|[mc]2)(.)(.)");
-    groups << SpaceGroupCheck(   hexagonal,"6/mmm", "([PRH])(63?/[mc])([mc])([mc])");
+    groups << SpaceGroupCheck(   hexagonal,    "6", "([PH])(6[12345]?)");
+    groups << SpaceGroupCheck(   hexagonal,   "-6", "([PH])(-6)");
+    groups << SpaceGroupCheck(   hexagonal,  "6/m", "([PH])(63?/m)");
+    groups << SpaceGroupCheck(   hexagonal,  "622", "([PH])(6[12345]?)(2)(2)");
+    groups << SpaceGroupCheck(   hexagonal,  "6mm", "([PH])(63?)([mc])([mc])");
+    groups << SpaceGroupCheck(   hexagonal, "-6m2", "([PH])(-6)(?=2[mc]|[mc]2)(.)(.)");
+    groups << SpaceGroupCheck(   hexagonal,"6/mmm", "([PH])(63?/[mc])([mc])([mc])");
 
     groups << SpaceGroupCheck(       cubic,   "23", "([PIF])(21?)(-?3)");
     groups << SpaceGroupCheck(       cubic,   "m3", "([PIF])([mnabcd])(-?3)");
@@ -66,6 +66,9 @@ bool SpaceGroup::setGroupSymbol(QString s) {
     for (iter=groups.begin(); iter!=groups.end(); ++iter) {
         if (iter->match(s)) {
             symbol = s;
+            if ((crystalsystem!=iter->system) || (symbolElements.first()!="R" && iter->elements().first()!="R") || (symbolElements.first()=="R" && iter->elements().first()=="R")) {
+                emit constrainsChanged();
+            }
             symbolElements = iter->elements();
             crystalsystem = iter->system;
             symbolElements.takeFirst();
