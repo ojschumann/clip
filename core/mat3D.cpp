@@ -9,17 +9,17 @@
 using namespace std;
 
 Mat3D::Mat3D() {
-  for (unsigned int i=3; i--; ) 
-    for (unsigned int j=3; j--; ) 
-      M[i][j]=(i==j)?1.0:0.0;
+    zero();
+    for (unsigned int i=3; i--; )
+        M[i][i]=1.0;
 }
 
 Mat3D::Mat3D(const Mat3D* t) {
-  memcpy(&M, &(t->M), 9*sizeof(double));
+  memcpy(&M, &(t->M), sizeof(M));
 }
 
 Mat3D::Mat3D(const Mat3D& t) {
-  memcpy(&M, &(t.M), 9*sizeof(double));
+  memcpy(&M, &(t.M), sizeof(M));
 }
 
 Mat3D::Mat3D(Vec3D v1,Vec3D v2,Vec3D v3) {
@@ -62,6 +62,11 @@ Mat3D::Mat3D(vector<double> m) {
   }
 }
 
+void Mat3D::zero() {
+    size_t i1 = 9*sizeof(double);
+    size_t i2 = sizeof(M);
+    memset(&M, 0, sizeof(M));
+}
 
 Vec3D Mat3D::operator*(const Vec3D& v) const {
   Vec3D r;
@@ -169,10 +174,10 @@ Vec3D Mat3D::operator[](unsigned int i) const {
 }
 
 
-double* Mat3D::at(unsigned int i, unsigned int j) {
+double& Mat3D::at(unsigned int i, unsigned int j) {
   if ((i<3) && (j<3)) 
-    return &M[i][j];
-  //return 0.0;
+    return M[i][j];
+  return fault;
 }
 
 
@@ -365,4 +370,5 @@ void Mat3D::svd(Mat3D& L, Mat3D& R) {
     R.transpose();
 };    
     
+double Mat3D::fault=0.0;
 

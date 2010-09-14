@@ -79,9 +79,9 @@ void CrystalDisplay::slotUpdateOM() {
     double omega, phi, chi;
     crystal->calcEulerAngles(omega, chi, phi);
     allowRotationUpdate = false;
-    ui->rotationOmega->setValue(M_PI/180.0*omega);
-    ui->rotationChi->setValue(M_PI/180.0*chi);
-    ui->rotationPhi->setValue(M_PI/180.0*phi);
+    ui->rotationOmega->setValue(180.0*M_1_PI*omega);
+    ui->rotationChi->setValue(180.0*M_1_PI*chi);
+    ui->rotationPhi->setValue(180.0*M_1_PI*phi);
     allowRotationUpdate = true;
 }
 
@@ -93,8 +93,6 @@ void CrystalDisplay::slotLoadCellFromCrystal() {
     for (int i=0; i<6; i++)
         inputs[i]->setValue(cell[i]);
 }
-
-
 
 void CrystalDisplay::slotCellChanged() {
     QList<double> cell;
@@ -110,32 +108,14 @@ void CrystalDisplay::slotCellChanged() {
 void CrystalDisplay::slotSpaceGroupChanged(QString s) {
     crystal->getSpacegroup()->setGroupSymbol(s);
     slotSetSGConstrains();
-
-/*
-            if self.sg.system==self.sg.trigonal:
-                self.crystal.setSpacegroupConstrains([0,0,0,0,0,0])
-                if sgold.getCellConstrain()==[0,-1,-1,0,-4,-4] and self.sg.getCellConstrain()==[0,-1,0,90,90,120]:
-                    self.R2T(self.crystal)
-                elif sgold.getCellConstrain()==[0,-1,0,90,90,120] and self.sg.getCellConstrain()==[0,-1,-1,0,-4,-4]:
-                    self.T2R(self.crystal)
-
-            self.crystal.setSpacegroupConstrains(self.sg.getCellConstrain())
-
-        constrain=self.sg.getCellConstrain()
-        for i in range(6):
-            self.inputs[i].setEnabled(constrain[i]==0)
-        cell=self.sg.contrainCellToSymmetry(self.crystal.getCell())
-        self.crystal.setCell(*cell)
-*/
-
 }
 
 
 void CrystalDisplay::slotRotationChanged() {
     if (allowRotationUpdate) {
-        double omega = 180.0*M_1_PI*ui->rotationOmega->value();
-        double chi = 180.0*M_1_PI*ui->rotationChi->value();
-        double phi = 180.0*M_1_PI*ui->rotationPhi->value();
+        double omega = M_PI/180.0*ui->rotationOmega->value();
+        double chi = M_PI/180.0*ui->rotationChi->value();
+        double phi = M_PI/180.0*ui->rotationPhi->value();
         crystal->setEulerAngles(omega, chi, phi);
     }
 }
@@ -167,7 +147,7 @@ void CrystalDisplay::slotStartIndexing() {
 
 
 /*
-
+    TODO: Port
 
     def crystaldata2xml(self, w):
         w.writeStartElement('Crystal')
@@ -244,39 +224,5 @@ void CrystalDisplay::slotStartIndexing() {
                 if r.name()=='Crystal' and r.isStartElement():
                     self.loadFromXML(r)
 
-    def R2T(self, Cr):
-        a,b,c,al,be,ga=Cr.getCell()
-        if a==b and b==c and al==be and be==ga:
-            a=Cr.uvw2Real(1,-1,0)
-            c=Cr.uvw2Real(1,1,1)
-            Cr.setCell(a.norm(),a.norm(),c.norm(),90,90,120)
-            ch=Cr.uvw2Real(0,0,1)
-            Cr.addRotation(self.rotHT(a,c,Cr.uvw2Real(1,0,0),Cr.uvw2Real(0,0,1),-1))
 
-    def T2R(self, Cr):
-        a,b,c,al,be,ga=Cr.getCell()
-        if a==b and al==90.0 and be==90.0 and ga==120.0:
-            a=Cr.uvw2Real(2,1,1)/3
-            b=Cr.uvw2Real(-1,1,1)/3
-            ah=Cr.uvw2Real(1,0,0)
-            ch=Cr.uvw2Real(0,0,1)
-            l=a.norm()
-            ang=math.degrees(math.acos(a*b/l/l))
-            Cr.setCell(l,l,l,ang,ang,ang)
-            Cr.addRotation(self.rotHT(Cr.uvw2Real(1,-1,0),Cr.uvw2Real(1,1,1),ah,ch,1))
-
-
-    def rotHT(self,r1,r2,ah,ch,o):
-        da=r1-ah
-        dc=r2-ch
-
-        n=da%dc
-        n.normalize()
-
-        c1=r2-n*(n*r2)
-        c2=ch-n*(ch*n)
-        c1.normalize()
-        c2.normalize()
-        R=Mat3D(n,o*math.acos(c1*c2))
-        return R
 */

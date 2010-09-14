@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     core/projector.cpp \
     core/objectstore.cpp \
     core/reflection.cpp \
-    core/spacegroup.cpp
+    core/spacegroup.cpp \
+    tools/optimalrotation.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -32,7 +33,8 @@ HEADERS  += ui/clip.h \
     core/projector.h \
     core/objectstore.h \
     core/reflection.h \
-    core/spacegroup.h
+    core/spacegroup.h \
+    tools/optimalrotation.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui

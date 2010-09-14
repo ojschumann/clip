@@ -16,7 +16,10 @@ bool SpaceGroup::SpaceGroupCheck::match(QString s) {
 }
 
 QStringList SpaceGroup::SpaceGroupCheck::elements() {
-    return regexp.capturedTexts();
+    QStringList r = regexp.capturedTexts();
+    if (not r.empty())
+        r.takeFirst();
+    return r;
 }
 
 
@@ -65,13 +68,27 @@ bool SpaceGroup::setGroupSymbol(QString s) {
     QList<SpaceGroupCheck>::iterator iter;
     for (iter=groups.begin(); iter!=groups.end(); ++iter) {
         if (iter->match(s)) {
+
+            bool SystemChg = crystalsystem!=iter->system;
+            QString CenterChg;
+            if (not symbolElements.empty()) {
+                CenterChg = symbolElements.first();
+            } else {
+                // On startup
+                SystemChg = true;
+            }
+
             symbol = s;
-            if ((crystalsystem!=iter->system) || (symbolElements.first()!="R" && iter->elements().first()!="R") || (symbolElements.first()=="R" && iter->elements().first()=="R")) {
+            crystalsystem = iter->system;
+            symbolElements = iter->elements();
+            CenterChg += symbolElements.first();
+
+            if (SystemChg || CenterChg=="HR" || CenterChg=="RH") {
                 emit constrainsChanged();
             }
-            symbolElements = iter->elements();
-            crystalsystem = iter->system;
-            symbolElements.takeFirst();
+            if (CenterChg=="HR") emit triclinHtoR();
+            if (CenterChg=="RH") emit triclinRtoH();
+
             emit groupChanged();
             return true;
         }
@@ -92,7 +109,7 @@ QList<int> SpaceGroup::getConstrains() const {
     if (crystalsystem==triclinic) {
         r << 0 << 0 << 0 << 0 << 0 << 0;
     } else if (crystalsystem==monoclinic) {
-        r << 0 << 0 << 0 << 90 << 0 << 90;
+        r << 0 << 0 << 0 << -5 << 0 << -5;
     } else if (crystalsystem==orthorhombic) {
         r << 0 << 0 << 0 << 90 << 90 << 90;
     } else if (crystalsystem==tetragonal) {

@@ -7,7 +7,7 @@
 
 using namespace std;
 
-Projector::Projector(QObject *parent): QObject(parent), FitObject(), crystal(), projectedItems(), decorationItems(), textMarkerItems(), markerItems(), scene(this), imgGroup() {
+Projector::Projector(QObject *parent): QObject(parent), FitObject(), projectedItems(), decorationItems(), textMarkerItems(), markerItems(), crystal(), scene(this), imgGroup() {
     enableSpots();
     enableProjection();
     scene.setItemIndexMethod(QGraphicsScene::NoIndex);

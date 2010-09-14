@@ -37,6 +37,8 @@ public:
 signals:
     void groupChanged();
     void constrainsChanged();
+    void triclinHtoR();
+    void triclinRtoH();
 
 
 private:

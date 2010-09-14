@@ -73,6 +73,10 @@ class Crystal: public QObject, public FitObject {
         void setRotationAxis(const Vec3D& axis, RotationAxisType type=LabSystem);
         void slotSetSGConstrains();
 
+    private slots:
+        void convertHtoR();
+        void convertRtoH();
+
     signals:
         void cellChanged();
         void orientationChanged();

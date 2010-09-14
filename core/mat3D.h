@@ -34,7 +34,7 @@ class Mat3D {
   
       
   Vec3D operator[](unsigned int i) const;
-  double* at(unsigned int i, unsigned int j);
+  double& at(unsigned int i, unsigned int j);
   
   Mat3D orthogonalize() const;
   Mat3D transposed() const;
@@ -42,6 +42,7 @@ class Mat3D {
   Mat3D inverse() const;
   double sqSum() const;
   double det() const;
+  void zero();
   
   // returns Q, Matrix will be overwritten
   Mat3D QR();
@@ -50,6 +51,7 @@ class Mat3D {
   void svd(Mat3D& L, Mat3D& R);
  protected:
   double M[3][3];
+  static double fault;
 };
 
 

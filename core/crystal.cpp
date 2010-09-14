@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <core/projector.h>
+#include <tools/optimalrotation.h>
 
 using namespace std;
 
@@ -22,6 +23,9 @@ Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), M
     Qmax=1.0;
     connect(&connectedProjectors, SIGNAL(objectAdded()), this, SLOT(updateWavevectorsFromProjectors()));
     connect(&connectedProjectors, SIGNAL(objectRemoved()), this, SLOT(updateWavevectorsFromProjectors()));
+    connect(spaceGroup, SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
+    connect(spaceGroup, SIGNAL(triclinHtoR()), this, SLOT(convertHtoR()));
+    connect(spaceGroup, SIGNAL(triclinRtoH()), this, SLOT(convertRtoH()));
     axisType=LabSystem;
     enableUpdate();
 }
@@ -387,24 +391,6 @@ void Crystal::enableUpdate(bool b) {
     updateEnabled=b;
 }
 
-/*void Crystal::setSpacegroupConstrains(QList<int> constrains) {
-    if (constrains!=spacegroupConstrains) {
-        spacegroupConstrains=constrains;
-        QList<QString> fitParameterTempNames;
-        fitParameterTempNames << "b" << "c" << "alpha" << "beta" << "gamma";
-        QList<QString> fitParameterNames;
-        if (constrains[1]==0 or constrains[2]==0)
-            fitParameterNames << "a";
-        for (unsigned int n=1; n<constrains.size(); n++) {
-            if (constrains[n]==0)
-                fitParameterNames << fitParameterTempNames[n-1];
-        }    
-        setFitParameterNames(fitParameterNames);
-        emit constrainsChanged();
-    }
-}*/
-
-
 double Crystal::fitParameterValue(unsigned int n) {
     if (fitParameterName(n)=="a") {
         return a;
@@ -472,17 +458,6 @@ void Crystal::calcEulerAngles(double &omega, double &chi, double &phi) {
     }
     Mat3D M(Mat3D(Vec3D(1,0,0), -chi)*Mat3D(Vec3D(0,0,1), -omega)*MRot);
     phi=atan2(M[0][2],M[0][0]);
-    
-        /*v=R*Vec3D(0, 0, 1)
-        omega=math.atan2(v.x(), -v.y())
-        Rom=Mat3D(Vec3D(0, 0, 1),  -omega)
-        v=Rom*v
-        chi=math.atan2(-v.y(), v.z())
-        Rchi=Mat3D(Vec3D(1, 0, 0),  -chi)
-        Rphi=Rchi*Rom*R
-        v=Rphi*Vec3D(1, 0, 0)
-        phi=math.atan2(v.y(),  v.x())
-        return math.degrees(omega), math.degrees(chi), math.degrees(phi), OM*/    
 }
 
 void Crystal::setEulerAngles(double omega, double chi, double phi) {
@@ -490,17 +465,60 @@ void Crystal::setEulerAngles(double omega, double chi, double phi) {
     M*=Mat3D(Vec3D(1,0,0), chi);
     M*=Mat3D(Vec3D(0,1,0), phi);
     setRotation(M);
-/*        OM=Mat3D()
-        for ang, p in ((omega, 2), (chi, 0), (phi, 2)):
-            ax=Vec3D(0, 0, 0)
-            ax[p]=1.0
-            OM=OM*Mat3D(ax,  math.radians(ang))
-        
-        self.crystal.setRotation(OM)
-  */  
 }
 
 void Crystal::slotSetSGConstrains() {
     setCell(getCell());
+
+    QList<int> constrains = spaceGroup->getConstrains();
+
+    QList<QString> fitParameterTempNames;
+    fitParameterTempNames << "b" << "c" << "alpha" << "beta" << "gamma";
+    QList<QString> fitParameterNames;
+    if (constrains[1]==0 or constrains[2]==0)
+        fitParameterNames << "a";
+    for (unsigned int n=1; n<constrains.size(); n++) {
+        if (constrains[n]==0)
+            fitParameterNames << fitParameterTempNames[n-1];
+    }
+    setFitParameterNames(fitParameterNames);
+    //emit constrainsChanged();
+}
+
+
+
+void Crystal::convertRtoH() {
+    Vec3D a = uvw2Real(1, -1, 0);
+    Vec3D c = uvw2Real(1, 1, 1);
+    // Vec3D b = uvw2Real(0, 1, -1);
+    setCell(a.norm(), a.norm(), c.norm(), 90, 90, 120);
+    OptimalRotation r;
+    r.addVectorPair(a.normalized(), uvw2Real(1,0,0).normalized());
+    r.addVectorPair(c.normalized(), uvw2Real(0,0,1).normalized());
+    addRotation(r.getOptimalRotation());
+
+    Vec3D t = uvw2Real(1,0,0);
+
+    t = uvw2Real(0,0,1);
+
+}
+
+void Crystal::convertHtoR() {
+    Vec3D a=uvw2Real(2,1,1)/3;
+    Vec3D b=uvw2Real(-1,1,1)/3;
+    double l=a.norm();
+    l=b.norm();
+    double ang=180*M_1_PI*acos(a*b/l/l);
+    setCell(l,l,l,ang,ang,ang);
+
+    OptimalRotation r;
+    r.addVectorPair(a.normalized(), uvw2Real(1,0,0).normalized());
+    r.addVectorPair(b.normalized(), uvw2Real(0,1,0).normalized());
+    addRotation(r.getOptimalRotation());
+
+    Vec3D t = uvw2Real(1,0,0);
+
+    t = uvw2Real(0,1,0);
+
 }
 

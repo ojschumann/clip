@@ -1,5 +1,5 @@
 #include <QtGui/QApplication>
-#include "clip.h"
+#include <ui/clip.h>
 
 int main(int argc, char *argv[])
 {
