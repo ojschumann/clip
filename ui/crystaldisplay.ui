@@ -39,7 +39,7 @@
    <item row="1" column="0" colspan="3">
     <layout class="QHBoxLayout">
      <item>
-      <widget class="QLabel" name="label_7">
+      <widget class="QLabel" name="label_Spacegroup">
        <property name="text">
         <string>SpaceGroup</string>
        </property>
@@ -61,7 +61,7 @@
      <item>
       <layout class="QVBoxLayout">
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="Label_A">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -80,9 +80,12 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="latticeA">
+        <widget class="NumberEdit" name="latticeA">
          <property name="buttonSymbols">
           <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="correctionMode">
+          <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
          </property>
          <property name="prefix">
           <string/>
@@ -105,7 +108,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="Label_Alpha">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -124,7 +127,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="latticeAlpha">
+        <widget class="NumberEdit" name="latticeAlpha">
          <property name="buttonSymbols">
           <enum>QAbstractSpinBox::NoButtons</enum>
          </property>
@@ -150,7 +153,7 @@
      <item>
       <layout class="QVBoxLayout">
        <item>
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="label_B">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -169,7 +172,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="latticeB">
+        <widget class="NumberEdit" name="latticeB">
          <property name="buttonSymbols">
           <enum>QAbstractSpinBox::NoButtons</enum>
          </property>
@@ -191,7 +194,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="label_Beta">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -210,7 +213,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="latticeBeta">
+        <widget class="NumberEdit" name="latticeBeta">
          <property name="buttonSymbols">
           <enum>QAbstractSpinBox::NoButtons</enum>
          </property>
@@ -236,7 +239,7 @@
      <item>
       <layout class="QVBoxLayout">
        <item>
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="label_C">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -255,7 +258,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="latticeC">
+        <widget class="NumberEdit" name="latticeC">
          <property name="buttonSymbols">
           <enum>QAbstractSpinBox::NoButtons</enum>
          </property>
@@ -277,7 +280,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="label_Gamma">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -296,7 +299,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="latticeGamma">
+        <widget class="NumberEdit" name="latticeGamma">
          <property name="buttonSymbols">
           <enum>QAbstractSpinBox::NoButtons</enum>
          </property>
@@ -329,7 +332,7 @@
     </widget>
    </item>
    <item row="4" column="0" colspan="3">
-    <widget class="QLabel" name="label_9">
+    <widget class="QLabel" name="label_OMat">
      <property name="text">
       <string>orientation matrix</string>
      </property>
@@ -378,7 +381,7 @@
    <item row="6" column="0">
     <layout class="QVBoxLayout">
      <item>
-      <widget class="QLabel" name="label_8">
+      <widget class="QLabel" name="label_Omega">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -397,7 +400,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="rotationOmega">
+      <widget class="NumberEdit" name="rotationOmega">
        <property name="buttonSymbols">
         <enum>QAbstractSpinBox::NoButtons</enum>
        </property>
@@ -423,7 +426,7 @@
    <item row="6" column="1">
     <layout class="QVBoxLayout">
      <item>
-      <widget class="QLabel" name="label_10">
+      <widget class="QLabel" name="label_Chi">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -442,7 +445,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="rotationChi">
+      <widget class="NumberEdit" name="rotationChi">
        <property name="buttonSymbols">
         <enum>QAbstractSpinBox::NoButtons</enum>
        </property>
@@ -468,7 +471,7 @@
    <item row="6" column="2">
     <layout class="QVBoxLayout">
      <item>
-      <widget class="QLabel" name="label_12">
+      <widget class="QLabel" name="label_Phi">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -487,7 +490,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="rotationPhi">
+      <widget class="NumberEdit" name="rotationPhi">
        <property name="buttonSymbols">
         <enum>QAbstractSpinBox::NoButtons</enum>
        </property>
@@ -582,6 +585,11 @@
    <header>defs.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>NumberEdit</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>tools/numberedit.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>SpaceGroup</tabstop>
@@ -600,102 +608,6 @@
   <include location="../icons/icons.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>latticeA</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>CrystalDisplay</receiver>
-   <slot>slotCellChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>36</x>
-     <y>85</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>202</x>
-     <y>102</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>latticeB</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>CrystalDisplay</receiver>
-   <slot>slotCellChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>86</x>
-     <y>84</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>203</x>
-     <y>94</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>latticeC</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>CrystalDisplay</receiver>
-   <slot>slotCellChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>158</x>
-     <y>84</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>200</x>
-     <y>86</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>latticeAlpha</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>CrystalDisplay</receiver>
-   <slot>slotCellChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>46</x>
-     <y>126</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>204</x>
-     <y>130</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>latticeBeta</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>CrystalDisplay</receiver>
-   <slot>slotCellChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>116</x>
-     <y>134</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>205</x>
-     <y>178</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>latticeGamma</sender>
-   <signal>valueChanged(double)</signal>
-   <receiver>CrystalDisplay</receiver>
-   <slot>slotCellChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>181</x>
-     <y>136</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>205</x>
-     <y>209</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>rotationOmega</sender>
    <signal>valueChanged(double)</signal>
@@ -757,6 +669,102 @@
     <hint type="destinationlabel">
      <x>99</x>
      <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeGamma</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>181</x>
+     <y>136</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>205</x>
+     <y>209</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeBeta</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>116</x>
+     <y>134</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>205</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeAlpha</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>46</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>204</x>
+     <y>130</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeC</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>158</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>200</x>
+     <y>86</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeB</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>86</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>203</x>
+     <y>94</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeA</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>36</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>202</x>
+     <y>102</y>
     </hint>
    </hints>
   </connection>

@@ -21,7 +21,10 @@ SOURCES += main.cpp\
     core/objectstore.cpp \
     core/reflection.cpp \
     core/spacegroup.cpp \
-    tools/optimalrotation.cpp
+    tools/optimalrotation.cpp \
+    tools/numberedit.cpp \
+    ui/projectionplane.cpp \
+    ui/projectiongraphicsview.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -34,10 +37,14 @@ HEADERS  += ui/clip.h \
     core/objectstore.h \
     core/reflection.h \
     core/spacegroup.h \
-    tools/optimalrotation.h
+    tools/optimalrotation.h \
+    tools/numberedit.h \
+    ui/projectionplane.h \
+    ui/projectiongraphicsview.h
 
 FORMS    += ui/clip.ui \
-    ui/crystaldisplay.ui
+    ui/crystaldisplay.ui \
+    ui/projectionplane.ui
 
 RESOURCES += \
     icons/icons.qrc

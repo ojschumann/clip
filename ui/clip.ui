@@ -37,21 +37,19 @@
      <string>File</string>
     </property>
     <addaction name="actionNew_Crystal"/>
+    <addaction name="actionNew_Projection"/>
    </widget>
    <addaction name="menuFile"/>
-  </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNew_Crystal">
    <property name="text">
     <string>New Crystal</string>
+   </property>
+  </action>
+  <action name="actionNew_Projection">
+   <property name="text">
+    <string>New Projector</string>
    </property>
   </action>
  </widget>

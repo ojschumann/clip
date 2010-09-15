@@ -17,7 +17,7 @@ public:
 
 public slots:
     void on_actionNew_Crystal_triggered(bool);
-
+    void on_actionNew_Projection_triggered(bool);
 
 private:
     Ui::Clip *ui;
