@@ -24,7 +24,7 @@ Projector::Projector(QObject *parent): QObject(parent), FitObject(), projectedIt
     updateImgTransformations();
 };
 
-Projector::Projector(const Projector &p): QObject(),FitObject(),det2img(p.det2img), img2det(p.img2det), crystal(), projectedItems(), decorationItems(), markerItems(), textMarkerItems(), infoItems(), scene(this)  {
+Projector::Projector(const Projector &p): QObject(),FitObject(),det2img(p.det2img), img2det(p.img2det), projectedItems(), decorationItems(), textMarkerItems(), markerItems(), infoItems(), crystal(), scene(this)  {
     cout << "Projector Copy Constructor" << endl;
     enableSpots(p.spotsEnabled());
     enableProjection(p.projectionEnabled);
@@ -33,7 +33,7 @@ Projector::Projector(const Projector &p): QObject(),FitObject(),det2img(p.det2im
     setTextSize(p.getTextSize());
     setSpotSize(p.getSpotSize());
     
-    for (unsigned int n=p.markerNumber(); n--; )
+    for (int n=p.markerNumber(); n--; )
         addMarker(p.getMarkerDetPos(n));
     
     connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
@@ -259,7 +259,7 @@ Crystal* Projector::getCrystal() {
     return crystal;
 }
 
-unsigned int Projector::getMaxHklSqSum() const {
+int Projector::getMaxHklSqSum() const {
     return maxHklSqSum;
 }
 
@@ -275,7 +275,7 @@ bool Projector::spotsEnabled() const {
     return showSpots;
 }
 
-void Projector::setMaxHklSqSum(unsigned int m) {
+void Projector::setMaxHklSqSum(int m) {
     maxHklSqSum=m;
     emit projectionParamsChanged();
 }
@@ -316,10 +316,10 @@ void Projector::delMarkerNear(const QPointF& p) {
     if (markerItems.isEmpty())
         return;
     double minDist;
-    unsigned int minIdx;
+    int minIdx;
     QGraphicsEllipseItem* m;
     QPointF imgPos=det2img.map(p);
-    for (unsigned int i=0; i<markerItems.size(); i++) {
+    for (int i=0; i<markerItems.size(); i++) {
         m=markerItems.at(i);
         double d=hypot(imgPos.x()-m->pos().x(), imgPos.y()-m->pos().y());
         if (i==0 or d<minDist) {
@@ -332,17 +332,17 @@ void Projector::delMarkerNear(const QPointF& p) {
     delete m;
 };
 
-unsigned int Projector::markerNumber() const {
+int Projector::markerNumber() const {
     return markerItems.size();
 }
 
-QPointF Projector::getMarkerDetPos(unsigned int n) const {
+QPointF Projector::getMarkerDetPos(int n) const {
     return img2det.map(markerItems.at(n)->pos());
 }
 
 QList<Vec3D> Projector::getMarkerNormals() const {
     QList<Vec3D> r;
-    for (unsigned int i=0; i<markerItems.size(); i++) 
+    for (int i=0; i<markerItems.size(); i++)
         r << det2normal(img2det.map(markerItems.at(i)->pos()));
     return r;
 }
@@ -360,15 +360,15 @@ void Projector::updateImgTransformations() {
     imgGroup.setTransform(img2det);
     QTransform t;
     t.scale(det2img.m11(), det2img.m22());
-    for (unsigned int i=imgGroup.childItems().size(); i--; ) 
+    for (int i=imgGroup.childItems().size(); i--; )
         imgGroup.childItems().at(i)->setTransform(t);
     emit imgTransformUpdated();
 }
 
 // Rotates and flips the Decorations, which are bound to the Image
-void Projector::doImgRotation(unsigned int CWRSteps, bool flip) {
+void Projector::doImgRotation(int CWRSteps, bool flip) {
     QTransform t;
-    for (unsigned int i=imgGroup.childItems().size(); i--; ) {
+    for (int i=imgGroup.childItems().size(); i--; ) {
         QGraphicsItem* e=imgGroup.childItems().at(i);
         double x = e->pos().x();
         double y = e->pos().y();
@@ -412,7 +412,7 @@ void Projector::projector2xml(QXmlStreamWriter& w) {
         w.writeAttribute("spotsEnabled", "1");
     
     w.writeStartElement("SpotMarkers");
-    for (unsigned int n=0; n<markerNumber(); n++) {
+    for (int n=0; n<markerNumber(); n++) {
         QPointF p=getMarkerDetPos(n);
         w.writeEmptyElement("Spot");
         w.writeAttribute("x", QString::number(p.x()));

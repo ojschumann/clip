@@ -73,6 +73,13 @@ void Crystal::setCell(QList<double> cell) {
     double _beta = cell[4];
     double _gamma = cell[5];
 
+    double da = _a-a;
+    double db = _b-b;
+    double dc = _c-c;
+    double dal = _alpha-alpha;
+    double dbe = _beta-beta;
+    double dga = _gamma-gamma;
+
     // discard minor changes (may affect fit)
     if (fabs(_a-a)>1e-8 || fabs(_b-b)>1e-8 || fabs(_c-c)>1e-8 || fabs(_alpha-alpha)>1e-8 ||fabs(_beta-beta)>1e-8 || fabs(_gamma-gamma)>1e-8) {
         a=_a;
@@ -247,12 +254,12 @@ void Crystal::updateRotation() {
 }
 
 
-unsigned int Crystal::reflectionCount() {
+int Crystal::reflectionCount() {
     QList<Reflection> r = getReflectionList();
     return r.size();
 }
 
-Reflection Crystal::getReflection(unsigned int i) {
+Reflection Crystal::getReflection(int i) {
     QList<Reflection> r = getReflectionList();
     if (i<r.size()) {
         return r[i];
@@ -265,7 +272,7 @@ Reflection Crystal::getClosestReflection(const Vec3D& normal) {
     QList<Reflection> r = getReflectionList();
     int minIdx=-1;
     double minDist=0;
-    for (unsigned int n=r.size(); n--; ) {
+    for (int n=r.size(); n--; ) {
         double dist=(r[n].normal-normal).norm_sq();
         if (dist<minDist or minIdx<0) {
             minDist=dist;
@@ -331,7 +338,7 @@ void Crystal::removeProjector(Projector* p) {
 void Crystal::updateWavevectorsFromProjectors() {
     double hi;
     double lo;
-    for (unsigned int i=0; i<connectedProjectors.size(); i++) {
+    for (int i=0; i<connectedProjectors.size(); i++) {
         Projector* p=dynamic_cast<Projector*>(connectedProjectors.at(i));
         if ((i==0) or (p->Qmin()<lo))
             lo=p->Qmin();
@@ -343,7 +350,7 @@ void Crystal::updateWavevectorsFromProjectors() {
 
 QList<Projector*> Crystal::getConnectedProjectors() {
     QList<Projector*> r;
-    for (unsigned int i=0; i<connectedProjectors.size(); i++)
+    for (int i=0; i<connectedProjectors.size(); i++)
         r << dynamic_cast<Projector*>(connectedProjectors.at(i));
     return r;
 }
@@ -391,7 +398,7 @@ void Crystal::enableUpdate(bool b) {
     updateEnabled=b;
 }
 
-double Crystal::fitParameterValue(unsigned int n) {
+double Crystal::fitParameterValue(int n) {
     if (fitParameterName(n)=="a") {
         return a;
     } else if (fitParameterName(n)=="b") {
@@ -408,7 +415,7 @@ double Crystal::fitParameterValue(unsigned int n) {
     return 0.0;
 }
 
-void Crystal::fitParameterSetValue(unsigned int n, double val) {
+void Crystal::fitParameterSetValue(int n, double val) {
     if (fitParameterName(n)=="a") {
         setCell(val, b,c,alpha, beta, gamma);
     } else if (fitParameterName(n)=="b") {
@@ -424,10 +431,10 @@ void Crystal::fitParameterSetValue(unsigned int n, double val) {
     }
 }
 
-void Crystal::fitParameterSetEnabled(unsigned int n, bool enable) {
-    unsigned int nDist=0;
+void Crystal::fitParameterSetEnabled(int n, bool enable) {
+    int nDist=0;
     QList<int> spacegroupConstrains = spaceGroup->getConstrains();
-    for (unsigned int i=0; i<3; i++) {
+    for (int i=0; i<3; i++) {
         if (spacegroupConstrains[i]==0)
             nDist++;
     }
@@ -435,7 +442,7 @@ void Crystal::fitParameterSetEnabled(unsigned int n, bool enable) {
         nDist=0;
     if ((n<nDist) and enable) {
         bool b=true;
-        for (unsigned int i=0; i<nDist; i++) {
+        for (int i=0; i<nDist; i++) {
             b = b and (fitParameterEnabled(i) or i==n);
         }
         if (b) {
@@ -477,7 +484,7 @@ void Crystal::slotSetSGConstrains() {
     QList<QString> fitParameterNames;
     if (constrains[1]==0 or constrains[2]==0)
         fitParameterNames << "a";
-    for (unsigned int n=1; n<constrains.size(); n++) {
+    for (int n=1; n<constrains.size(); n++) {
         if (constrains[n]==0)
             fitParameterNames << fitParameterTempNames[n-1];
     }

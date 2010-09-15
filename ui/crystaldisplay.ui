@@ -84,6 +84,9 @@
          <property name="buttonSymbols">
           <enum>QAbstractSpinBox::NoButtons</enum>
          </property>
+         <property name="prefix">
+          <string/>
+         </property>
          <property name="decimals">
           <number>5</number>
          </property>

@@ -83,11 +83,11 @@ bool SpaceGroup::setGroupSymbol(QString s) {
             symbolElements = iter->elements();
             CenterChg += symbolElements.first();
 
+            if (CenterChg=="HR") emit triclinHtoR();
+            if (CenterChg=="RH") emit triclinRtoH();
             if (SystemChg || CenterChg=="HR" || CenterChg=="RH") {
                 emit constrainsChanged();
             }
-            if (CenterChg=="HR") emit triclinHtoR();
-            if (CenterChg=="RH") emit triclinRtoH();
 
             emit groupChanged();
             return true;

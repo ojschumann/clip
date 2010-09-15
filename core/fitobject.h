@@ -13,7 +13,7 @@ class FitObject {
         
         void setFitParameterNames(QList<QString> names);
         
-        virtual unsigned int fitParameterNumber();
+        virtual int fitParameterNumber();
         virtual QString fitParameterName(int n);
         virtual double fitParameterValue(int n);
         virtual void fitParameterSetValue(int n, double val);

@@ -2,8 +2,8 @@
 #define __REFLECTION_H__
 
 #include <QtCore/QList>
-#include <core/mat3D.h>
-#include <core/vec3D.h>
+#include <tools/mat3D.h>
+#include <tools/vec3D.h>
 
 class  Reflection {
     public:

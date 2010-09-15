@@ -13,8 +13,8 @@ TEMPLATE = app
 SOURCES += main.cpp\
         ui/clip.cpp \
     ui/crystaldisplay.cpp \
-    core/vec3D.cpp \
-    core/mat3D.cpp \
+    tools/vec3D.cpp \
+    tools/mat3D.cpp \
     core/crystal.cpp \
     core/fitobject.cpp \
     core/projector.cpp \
@@ -25,8 +25,8 @@ SOURCES += main.cpp\
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
-    core/vec3D.h \
-    core/mat3D.h \
+    tools/vec3D.h \
+    tools/mat3D.h \
     defs.h \
     core/crystal.h \
     core/fitobject.h \

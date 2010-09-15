@@ -1,6 +1,6 @@
 #include "crystaldisplay.h"
 #include "ui_crystaldisplay.h"
-#include "core/mat3D.h"
+#include <tools/mat3D.h>
 
 #include <QTableWidgetItem>
 #include <QDrag>
@@ -30,6 +30,9 @@ CrystalDisplay::CrystalDisplay(QWidget *parent) :
 
     // Load Cell
     slotLoadCellFromCrystal();
+
+    // Disable Inputs based on constrains
+    slotSetSGConstrains();
 }
 
 CrystalDisplay::~CrystalDisplay()
@@ -86,12 +89,33 @@ void CrystalDisplay::slotUpdateOM() {
 }
 
 void CrystalDisplay::slotLoadCellFromCrystal() {
+    // Update space group symbol
     ui->SpaceGroup->setText(crystal->getSpacegroup()->groupSymbol());
+
+    // Get Cell from crystal
     QList<double> cell = crystal->getCell();
+
+    //Prepare list of all inputs, that corresponts to the cell parameters
     QList<QDoubleSpinBox*> inputs;
     inputs << ui->latticeA << ui->latticeB << ui->latticeC << ui->latticeAlpha << ui->latticeBeta << ui->latticeGamma;
-    for (int i=0; i<6; i++)
+
+    // Bool to check, if the values change
+    bool cellChanged = false;
+    for (int i=0; i<6; i++) {
+        // Block signals, to prevent multiple signals to be generated. Save the block state (should alwas be true)
+        bool b = inputs[i]->blockSignals(true);
+        // Save value for compare. Do not compare here, as the QSpinBox may round
+        double v = inputs[i]->value();
+        // set Value
         inputs[i]->setValue(cell[i]);
+        // compare with former value. If not equal, cell is changed
+        cellChanged = cellChanged || (v!=inputs[i]->value());
+        // Restore blocking state
+        inputs[i]->blockSignals(b);
+    }
+    // If Cell has changed, promote to crystal again
+    if (cellChanged)
+        slotCellChanged();
 }
 
 void CrystalDisplay::slotCellChanged() {
@@ -107,7 +131,6 @@ void CrystalDisplay::slotCellChanged() {
 
 void CrystalDisplay::slotSpaceGroupChanged(QString s) {
     crystal->getSpacegroup()->setGroupSymbol(s);
-    slotSetSGConstrains();
 }
 
 

@@ -18,7 +18,7 @@ void FitObject::setFitParameterNames(QList<QString> names) {
     }
 }
 
-unsigned int FitObject::fitParameterNumber() {
+int FitObject::fitParameterNumber() {
     return fitParameter.size();
 }
 

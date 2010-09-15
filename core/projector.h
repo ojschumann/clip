@@ -45,13 +45,13 @@ class Projector: public QObject, public FitObject {
         virtual double TTmin() const;
         virtual double TTmax() const;
             
-        unsigned int getMaxHklSqSum() const;
+        int getMaxHklSqSum() const;
         double getTextSize() const;
         double getSpotSize() const;
         bool spotsEnabled() const;
         
-        unsigned int markerNumber() const;
-        QPointF getMarkerDetPos(unsigned int n) const;
+        int markerNumber() const;
+        QPointF getMarkerDetPos(int n) const;
         QList<Vec3D> getMarkerNormals() const;
         
         virtual void projector2xml(QXmlStreamWriter&);
@@ -66,7 +66,7 @@ class Projector: public QObject, public FitObject {
         void setRotation(const Mat3D& M);
 
         virtual void decorateScene()=0;
-        void setMaxHklSqSum(unsigned int m);
+        void setMaxHklSqSum(int m);
         void setTextSize(double d);
         void setSpotSize(double d);
         void enableSpots(bool b=true);
@@ -77,7 +77,7 @@ class Projector: public QObject, public FitObject {
         void addMarker(const QPointF& p);
         void delMarkerNear(const QPointF& p);
         
-        virtual void doImgRotation(unsigned int CWRSteps, bool flip);
+        virtual void doImgRotation(int CWRSteps, bool flip);
 
         void addInfoItem(const QString& text, const QPointF& p);
         void clearInfoItems();
@@ -112,7 +112,7 @@ class Projector: public QObject, public FitObject {
     
         double QminVal;
         double QmaxVal;
-        unsigned int maxHklSqSum;
+        int maxHklSqSum;
         double textSize;
         double spotSize;
         bool showSpots;

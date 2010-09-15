@@ -9,8 +9,8 @@ class ObjectStore: public QObject {
     Q_OBJECT
     public:
         ObjectStore(QObject* parent=0);
-        unsigned int size();
-        QObject* at(unsigned int i);
+        int size();
+        QObject* at(int i);
         
     public slots:
         void addObject(QObject *o);

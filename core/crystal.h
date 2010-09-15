@@ -2,8 +2,8 @@
 #define __CRYSTAL_H__
 
 #include <QtCore/QObject>
-#include <core/vec3D.h>
-#include <core/mat3D.h>
+#include <tools/vec3D.h>
+#include <tools/mat3D.h>
 #include <core/objectstore.h>
 #include <core/reflection.h>
 #include <core/fitobject.h>
@@ -26,8 +26,8 @@ class Crystal: public QObject, public FitObject {
 
         void generateReflections();
         void updateRotation();
-        unsigned int reflectionCount();
-        Reflection getReflection(unsigned int i);
+        int reflectionCount();
+        Reflection getReflection(int i);
         Reflection getClosestReflection(const Vec3D& normal);
         QList<Reflection> getReflectionList();
 
@@ -56,9 +56,9 @@ class Crystal: public QObject, public FitObject {
         void enableUpdate(bool b=true);
         
         // Functions for fitting parameters
-        virtual double fitParameterValue(unsigned int n);
-        virtual void fitParameterSetValue(unsigned int n, double val);
-        virtual void fitParameterSetEnabled(unsigned int n, bool enable);
+        virtual double fitParameterValue(int n);
+        virtual void fitParameterSetValue(int n, double val);
+        virtual void fitParameterSetEnabled(int n, bool enable);
             
     public slots:
         void addRotation(const Vec3D& axis, double angle);

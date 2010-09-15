@@ -1,8 +1,8 @@
 #ifndef OPTIMALROTATION_H
 #define OPTIMALROTATION_H
 
-#include <core/vec3D.h>
-#include <core/mat3D.h>
+#include <tools/vec3D.h>
+#include <tools/mat3D.h>
 
 class OptimalRotation
 {

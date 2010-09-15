@@ -2,12 +2,12 @@
 
 ObjectStore::ObjectStore(QObject* parent): QObject(parent), set() {
 }
-unsigned int ObjectStore::size() {
+int ObjectStore::size() {
     return set.size();
 }
 
 
-QObject* ObjectStore::at(unsigned int i) {
+QObject* ObjectStore::at(int i) {
     if (i<size()) 
         return set[i];
     else
