@@ -155,6 +155,7 @@ void Crystal::setWavevectors(double _Qmin, double _Qmax) {
     }
 }
 
+// TODO: Multithreading, eventually start on change and abort on next change
 void Crystal::generateReflections() {
     if (not updateEnabled)
         return;

@@ -14,6 +14,7 @@ class ProjectionPlane : public QWidget
 public:
     explicit ProjectionPlane(QWidget *parent = 0);
     ~ProjectionPlane();
+    virtual void resizeEvent(QResizeEvent *);
 
 private:
     Ui::ProjectionPlane *ui;
