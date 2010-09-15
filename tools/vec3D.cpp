@@ -1,5 +1,5 @@
-#include <core/vec3D.h>
-#include <core/mat3D.h>
+#include <tools/vec3D.h>
+#include <tools/mat3D.h>
 
 #include <cmath>
 #include <stdio.h>
@@ -61,8 +61,7 @@ Mat3D Vec3D::operator^(const Vec3D &v) const {
     Mat3D M;
     for (int i=3; i--; ) {
         for (int j=3; j--; ) {
-            double tmp=X[i]*v.X[j];
-            M.M[i][j]=tmp;
+            M.M[i][j]=X[i]*v.X[j];
         }
     }
     return M;

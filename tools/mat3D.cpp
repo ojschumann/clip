@@ -1,5 +1,5 @@
-#include <core/mat3D.h>
-#include <core/vec3D.h>
+#include <tools/mat3D.h>
+#include <tools/vec3D.h>
 
 #include <cmath>
 #include <stdio.h>
@@ -63,8 +63,6 @@ Mat3D::Mat3D(vector<double> m) {
 }
 
 void Mat3D::zero() {
-    size_t i1 = 9*sizeof(double);
-    size_t i2 = sizeof(M);
     memset(&M, 0, sizeof(M));
 }
 
@@ -322,7 +320,7 @@ void Mat3D::svd(Mat3D& L, Mat3D& R) {
     upperBidiagonal(L,R);
     L.transpose();
     
-    unsigned int loops=250;
+    int maxLoops=512;
     double sumDiag=0.0;
     double sumOffdiag=0.0;
         
@@ -365,7 +363,7 @@ void Mat3D::svd(Mat3D& L, Mat3D& R) {
         for (unsigned int i=3; i--; ) sumDiag+=fabs(M[i][i]);
         for (unsigned int i=2; i--; ) sumOffdiag+=fabs(M[i][i+1]);
             
-    } while (loops-- and sumDiag<1e20*sumOffdiag);
+    } while (maxLoops-- and sumDiag<1e20*sumOffdiag);
     L.transpose();
     R.transpose();
 };    
