@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-TARGET = Clip4
+TARGET = Clip
 TEMPLATE = app
 
 
@@ -24,7 +24,10 @@ SOURCES += main.cpp\
     tools/optimalrotation.cpp \
     tools/numberedit.cpp \
     ui/projectionplane.cpp \
-    ui/projectiongraphicsview.cpp
+    ui/projectiongraphicsview.cpp \
+    core/laueplaneprojector.cpp \
+    core/stereoprojector.cpp \
+    tools/signalingellipse.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -40,7 +43,10 @@ HEADERS  += ui/clip.h \
     tools/optimalrotation.h \
     tools/numberedit.h \
     ui/projectionplane.h \
-    ui/projectiongraphicsview.h
+    ui/projectiongraphicsview.h \
+    core/laueplaneprojector.h \
+    core/stereoprojector.h \
+    tools/signalingellipse.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -48,3 +54,7 @@ FORMS    += ui/clip.ui \
 
 RESOURCES += \
     icons/icons.qrc
+
+win32 {
+    RC_FILE = icons/clip.rc
+}

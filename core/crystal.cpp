@@ -73,13 +73,6 @@ void Crystal::setCell(QList<double> cell) {
     double _beta = cell[4];
     double _gamma = cell[5];
 
-    double da = _a-a;
-    double db = _b-b;
-    double dc = _c-c;
-    double dal = _alpha-alpha;
-    double dbe = _beta-beta;
-    double dga = _gamma-gamma;
-
     // discard minor changes (may affect fit)
     if (fabs(_a-a)>1e-8 || fabs(_b-b)>1e-8 || fabs(_c-c)>1e-8 || fabs(_alpha-alpha)>1e-8 ||fabs(_beta-beta)>1e-8 || fabs(_gamma-gamma)>1e-8) {
         a=_a;
@@ -337,8 +330,8 @@ void Crystal::removeProjector(Projector* p) {
 
 
 void Crystal::updateWavevectorsFromProjectors() {
-    double hi;
-    double lo;
+    double hi=0.0;
+    double lo=0.0;
     for (int i=0; i<connectedProjectors.size(); i++) {
         Projector* p=dynamic_cast<Projector*>(connectedProjectors.at(i));
         if ((i==0) or (p->Qmin()<lo))

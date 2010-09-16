@@ -21,8 +21,8 @@ CrystalDisplay::CrystalDisplay(QWidget *parent) :
     connect(crystal->getSpacegroup(), SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
 
     // Add Toolbar buttons
-    ui->tollBar->addAction(QIcon(":/fileopen.png"), "Open", this, SLOT(slotLoadCrystalData()));
-    ui->tollBar->addAction(QIcon(":/filesave.png"), "Save", this, SLOT(slotSaveCrystalData()));
+    ui->tollBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Open Crystal Data", this, SLOT(slotLoadCrystalData()));
+    ui->tollBar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Save Crystal Data", this, SLOT(slotSaveCrystalData()));
     ui->tollBar->addAction(QIcon(":/Index.png"), "Index", this, SLOT(slotStartIndexing()));
 
     // Load Orientation Matrix

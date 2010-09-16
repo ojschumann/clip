@@ -315,8 +315,8 @@ void Projector::addMarker(const QPointF& p) {
 void Projector::delMarkerNear(const QPointF& p) {
     if (markerItems.isEmpty())
         return;
-    double minDist;
-    int minIdx;
+    double minDist=0.0;
+    int minIdx=-1;
     QGraphicsEllipseItem* m;
     QPointF imgPos=det2img.map(p);
     for (int i=0; i<markerItems.size(); i++) {
