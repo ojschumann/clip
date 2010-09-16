@@ -16,7 +16,8 @@ public:
     explicit ProjectionPlane(Projector*, QWidget *parent = 0);
     ~ProjectionPlane();
     virtual void resizeEvent(QResizeEvent *);
-
+    virtual void mousePressEvent(QMouseEvent *);
+    virtual void mouseReleaseEvent(QMouseEvent *);
 protected:
     QRectF zoomSceneRect();
     void resizeView();

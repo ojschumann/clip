@@ -116,7 +116,6 @@ void StereoProjector::setDetOrientation(const Mat3D& M) {
         emit projectionParamsChanged();
 }
 
-
 void StereoProjector::projector2xml(QXmlStreamWriter& w) {  
     w.writeStartElement("Projector");
     Projector::projector2xml(w);
