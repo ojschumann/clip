@@ -7,8 +7,10 @@ ProjectionGraphicsView::ProjectionGraphicsView(QWidget *parent) :
     viewIgnoresThisMouseEvent=true;
 }
 
-void ProjectionGraphicsView::dragEnterEvent(QDragEnterEvent *event) {
-    QGraphicsView::dragEnterEvent(event);
+void ProjectionGraphicsView::dragEnterEvent(QDragEnterEvent *e) {
+    if (!not e->mimeData()->hasFormat("application/CrystalPointer"))
+        QGraphicsView::dragEnterEvent(e);
+    e->ignore();
 }
 
 void ProjectionGraphicsView::mousePressEvent(QMouseEvent *e) {

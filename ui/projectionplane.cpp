@@ -11,15 +11,14 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     ui->setupUi(this);
     projector = p;
     projector->setParent(this); // Ensures, that projector is deleted at end
+    setWindowTitle(projector->displayName());
 
     ui->view->setScene(projector->getScene());
-
 
     ui->toolBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Open", this, SLOT(slotLoadCrystalData()));
 
     zoomRubber=new QRubberBand(QRubberBand::Rectangle, ui->view);
     resizeView();
-
 }
 
 ProjectionPlane::~ProjectionPlane()
@@ -48,9 +47,12 @@ void ProjectionPlane::resizeView() {
     QSizeF maxWidgetSize = scaleFactor * projector->getScene()->sceneRect().size();
     // bound that to the widget and use as rectSize
     QRectF finalRect(QPointF(0,0), maxWidgetSize.boundedTo(ui->viewFrame->size()));
+    // Center the View
     finalRect.moveCenter(ui->viewFrame->rect().center());
+    // And set the Geometry
     ui->view->setGeometry(finalRect.toRect());
-    ui->view->fitInView(minViewRect);
+    // Finally set the ZoomRect to the view
+    ui->view->fitInView(minViewRect, Qt::KeepAspectRatio);
 }
 
 void ProjectionPlane::resizeEvent(QResizeEvent *e) {
@@ -87,4 +89,25 @@ void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
         resizeView();
     }
     //ui->view->setDragMode(QGraphicsView::NoDrag);
+}
+
+
+void ProjectionPlane::dragEnterEvent(QDragEnterEvent *e) {
+    if (e->mimeData()->hasFormat("application/CrystalPointer"))
+        e->acceptProposedAction();
+}
+
+void ProjectionPlane::dropEvent(QDropEvent *e) {
+    e->acceptProposedAction();
+    if (e->mimeData()->hasImage()) {
+        QVariant v = e->mimeData()->imageData();
+        if (v.canConvert<Crystal*>()) {
+            Crystal* c = v.value<Crystal*>();
+            projector->connectToCrystal(c);
+        }
+    }
+
+    //e->source()->
+    //c=e.source().crystal
+    //self.projector.connectToCrystal(c)
 }

@@ -1,7 +1,8 @@
 #ifndef __CRYSTAL_H__
 #define __CRYSTAL_H__
 
-#include <QtCore/QObject>
+#include <QObject>
+#include <QMetaType>
 #include <tools/vec3D.h>
 #include <tools/mat3D.h>
 #include <core/objectstore.h>
@@ -108,6 +109,15 @@ class Crystal: public QObject, public FitObject {
         
         bool updateEnabled;
 };
+
+struct CrystalPointer {
+    Crystal* data;
+};
+
+
+Q_DECLARE_METATYPE(Crystal*)
+
+
 
 
 #endif

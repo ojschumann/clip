@@ -6,6 +6,8 @@
 
 using namespace std;
 
+
+
 int ggt(int a, int b) {
     while (b) {
         int tb=b;

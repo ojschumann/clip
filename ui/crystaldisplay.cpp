@@ -54,11 +54,12 @@ void CrystalDisplay::resizeEvent(QResizeEvent *) {
 
 void CrystalDisplay::mousePressEvent(QMouseEvent* e) {
     if (e->button()==Qt::LeftButton and ui->dragStart->geometry().contains(e->pos())) {
-        QDrag drag(this);
-        QMimeData mime;
-        mime.setData("application/CrystalPointer", "");
-        drag.setMimeData(&mime);
-        drag.exec(Qt::LinkAction);
+        QDrag* drag = new QDrag(this);
+        QMimeData* mime = new QMimeData;
+        mime->setData("application/CrystalPointer", "");
+        mime->setImageData(QVariant::fromValue(crystal));
+        drag->setMimeData(mime);
+        drag->exec(Qt::LinkAction);
     }
 }
 

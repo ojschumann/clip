@@ -10,6 +10,9 @@
     <height>410</height>
    </rect>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -21,9 +24,7 @@
     <number>0</number>
    </property>
    <item row="0" column="0">
-    <widget class="ToolBar" name="toolBar" native="true">
-     <zorder>viewFrame</zorder>
-    </widget>
+    <widget class="ToolBar" name="toolBar" native="true"/>
    </item>
    <item row="1" column="0">
     <widget class="QWidget" name="viewFrame" native="true">
@@ -38,6 +39,9 @@
        <width>50</width>
        <height>50</height>
       </size>
+     </property>
+     <property name="acceptDrops">
+      <bool>true</bool>
      </property>
      <widget class="ProjectionGraphicsView" name="view">
       <property name="geometry">

@@ -116,8 +116,8 @@ bool LauePlaneProjector::project(const Reflection &r, QGraphicsItem* item) {
         return false;
 
     bool doesReflect=false;
-    for (unsigned int i=0; i<r.orders.size(); i++) {
-        unsigned int n=r.orders[i];
+    for (int i=0; i<r.orders.size(); i++) {
+        int n=r.orders[i];
         if ((QminVal<=n*r.Qscatter) and (n*r.Qscatter<=QmaxVal)) {
             doesReflect=true;
             break;
