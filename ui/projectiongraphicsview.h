@@ -8,10 +8,18 @@ class ProjectionGraphicsView : public QGraphicsView
     Q_OBJECT
 public:
     explicit ProjectionGraphicsView(QWidget *parent = 0);
-    virtual int heightForWidth(int) const;
+
+    void dragEnterEvent(QDragEnterEvent *);
+    void mousePressEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *);
+    void mouseReleaseEvent(QMouseEvent *);
+
 signals:
 
 public slots:
+
+protected:
+    bool viewIgnoresThisMouseEvent;
 
 };
 

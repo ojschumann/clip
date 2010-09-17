@@ -2,7 +2,9 @@
 #define PROJECTIONPLANE_H
 
 #include <QWidget>
+#include <QRubberBand>
 #include <core/projector.h>
+
 
 namespace Ui {
     class ProjectionPlane;
@@ -17,6 +19,7 @@ public:
     ~ProjectionPlane();
     virtual void resizeEvent(QResizeEvent *);
     virtual void mousePressEvent(QMouseEvent *);
+    virtual void mouseMoveEvent(QMouseEvent *);
     virtual void mouseReleaseEvent(QMouseEvent *);
 protected:
     QRectF zoomSceneRect();
@@ -25,6 +28,9 @@ protected:
 private:
     Ui::ProjectionPlane *ui;
     Projector* projector;
+
+    QPointF mousePressOrigin;
+    QRubberBand* zoomRubber;
 
     QList<QRectF> zoomSteps;
 
