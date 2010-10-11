@@ -64,11 +64,8 @@
       <property name="horizontalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
-      <property name="renderHints">
-       <set>QPainter::Antialiasing|QPainter::HighQualityAntialiasing|QPainter::TextAntialiasing</set>
-      </property>
-      <property name="optimizationFlags">
-       <set>QGraphicsView::DontAdjustForAntialiasing</set>
+      <property name="viewportUpdateMode">
+       <enum>QGraphicsView::FullViewportUpdate</enum>
       </property>
      </widget>
     </widget>

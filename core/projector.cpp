@@ -3,7 +3,9 @@
 #include <iostream>
 #include <QtCore/QTimer>
 #include <QtGui/QCursor>
-
+#include <QTime>
+#include <QFile>
+#include <QTextStream>
 
 using namespace std;
 
@@ -127,9 +129,6 @@ void Projector::clearInfoItems() {
 void Projector::reflectionsUpdated() {
     if (crystal.isNull() or not projectionEnabled) 
         return;
-    #ifdef __DEBUG__
-    cout << "Project..." << endl;
-    #endif
     //FIXME: Do Better
     while (textMarkerItems.size()>0) {
         QGraphicsItem* item=textMarkerItems.takeLast();
@@ -139,12 +138,13 @@ void Projector::reflectionsUpdated() {
 
     clearInfoItems();
     
+    QTime t = QTime::currentTime();
+
     QList<Reflection> r = crystal->getReflectionList();
     int n=0;
     int i=0;
-    #ifdef __DEBUG__
-    int beginSize=projectedItems.size();
-    #endif
+
+    int ell1 = t.msecsTo(QTime::currentTime());
 
     if (!showSpots) {
         i=r.size();
@@ -166,20 +166,12 @@ void Projector::reflectionsUpdated() {
         }
     }
     
-    #ifdef __DEBUG__
-    int rewritten=n;
-    int deleted=0;
-    int added=0;
-    int projected=n;
-    #endif
+
     QGraphicsItem* item;
     while (projectedItems.size()>n) {
         item = projectedItems.takeLast();
         scene.removeItem(item);
         delete item;
-        #ifdef __DEBUG__
-        deleted++;
-        #endif
     }
 
 
@@ -189,23 +181,16 @@ void Projector::reflectionsUpdated() {
             projectedItems.append(item);
             scene.addItem(item);
             item = itemFactory();
-            #ifdef __DEBUG__
-            projected++;
-            added++;
-            #endif
         }
     }
     delete item;
     
-    #ifdef __DEBUG__
-    cout << "startSize:" << beginSize;
-    cout << " rewrite:" << rewritten;
-    cout << " del:" << deleted;
-    cout << " add:" << added;
-    cout << " projected:" << projected;
-    cout << " itemSize:" << projectedItems.size() << endl;
-   #endif
-       
+    int ell2 = t.msecsTo(QTime::currentTime());
+
+    QFile f("debug.dat");
+    f.open(QFile::Append);
+    QTextStream fs(&f);
+    fs << r.size() << " " << projectedItems.size() << " " << ell1 << " " << ell2-ell1 << endl;
     emit projectedPointsUpdated();
 }
 

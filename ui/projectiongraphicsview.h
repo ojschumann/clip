@@ -19,6 +19,7 @@ signals:
 public slots:
 
 protected:
+    void paintEvent(QPaintEvent*);
     bool viewIgnoresThisMouseEvent;
 
 };

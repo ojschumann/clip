@@ -4,6 +4,9 @@
 #include <core/projector.h>
 #include <tools/optimalrotation.h>
 
+#include <QTime>
+#include <QtConcurrentMap>
+
 using namespace std;
 
 
@@ -16,6 +19,39 @@ int ggt(int a, int b) {
     }
     return abs(a);
 }
+
+class IntIterator {
+public:
+    IntIterator(int _pos): pos(_pos) {};
+    int pos;
+    typedef std::random_access_iterator_tag iterator_category;
+    typedef int value_type;
+    typedef int difference_type;
+    typedef void pointer;
+    typedef void reference;
+
+    bool operator !=(const IntIterator& o) {
+        return pos != o.pos;
+    }
+
+    void operator ++() {
+        pos++;
+    }
+
+    void operator+=(int n) {
+        pos +=n;
+    }
+
+    int operator *() {
+        return pos;
+    }
+
+    int operator-(IntIterator& o) {
+        return pos-o.pos;
+    }
+
+};
+
 
 Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), MReziprocal(), MRot(), reflections(), connectedProjectors(this), rotationAxis(1,0,0) {
     spaceGroup = new SpaceGroup(this);
@@ -150,6 +186,71 @@ void Crystal::setWavevectors(double _Qmin, double _Qmax) {
     }
 }
 
+
+QList<Reflection> Crystal::GenerateReflection::operator ()(int h) {
+    QList<Reflection> kl_layer;
+    Crystal::UpdateRef updateRef(c);
+
+    //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
+    // k^2 +2*k *h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
+    double ns = 1.0/c->bstar.norm_sq();
+    double p = c->astar*c->bstar*ns*h;
+    double q1 = c->astar.norm_sq()*ns*h*h;
+    double q2 = 4.0*ns*c->Qmax*c->Qmax;
+    double s = p*p-q1+q2;
+    int kMin = (s>0)?int(-p-sqrt(s)):0;
+    int kMax = (s>0)?int(-p+sqrt(s)):0;
+
+    for (int k=kMin; k<=kMax; k++) {
+
+        int hk_ggt = ggt(h,k);
+
+        Vec3D v = c->MReziprocal*Vec3D(h,k,0);
+        ns = 1.0/c->cstar.norm_sq();
+        p = v*c->cstar*ns;
+        q1 = v.norm_sq()*ns;
+        q2 = 4.0*ns*c->Qmax*c->Qmax;
+        s = p*p-q1+q2;
+        int lMin = (s>0)?int(-p-sqrt(s)):0;
+        int lMax = (s>0)?int(-p+sqrt(s)):0;
+
+        for (int l=lMin; l<=lMax; l++) {
+            // store only lowest order reflections
+            if (ggt(hk_ggt, l)==1) {
+                v=c->MReziprocal*Vec3D(h,k,l);
+                double Q = 0.5*v.norm();
+
+                if (Q<=c->Qmax) {
+                    Reflection r;
+                    r.h=h;
+                    r.k=k;
+                    r.l=l;
+                    r.hklSqSum=h*h+k*k+l*l;
+                    r.Q=Q;
+                    r.d = 0.5/Q;
+                    for (int i=1; i<int(2.0*c->Qmax*r.d+0.9); i++) {
+                        // TODO: check sys absents
+                        r.orders.push_back(i);
+                    }
+
+                    r.normalLocal=v*r.d;
+                    updateRef(r);
+                    kl_layer << r;
+
+
+                }
+            }
+        }
+    }
+    return kl_layer;
+}
+
+
+// Helper Function for generateReflections
+void Reduce(QList<Reflection> &list, const QList<Reflection> res) {
+    list += res;
+}
+
 // TODO: Multithreading, eventually start on change and abort on next change
 void Crystal::generateReflections() {
     if (not updateEnabled)
@@ -157,97 +258,55 @@ void Crystal::generateReflections() {
     #ifdef __DEBUG__
     cout << "Generate Reflextions" << endl;
     #endif
-    reflections.clear();
     // Q=0.5/d/sin(theta)
     // n*lambda=2*d*sin(theta) => n=2*d/lambda = 2*Q*d
     int hMax = int(2.0*a*Qmax);
-    //cout << "hMax: " << hMax << endl;
-    for (int h=-hMax; h<=hMax; h++) {
 
-        //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
-        // k^2 +2*k *h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
-        double ns = 1.0/bstar.norm_sq();
-        double p = astar*bstar*ns*h;
-        double q1 = astar.norm_sq()*ns*h*h;
-        double q2 = 4.0*ns*Qmax*Qmax;
-        double s = p*p-q1+q2;
-        int kMin = (s>0)?int(-p-sqrt(s)):0;
-        int kMax = (s>0)?int(-p+sqrt(s)):0;
-        
-        for (int k=kMin; k<=kMax; k++) {
+    QTime t=QTime::currentTime();
+    reflections = QtConcurrent::blockingMappedReduced(IntIterator(-hMax), IntIterator(hMax+1), GenerateReflection(this), Reduce);
+    int elappsed = t.msecsTo(QTime::currentTime());
+    elappsed = elappsed*1;
+    //updateRotation();
+}
 
-            Vec3D v = MReziprocal*Vec3D(h,k,0);
-            ns = 1.0/cstar.norm_sq();      
-            p = v*cstar*ns;
-            q1 = v.norm_sq()*ns;
-            q2 = 4.0*ns*Qmax*Qmax;
-            s = p*p-q1+q2;	
-            int lMin = (s>0)?int(-p-sqrt(s)):0;
-            int lMax = (s>0)?int(-p+sqrt(s)):0;
 
-            for (int l=lMin; l<=lMax; l++) {
-                // store only lowest order reflections
-                if (ggt(h,ggt(k,l))==1) {
-                    v=MReziprocal*Vec3D(h,k,l);
-                    double Q = 0.5*v.norm();
+void Crystal::UpdateRef::operator()(Reflection &r) {
+    r.normal=c->MRot*r.normalLocal;
+    r.lowestDiffOrder=0;
+    r.highestDiffOrder=0;
 
-                    if (Q<=Qmax) {
-                        Reflection r;
-                        r.h=h;
-                        r.k=k;
-                        r.l=l;
-                        r.hklSqSum=h*h+k*k+l*l;
-                        r.Q=Q;
-                        r.d = 0.5/Q;
-                        for (int i=1; i<int(2.0*Qmax*r.d+0.9); i++) {
-                            // TODO: check sys absents
-                            r.orders.push_back(i);
-                        }
+    // sin(theta) = v*e_x = v.x
+    // x direction points toward source, z points upwards
+    if (r.normal.x()>0.0) {
+        //Q=0.5/d/sin(theta)=r.Q/sin(theta)
+        r.Qscatter = r.Q/r.normal.x();
+        // Loop over higher orders
 
-                        r.normalLocal=v*r.d;
-                        reflections.push_back(r);
-                        
-                    }
-                } 
-            }
+        int j=0;
+        while (j<r.orders.size() && r.orders[j]*r.Qscatter<c->Qmin) j++;
+        if (j<r.orders.size() && r.orders[j]*r.Qscatter>=c->Qmin) r.lowestDiffOrder=r.orders[j];
+        while (j<r.orders.size() && r.orders[j]*r.Qscatter<=c->Qmax) {
+            r.highestDiffOrder=r.orders[j];
+            j++;
         }
     }
-    updateRotation();
+    if (r.lowestDiffOrder!=0)
+        r.scatteredRay = Projector::normal2scattered(r.normal);
+    else
+        r.scatteredRay = Vec3D();
 }
-  
+
 void Crystal::updateRotation() {
     if (not updateEnabled)
         return;
     #ifdef __DEBUG__
     cout << "Update Reflextions" << endl;
     #endif
-    for (int i=reflections.size(); i--; ) {
-        Reflection &r = reflections[i];
-        r.normal=MRot*r.normalLocal;
-        r.lowestDiffOrder=0;
-        r.highestDiffOrder=0;
 
-        // sin(theta) = v*e_x = v.x
-        // x direction points toward source, z points upwards
-        if (r.normal.x()>0.0) {
-            //Q=0.5/d/sin(theta)=r.Q/sin(theta)
-            r.Qscatter = r.Q/r.normal.x();
-            // Loop over higher orders
-    
-            int j=0;
-            while (j<r.orders.size() && r.orders[j]*r.Qscatter<Qmin) j++;
-            if (j<r.orders.size() && r.orders[j]*r.Qscatter>=Qmin) r.lowestDiffOrder=r.orders[j];
-            while (j<r.orders.size() && r.orders[j]*r.Qscatter<=Qmax) {
-                r.highestDiffOrder=r.orders[j];
-                j++;
-            }
-        }    
-        if (r.lowestDiffOrder!=0) 
-            r.scatteredRay = Projector::normal2scattered(r.normal);
-        else
-            r.scatteredRay = Vec3D();
-    }
+    QtConcurrent:: blockingMap(reflections, UpdateRef(this));
 }
+
+
 
 
 int Crystal::reflectionCount() {

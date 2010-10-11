@@ -3,6 +3,7 @@
 
 #include <QMouseEvent>
 #include <QApplication>
+#include <QtOpenGL/QGLWidget>
 
 ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     QWidget(parent),
@@ -14,6 +15,7 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     setWindowTitle(projector->displayName());
 
     ui->view->setScene(projector->getScene());
+    //ui->view->setViewport(new QGLWidget);
 
     ui->toolBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Open", this, SLOT(slotLoadCrystalData()));
 

@@ -10,6 +10,9 @@
 #include <core/fitobject.h>
 #include <core/spacegroup.h>
 
+#include <QFuture>
+#include <QFutureWatcher>
+
 class Projector;
 
 class Crystal: public QObject, public FitObject {
@@ -27,6 +30,7 @@ class Crystal: public QObject, public FitObject {
 
         void generateReflections();
         void updateRotation();
+
         int reflectionCount();
         Reflection getReflection(int i);
         Reflection getClosestReflection(const Vec3D& normal);
@@ -108,6 +112,29 @@ class Crystal: public QObject, public FitObject {
         RotationAxisType axisType;
         
         bool updateEnabled;
+
+        // Function Object that perfoms the
+        // update of Reflection Parameters depending on rotation
+        class UpdateRef {
+        public:
+            UpdateRef(Crystal* _c): c(_c) {};
+            void operator()(Reflection&);
+        private:
+            Crystal* c;
+        };
+
+        // Function Object that perfoms the
+        // generation of one layer of refelctions
+        class GenerateReflection {
+        public:
+            typedef QList<Reflection> result_type;
+            GenerateReflection(Crystal* _c): c(_c) {};
+            QList<Reflection> operator()(int);
+        private:
+            Crystal* c;
+        };
+
+
 };
 
 struct CrystalPointer {
