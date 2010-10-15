@@ -27,12 +27,24 @@ public:
 protected:
     QRectF zoomSceneRect();
     void resizeView();
+    enum MouseMode {
+        MouseZoom,
+        MousePan,
+        MouseRotate
+    };
+    MouseMode mouseMode;
+
+protected slots:
+    void slotActivateZoom();
+    void slotActivatePan();
+    void slotActivateRotate();
 
 private:
     Ui::ProjectionPlane *ui;
     Projector* projector;
 
     QPointF mousePressOrigin;
+    QPointF lastMousePosition;
     QRubberBand* zoomRubber;
 
     QList<QRectF> zoomSteps;

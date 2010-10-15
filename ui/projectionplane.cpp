@@ -15,9 +15,22 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     setWindowTitle(projector->displayName());
 
     ui->view->setScene(projector->getScene());
-    //ui->view->setViewport(new QGLWidget);
+    ui->view->setViewport(new QGLWidget);
 
     ui->toolBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Open", this, SLOT(slotLoadCrystalData()));
+
+    QActionGroup *g = new QActionGroup(this);
+    g->setExclusive(true);
+
+    g->addAction(ui->toolBar->addAction(QIcon(":/zoom.png"), "Zoom", this, SLOT(slotActivateZoom())));
+    g->addAction(ui->toolBar->addAction(QIcon(":/pan.png"), "Zoom", this, SLOT(slotActivatePan())));
+    g->addAction(ui->toolBar->addAction(QIcon(":/rotate_left.png"), "Zoom", this, SLOT(slotActivateRotate())));
+
+    for (int i=0; i<g->actions().size(); i++) {
+        g->actions().at(i)->setCheckable(true);
+        g->actions().at(i)->setChecked(i==0);
+    }
+    mouseMode = MouseZoom;
 
     zoomRubber=new QRubberBand(QRubberBand::Rectangle, ui->view);
     resizeView();
@@ -65,32 +78,78 @@ void ProjectionPlane::resizeEvent(QResizeEvent *e) {
 void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
     mousePressOrigin = ui->view->mapToScene(ui->view->mapFromGlobal(e->globalPos()));
     if (e->buttons()==Qt::LeftButton) {
-        QRect r(QPoint(), QSize());
-        zoomRubber->setGeometry(QRect());
-        zoomRubber->show();
-        //QPointF p = ui->view->mapToScene(ui->view->mapFromGlobal(e->globalPos()));
+        if (mouseMode==MouseZoom) {
+            QRect r(QPoint(), QSize());
+            zoomRubber->setGeometry(QRect());
+            zoomRubber->show();
+        }
     } else if (e->buttons()==Qt::RightButton) {
         if (zoomSteps.size()>0)
             zoomSteps.removeLast();
         resizeView();
     }
+    lastMousePosition = mousePressOrigin;
 }
 
 void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
     QPointF p = ui->view->mapToScene(ui->view->mapFromGlobal(e->globalPos()));
     if (e->buttons()==Qt::LeftButton) {
-        zoomRubber->setGeometry(QRect(ui->view->mapFromScene(mousePressOrigin), ui->view->mapFromScene(p)).normalized());
+        if (mouseMode==MouseZoom) {
+            zoomRubber->setGeometry(QRect(ui->view->mapFromScene(mousePressOrigin), ui->view->mapFromScene(p)).normalized());
+        } else if (mouseMode==MousePan) {
+            bool b1, b2;
+            Vec3D v1 = projector->det2normal(lastMousePosition, &b1);
+            Vec3D v2 = projector->det2normal(p, &b2);
+
+            if (b1 and b2) {
+                Vec3D r=v1%v2;
+                r.normalize();
+                projector->addRotation(r, acos(v1*v2));
+
+                // Process screen updates. Otherwise on Windows no updates are prosessed if
+                // two projectors are active and the mouse moves fast.
+                // Otherwise, on Linux this produces stange effects.
+                //if self.doProcessEvent:
+                //    QtGui.qApp.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
+                qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+            }
+        } else if (mouseMode==MouseRotate) {
+            bool b1, b2;
+            Vec3D v1 = projector->det2normal(lastMousePosition, &b1);
+            Vec3D v2 = projector->det2normal(p, &b2);
+            Crystal* c=projector->getCrystal();
+            if (c and b1 and b2) {
+                Vec3D ax=c->getLabSystamRotationAxis();
+                v1=v1-ax*(v1*ax);
+                v2=v2-ax*(v2*ax);
+                v1.normalize();
+                v2.normalize();
+                double a=v1*v2;
+                if (a>1.0) a=1.0;
+                a=acos(a);
+                if (Mat3D(ax, v1, v2).det()<0)
+                    a*=-1;
+                projector->addRotation(ax, a);
+            //self.emit(QtCore.SIGNAL('projectorAddedRotation(double)'), a)
+            //if self.doProcessEvent:
+                qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+            }
+        }
     }
+    lastMousePosition = p;
 }
 
 void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
     QPointF p = ui->view->mapToScene(ui->view->mapFromGlobal(e->globalPos()));
     if (e->button()==Qt::LeftButton) {
-        zoomSteps.append(QRectF(mousePressOrigin, p).normalized());
-        zoomRubber->hide();
-        resizeView();
+        if (mouseMode==MouseZoom) {
+            zoomSteps.append(QRectF(mousePressOrigin, p).normalized());
+            zoomRubber->hide();
+            resizeView();
+        }
     }
     //ui->view->setDragMode(QGraphicsView::NoDrag);
+    lastMousePosition = p;
 }
 
 
@@ -113,3 +172,16 @@ void ProjectionPlane::dropEvent(QDropEvent *e) {
     //c=e.source().crystal
     //self.projector.connectToCrystal(c)
 }
+
+void ProjectionPlane::slotActivatePan() {
+    mouseMode=ProjectionPlane::MousePan;
+}
+
+void ProjectionPlane::slotActivateZoom() {
+    mouseMode=ProjectionPlane::MouseZoom;
+}
+
+void ProjectionPlane::slotActivateRotate() {
+    mouseMode=ProjectionPlane::MouseRotate;
+}
+

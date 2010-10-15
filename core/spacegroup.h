@@ -61,6 +61,13 @@ private:
 
     QList<SpaceGroupCheck> groups;
 
+    /*struct PGElem{
+        Mat3D R;
+        Vec3D t;
+    };
+
+    QList<PGElem> pointgroup;
+*/
 };
 
 

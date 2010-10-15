@@ -1,6 +1,7 @@
 #include "projectiongraphicsview.h"
 #include <QMouseEvent>
 #include <QTime>
+#include <QGraphicsItem>
 
 ProjectionGraphicsView::ProjectionGraphicsView(QWidget *parent) :
     QGraphicsView(parent)
@@ -41,7 +42,8 @@ void ProjectionGraphicsView::mouseReleaseEvent(QMouseEvent *e) {
 }
 
 void ProjectionGraphicsView::paintEvent(QPaintEvent *e) {
-    QTime t=QTime::currentTime();
+    QGraphicsView::paintEvent(e);
+    /*QTime t=QTime::currentTime();
     QGraphicsView::paintEvent(e);
     int delta = t.msecsTo(QTime::currentTime());
     if (delta>0) {
@@ -54,19 +56,30 @@ void ProjectionGraphicsView::paintEvent(QPaintEvent *e) {
     }
     t=QTime::currentTime();
     QPainter p(viewport());
-    for (int i=0; i<80000; i++) {
-        QSize s = viewport()->size();
-        p.drawEllipse(mapFromScene(QPointF(0,0)), 5.0, 5.0);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(QPen(QBrush(Qt::black), 0));
+    QPainterPath path;
+    path.addEllipse(-4.0, -4.0, 8.0, 8.0);
+    QPolygonF poly = path.toFillPolygon();
+    QPointF l;
+    for (int i=0; i<scene()->items().size(); i++) {
+
+        QGraphicsItem* it = scene()->items().at(i);
+        QPointF pos = mapFromScene(it->pos() );
+        //p.drawEllipse(pos, 2.5, 2.5);
+        poly.translate(pos-l);
+        l=pos;
+        p.drawPolygon(poly);
     }
     p.end();
     delta = t.msecsTo(QTime::currentTime());
     if (delta>0) {
-       double ips = 1000.0*20000/delta;
+       double ips = 1000.0*scene()->items().size()/delta;
        QPainter p(viewport());
 
        p.setPen(Qt::black);
        p.drawText(15,45, QString("%1").arg(ips, 9, 'f', 2));
        p.drawText(15,60,QString("%1").arg(delta));
     }
-
+*/
 }
