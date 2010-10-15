@@ -64,6 +64,7 @@ Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), M
     connect(spaceGroup, SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
     connect(spaceGroup, SIGNAL(triclinHtoR()), this, SLOT(convertHtoR()));
     connect(spaceGroup, SIGNAL(triclinRtoH()), this, SLOT(convertRtoH()));
+    connect(spaceGroup, SIGNAL(groupChanged()),this, SLOT(renewReflections()));
     axisType=LabSystem;
     enableUpdate();
 }
@@ -152,6 +153,11 @@ void Crystal::setCell(QList<double> cell) {
     }
 }
 
+void Crystal::renewReflections() {
+  reflections.clear();
+  emit reflectionsUpdate();
+}
+
 void Crystal::addRotation(const Vec3D& axis, double angle) {
     addRotation(Mat3D(axis, angle));
 }
@@ -188,61 +194,63 @@ void Crystal::setWavevectors(double _Qmin, double _Qmax) {
 
 
 QList<Reflection> Crystal::GenerateReflection::operator ()(int h) {
-    QList<Reflection> kl_layer;
-    Crystal::UpdateRef updateRef(c);
+  QList<Reflection> kl_layer;
+  Crystal::UpdateRef updateRef(c);
 
-    //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
-    // k^2 +2*k *h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
-    double ns = 1.0/c->bstar.norm_sq();
-    double p = c->astar*c->bstar*ns*h;
-    double q1 = c->astar.norm_sq()*ns*h*h;
-    double q2 = 4.0*ns*c->Qmax*c->Qmax;
-    double s = p*p-q1+q2;
-    int kMin = (s>0)?int(-p-sqrt(s)):0;
-    int kMax = (s>0)?int(-p+sqrt(s)):0;
+  //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
+  // k^2 +2*k *h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
+  double ns = 1.0/c->bstar.norm_sq();
+  double p = c->astar*c->bstar*ns*h;
+  double q1 = c->astar.norm_sq()*ns*h*h;
+  double q2 = 4.0*ns*c->Qmax*c->Qmax;
+  double s = p*p-q1+q2;
+  int kMin = (s>0)?int(-p-sqrt(s)):0;
+  int kMax = (s>0)?int(-p+sqrt(s)):0;
 
-    for (int k=kMin; k<=kMax; k++) {
+  for (int k=kMin; k<=kMax; k++) {
 
-        int hk_ggt = ggt(h,k);
+    int hk_ggt = ggt(h,k);
 
-        Vec3D v = c->MReziprocal*Vec3D(h,k,0);
-        ns = 1.0/c->cstar.norm_sq();
-        p = v*c->cstar*ns;
-        q1 = v.norm_sq()*ns;
-        q2 = 4.0*ns*c->Qmax*c->Qmax;
-        s = p*p-q1+q2;
-        int lMin = (s>0)?int(-p-sqrt(s)):0;
-        int lMax = (s>0)?int(-p+sqrt(s)):0;
+    Vec3D v = c->MReziprocal*Vec3D(h,k,0);
+    ns = 1.0/c->cstar.norm_sq();
+    p = v*c->cstar*ns;
+    q1 = v.norm_sq()*ns;
+    q2 = 4.0*ns*c->Qmax*c->Qmax;
+    s = p*p-q1+q2;
+    int lMin = (s>0)?int(-p-sqrt(s)):0;
+    int lMax = (s>0)?int(-p+sqrt(s)):0;
 
-        for (int l=lMin; l<=lMax; l++) {
-            // store only lowest order reflections
-            if (ggt(hk_ggt, l)==1) {
-                v=c->MReziprocal*Vec3D(h,k,l);
-                double Q = 0.5*v.norm();
+    for (int l=lMin; l<=lMax; l++) {
+      // store only lowest order reflections
+      if (ggt(hk_ggt, l)==1) {
+        v=c->MReziprocal*Vec3D(h,k,l);
+        double Q = 0.5*v.norm();
 
-                if (Q<=c->Qmax) {
-                    Reflection r;
-                    r.h=h;
-                    r.k=k;
-                    r.l=l;
-                    r.hklSqSum=h*h+k*k+l*l;
-                    r.Q=Q;
-                    r.d = 0.5/Q;
-                    for (int i=1; i<int(2.0*c->Qmax*r.d+0.9); i++) {
-                        // TODO: check sys absents
-                        r.orders.push_back(i);
-                    }
+        if (Q<=c->Qmax) {
+          Reflection r;
+          r.h=h;
+          r.k=k;
+          r.l=l;
+          r.hklSqSum=h*h+k*k+l*l;
+          r.Q=Q;
+          r.d = 0.5/Q;
+          for (int i=1; i<int(2.0*c->Qmax*r.d+0.9); i++) {
+            if (!c->spaceGroup->isExtinct(TVec3D<int>(i*h, i*k, i*l)))
+            // TODO: check sys absents
+            r.orders.push_back(i);
+          }
+          if (r.orders.size()>0) {
+            r.normalLocal=v*r.d;
+            updateRef(r);
+            kl_layer << r;
+          }
 
-                    r.normalLocal=v*r.d;
-                    updateRef(r);
-                    kl_layer << r;
 
-
-                }
-            }
         }
+      }
     }
-    return kl_layer;
+  }
+  return kl_layer;
 }
 
 
@@ -509,17 +517,17 @@ void Crystal::fitParameterSetEnabled(int n, bool enable) {
 
 
 void Crystal::calcEulerAngles(double &omega, double &chi, double &phi) {
-    omega=-atan2(MRot[0][1],MRot[1][1]);
+    omega=-atan2(MRot(0,1),MRot(1,1));
     //chi=asin(MRot[2][1]);
     double s=sin(omega);
     double c=cos(omega);
     if (fabs(c)>fabs(s)) {
-        chi=atan2(MRot[2][1], MRot[1][1]/c);
+        chi=atan2(MRot(2,1), MRot(1,1)/c);
     } else {
-        chi=atan2(MRot[2][1], MRot[0][1]/s);
+        chi=atan2(MRot(2,1), MRot(0,1)/s);
     }
     Mat3D M(Mat3D(Vec3D(1,0,0), -chi)*Mat3D(Vec3D(0,0,1), -omega)*MRot);
-    phi=atan2(M[0][2],M[0][0]);
+    phi=atan2(M(0,2),M(0,0));
 }
 
 void Crystal::setEulerAngles(double omega, double chi, double phi) {

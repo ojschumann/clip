@@ -65,35 +65,35 @@ SpaceGroup::SpaceGroup(QObject* parent=NULL): QObject(parent), groups() {
 }
 
 bool SpaceGroup::setGroupSymbol(QString s) {
-    QList<SpaceGroupCheck>::iterator iter;
-    for (iter=groups.begin(); iter!=groups.end(); ++iter) {
-        if (iter->match(s)) {
+  QList<SpaceGroupCheck>::iterator iter;
+  for (iter=groups.begin(); iter!=groups.end(); ++iter) {
+    if (iter->match(s)) {
 
-            bool SystemChg = crystalsystem!=iter->system;
-            QString CenterChg;
-            if (not symbolElements.empty()) {
-                CenterChg = symbolElements.first();
-            } else {
-                // On startup
-                SystemChg = true;
-            }
+      bool SystemChg = crystalsystem!=iter->system;
+      QString CenterChg;
+      if (not symbolElements.empty()) {
+          CenterChg = symbolElements.first();
+      } else {
+          // On startup
+          SystemChg = true;
+      }
 
-            symbol = s;
-            crystalsystem = iter->system;
-            symbolElements = iter->elements();
-            CenterChg += symbolElements.first();
+      symbol = s;
+      crystalsystem = iter->system;
+      symbolElements = iter->elements();
+      CenterChg += symbolElements.first();
 
-            if (CenterChg=="HR") emit triclinHtoR();
-            if (CenterChg=="RH") emit triclinRtoH();
-            if (SystemChg || CenterChg=="HR" || CenterChg=="RH") {
-                emit constrainsChanged();
-            }
-
-            emit groupChanged();
-            return true;
-        }
+      if (CenterChg=="HR") emit triclinHtoR();
+      if (CenterChg=="RH") emit triclinRtoH();
+      if (SystemChg || CenterChg=="HR" || CenterChg=="RH") {
+          emit constrainsChanged();
+      }
+      generatePointgroup();
+      emit groupChanged();
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 
 QString SpaceGroup::groupSymbol() const {
@@ -129,7 +129,93 @@ QList<int> SpaceGroup::getConstrains() const {
 }
 
 
+SpaceGroup::PointgroupElement::PointgroupElement(int m11, int m12, int m13, int m21, int m22, int m23, int m31, int m32, int m33, int t1, int t2, int t3): M(m11, m12, m13, m21, m22, m23, m31, m32, m33), t(t1, t2, t3) {
+  normalize();
+};
 
+SpaceGroup::PointgroupElement::PointgroupElement(const TMat3D<int> &_M, const TVec3D<int> &_t): M(_M), t(_t) {
+  normalize();
+};
+
+void SpaceGroup::PointgroupElement::normalize() {
+  for (int i=0; i<3; i++) {
+    t(i)%=6;
+    if (t(i)<0)
+      t(i)+=6;
+  }
+}
+
+SpaceGroup::PointgroupElement SpaceGroup::PointgroupElement::operator *(const SpaceGroup::PointgroupElement& o) {
+  return SpaceGroup::PointgroupElement(M*o.M, M*o.t + t);
+}
+
+bool SpaceGroup::PointgroupElement::operator==(const SpaceGroup::PointgroupElement& o) {
+  return (M==o.M) && t==o.t;
+}
+
+
+bool SpaceGroup::isExtinct(const TVec3D<int>& reflection) {
+  for (int i=0; i<extinctionChecks.size(); i++) {
+    int s = reflection*extinctionChecks.at(i).t;
+    if ((s%6)!=0) {
+      if ((extinctionChecks.at(i).M*reflection).isNull()) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void SpaceGroup::generatePointgroup() {
+  pointgroup.clear();
+  extinctionChecks.clear();
+
+  pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0);
+  if (symbolElements.first()=="I") {
+    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 3);
+  } else if (symbolElements.first()=="F") {
+    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 3);
+    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3);
+    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0);
+  } else if (symbolElements.first()=="A") {
+    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 3);
+  } else if (symbolElements.first()=="B") {
+    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3);
+  } else if (symbolElements.first()=="C") {
+    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0);
+  } else if (symbolElements.first()=="R") {
+  } else if (symbolElements.first()=="H") {
+  }
+
+  int lastGSize;
+  do {
+    lastGSize = pointgroup.size();
+    for (int i=1; i<pointgroup.size(); i++) {
+      for (int j=1; j<pointgroup.size(); j++) {
+        PointgroupElement test = pointgroup[i]*pointgroup[j];
+        bool uniq=true;
+        for (int k=0; k<pointgroup.size(); k++) {
+          if (test==pointgroup[k]) {
+            uniq = false;
+            break;
+          }
+        }
+        if (uniq) {
+          pointgroup << test;
+        }
+
+      }
+    }
+  } while(lastGSize!=pointgroup.size());
+  for (int i=0; i<pointgroup.size(); i++) {
+    if (!pointgroup.at(i).t.isNull()) {
+      ExtinctionElement e;
+      e.M=TMat3D<int>() - pointgroup.at(i).M;
+      e.t=pointgroup.at(i).t;
+      extinctionChecks << e;
+    }
+  }
+}
 
     /*
     QStringList g;

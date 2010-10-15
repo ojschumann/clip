@@ -9,6 +9,7 @@ QT       += core gui opengl
 TARGET = Clip
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -std=gnu++0x
 
 SOURCES += main.cpp\
         ui/clip.cpp \
@@ -46,7 +47,8 @@ HEADERS  += ui/clip.h \
     ui/projectiongraphicsview.h \
     core/laueplaneprojector.h \
     core/stereoprojector.h \
-    tools/signalingellipse.h
+    tools/signalingellipse.h \
+    tools/init3D.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

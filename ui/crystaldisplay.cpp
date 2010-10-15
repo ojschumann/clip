@@ -76,7 +76,7 @@ void CrystalDisplay::slotUpdateOM() {
     for (int i=0; i<3; i++) {
         for (int j=0; j<3; j++) {
             // Set Cells
-            ui->orientationMatrix->setItem(i,j, new QTableWidgetItem(QString::number(OM[i][j], 'f', 4)));
+            ui->orientationMatrix->setItem(i,j, new QTableWidgetItem(QString::number(OM(i,j), 'f', 4)));
         }
     }
     // let Crystal calc Euler angles and write to UI

@@ -1,60 +1,73 @@
-#ifndef __MAT3D_H__
-#define __MAT3D_H__
+#ifndef __TMAT3D_H__
+#define __TMAT3D_H__
 
 
 #include <vector>
-
+#include <tools/init3D.h>
 using namespace std;
 
-class Vec3D;
 
-class Mat3D {
-    friend class Vec3D;
+template <typename T> class TVec3D;
+
+
+
+template <typename T> class TMat3D {
+    friend class TVec3D<T>;
  public:
-  Mat3D();
-  Mat3D(Vec3D v1, Vec3D v2,  Vec3D v3);
-  Mat3D(vector<double>M);
-  Mat3D(Vec3D axis, double angle);
-  Mat3D(const Mat3D* m);
-  Mat3D(const Mat3D& m);
+  TMat3D();
+  TMat3D(const TVec3D<T>& v1, const TVec3D<T>& v2, const TVec3D<T>& v3);
+  TMat3D(vector<T> M);
+  TMat3D(TVec3D<T> axis, T angle);
+  TMat3D(T m11, T m12, T m13, T m21, T m22, T m23, T m31, T m32, T m33);
+  TMat3D<T> operator*(T a) const;
+  template <typename U> TVec3D<T> operator*(const TVec3D<U>& v) const;
+  TMat3D<T> operator*(const TMat3D<T>& m) const;
   
-  Vec3D operator*(const Vec3D& v) const;
-  Mat3D operator*(const Mat3D& m) const;
-  Mat3D operator*(double a) const;
-  Mat3D lmult(const Mat3D& m);
-  
-  Mat3D operator-(const Mat3D& m) const;
-  Mat3D operator+(const Mat3D& m) const;
+  TMat3D<T> operator+(const TMat3D<T>& m) const;
+  TMat3D<T> operator-(const TMat3D<T>& m) const;
 
-  Mat3D operator*=(const Mat3D& m);
-  Mat3D operator*=(double a);
-  Mat3D operator+=(const Mat3D& m);
-  Mat3D operator-=(const Mat3D& m);
+  TMat3D<T>& operator*=(const TMat3D<T>& m);
+  TMat3D<T>& operator*=(T a);
+  TMat3D<T>& operator+=(const TMat3D<T>& m);
+  TMat3D<T>& operator-=(const TMat3D<T>& m);
+  TMat3D<T>& lmult(const TMat3D<T>& m);
 
-  
-      
-  Vec3D operator[](unsigned int i) const;
-  double& at(unsigned int i, unsigned int j);
-  
-  Mat3D orthogonalize() const;
-  Mat3D transposed() const;
+  bool operator==(const TMat3D<T>& m);
+
+  TVec3D<T> operator[](int i) const;
+  T& operator()(int i, int j) { return DATA[i+j+(j<<1)]; };
+  const T& operator()(int i, int j) const { return DATA[i+j+(j<<1)]; }
+  T at(int i, int j) const;
+
+  TMat3D<T> transposed() const;
   void transpose();
-  Mat3D inverse() const;
-  double sqSum() const;
-  double det() const;
+  T sqSum() const;
+  T det() const;
   void zero();
   
+  TMat3D<T> orthogonalize() const;
+  TMat3D<T> inverse() const;
+
   // returns Q, Matrix will be overwritten
-  Mat3D QR();
-  Mat3D QL();
-  void upperBidiagonal(Mat3D& L, Mat3D& R);
-  void svd(Mat3D& L, Mat3D& R);
- protected:
-  double M[3][3];
-  static double fault;
+  TMat3D<T> QR();
+  TMat3D<T> QL();
+  void upperBidiagonal(TMat3D<T>& L, TMat3D<T>& R);
+  void svd(TMat3D<T>& L, TMat3D<T>& R);
+
+protected:
+  struct KeyClass {};
+  static const KeyClass Key;
+  inline TMat3D(KeyClass ) {};
+
+  inline void givens(double a, double b, double &c, double &s);
+
+  T DATA[9];
 };
 
 
-//Mat3D operator*(double a, const Mat3D& m);
+typedef TMat3D<double> Mat3D;
+
+
+#include<tools/mat3d.cpp>
 
 #endif

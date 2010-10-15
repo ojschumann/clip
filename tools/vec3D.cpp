@@ -1,5 +1,8 @@
-#include <tools/vec3D.h>
-#include <tools/mat3D.h>
+#ifndef __TVEC3D_CPP__
+#define __TVEC3D_CPP__
+
+#ifdef __TVEC3D_H__
+
 
 #include <cmath>
 #include <stdio.h>
@@ -7,163 +10,146 @@
 
 using namespace std;
 
-Vec3D::Vec3D(){
-  for (unsigned int i=3; i--; ) X[i] = 0.0;
+template <typename T> TVec3D<T>::TVec3D(){
+  for (int i=0; i<3; i++) (*this)(i) = InitatorValues<T>::Zero();
 }
 
-Vec3D::Vec3D(double _x, double _y, double _z) {
-  X[0]=_x;
-  X[1]=_y;
-  X[2]=_z;
+template <typename T>  TVec3D<T>::TVec3D(T _x, T _y, T _z) {
+  (*this)(0)=_x;
+  (*this)(1)=_y;
+  (*this)(2)=_z;
 }
 
-Vec3D::Vec3D(const double _x[3]) {
-  for (unsigned int i=3; i--; ) X[i] = _x[i];
+template <typename T> TVec3D<T>::TVec3D(const T _x[3]) {
+  for (int i=0; i<3; i++) (*this)(i) = _x[i];
 }
 
-Vec3D::Vec3D(const Vec3D* v) {
-  for (unsigned int i=3; i--; ) X[i] = v->X[i];
-}
 
-Vec3D Vec3D::operator+(const Vec3D& v) const{
-  Vec3D r(this);
-  for (unsigned int i=3; i--; ) r.X[i] += v.X[i];
+template <typename T> TVec3D<T> TVec3D<T>::operator+(const TVec3D<T>& v) const{
+  TVec3D<T> r(Key);
+  for (int i=0; i<3; i++) r(i) = (*this)(i)+v(i);
   return r;
 }
 
-Vec3D Vec3D::operator-(const Vec3D& v) const {
-  Vec3D r(this);
-  for (unsigned int i=3; i--; ) r.X[i] -= v.X[i];
+template <typename T> TVec3D<T> TVec3D<T>::operator-(const TVec3D<T>& v) const {
+  TVec3D<T> r(Key);
+  for (int i=0; i<3; i++) r(i) = (*this)(i)-v(i);
   return r;
 }
 
-double Vec3D::operator*(const Vec3D& v) const {
-  double p=0.0;
-  for (unsigned int i=3; i--; ) p+=X[i]*v.X[i];
-  return p;
-}
-
-Vec3D Vec3D::operator*(double a) const {
-  Vec3D r(this);
-  for (unsigned int i=3; i--; ) r.X[i] *= a;
+template <typename T> template <typename U> T TVec3D<T>::operator*(const TVec3D<U>& v) const {
+  T r = (*this)(0)*v(0);
+  for (int i=1; i<3; i++) r+=(*this)(i)*v(i);
   return r;
 }
 
-Vec3D Vec3D::operator%(const Vec3D &v) const {
-  Vec3D r;
-  r.X[0]=X[1]*v.X[2]-X[2]*v.X[1];
-  r.X[1]=X[2]*v.X[0]-X[0]*v.X[2];
-  r.X[2]=X[0]*v.X[1]-X[1]*v.X[0];
+
+
+template <typename T> TVec3D<T> TVec3D<T>::operator*(const T& a) const {
+  TVec3D<T> r(Key);
+  for (int i=0; i<3; i++) r(i) = (*this)(i) * a;
   return r;
 }
 
-Mat3D Vec3D::operator^(const Vec3D &v) const {
-    Mat3D M;
-    for (int i=3; i--; ) {
-        for (int j=3; j--; ) {
-            M.M[i][j]=X[i]*v.X[j];
-        }
+template <typename T> TVec3D<T> TVec3D<T>::operator%(const TVec3D<T> &v) const {
+  TVec3D<T> r(Key);
+  r(0)=(*this)(1)*v(2)-(*this)(2)*v(1);
+  r(1)=(*this)(2)*v(0)-(*this)(0)*v(2);
+  r(2)=(*this)(0)*v(1)-(*this)(1)*v(0);
+  return r;
+}
+
+template <typename T> TMat3D<T> TVec3D<T>::operator^(const TVec3D<T> &v) const {
+  TMat3D<T> M(TMat3D<T>::Key);
+  for (int i=0; i<3; i++) {
+    M(i,i)=(*this)(i)*(*this)(i);
+    for (int j=i+1; j<3; j++) {
+      M(j,i)=M(i,j)=(*this)(i)*(*this)(j);
     }
-    return M;
+  }
+  return M;
 }
 
-Vec3D Vec3D::operator/(double a)  const {
-  if (a==0) return Vec3D(this);
-  Vec3D r(this);
-  for (unsigned int i=3; i--; ) r.X[i] /= a;
+template <typename T> TVec3D<T> TVec3D<T>::operator/(const T& a)  const {
+  if (a==0) return TVec3D<T>(*this);
+  TVec3D<T> r(Key);
+  for (int i=0; i<3; i++) r(i) = (*this)(i) / a;
   return r;
 }
 
 
-Vec3D Vec3D::operator+=(const Vec3D& v) {
-  for (unsigned int i=3; i--; ) X[i] += v.X[i];
-  return Vec3D(this);
+template <typename T> TVec3D<T>& TVec3D<T>::operator+=(const TVec3D<T>& v) {
+  for (int i=0; i<3; i++) (*this)(i) += v(i);
+  return *this;
 }
 
-Vec3D Vec3D::operator-=(const Vec3D& v){
-  for (unsigned int i=3; i--; ) X[i] -= v.X[i];
-  return Vec3D(this);
+template <typename T> TVec3D<T>& TVec3D<T>::operator-=(const TVec3D<T>& v){
+  for (int i=0; i<3; i++) (*this)(i) -= v(i);
+  return *this;
 }
 
-Vec3D Vec3D::operator*=(double a){
-  for (unsigned int i=3; i--; ) X[i] *= a;
-  return Vec3D(this);
+template <typename T> TVec3D<T>& TVec3D<T>::operator*=(const T& a){
+  for (int i=0; i<3; i++) (*this)(i) *= a;
+  return *this;
 }
 
-Vec3D Vec3D::operator/=(double a) {
+template <typename T> TVec3D<T>& TVec3D<T>::operator/=(const T& a) {
   if (a!=0)
-    for (unsigned int i=3; i--; ) X[i] /= a;
-  return Vec3D(this);
+    for (int i=0; i<3; i++) (*this)(i) /= a;
+  return *this;
+}
+
+template <typename T> template <typename U> TVec3D<T>& TVec3D<T>::convert(const TVec3D<U>& v) {
+    for (int i=0; i<3; i++)
+        (*this)(i)=v(i);
+    return *this;
 }
 
 
-Mat3D Vec3D::outer() const {
-    Mat3D M;
-    for (unsigned int i=3; i--; ) {
-        M.M[i][i]=X[i]*X[i];
-        for (unsigned int j=i; j--; ) {
-            double tmp=X[i]*X[j];
-            M.M[i][j]=tmp;
-            M.M[j][i]=tmp;
-        }
-    }
-    return M;
+template <typename T> double TVec3D<T>::norm()  const {
+  return sqrt((*this)(0)*(*this)(0)+(*this)(1)*(*this)(1)+(*this)(2)*(*this)(2));
 }
 
-double Vec3D::norm()  const {
-  return sqrt(X[0]*X[0]+X[1]*X[1]+X[2]*X[2]);
+template <typename T> T TVec3D<T>::norm_sq()  const {
+  return (*this)(0)*(*this)(0)+(*this)(1)*(*this)(1)+(*this)(2)*(*this)(2);
 }
 
-double Vec3D::norm_sq()  const {
-  return X[0]*X[0]+X[1]*X[1]+X[2]*X[2];
+template <typename T> void TVec3D<T>::normalize() {
+    *this /= norm();
 }
 
-void Vec3D::normalize() {
-  double n=norm();
-  if (n!=0) 
-    for (unsigned int i=3; i--; ) X[i] /= n;
+template <typename T> TVec3D<T> TVec3D<T>::normalized() const {
+  TVec3D<T> r(*this);
+  r.normalize();
+  return r;
 }
 
-Vec3D Vec3D::normalized() const {
-  Vec3D v=Vec3D(this);
-  v.normalize();
-  return v;
+template <typename T> T TVec3D<T>::x()  const {
+  return (*this)(0);
 }
 
-double Vec3D::x()  const {
-  return X[0];
+template <typename T> T TVec3D<T>::y()  const {
+  return (*this)(1);
 }
 
-double Vec3D::y()  const {
-  return X[1];
+template <typename T> T TVec3D<T>::z()  const {
+  return (*this)(2);
 }
 
-double Vec3D::z()  const {
-  return X[2];
+template <typename T> bool TVec3D<T>::operator==(const TVec3D<T>& v)  const {
+  return ((*this)(0)==v(0)) && ((*this)(1)==v(1)) && ((*this)(2)==v(2));
 }
 
-double& Vec3D::operator[](unsigned int i) {
-  static double err=0.0;
-  if (i<3)
-    return X[i];
-  return err;
+template <typename T> bool TVec3D<T>::operator!=(const TVec3D<T>& v)  const {
+  return ((*this)(0)!=v(0)) && ((*this)(1)!=v(1)) && ((*this)(2)!=v(2));
 }
 
-double Vec3D::operator[](unsigned int i) const {
-  if (i<3)
-    return X[i];
-  return 0.0;
+template <typename T> bool TVec3D<T>::isNull()  const {
+  return ((*this)(0)==InitatorValues<T>::Zero()) && ((*this)(1)==InitatorValues<T>::Zero()) && ((*this)(2)==InitatorValues<T>::Zero());
 }
 
 
-bool Vec3D::operator==(const Vec3D& v)  const {
-  return (X[0]==v.X[0]) && (X[1]==v.X[1]) && (X[2]==v.X[2]);
-}
+//template <typename T> T TVec3D<T>::fault=InitatorValues<T>::Zero;
 
-bool Vec3D::operator!=(const Vec3D& v)  const {
-  return (X[0]!=v.X[0]) || (X[1]!=v.X[1]) || (X[2]!=v.X[2]);
-}
-
-bool Vec3D::isNull()  const {
-  return (X[0]==0.0) && (X[1]==0.0) && (X[2]==0.0);
-}
+#endif
+#endif

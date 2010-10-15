@@ -23,7 +23,7 @@ Mat3D OptimalRotation::getOptimalRotation() {
         double d=L.det()*R.det();
         if (d<0.0) {
             Mat3D T;
-            T.at(2,2)=-1.0;
+            T(2,2)=-1.0;
             optRot = L*T*R;
         } else {
             optRot = L*R;
