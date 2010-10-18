@@ -28,7 +28,7 @@ Mat3D OptimalRotation::getOptimalRotation() {
         } else {
             optRot = L*R;
         }
-        optRot = optRot.orthogonalize();
+        //optRot = optRot.orthogonalize();
         valid = true;
     }
     return optRot;

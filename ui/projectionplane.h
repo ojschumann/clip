@@ -38,6 +38,7 @@ protected slots:
     void slotActivateZoom();
     void slotActivatePan();
     void slotActivateRotate();
+    void slotUpdateFPS();
 
 private:
     Ui::ProjectionPlane *ui;

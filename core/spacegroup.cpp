@@ -62,6 +62,8 @@ SpaceGroup::SpaceGroup(QObject* parent=NULL): QObject(parent), groups() {
     groups << SpaceGroupCheck(       cubic,  "432", "([PIF])(4[123]?)(-?3)(2)");
     groups << SpaceGroupCheck(       cubic,  "43m", "([PIF])(-?4[123]?)(-?3)([mnabcd])");
     groups << SpaceGroupCheck(       cubic,  "m3m", "([PIF])([mnabcd])(-?3)([mnabcd])");
+
+    setGroupSymbol("P1");
 }
 
 bool SpaceGroup::setGroupSymbol(QString s) {
@@ -70,12 +72,12 @@ bool SpaceGroup::setGroupSymbol(QString s) {
     if (iter->match(s)) {
 
       bool SystemChg = crystalsystem!=iter->system;
+      bool startup = false;
       QString CenterChg;
-      if (not symbolElements.empty()) {
-          CenterChg = symbolElements.first();
+      if (symbolElements.empty()) {
+          startup = true;
       } else {
-          // On startup
-          SystemChg = true;
+          CenterChg = symbolElements.first();
       }
 
       symbol = s;
@@ -83,9 +85,18 @@ bool SpaceGroup::setGroupSymbol(QString s) {
       symbolElements = iter->elements();
       CenterChg += symbolElements.first();
 
-      if (CenterChg=="HR") emit triclinHtoR();
-      if (CenterChg=="RH") emit triclinRtoH();
-      if (SystemChg || CenterChg=="HR" || CenterChg=="RH") {
+      bool TriclinSettingChanged = false;
+      if ((crystalsystem==trigonal) && (!SystemChg)) {
+          if ((CenterChg=="HR") || (CenterChg=="PR")) {
+              emit triclinHtoR();
+              TriclinSettingChanged=true;
+          }
+          if ((CenterChg=="RH") || (CenterChg=="RP")) {
+              emit triclinRtoH();
+              TriclinSettingChanged=true;
+          }
+      }
+      if (startup || SystemChg || TriclinSettingChanged) {
           emit constrainsChanged();
       }
       generatePointgroup();
@@ -185,6 +196,11 @@ void SpaceGroup::generatePointgroup() {
     pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0);
   } else if (symbolElements.first()=="R") {
   } else if (symbolElements.first()=="H") {
+      pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, 2);
+      //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 4, 4);
+      //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, 2);
+      //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -4, 2);
+      pointgroup << PointgroupElement(0,-1, 0, 1, -1, 0, 0, 0, 1, 0, 0, 0);
   }
 
   int lastGSize;

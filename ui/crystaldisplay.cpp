@@ -131,7 +131,13 @@ void CrystalDisplay::slotCellChanged() {
 }
 
 void CrystalDisplay::slotSpaceGroupChanged(QString s) {
-    crystal->getSpacegroup()->setGroupSymbol(s);
+    QPalette p = ui->SpaceGroup->palette();
+    if (crystal->getSpacegroup()->setGroupSymbol(s)) {
+        p.setColor(QPalette::Base, Qt::white);
+    } else {
+        p.setColor(QPalette::Base, QColor(255, 200, 200));
+    }
+    ui->SpaceGroup->setPalette(p);
 }
 
 

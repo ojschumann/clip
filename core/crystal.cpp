@@ -166,7 +166,7 @@ void Crystal::addRotation(const Mat3D& M) {
     #ifdef __DEBUG__
     cout << "AddRotation" << endl;
     #endif
-    MRot = M * MRot;
+    MRot.lmult(M);
     MRot.orthogonalize();
     updateRotation();
     emit orientationChanged();
@@ -559,17 +559,13 @@ void Crystal::slotSetSGConstrains() {
 
 void Crystal::convertRtoH() {
     Vec3D a = uvw2Real(1, -1, 0);
-    Vec3D c = uvw2Real(1, 1, 1);
     // Vec3D b = uvw2Real(0, 1, -1);
+    Vec3D c = uvw2Real(1, 1, 1);
     setCell(a.norm(), a.norm(), c.norm(), 90, 90, 120);
     OptimalRotation r;
-    r.addVectorPair(a.normalized(), uvw2Real(1,0,0).normalized());
-    r.addVectorPair(c.normalized(), uvw2Real(0,0,1).normalized());
+    r.addVectorPair(a, uvw2Real(1,0,0));
+    r.addVectorPair(c, uvw2Real(0,0,1));
     addRotation(r.getOptimalRotation());
-
-    Vec3D t = uvw2Real(1,0,0);
-
-    t = uvw2Real(0,0,1);
 
 }
 
@@ -577,18 +573,12 @@ void Crystal::convertHtoR() {
     Vec3D a=uvw2Real(2,1,1)/3;
     Vec3D b=uvw2Real(-1,1,1)/3;
     double l=a.norm();
-    l=b.norm();
     double ang=180*M_1_PI*acos(a*b/l/l);
     setCell(l,l,l,ang,ang,ang);
 
     OptimalRotation r;
-    r.addVectorPair(a.normalized(), uvw2Real(1,0,0).normalized());
-    r.addVectorPair(b.normalized(), uvw2Real(0,1,0).normalized());
+    r.addVectorPair(a, uvw2Real(1,0,0));
+    r.addVectorPair(b, uvw2Real(0,1,0));
     addRotation(r.getOptimalRotation());
-
-    Vec3D t = uvw2Real(1,0,0);
-
-    t = uvw2Real(0,1,0);
-
 }
 

@@ -41,8 +41,15 @@ void ProjectionGraphicsView::mouseReleaseEvent(QMouseEvent *e) {
     }
 }
 
+int ProjectionGraphicsView::getFrames() {
+    int f = frames;
+    frames = 0;
+    return f;
+}
+
 void ProjectionGraphicsView::paintEvent(QPaintEvent *e) {
     QGraphicsView::paintEvent(e);
+    frames++;
     /*QTime t=QTime::currentTime();
     QGraphicsView::paintEvent(e);
     int delta = t.msecsTo(QTime::currentTime());

@@ -62,9 +62,8 @@ template <typename T> TVec3D<T> TVec3D<T>::operator%(const TVec3D<T> &v) const {
 template <typename T> TMat3D<T> TVec3D<T>::operator^(const TVec3D<T> &v) const {
   TMat3D<T> M(TMat3D<T>::Key);
   for (int i=0; i<3; i++) {
-    M(i,i)=(*this)(i)*(*this)(i);
-    for (int j=i+1; j<3; j++) {
-      M(j,i)=M(i,j)=(*this)(i)*(*this)(j);
+    for (int j=0; j<3; j++) {
+        M(i,j)=(*this)(i)*v(j);
     }
   }
   return M;

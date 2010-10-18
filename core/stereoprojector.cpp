@@ -79,6 +79,26 @@ bool StereoProjector::project(const Reflection &r, QGraphicsItem* item) {
     e->setPos(v.y()*s, v.z()*s);
     return true;
 }
+
+void StereoProjector::project(const Reflection &r, QPainterPath &path) {
+    bool doesReflect=false;
+    for (int i=0; i<r.orders.size(); i++) {
+        int n=r.orders[i];
+        if ((QminVal<=n*r.Q) and (n*r.Q<=QmaxVal)) {
+            doesReflect=true;
+            break;
+        }
+    }
+    if (not doesReflect)
+        return;
+
+    Vec3D v=localCoordinates*r.normal;
+    double s=1.0+v.x();
+    if (s>1e-5) {
+        s=1.0/s;
+        path.addEllipse(QPointF(v.y()*s, v.z()*s), 0.5*spotSize, 0.5*spotSize);
+    }
+}
         
 QGraphicsItem* StereoProjector::itemFactory() {
     QGraphicsEllipseItem* e=new QGraphicsEllipseItem();

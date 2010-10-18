@@ -6,6 +6,7 @@
 #include <QTime>
 #include <QFile>
 #include <QTextStream>
+#include <QPainter>
 
 using namespace std;
 
@@ -23,6 +24,8 @@ Projector::Projector(QObject *parent): QObject(parent), FitObject(), projectedIt
     scene.addItem(&imgGroup);
     imgGroup.setHandlesChildEvents(false);
     //imgGroup.setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+    spotMarkers = new Projector::SpotMarkerGraphicsItem();
+    scene.addItem(spotMarkers);
     updateImgTransformations();
 };
 
@@ -41,8 +44,10 @@ Projector::Projector(const Projector &p): QObject(),FitObject(),det2img(p.det2im
     connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
     connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
     
+    spotMarkers = new Projector::SpotMarkerGraphicsItem();
+    scene.addItem(spotMarkers);
     updateImgTransformations();
-} 
+}
 
 
 
@@ -137,14 +142,17 @@ void Projector::reflectionsUpdated() {
     }
 
     clearInfoItems();
-    
-    QTime t = QTime::currentTime();
-
     QList<Reflection> r = crystal->getReflectionList();
+    /*spotMarkers->path=QPainterPath();
+
+    for (int i=0; i<r.size(); i++) {
+        project(r.at(i), spotMarkers->path);
+    }
+    spotMarkers->setPath();
+    */
     int n=0;
     int i=0;
 
-    int ell1 = t.msecsTo(QTime::currentTime());
 
     if (!showSpots) {
         i=r.size();
@@ -175,6 +183,7 @@ void Projector::reflectionsUpdated() {
     }
 
 
+
     item = itemFactory();
     for (; i<r.size(); i++) {
         if (project(r.at(i), item))  {
@@ -184,13 +193,9 @@ void Projector::reflectionsUpdated() {
         }
     }
     delete item;
-    
-    int ell2 = t.msecsTo(QTime::currentTime());
 
-    QFile f("debug.dat");
-    f.open(QFile::Append);
-    QTextStream fs(&f);
-    fs << r.size() << " " << projectedItems.size() << " " << ell1 << " " << ell2-ell1 << endl;
+
+
     emit projectedPointsUpdated();
 }
 
@@ -471,4 +476,17 @@ bool Projector::parseXMLElement(QXmlStreamReader &r) {
         return true;
     }
     return false;
+}
+
+
+Projector::SpotMarkerGraphicsItem::SpotMarkerGraphicsItem(): QGraphicsItem() {
+    //path.addEllipse(QPointF(0,0), .5,.7);
+};
+
+void Projector::SpotMarkerGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    p->drawPath(path);;
+}
+
+QRectF Projector::SpotMarkerGraphicsItem::boundingRect() const {
+    return path.controlPointRect();
 }

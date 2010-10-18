@@ -2,15 +2,16 @@
 #define __PROJECTOR_H__
 
 #include <core/reflection.h>
-#include <QtCore/QObject>
-#include <QtCore/QVector>
-#include <QtCore/QPointF>
-#include <QtCore/QPointer>
-#include <QtGui/QGraphicsScene>
-#include <QtGui/QGraphicsItem>
-#include <QtCore/QString>
-#include <QtCore/QXmlStreamReader>
-#include <QtCore/QXmlStreamWriter>
+#include <QObject>
+#include <QVector>
+#include <QPointF>
+#include <QPointer>
+#include <QGraphicsScene>
+#include <QGraphicsItem>
+#include <QGraphicsRectItem>
+#include <QString>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 #include <core/crystal.h>
 #include <core/fitobject.h>
 
@@ -92,6 +93,7 @@ class Projector: public QObject, public FitObject {
 
     protected:
         virtual bool project(const Reflection &r, QGraphicsItem* item)=0;
+        virtual void project(const Reflection &r, QPainterPath &path)=0;
         virtual QGraphicsItem* itemFactory()=0;
     
         virtual bool parseXMLElement(QXmlStreamReader&);
@@ -107,7 +109,7 @@ class Projector: public QObject, public FitObject {
         // Info Items. These will be set on Mousepress from Python and be deleted on orientation change or slot!
         QList<QGraphicsItem*> infoItems;
     
-        // Pointer to the connectred crystal
+        // Pointer to the connected crystal
         QPointer<Crystal> crystal;
     
         double QminVal;
@@ -117,10 +119,22 @@ class Projector: public QObject, public FitObject {
         double spotSize;
         bool showSpots;
         bool projectionEnabled;
-        
+
         QGraphicsScene scene;
         
         QGraphicsItemGroup imgGroup;
+
+        class SpotMarkerGraphicsItem: public QGraphicsItem {
+        public:
+            SpotMarkerGraphicsItem();
+            virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+            virtual QRectF boundingRect() const;
+            void setPath() {  update(); }
+            QPainterPath path;
+        private:
+        };
+
+        SpotMarkerGraphicsItem* spotMarkers;
     protected slots:
         virtual void updateImgTransformations();
 };

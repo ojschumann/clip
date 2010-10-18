@@ -4,6 +4,7 @@
 #include <QMouseEvent>
 #include <QApplication>
 #include <QtOpenGL/QGLWidget>
+#include <QTimer>
 
 ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     QWidget(parent),
@@ -15,7 +16,7 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     setWindowTitle(projector->displayName());
 
     ui->view->setScene(projector->getScene());
-    ui->view->setViewport(new QGLWidget);
+    //ui->view->setViewport(new QGLWidget);
 
     ui->toolBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Open", this, SLOT(slotLoadCrystalData()));
 
@@ -34,6 +35,8 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
 
     zoomRubber=new QRubberBand(QRubberBand::Rectangle, ui->view);
     resizeView();
+
+    QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
 }
 
 ProjectionPlane::~ProjectionPlane()
@@ -185,3 +188,8 @@ void ProjectionPlane::slotActivateRotate() {
     mouseMode=ProjectionPlane::MouseRotate;
 }
 
+void ProjectionPlane::slotUpdateFPS() {
+    int frames = ui->view->getFrames();
+    ui->fpsDisplay->setText(QString::number(frames/2));
+    QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
+}

@@ -128,18 +128,6 @@ template <typename T> TMat3D<T> TMat3D<T>::operator*(const TMat3D<T>& m) const {
   return r;
 }
 
-template <typename T> TMat3D<T>& TMat3D<T>::lmult(const TMat3D<T>& m) {
-  TMat3D tmp(*this);
-  for (int j=0; j<3; j++) {
-    for (int i=0; i<3; i++) {
-      T tmp2=m(i,0)*tmp(0,j);
-      for (int k=1; k<3; k++)
-        tmp2+=m(i,k)*tmp(k,j);
-      (*this)(i,j) = tmp2;
-    }
-  }
-  return *this;
-}
 
 template <typename T> TMat3D<T>& TMat3D<T>::operator*=(const TMat3D<T>& m) {
   TMat3D tmp(*this);
@@ -154,6 +142,18 @@ template <typename T> TMat3D<T>& TMat3D<T>::operator*=(const TMat3D<T>& m) {
   return *this;
 }
 
+template <typename T> TMat3D<T>& TMat3D<T>::lmult(const TMat3D<T>& m) {
+  TMat3D tmp(*this);
+  for (int j=0; j<3; j++) {
+    for (int i=0; i<3; i++) {
+      T tmp2=m(i,0)*tmp(0,j);
+      for (int k=1; k<3; k++)
+        tmp2+=m(i,k)*tmp(k,j);
+      (*this)(i,j) = tmp2;
+    }
+  }
+  return *this;
+}
 
 template <typename T> TMat3D<T>& TMat3D<T>::operator+=(const TMat3D<T>& m) {
   for (int i=0; i<3; i++)
@@ -352,7 +352,7 @@ template <typename T> void TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
         for (int n=0; n<2; n++) {
             double c,s;
             givens((*this)(0,n),(*this)(0,n+1), c, s);
-            TMat3D G1;
+            TMat3D<T> G1;
             G1(n,n)=c;
             G1(n+1,n+1)=c;
             G1(n+1,n)=-s;
@@ -362,7 +362,7 @@ template <typename T> void TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
             R*=G1;
             
             givens((*this)(n,n), (*this)(n+1,n), c, s);
-            TMat3D G2;
+            TMat3D<T> G2;
             G2(n,n)=c;
             G2(n+1,n+1)=c;
             G2(n,n+1)=-s;

@@ -13,7 +13,7 @@ public:
     void mousePressEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *);
     void mouseReleaseEvent(QMouseEvent *);
-
+    int getFrames();
 signals:
 
 public slots:
@@ -21,6 +21,7 @@ public slots:
 protected:
     void paintEvent(QPaintEvent*);
     bool viewIgnoresThisMouseEvent;
+    int frames;
 
 };
 
