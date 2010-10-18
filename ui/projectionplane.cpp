@@ -34,9 +34,12 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     mouseMode = MouseZoom;
 
     zoomRubber=new QRubberBand(QRubberBand::Rectangle, ui->view);
-    resizeView();
 
+    // Call as soon as we are displayed
+    QTimer::singleShot(0, this, SLOT(resizeView()));
     QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
+    QTimer::singleShot(0, this, SLOT(slotRandomRotation()));
+
 }
 
 ProjectionPlane::~ProjectionPlane()
@@ -69,7 +72,7 @@ void ProjectionPlane::resizeView() {
     finalRect.moveCenter(ui->viewFrame->rect().center());
     // And set the Geometry
     ui->view->setGeometry(finalRect.toRect());
-    // Finally set the ZoomRect to the view
+    // Set the ZoomRect to the view
     ui->view->fitInView(minViewRect, Qt::KeepAspectRatio);
 }
 
@@ -189,7 +192,18 @@ void ProjectionPlane::slotActivateRotate() {
 }
 
 void ProjectionPlane::slotUpdateFPS() {
-    int frames = ui->view->getFrames();
-    ui->fpsDisplay->setText(QString::number(frames/2));
-    QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
+  int frames = ui->view->getFrames();
+  ui->fpsDisplay->setText(QString::number(frames/2));
+  QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
+}
+
+void ProjectionPlane::slotLoadCrystalData() {
+  projector->gap*=2;
+  ui->fpsDisplay->setText(QString::number(projector->gap));
+}
+
+void ProjectionPlane::slotRandomRotation() {
+  projector->addRotation(Mat3D(Vec3D(1,2,3).normalized(), 0.01));
+  QTimer::singleShot(0, this, SLOT(slotRandomRotation()));
+
 }

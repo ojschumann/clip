@@ -26,7 +26,6 @@ public:
     virtual void dropEvent(QDropEvent *);
 protected:
     QRectF zoomSceneRect();
-    void resizeView();
     enum MouseMode {
         MouseZoom,
         MousePan,
@@ -39,6 +38,10 @@ protected slots:
     void slotActivatePan();
     void slotActivateRotate();
     void slotUpdateFPS();
+    void resizeView();
+    void slotLoadCrystalData();
+    //FIXME: Only for debuging
+    void slotRandomRotation();
 
 private:
     Ui::ProjectionPlane *ui;

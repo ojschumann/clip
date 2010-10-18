@@ -14,6 +14,9 @@
 #include <QXmlStreamWriter>
 #include <core/crystal.h>
 #include <core/fitobject.h>
+#include <QWaitCondition>
+#include <QSemaphore>
+
 
 class Projector: public QObject, public FitObject {
     Q_OBJECT
@@ -57,6 +60,10 @@ class Projector: public QObject, public FitObject {
         
         virtual void projector2xml(QXmlStreamWriter&);
         virtual void loadFromXML(QXmlStreamReader&);
+
+        //FIXME: For Debuging only
+        int gap;
+
     public slots:
         void connectToCrystal(Crystal *);
         void setWavevectors(double Qmin, double Qmax);
@@ -93,7 +100,7 @@ class Projector: public QObject, public FitObject {
 
     protected:
         virtual bool project(const Reflection &r, QGraphicsItem* item)=0;
-        virtual void project(const Reflection &r, QPainterPath &path)=0;
+        virtual bool project(const Reflection &r, QPointF &point)=0;
         virtual QGraphicsItem* itemFactory()=0;
     
         virtual bool parseXMLElement(QXmlStreamReader&);
@@ -124,14 +131,29 @@ class Projector: public QObject, public FitObject {
         
         QGraphicsItemGroup imgGroup;
 
-        class SpotMarkerGraphicsItem: public QGraphicsItem {
+        class SpotMarkerGraphicsItem: public QGraphicsItem, public QRunnable {
         public:
             SpotMarkerGraphicsItem();
             virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
             virtual QRectF boundingRect() const;
-            void setPath() {  update(); }
-            QPainterPath path;
+            void run();
+            void updateCache();
+            QVector<QPointF> coo;
+            int paintUntil;
+            double spotSize;
+            int gap;
+            QPixmap cache;
+            bool cacheNeedsUpdate;
+
+
         private:
+            QAtomicInt runningThreads;
+            QAtomicInt threadNr;
+            QMutex cacheWrite;
+            QSemaphore sync;
+            QTransform scene2widget;
+            QAtomicInt threadCount;
+            bool workerFinished;
         };
 
         SpotMarkerGraphicsItem* spotMarkers;

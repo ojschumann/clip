@@ -23,7 +23,7 @@ class StereoProjector: public Projector {
         void setDetOrientation(const Mat3D& M);
     protected:
         virtual bool project(const Reflection &r, QGraphicsItem* item);
-        virtual void project(const Reflection &r, QPainterPath &path);
+        virtual bool project(const Reflection &r, QPointF &);
         virtual QGraphicsItem* itemFactory();
         virtual bool parseXMLElement(QXmlStreamReader&);
     

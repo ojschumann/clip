@@ -7,6 +7,7 @@ ProjectionGraphicsView::ProjectionGraphicsView(QWidget *parent) :
     QGraphicsView(parent)
 {
     viewIgnoresThisMouseEvent=true;
+    frames=0;
 }
 
 void ProjectionGraphicsView::dragEnterEvent(QDragEnterEvent *e) {

@@ -21,6 +21,7 @@ public slots:
 protected:
     void paintEvent(QPaintEvent*);
     bool viewIgnoresThisMouseEvent;
+    // TODO: Only for debugging!
     int frames;
 
 };

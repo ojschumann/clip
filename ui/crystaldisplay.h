@@ -22,6 +22,8 @@ public:
 
     QSize sizeHint() const;
 
+    Crystal* getCrystal() {return crystal; }
+
 public slots:
     void slotUpdateOM();
     void slotCellChanged();

@@ -56,7 +56,7 @@ public:
 Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), MReziprocal(), MRot(), reflections(), connectedProjectors(this), rotationAxis(1,0,0) {
     spaceGroup = new SpaceGroup(this);
     spaceGroup->setGroupSymbol("Pm3m");
-    setCell(1.0, 1.0, 1.0, 90.0, 90.0, 90.0);
+    setCell(5.0, 5.0, 5.0, 90.0, 90.0, 90.0);
     Qmin=0.0;
     Qmax=1.0;
     connect(&connectedProjectors, SIGNAL(objectAdded()), this, SLOT(updateWavevectorsFromProjectors()));
