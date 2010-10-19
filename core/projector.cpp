@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QWidget>
 #include <QThreadPool>
+#include <QtConcurrentMap>
 
 
 using namespace std;
@@ -135,10 +136,21 @@ void Projector::clearInfoItems() {
   }
 }
 
+
+void Projector::ProjectionMapper::operator ()(Reflection& r) {
+  QPointF p;
+  if (projector->project(r, p)) {
+    int i = nextUnusedPoint->fetchAndAddOrdered(1);
+    //mutex.lock();
+    projectedPoints[i]=p;
+    //mutex.unlock();
+  }
+}
+
 void Projector::reflectionsUpdated() {
   if (crystal.isNull() or not projectionEnabled)
     return;
-  //FIXME: Do Better
+
   while (textMarkerItems.size()>0) {
     QGraphicsItem* item=textMarkerItems.takeLast();
     scene.removeItem(item);
@@ -147,26 +159,24 @@ void Projector::reflectionsUpdated() {
 
   clearInfoItems();
   QList<Reflection> r = crystal->getReflectionList();
-
-  spotMarkers->paintUntil=0;
-  spotMarkers->coo.resize(r.size());
+  //spotMarkers->paintUntil=0;
+  spotMarkers->coordinates.resize(r.size());
   spotMarkers->gap = gap;
-  spotMarkers->spotSize = spotSize;
-  for (int i=0; i<r.size(); i++) {
-    if (project(r.at(i), spotMarkers->coo[spotMarkers->paintUntil]))
-      spotMarkers->paintUntil++;
-  }
+  spotMarkers->setSpotsize(spotSize);
+
+  ProjectionMapper mapper(this, spotMarkers->coordinates);
+  ProjectionMapper& m = mapper;
+  QtConcurrent::blockingMap(r, m);
+  spotMarkers->paintUntil = *mapper.nextUnusedPoint;
+  //for (int i=0; i<r.size(); i++) {
+  //  if (project(r[i], spotMarkers->coordinates[spotMarkers->paintUntil]))
+  //    spotMarkers->paintUntil++;
+  //}
   spotMarkers->cacheNeedsUpdate=true;
   spotMarkers->update();
 
   /*
-  int n=0;
-  int i=0;
 
-
-  if (!showSpots) {
-    i=r.size();
-  }
   for (; i<r.size() and n<projectedItems.size(); i++) {
     if (project(r.at(i), projectedItems.at(n))) {
       if (r.at(i).hklSqSum<=maxHklSqSum) {
@@ -183,26 +193,6 @@ void Projector::reflectionsUpdated() {
       n++;
     }
   }
-
-
-  QGraphicsItem* item;
-  while (projectedItems.size()>n) {
-    item = projectedItems.takeLast();
-    scene.removeItem(item);
-    delete item;
-  }
-
-
-
-  item = itemFactory();
-  for (; i<r.size(); i++) {
-    if (project(r.at(i), item))  {
-      projectedItems.append(item);
-      scene.addItem(item);
-      item = itemFactory();
-    }
-  }
-  delete item;
 */
 
 
@@ -490,82 +480,88 @@ bool Projector::parseXMLElement(QXmlStreamReader &r) {
 
 
 
-Projector::SpotMarkerGraphicsItem::SpotMarkerGraphicsItem(): QGraphicsItem(), runningThreads(0), sync(0) {
+Projector::SpotMarkerGraphicsItem::SpotMarkerGraphicsItem(): QGraphicsItem(), workerSync(0) {
   setCacheMode(NoCache);
   cacheNeedsUpdate = true;
-  setAutoDelete(false);
-  QThreadPool::globalInstance()->setMaxThreadCount(4);
+  for (int i=0; i<QThread::idealThreadCount()+1; i++) {
+    Worker* w = new Worker(this, i);
+    w->start(QThread::HighPriority);
+    workers << w;
+  }
 };
 
-void Projector::SpotMarkerGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem *option, QWidget *w) {
-  QSize s = w->size();
-  if (cache.size()!=w->size()) {
-    cache = QPixmap(s);
+Projector::SpotMarkerGraphicsItem::~SpotMarkerGraphicsItem() {
+  for (int i=0; i<workers.size(); i++) {
+    workers.at(i)->shouldStop=true;
+  }
+  workerStart.wakeAll();
+  workerSync.acquire(workers.size());
+  for (int i=0; i<workers.size(); i++) {
+    delete workers[i];
+  }
+  workers.clear();
+
+}
+
+void Projector::SpotMarkerGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem *option, QWidget *w) {  
+
+  if (cache.size()!=p->viewport().size()) {
+    cache = QPixmap(p->viewport().size());
     cacheNeedsUpdate = true;
   }
 
-  scene2widget = p->worldTransform();
   if (cacheNeedsUpdate) {
+    transform = p->worldTransform();
+    workN = 0;
+    workerStart.wakeAll();
     cache.fill(QColor(0,0,0,0));
-    workerFinished = false;
-    threadCount = 0;
-    threadNr.fetchAndStoreOrdered(0);
-    QThreadPool::globalInstance()->start(this);
-    sync.acquire();
+    workerSync.acquire(workers.size());
+    QPainter p2(&cache);
+    for (int i=0; i<workers.size(); i++) {
+      p2.drawImage(QPoint(0,0), workers.at(i)->localCache);
+    }
   }
 
-  QTransform t = scene2widget.inverted();
-  p->drawPixmap(t.mapRect(w->rect()), cache, cache.rect());
-
+  p->save();
+  p->resetTransform();
+  p->drawPixmap(QPoint(0,0), cache);
+  p->restore();
 }
 
-void Projector::SpotMarkerGraphicsItem::updateCache() {
-
-}
 
 QRectF Projector::SpotMarkerGraphicsItem::boundingRect() const {
   return QRectF(-1,-1,2,2);
 }
 
 
-void Projector::SpotMarkerGraphicsItem::run() {
-  cacheWrite.lock();
-  int lthreadNr = threadNr.fetchAndAddOrdered(1);
-  runningThreads.ref();
-  if (lthreadNr==0) {
-    threadCount.fetchAndStoreOrdered(1);
-    while (QThreadPool::globalInstance()->tryStart(this)) {
-      threadCount.fetchAndAddOrdered(1);
+void Projector::SpotMarkerGraphicsItem::Worker::run() {
+  forever {
+    spotMarker->mutex.lock();
+    spotMarker->workerStart.wait(&spotMarker->mutex);
+    spotMarker->mutex.unlock();
+
+    if (shouldStop) {
+      spotMarker->workerSync.release(1);
+      return;
     }
 
+    double rx = spotMarker->transform.m11()*spotMarker->spotSize;
+    double ry = spotMarker->transform.m22()*spotMarker->spotSize;
+
+    if (localCache.size()!=spotMarker->cache.size())
+      localCache = QImage(spotMarker->cache.size(), QImage::Format_ARGB32_Premultiplied);
+    localCache.fill(QColor(0,0,0,0).rgba());
+    QPainter p(&localCache);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(Qt::green);
+    int i;
+    while ((i=spotMarker->workN.fetchAndAddOrdered(1))<spotMarker->paintUntil) {
+      p.drawEllipse(spotMarker->transform.map(spotMarker->coordinates.at(i)), rx, ry);
+    }
+    p.end();
+
+    spotMarker->workerSync.release(1);
+
   }
-  int step = threadCount.fetchAndAddOrdered(0);
-  step*=gap;
-  cacheWrite.unlock();
 
-  QImage img(cache.size(), QImage::Format_ARGB32_Premultiplied);
-  img.fill(QColor(0,0,0,0).rgba());
-
-  QPainter p;
-
-  p.begin(&img);
-  p.setRenderHint(QPainter::Antialiasing);
-  QList<QColor> c;
-  c << Qt::red << Qt::green << Qt::gray << Qt::blue << Qt::yellow;
-  p.setPen(c[lthreadNr]);
-  double rx = scene2widget.m11()*spotSize;
-  double ry = scene2widget.m22()*spotSize;
-  for (int i=lthreadNr; i<this->paintUntil; i+=step) {
-    p.drawEllipse(scene2widget.map(coo.at(i)), rx, ry);
-  }
-  p.end();
-
-  cacheWrite.lock();
-  p.begin(&cache);
-  p.drawImage(QPoint(0,0), img);
-  p.end();
-  cacheWrite.unlock();
-
-  if (!runningThreads.deref())
-    sync.release(1);
 }

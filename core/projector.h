@@ -16,6 +16,7 @@
 #include <core/fitobject.h>
 #include <QWaitCondition>
 #include <QSemaphore>
+#include <QThread>
 
 
 class Projector: public QObject, public FitObject {
@@ -127,33 +128,58 @@ class Projector: public QObject, public FitObject {
         bool showSpots;
         bool projectionEnabled;
 
-        QGraphicsScene scene;
-        
+        QGraphicsScene scene;        
         QGraphicsItemGroup imgGroup;
 
-        class SpotMarkerGraphicsItem: public QGraphicsItem, public QRunnable {
+        class ProjectionMapper {
+        public:
+          ProjectionMapper(Projector* p, QVector<QPointF>& r): nextUnusedPoint(new QAtomicInt(0)), projector(p), projectedPoints(r) {}
+          //~ProjectionMapper() { delete nextUnusedPoint; }
+          void operator()(Reflection& r);
+          QAtomicInt* nextUnusedPoint;
+        private:
+          ProjectionMapper(const ProjectionMapper& o): projectedPoints(o.projectedPoints)  { };
+          Projector* projector;
+          QVector<QPointF>& projectedPoints;
+          //QMutex mutex;
+        };
+
+        class SpotMarkerGraphicsItem: public QGraphicsItem {
         public:
             SpotMarkerGraphicsItem();
+            ~SpotMarkerGraphicsItem();
             virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
             virtual QRectF boundingRect() const;
-            void run();
-            void updateCache();
-            QVector<QPointF> coo;
+
+            QVector<QPointF> coordinates;
             int paintUntil;
-            double spotSize;
+
+            //FIXME: For Debbuging only
             int gap;
-            QPixmap cache;
+
+            void setSpotsize(double s) { spotSize = s; }
             bool cacheNeedsUpdate;
+        protected:
+            class Worker: public QThread {
+            public:
+              Worker(SpotMarkerGraphicsItem* s, int t): spotMarker(s), threadNr(t), localCache(s->cache.size(), QImage::Format_ARGB32_Premultiplied) {}
+              void run();
+              SpotMarkerGraphicsItem* spotMarker;
+              int threadNr;
+              QImage localCache;
+              bool shouldStop;
+            };
 
+            QList<Worker*> workers;
+            QPixmap cache;
+            double spotSize;
+            QTransform transform;
 
-        private:
-            QAtomicInt runningThreads;
-            QAtomicInt threadNr;
-            QMutex cacheWrite;
-            QSemaphore sync;
-            QTransform scene2widget;
-            QAtomicInt threadCount;
-            bool workerFinished;
+            QMutex mutex;
+            QWaitCondition workerStart;
+            QSemaphore workerSync;
+            QAtomicInt workN;
+
         };
 
         SpotMarkerGraphicsItem* spotMarkers;
