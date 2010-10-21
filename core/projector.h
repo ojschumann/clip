@@ -186,6 +186,8 @@ class Projector: public QObject, public FitObject {
         SpotMarkerGraphicsItem* spotMarkers;
     protected slots:
         virtual void updateImgTransformations();
+    private:
+        void internalSetWavevectors(double, double);
 };
 
 double getDoubleAttrib(QXmlStreamReader &r, QString name, double def);

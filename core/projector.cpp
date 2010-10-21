@@ -18,7 +18,7 @@ Projector::Projector(QObject *parent): QObject(parent), FitObject(), decorationI
   enableSpots();
   enableProjection();
   scene.setItemIndexMethod(QGraphicsScene::NoIndex);
-  setWavevectors(0.0, 1.0*M_1_PI);
+  internalSetWavevectors(0.0, 1.0*M_1_PI);
   setMaxHklSqSum(0);
   setTextSize(4.0);
   setSpotSize(4.0);
@@ -37,7 +37,7 @@ Projector::Projector(const Projector &p): QObject(),FitObject(),det2img(p.det2im
   cout << "Projector Copy Constructor" << endl;
   enableSpots(p.spotsEnabled());
   enableProjection(p.projectionEnabled);
-  setWavevectors(p.Qmin(), p.Qmax());
+  internalSetWavevectors(p.Qmin(), p.Qmax());
   setMaxHklSqSum(p.getMaxHklSqSum());
   setTextSize(p.getTextSize());
   setSpotSize(p.getSpotSize());
@@ -88,11 +88,16 @@ double Projector::TTmin() const {
 
 void Projector::setWavevectors(double Qmin, double Qmax)  {
   if ((Qmin<Qmax) and ((Qmin!=QminVal) or (Qmax!=QmaxVal))) {
-    QmaxVal=Qmax;
-    QminVal=Qmin;
-    emit projectionParamsChanged();
-    emit wavevectorsUpdated();
+    internalSetWavevectors(Qmin, Qmax);
   }
+}
+
+void Projector::internalSetWavevectors(double Qmin, double Qmax)  {
+  QmaxVal=Qmax;
+  QminVal=Qmin;
+  emit projectionParamsChanged();
+  emit wavevectorsUpdated();
+
 }
 
 QString formatOveline(int i) {
