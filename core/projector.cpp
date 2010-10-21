@@ -14,7 +14,7 @@
 
 using namespace std;
 
-Projector::Projector(QObject *parent): QObject(parent), FitObject(), projectedItems(), decorationItems(), textMarkerItems(), markerItems(), crystal(), scene(this), imgGroup() {
+Projector::Projector(QObject *parent): QObject(parent), FitObject(), decorationItems(), textMarkerItems(), markerItems(), crystal(), scene(this), imgGroup() {
   enableSpots();
   enableProjection();
   scene.setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -31,10 +31,9 @@ Projector::Projector(QObject *parent): QObject(parent), FitObject(), projectedIt
   spotMarkers = new Projector::SpotMarkerGraphicsItem();
   scene.addItem(spotMarkers);
   updateImgTransformations();
-  gap=1;
 };
 
-Projector::Projector(const Projector &p): QObject(),FitObject(),det2img(p.det2img), img2det(p.img2det), projectedItems(), decorationItems(), textMarkerItems(), markerItems(), infoItems(), crystal(), scene(this)  {
+Projector::Projector(const Projector &p): QObject(),FitObject(),det2img(p.det2img), img2det(p.img2det), decorationItems(), textMarkerItems(), markerItems(), infoItems(), crystal(), scene(this)  {
   cout << "Projector Copy Constructor" << endl;
   enableSpots(p.spotsEnabled());
   enableProjection(p.projectionEnabled);
@@ -54,7 +53,9 @@ Projector::Projector(const Projector &p): QObject(),FitObject(),det2img(p.det2im
   updateImgTransformations();
 }
 
-
+Projector::~Projector() {
+  delete spotMarkers;
+}
 
 void Projector::connectToCrystal(Crystal *c) {
   if (not crystal.isNull()) {
@@ -132,20 +133,54 @@ void Projector::addInfoItem(const QString& text, const QPointF& p) {
 void Projector::clearInfoItems() {
   while (infoItems.size()>0) {
     QGraphicsItem* item=infoItems.takeLast();
+    scene.removeItem(item);
     delete item;
   }
 }
 
+Projector::ProjectionMapper::ProjectionMapper(Projector *p, QList<Reflection> r):
+    projector(p),
+    reflections(r),
+    nextReflection(0),
+    nextUnusedPoint(0),
+    mutex() {
+  if (projector->spotMarkers->coordinates.size()!=r.size())
+    projector->spotMarkers->coordinates.resize(r.size());
+  projector->spotMarkers->cacheNeedsUpdate=true;
+  setAutoDelete(true);
+}
 
-void Projector::ProjectionMapper::operator ()(Reflection& r) {
-  QPointF p;
-  if (projector->project(r, p)) {
-    int i = nextUnusedPoint->fetchAndAddOrdered(1);
-    //mutex.lock();
-    projectedPoints[i]=p;
-    //mutex.unlock();
+Projector::ProjectionMapper::~ProjectionMapper() {
+  projector->spotMarkers->paintUntil = nextUnusedPoint;
+}
+
+void Projector::ProjectionMapper::run() {
+  QThreadPool::globalInstance()->tryStart(this);
+  int i;
+  while ((i=nextReflection.fetchAndAddAcquire(1))<reflections.size()) {
+    QPointF p;
+    const Reflection& r = reflections.at(i);
+    if (projector->project(r, p)) {
+      projector->spotMarkers->coordinates[nextUnusedPoint.fetchAndAddOrdered(1)]=p;
+
+      if (r.hklSqSum<=(projector->maxHklSqSum)) {
+        mutex.lock();
+        QGraphicsTextItem*  t = projector->scene.addText("");
+        projector->textMarkerItems.append(t);
+        mutex.unlock();
+        t->setHtml(formatHklText(r.h, r.k, r.l));
+        t->setPos(p);
+        QRectF r=t->boundingRect();
+        double sx=projector->textSize*projector->scene.width()/r.width();
+        double sy=projector->textSize*projector->scene.height()/r.height();
+        double s=sx<sy?sy:sx;
+        t->scale(s,s);
+      }
+
+    }
   }
 }
+
 
 void Projector::reflectionsUpdated() {
   if (crystal.isNull() or not projectionEnabled)
@@ -158,43 +193,11 @@ void Projector::reflectionsUpdated() {
   }
 
   clearInfoItems();
-  QList<Reflection> r = crystal->getReflectionList();
-  //spotMarkers->paintUntil=0;
-  spotMarkers->coordinates.resize(r.size());
-  spotMarkers->gap = gap;
+
   spotMarkers->setSpotsize(spotSize);
-
-  ProjectionMapper mapper(this, spotMarkers->coordinates);
-  ProjectionMapper& m = mapper;
-  QtConcurrent::blockingMap(r, m);
-  spotMarkers->paintUntil = *mapper.nextUnusedPoint;
-  /*for (int i=0; i<r.size(); i++) {
-    if (project(r[i], spotMarkers->coordinates[spotMarkers->paintUntil]))
-      spotMarkers->paintUntil++;
-  }*/
-  spotMarkers->cacheNeedsUpdate=true;
+  QThreadPool::globalInstance()->start(new ProjectionMapper(this, crystal->getReflectionList()));
+  QThreadPool::globalInstance()->waitForDone();
   spotMarkers->update();
-
-  /*
-
-  for (; i<r.size() and n<projectedItems.size(); i++) {
-    if (project(r.at(i), projectedItems.at(n))) {
-      if (r.at(i).hklSqSum<=maxHklSqSum) {
-        QGraphicsTextItem*  t = scene.addText("");
-        t->setHtml(formatHklText(r.at(i).h, r.at(i).k, r.at(i).l));
-        t->setPos(projectedItems.at(n)->pos());
-        QRectF r=t->boundingRect();
-        double sx=textSize*scene.width()/r.width();
-        double sy=textSize*scene.height()/r.height();
-        double s=sx<sy?sy:sx;
-        t->scale(s,s);
-        textMarkerItems.append(t);
-      }
-      n++;
-    }
-  }
-*/
-
 
   emit projectedPointsUpdated();
 }
@@ -483,7 +486,7 @@ bool Projector::parseXMLElement(QXmlStreamReader &r) {
 Projector::SpotMarkerGraphicsItem::SpotMarkerGraphicsItem(): QGraphicsItem(), workerSync(0) {
   setCacheMode(NoCache);
   cacheNeedsUpdate = true;
-  for (int i=0; i<QThread::idealThreadCount()+1; i++) {
+  for (int i=0; i<QThread::idealThreadCount(); i++) {
     Worker* w = new Worker(this, i);
     w->start(QThread::HighPriority);
     workers << w;
@@ -526,6 +529,8 @@ void Projector::SpotMarkerGraphicsItem::paint(QPainter *p, const QStyleOptionGra
   p->resetTransform();
   p->drawPixmap(QPoint(0,0), cache);
   p->restore();
+
+
 }
 
 

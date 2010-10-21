@@ -46,8 +46,7 @@ class LauePlaneProjector: public Projector {
     protected:
         double maxCos(Vec3D n) const;
     
-        virtual bool project(const Reflection &r, QGraphicsItem* item);
-        virtual QGraphicsItem* itemFactory();
+        virtual bool project(const Reflection &r, QPointF& p);
         virtual bool parseXMLElement(QXmlStreamReader&);
     
         Mat3D localCoordinates;

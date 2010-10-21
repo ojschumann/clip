@@ -89,6 +89,10 @@ class Crystal: public QObject, public FitObject {
         void reflectionsUpdate();
         void rotationAxisChanged();
     private:
+        // Do the real work. Does not use possible uninitial values of objects variables
+        void internalSetCell(double a, double b, double c, double alpha, double beta, double gamma);
+
+
         // Real and reziprocal orientation Matrix
         Mat3D MReal;
         Mat3D MReziprocal;

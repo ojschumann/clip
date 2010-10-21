@@ -1,6 +1,6 @@
 #include "clip.h"
 #include "ui_clip.h"
-#include "crystaldisplay.h"
+#include <ui/crystaldisplay.h>
 #include <QMdiSubWindow>
 #include <ui/projectionplane.h>
 #include <core/laueplaneprojector.h>
@@ -32,7 +32,7 @@ void Clip::on_actionNew_Crystal_triggered(bool) {
 
 void Clip::on_actionNew_Projection_triggered(bool) {
     Projector* p = new StereoProjector(this);
-
+    //Projector* p = new LauePlaneProjector(this);
     QList<QMdiSubWindow*> mdiWindows = ui->mdiArea->subWindowList(QMdiArea::StackingOrder);
     while (!mdiWindows.empty()) {
       QMdiSubWindow* window = mdiWindows.takeLast();

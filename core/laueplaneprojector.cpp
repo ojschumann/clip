@@ -111,7 +111,7 @@ void LauePlaneProjector::setDetOffset(double dx, double dy) {
     }
 }
 
-bool LauePlaneProjector::project(const Reflection &r, QGraphicsItem* item) {
+bool LauePlaneProjector::project(const Reflection &r, QPointF& p) {
     if (r.lowestDiffOrder==0) 
         return false;
 
@@ -132,19 +132,12 @@ bool LauePlaneProjector::project(const Reflection &r, QGraphicsItem* item) {
         return false;
     
     
-    QGraphicsEllipseItem* e=dynamic_cast<QGraphicsEllipseItem*>(item);
     s=1.0/s;
-    e->setRect(QRectF(-0.5*spotSize, -0.5*spotSize,spotSize,spotSize));
-    e->setPos(v.y()*s+detDx, v.z()*s+detDy);
+    p.setX(v.y()*s+detDx);
+    p.setY(v.z()*s+detDy);
     return true;
 }
         
-QGraphicsItem* LauePlaneProjector::itemFactory() {
-    QGraphicsEllipseItem* e=new QGraphicsEllipseItem();
-    e->setPen(QPen(Qt::green));
-    return e;
-}
-
 void LauePlaneProjector::decorateScene() {
     while (!decorationItems.empty()) {
         QGraphicsItem* item = decorationItems.takeLast();
@@ -368,14 +361,12 @@ bool LauePlaneProjector::parseXMLElement(QXmlStreamReader &r) {
 double LauePlaneProjector::TTmax() const {
     Vec3D n(1.0, 0.0, 0.0);
     double mc=maxCos(n);
-    cout << mc << endl;
     return 180.0-180.0*acos(mc)/M_PI;    
 }
 
 double LauePlaneProjector::TTmin() const {
     Vec3D n(-1.0, 0.0, 0.0);
     double mc=maxCos(n);
-    cout << mc << endl;
     return 180.0*acos(mc)/M_PI;    
 }
 

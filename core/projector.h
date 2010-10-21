@@ -24,6 +24,7 @@ class Projector: public QObject, public FitObject {
     public:
         Projector(QObject* parent=0);
         Projector(const Projector&);
+        ~Projector();
     
         // Functions for transformations in the different Coordinate systems
     
@@ -62,9 +63,6 @@ class Projector: public QObject, public FitObject {
         virtual void projector2xml(QXmlStreamWriter&);
         virtual void loadFromXML(QXmlStreamReader&);
 
-        //FIXME: For Debuging only
-        int gap;
-
     public slots:
         void connectToCrystal(Crystal *);
         void setWavevectors(double Qmin, double Qmax);
@@ -100,10 +98,7 @@ class Projector: public QObject, public FitObject {
         void imgTransformUpdated();
 
     protected:
-        virtual bool project(const Reflection &r, QGraphicsItem* item)=0;
-        virtual bool project(const Reflection &r, QPointF &point)=0;
-        virtual QGraphicsItem* itemFactory()=0;
-    
+        virtual bool project(const Reflection &r, QPointF &point)=0;    
         virtual bool parseXMLElement(QXmlStreamReader&);
 
         // These are the reflections
@@ -131,17 +126,17 @@ class Projector: public QObject, public FitObject {
         QGraphicsScene scene;        
         QGraphicsItemGroup imgGroup;
 
-        class ProjectionMapper {
+        class ProjectionMapper: public QRunnable {
         public:
-          ProjectionMapper(Projector* p, QVector<QPointF> r): nextUnusedPoint(new QAtomicInt(0)), projector(p), projectedPoints(r.data()) {}
-          //~ProjectionMapper() { delete nextUnusedPoint; }
-          void operator()(Reflection& r);
-          QAtomicInt* nextUnusedPoint;
+          ProjectionMapper(Projector* p, QList<Reflection> r);
+          ~ProjectionMapper();
+          void run();
         private:
-          //ProjectionMapper(const ProjectionMapper& o): projectedPoints(o.projectedPoints)  { };
           Projector* projector;
-          QPointF* projectedPoints;
-          //QMutex mutex;
+          QList<Reflection> reflections;
+          QAtomicInt nextReflection;
+          QAtomicInt nextUnusedPoint;
+          QMutex mutex;
         };
 
         class SpotMarkerGraphicsItem: public QGraphicsItem {
@@ -157,15 +152,16 @@ class Projector: public QObject, public FitObject {
             QVector<QPointF> coordinates;
             int paintUntil;
 
-            //FIXME: For Debbuging only
-            int gap;
-
             void setSpotsize(double s) { spotSize = s; }
             bool cacheNeedsUpdate;
         protected:
             class Worker: public QThread {
             public:
-              Worker(SpotMarkerGraphicsItem* s, int t): spotMarker(s), threadNr(t), localCache(s->cache.size(), QImage::Format_ARGB32_Premultiplied), shouldStop(false) {}
+              Worker(SpotMarkerGraphicsItem* s, int t):
+                  spotMarker(s),
+                  threadNr(t),
+                  localCache(s->cache.size(), QImage::Format_ARGB32_Premultiplied),
+                  shouldStop(false) {}
               void run();
               SpotMarkerGraphicsItem* spotMarker;
               int threadNr;

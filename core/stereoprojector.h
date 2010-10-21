@@ -24,7 +24,6 @@ class StereoProjector: public Projector {
     protected:
         virtual bool project(const Reflection &r, QGraphicsItem* item);
         virtual bool project(const Reflection &r, QPointF &);
-        virtual QGraphicsItem* itemFactory();
         virtual bool parseXMLElement(QXmlStreamReader&);
     
         Mat3D localCoordinates;

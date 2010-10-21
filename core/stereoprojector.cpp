@@ -103,11 +103,6 @@ bool StereoProjector::project(const Reflection &r, QPointF &p) {
   return false;
 }
 
-QGraphicsItem* StereoProjector::itemFactory() {
-  QGraphicsEllipseItem* e=new QGraphicsEllipseItem();
-  e->setPen(QPen(Qt::green));
-  return e;
-}
 
 void StereoProjector::decorateScene() {
   cout << "StereoDecorate" << endl;

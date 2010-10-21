@@ -39,13 +39,13 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     QTimer::singleShot(0, this, SLOT(resizeView()));
     QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
     QTimer::singleShot(0, this, SLOT(slotRandomRotation()));
-
 }
 
 ProjectionPlane::~ProjectionPlane()
 {
     delete ui;
     delete zoomRubber;
+    delete projector;
 }
 
 QRectF ProjectionPlane::zoomSceneRect() {
@@ -198,8 +198,6 @@ void ProjectionPlane::slotUpdateFPS() {
 }
 
 void ProjectionPlane::slotLoadCrystalData() {
-  projector->gap*=2;
-  ui->fpsDisplay->setText(QString::number(projector->gap));
 }
 
 void ProjectionPlane::slotRandomRotation() {

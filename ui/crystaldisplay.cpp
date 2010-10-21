@@ -11,152 +11,157 @@ CrystalDisplay::CrystalDisplay(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CrystalDisplay), crystal(new Crystal(this)), allowRotationUpdate(true)
 {
-    ui->setupUi(this);
+  ui->setupUi(this);
 
-    // Connect Signals of the crystal
-    connect(crystal, SIGNAL(orientationChanged()), this, SLOT(slotUpdateOM()));
-    connect(crystal, SIGNAL(cellChanged()), this, SLOT(slotUpdateOM()));
-    connect(crystal, SIGNAL(cellChanged()), this, SLOT(slotLoadCellFromCrystal()));
+  // Connect Signals of the crystal
+  connect(crystal, SIGNAL(orientationChanged()), this, SLOT(slotUpdateOM()));
+  connect(crystal, SIGNAL(cellChanged()), this, SLOT(slotUpdateOM()));
+  connect(crystal, SIGNAL(cellChanged()), this, SLOT(slotLoadCellFromCrystal()));
 
-    connect(crystal->getSpacegroup(), SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
+  connect(crystal->getSpacegroup(), SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
 
-    // Add Toolbar buttons
-    ui->tollBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Open Crystal Data", this, SLOT(slotLoadCrystalData()));
-    ui->tollBar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Save Crystal Data", this, SLOT(slotSaveCrystalData()));
-    ui->tollBar->addAction(QIcon(":/Index.png"), "Index", this, SLOT(slotStartIndexing()));
+  // Add Toolbar buttons
+  ui->tollBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Open Crystal Data", this, SLOT(slotLoadCrystalData()));
+  ui->tollBar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Save Crystal Data", this, SLOT(slotSaveCrystalData()));
+  ui->tollBar->addAction(QIcon(":/Index.png"), "Index", this, SLOT(slotStartIndexing()));
 
-    // Load Orientation Matrix
-    slotUpdateOM();
+  // Init Orientation Matrix Elements
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      ui->orientationMatrix->setItem(i,j, new QTableWidgetItem(""));
 
-    // Load Cell
-    slotLoadCellFromCrystal();
+  // Load Orientation Matrix
+  slotUpdateOM();
 
-    // Disable Inputs based on constrains
-    slotSetSGConstrains();
+  // Load Cell
+  slotLoadCellFromCrystal();
+
+  // Disable Inputs based on constrains
+  slotSetSGConstrains();
 }
 
 CrystalDisplay::~CrystalDisplay()
 {
-    delete ui;
-    delete crystal;
+  delete ui;
+  delete crystal;
 }
 
 
 void CrystalDisplay::resizeEvent(QResizeEvent *) {
-    // Adjust Size of the Orientation Matrix Cells
-    int w = ui->orientationMatrix->width()/3;
-    int h = ui->orientationMatrix->height()/3;
-    for (int i=0; i<3; i++) {
-        ui->orientationMatrix->setColumnWidth(i, w);
-        ui->orientationMatrix->setRowHeight(i, h);
-    }
+  // Adjust Size of the Orientation Matrix Cells
+  int w = ui->orientationMatrix->width()/3;
+  int h = ui->orientationMatrix->height()/3;
+  for (int i=0; i<3; i++) {
+    ui->orientationMatrix->setColumnWidth(i, w);
+    ui->orientationMatrix->setRowHeight(i, h);
+  }
 }
 
 void CrystalDisplay::mousePressEvent(QMouseEvent* e) {
-    if (e->button()==Qt::LeftButton and ui->dragStart->geometry().contains(e->pos())) {
-        QDrag* drag = new QDrag(this);
-        QMimeData* mime = new QMimeData;
-        mime->setData("application/CrystalPointer", "");
-        mime->setImageData(QVariant::fromValue(crystal));
-        drag->setMimeData(mime);
-        drag->exec(Qt::LinkAction);
-    }
+  if (e->button()==Qt::LeftButton and ui->dragStart->geometry().contains(e->pos())) {
+    QDrag* drag = new QDrag(this);
+    QMimeData* mime = new QMimeData;
+    mime->setData("application/CrystalPointer", "");
+    mime->setImageData(QVariant::fromValue(crystal));
+    drag->setMimeData(mime);
+    drag->exec(Qt::LinkAction);
+  }
 }
 
 QSize CrystalDisplay::sizeHint() const {
-    // sizeHint results in a compact window
-    return minimumSizeHint();
+  // sizeHint results in a compact window
+  return minimumSizeHint();
 }
 
 void CrystalDisplay::slotUpdateOM() {
-    // Load rotationMatrix
-    Mat3D OM = crystal->getRotationMatrix();
-    // Multiply with unrotated Orientation Matrix
-    OM *= crystal->getReziprocalOrientationMatrix();
-    for (int i=0; i<3; i++) {
-        for (int j=0; j<3; j++) {
-            // Set Cells
-            ui->orientationMatrix->setItem(i,j, new QTableWidgetItem(QString::number(OM(i,j), 'f', 4)));
-        }
+  // Load rotationMatrix
+  Mat3D OM = crystal->getRotationMatrix();
+  // Multiply with unrotated Orientation Matrix
+  OM *= crystal->getReziprocalOrientationMatrix();
+  for (int i=0; i<3; i++) {
+    for (int j=0; j<3; j++) {
+      // Set Cells
+      ui->orientationMatrix->item(i,j)->setText(QString::number(OM(i,j), 'f', 4));
     }
-    // let Crystal calc Euler angles and write to UI
-    double omega, phi, chi;
-    crystal->calcEulerAngles(omega, chi, phi);
-    allowRotationUpdate = false;
-    ui->rotationOmega->setValue(180.0*M_1_PI*omega);
-    ui->rotationChi->setValue(180.0*M_1_PI*chi);
-    ui->rotationPhi->setValue(180.0*M_1_PI*phi);
-    allowRotationUpdate = true;
+  }
+  // let Crystal calc Euler angles and write to UI
+  double omega, phi, chi;
+  crystal->calcEulerAngles(omega, chi, phi);
+  allowRotationUpdate = false;
+  ui->rotationOmega->setValue(180.0*M_1_PI*omega);
+  ui->rotationChi->setValue(180.0*M_1_PI*chi);
+  ui->rotationPhi->setValue(180.0*M_1_PI*phi);
+  allowRotationUpdate = true;
 }
 
 void CrystalDisplay::slotLoadCellFromCrystal() {
-    // Update space group symbol
-    ui->SpaceGroup->setText(crystal->getSpacegroup()->groupSymbol());
+  // Update space group symbol
+  ui->SpaceGroup->setText(crystal->getSpacegroup()->groupSymbol());
 
-    // Get Cell from crystal
-    QList<double> cell = crystal->getCell();
+  // Get Cell from crystal
+  QList<double> cell = crystal->getCell();
 
-    //Prepare list of all inputs, that corresponts to the cell parameters
-    QList<QDoubleSpinBox*> inputs;
-    inputs << ui->latticeA << ui->latticeB << ui->latticeC << ui->latticeAlpha << ui->latticeBeta << ui->latticeGamma;
+  //Prepare list of all inputs, that corresponts to the cell parameters
+  QList<QDoubleSpinBox*> inputs;
+  inputs << ui->latticeA << ui->latticeB << ui->latticeC << ui->latticeAlpha << ui->latticeBeta << ui->latticeGamma;
 
-    // Bool to check, if the values change
-    bool cellChanged = false;
-    for (int i=0; i<6; i++) {
-        // Block signals, to prevent multiple signals to be generated. Save the block state (should alwas be true)
-        bool b = inputs[i]->blockSignals(true);
-        // Save value for compare. Do not compare here, as the QSpinBox may round
-        double v = inputs[i]->value();
-        // set Value
-        inputs[i]->setValue(cell[i]);
-        // compare with former value. If not equal, cell is changed
-        cellChanged = cellChanged || (v!=inputs[i]->value());
-        // Restore blocking state
-        inputs[i]->blockSignals(b);
-    }
-    // If Cell has changed, promote to crystal again
-    if (cellChanged)
-        slotCellChanged();
+  // Bool to check, if the values change
+  bool cellChanged = false;
+  for (int i=0; i<6; i++) {
+    // Block signals, to prevent multiple signals to be generated. Save the block state (should alwas be true)
+    bool b = inputs[i]->blockSignals(true);
+    // Save value for compare. Do not compare here, as the QSpinBox may round
+    double v = inputs[i]->value();
+    // set Value
+    inputs[i]->setValue(cell[i]);
+    // compare with former value. If not equal, cell is changed
+    cellChanged = cellChanged || (v!=inputs[i]->value());
+    // Restore blocking state
+    inputs[i]->blockSignals(b);
+  }
+  // If Cell has changed, promote to crystal again
+  if (cellChanged)
+    slotCellChanged();
 }
 
 void CrystalDisplay::slotCellChanged() {
-    QList<double> cell;
-    cell << ui->latticeA->value();
-    cell << ui->latticeB->value();
-    cell << ui->latticeC->value();
-    cell << ui->latticeAlpha->value();
-    cell << ui->latticeBeta->value();
-    cell << ui->latticeGamma->value();
-    crystal->setCell(cell);
+  QList<double> cell;
+  cell << ui->latticeA->value();
+  cell << ui->latticeB->value();
+  cell << ui->latticeC->value();
+  cell << ui->latticeAlpha->value();
+  cell << ui->latticeBeta->value();
+  cell << ui->latticeGamma->value();
+  crystal->setCell(cell);
 }
 
 void CrystalDisplay::slotSpaceGroupChanged(QString s) {
-    QPalette p = ui->SpaceGroup->palette();
-    if (crystal->getSpacegroup()->setGroupSymbol(s)) {
-        p.setColor(QPalette::Base, Qt::white);
-    } else {
-        p.setColor(QPalette::Base, QColor(255, 200, 200));
-    }
-    ui->SpaceGroup->setPalette(p);
+  QPalette p = ui->SpaceGroup->palette();
+  if (crystal->getSpacegroup()->setGroupSymbol(s)) {
+    p.setColor(QPalette::Base, Qt::white);
+  } else {
+    p.setColor(QPalette::Base, QColor(255, 200, 200));
+  }
+  ui->SpaceGroup->setPalette(p);
 }
 
 
 void CrystalDisplay::slotRotationChanged() {
-    if (allowRotationUpdate) {
-        double omega = M_PI/180.0*ui->rotationOmega->value();
-        double chi = M_PI/180.0*ui->rotationChi->value();
-        double phi = M_PI/180.0*ui->rotationPhi->value();
-        crystal->setEulerAngles(omega, chi, phi);
-    }
+  if (allowRotationUpdate) {
+    double omega = M_PI/180.0*ui->rotationOmega->value();
+    double chi = M_PI/180.0*ui->rotationChi->value();
+    double phi = M_PI/180.0*ui->rotationPhi->value();
+    crystal->setEulerAngles(omega, chi, phi);
+  }
 }
 
 void CrystalDisplay::slotSetSGConstrains() {
-    QList<int> constrains = crystal->getSpacegroup()->getConstrains();
-    QList<QDoubleSpinBox*> inputs;
-    inputs << ui->latticeA << ui->latticeB << ui->latticeC << ui->latticeAlpha << ui->latticeBeta << ui->latticeGamma;
-    for (int i=0; i<6; i++) {
-        inputs[i]->setEnabled(constrains[i]==0);
-    }
+  QList<int> constrains = crystal->getSpacegroup()->getConstrains();
+  QList<QDoubleSpinBox*> inputs;
+  inputs << ui->latticeA << ui->latticeB << ui->latticeC << ui->latticeAlpha << ui->latticeBeta << ui->latticeGamma;
+  for (int i=0; i<6; i++) {
+    inputs[i]->setEnabled(constrains[i]==0);
+  }
 }
 
 void CrystalDisplay::slotLoadCrystalData() {
@@ -168,7 +173,7 @@ void CrystalDisplay::slotSaveCrystalData() {
 }
 
 void CrystalDisplay::slotStartIndexing() {
-/*    w=Indexing(self.crystal)
+  /*    w=Indexing(self.crystal)
     mdi=self.parent().mdiArea()
     mdi.addSubWindow(w)
     w.show() */
