@@ -168,10 +168,10 @@ void Projector::reflectionsUpdated() {
   ProjectionMapper& m = mapper;
   QtConcurrent::blockingMap(r, m);
   spotMarkers->paintUntil = *mapper.nextUnusedPoint;
-  //for (int i=0; i<r.size(); i++) {
-  //  if (project(r[i], spotMarkers->coordinates[spotMarkers->paintUntil]))
-  //    spotMarkers->paintUntil++;
-  //}
+  /*for (int i=0; i<r.size(); i++) {
+    if (project(r[i], spotMarkers->coordinates[spotMarkers->paintUntil]))
+      spotMarkers->paintUntil++;
+  }*/
   spotMarkers->cacheNeedsUpdate=true;
   spotMarkers->update();
 

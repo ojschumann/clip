@@ -133,14 +133,14 @@ class Projector: public QObject, public FitObject {
 
         class ProjectionMapper {
         public:
-          ProjectionMapper(Projector* p, QVector<QPointF>& r): nextUnusedPoint(new QAtomicInt(0)), projector(p), projectedPoints(r) {}
+          ProjectionMapper(Projector* p, QVector<QPointF> r): nextUnusedPoint(new QAtomicInt(0)), projector(p), projectedPoints(r.data()) {}
           //~ProjectionMapper() { delete nextUnusedPoint; }
           void operator()(Reflection& r);
           QAtomicInt* nextUnusedPoint;
         private:
-          ProjectionMapper(const ProjectionMapper& o): projectedPoints(o.projectedPoints)  { };
+          //ProjectionMapper(const ProjectionMapper& o): projectedPoints(o.projectedPoints)  { };
           Projector* projector;
-          QVector<QPointF>& projectedPoints;
+          QPointF* projectedPoints;
           //QMutex mutex;
         };
 
@@ -148,6 +148,9 @@ class Projector: public QObject, public FitObject {
         public:
             SpotMarkerGraphicsItem();
             ~SpotMarkerGraphicsItem();
+        private:
+            SpotMarkerGraphicsItem(const SpotMarkerGraphicsItem&){};
+        public:
             virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
             virtual QRectF boundingRect() const;
 
@@ -162,12 +165,14 @@ class Projector: public QObject, public FitObject {
         protected:
             class Worker: public QThread {
             public:
-              Worker(SpotMarkerGraphicsItem* s, int t): spotMarker(s), threadNr(t), localCache(s->cache.size(), QImage::Format_ARGB32_Premultiplied) {}
+              Worker(SpotMarkerGraphicsItem* s, int t): spotMarker(s), threadNr(t), localCache(s->cache.size(), QImage::Format_ARGB32_Premultiplied), shouldStop(false) {}
               void run();
               SpotMarkerGraphicsItem* spotMarker;
               int threadNr;
               QImage localCache;
               bool shouldStop;
+            private:
+              Worker(const Worker&) {};
             };
 
             QList<Worker*> workers;
