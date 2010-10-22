@@ -269,7 +269,14 @@ void Crystal::generateReflections() {
   // Q=0.5/d/sin(theta)
   // n*lambda=2*d*sin(theta) => n=2*d/lambda = 2*Q*d
   int hMax = int(2.0*a*Qmax);
+
+  QTime t1(QTime::currentTime());
   reflections = QtConcurrent::blockingMappedReduced(IntIterator(-hMax), IntIterator(hMax+1), GenerateReflection(this), Reduce);
+
+  int N = reflections.size();
+  int dt = t1.msecsTo(QTime::currentTime());
+  emit info(QString("%1 reflections generated in %2ms (%3 r/ms)").arg(N).arg(dt).arg(1.0*N/dt), 1000);
+
 }
 
 

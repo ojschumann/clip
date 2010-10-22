@@ -144,7 +144,7 @@ class Projector: public QObject, public FitObject {
             SpotMarkerGraphicsItem();
             ~SpotMarkerGraphicsItem();
         private:
-            SpotMarkerGraphicsItem(const SpotMarkerGraphicsItem&){};
+            SpotMarkerGraphicsItem(const SpotMarkerGraphicsItem&);
         public:
             virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
             virtual QRectF boundingRect() const;
@@ -152,7 +152,7 @@ class Projector: public QObject, public FitObject {
             QVector<QPointF> coordinates;
             int paintUntil;
 
-            void setSpotsize(double s) { spotSize = s; }
+            void setSpotsize(double s) { spotSize = s; cacheNeedsUpdate=true; }
             bool cacheNeedsUpdate;
         protected:
             class Worker: public QThread {

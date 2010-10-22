@@ -493,7 +493,7 @@ Projector::SpotMarkerGraphicsItem::SpotMarkerGraphicsItem(): QGraphicsItem(), wo
   cacheNeedsUpdate = true;
   for (int i=0; i<QThread::idealThreadCount(); i++) {
     Worker* w = new Worker(this, i);
-    w->start(QThread::HighPriority);
+    w->start();
     workers << w;
   }
 };
@@ -518,16 +518,21 @@ void Projector::SpotMarkerGraphicsItem::paint(QPainter *p, const QStyleOptionGra
     cacheNeedsUpdate = true;
   }
 
-  if (cacheNeedsUpdate) {
+  if (transform!=p->worldTransform()) {
     transform = p->worldTransform();
+    cacheNeedsUpdate = true;
+  }
+
+  if (cacheNeedsUpdate) {
     workN = 0;
-    workerStart.wakeAll();
+    //workerStart.wakeAll();
     cache.fill(QColor(0,0,0,0));
-    workerSync.acquire(workers.size());
+    //workerSync.acquire(workers.size());
     QPainter p2(&cache);
     for (int i=0; i<workers.size(); i++) {
       p2.drawImage(QPoint(0,0), workers.at(i)->localCache);
     }
+    cacheNeedsUpdate=false;
   }
 
   p->save();

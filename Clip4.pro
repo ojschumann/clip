@@ -12,8 +12,7 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -std=gnu++0x
 
 QMAKE_CXXFLAGS_DEBUG += -pg
-QMAKE_LFLAGS_DEBUG += -pg # -L../duma -lmingw32 -lduma
-
+QMAKE_LFLAGS_DEBUG += -pg
 
 SOURCES += main.cpp\
         ui/clip.cpp \

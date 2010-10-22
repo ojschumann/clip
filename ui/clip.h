@@ -15,12 +15,16 @@ public:
     explicit Clip(QWidget *parent = 0);
     ~Clip();
 
+    void addMdiWindow(QWidget*);
+
 public slots:
     void on_actionNew_Crystal_triggered(bool);
     void on_actionNew_Projection_triggered(bool);
 
+
 private:
     Ui::Clip *ui;
+
 };
 
 #endif // CLIP_H

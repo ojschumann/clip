@@ -38,7 +38,7 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     // Call as soon as we are displayed
     QTimer::singleShot(0, this, SLOT(resizeView()));
     QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
-    QTimer::singleShot(0, this, SLOT(slotRandomRotation()));
+    //QTimer::singleShot(0, this, SLOT(slotRandomRotation()));
 }
 
 ProjectionPlane::~ProjectionPlane()
@@ -181,14 +181,17 @@ void ProjectionPlane::dropEvent(QDropEvent *e) {
 
 void ProjectionPlane::slotActivatePan() {
     mouseMode=ProjectionPlane::MousePan;
+    emit info("Pan mode selected", 1000);
 }
 
 void ProjectionPlane::slotActivateZoom() {
     mouseMode=ProjectionPlane::MouseZoom;
+    emit info("Zoom mode selected", 1000);
 }
 
 void ProjectionPlane::slotActivateRotate() {
     mouseMode=ProjectionPlane::MouseRotate;
+    emit info("Rotation mode selected", 1000);
 }
 
 void ProjectionPlane::slotUpdateFPS() {
@@ -202,6 +205,6 @@ void ProjectionPlane::slotLoadCrystalData() {
 
 void ProjectionPlane::slotRandomRotation() {
   projector->addRotation(Mat3D(Vec3D(1,2,3).normalized(), 0.01));
-  QTimer::singleShot(0, this, SLOT(slotRandomRotation()));
+  QTimer::singleShot(1, this, SLOT(slotRandomRotation()));
 
 }

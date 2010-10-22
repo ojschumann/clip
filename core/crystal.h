@@ -88,6 +88,7 @@ class Crystal: public QObject, public FitObject {
         void orientationChanged();
         void reflectionsUpdate();
         void rotationAxisChanged();
+        void info(QString, int);
     private:
         // Do the real work. Does not use possible uninitial values of objects variables
         void internalSetCell(double a, double b, double c, double alpha, double beta, double gamma);
