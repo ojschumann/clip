@@ -59,6 +59,7 @@ Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), M
   internalSetCell(5.0, 5.0, 5.0, 90.0, 90.0, 90.0);
   Qmin=0.0;
   Qmax=1.0;
+  predictionFactor = 1.0;
   connect(&connectedProjectors, SIGNAL(objectAdded()), this, SLOT(updateWavevectorsFromProjectors()));
   connect(&connectedProjectors, SIGNAL(objectRemoved()), this, SLOT(updateWavevectorsFromProjectors()));
   connect(spaceGroup, SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
@@ -76,6 +77,7 @@ Crystal::Crystal(const Crystal& c) {
   internalSetCell(c.a,c.b,c.c,c.alpha,c.beta,c.gamma);
   Qmin=c.Qmin;
   Qmax=c.Qmax;
+  predictionFactor = 1.0;
   connect(&connectedProjectors, SIGNAL(objectAdded()), this, SLOT(updateWavevectorsFromProjectors()));
   connect(&connectedProjectors, SIGNAL(objectRemoved()), this, SLOT(updateWavevectorsFromProjectors()));
 
@@ -195,74 +197,89 @@ void Crystal::setWavevectors(double _Qmin, double _Qmax) {
   }
 }
 
+Crystal::GenerateReflection::GenerateReflection(Crystal *_c, int _hMax):
+    c(_c),
+    hMax(_hMax),
+    aktualH(-_hMax) {
+  setAutoDelete(true);
+  reflectionNumber = 0;
+}
 
-QList<Reflection> Crystal::GenerateReflection::operator ()(int h) {
-  QList<Reflection> kl_layer;
+Crystal::GenerateReflection::~GenerateReflection() {
+  c->reflections.resize(reflectionNumber);
+}
+
+void Crystal::GenerateReflection::run() {
+  QThreadPool::globalInstance()->tryStart(this);
+
   Crystal::UpdateRef updateRef(c);
 
-  //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
-  // k^2 +2*k *h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
-  double ns = 1.0/c->bstar.norm_sq();
-  double p = c->astar*c->bstar*ns*h;
-  double q1 = c->astar.norm_sq()*ns*h*h;
-  double q2 = 4.0*ns*c->Qmax*c->Qmax;
-  double s = p*p-q1+q2;
-  int kMin = (s>0)?int(-p-sqrt(s)):0;
-  int kMax = (s>0)?int(-p+sqrt(s)):0;
+  int h;
 
-  for (int k=kMin; k<=kMax; k++) {
+  while ((h=aktualH.fetchAndAddRelaxed(1))<=hMax) {
 
-    int hk_ggt = ggt(h,k);
+    //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
+    // k^2 +2*k *h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
+    double ns = 1.0/c->bstar.norm_sq();
+    double p = c->astar*c->bstar*ns*h;
+    double q1 = c->astar.norm_sq()*ns*h*h;
+    double q2 = 4.0*ns*c->Qmax*c->Qmax;
+    double s = p*p-q1+q2;
+    int kMin = (s>0)?int(-p-sqrt(s)):0;
+    int kMax = (s>0)?int(-p+sqrt(s)):0;
 
-    Vec3D v = c->MReziprocal*Vec3D(h,k,0);
-    ns = 1.0/c->cstar.norm_sq();
-    p = v*c->cstar*ns;
-    q1 = v.norm_sq()*ns;
-    q2 = 4.0*ns*c->Qmax*c->Qmax;
-    s = p*p-q1+q2;
-    int lMin = (s>0)?int(-p-sqrt(s)):0;
-    int lMax = (s>0)?int(-p+sqrt(s)):0;
+    for (int k=kMin; k<=kMax; k++) {
 
-    for (int l=lMin; l<=lMax; l++) {
-      // store only lowest order reflections
-      if (ggt(hk_ggt, l)==1) {
-        v=c->MReziprocal*Vec3D(h,k,l);
-        double Q = 0.5*v.norm();
+      int hk_ggt = ggt(h,k);
 
-        if (Q<=c->Qmax) {
-          Reflection r;
-          r.h=h;
-          r.k=k;
-          r.l=l;
-          r.hklSqSum=h*h+k*k+l*l;
-          r.Q=Q;
-          r.d = 0.5/Q;
-          for (int i=1; i<int(2.0*c->Qmax*r.d+0.9); i++) {
-            if (!c->spaceGroup->isExtinct(TVec3D<int>(i*h, i*k, i*l)))
-              // TODO: check sys absents
-              r.orders.push_back(i);
+      Vec3D v = c->MReziprocal*Vec3D(h,k,0);
+      ns = 1.0/c->cstar.norm_sq();
+      p = v*c->cstar*ns;
+      q1 = v.norm_sq()*ns;
+      q2 = 4.0*ns*c->Qmax*c->Qmax;
+      s = p*p-q1+q2;
+      int lMin = (s>0)?int(-p-sqrt(s)):0;
+      int lMax = (s>0)?int(-p+sqrt(s)):0;
+
+      for (int l=lMin; l<=lMax; l++) {
+        // store only lowest order reflections
+        if (ggt(hk_ggt, l)==1) {
+          v=c->MReziprocal*Vec3D(h,k,l);
+          double Q = 0.5*v.norm();
+
+          if (Q<=c->Qmax) {
+            Reflection r;
+            r.h=h;
+            r.k=k;
+            r.l=l;
+            r.hklSqSum=h*h+k*k+l*l;
+            r.Q=Q;
+            r.d = 0.5/Q;
+            for (int i=1; i<int(2.0*c->Qmax*r.d+0.9); i++) {
+              if (!c->spaceGroup->isExtinct(TVec3D<int>(i*h, i*k, i*l)))
+                r.orders.push_back(i);
+            }
+            if (r.orders.size()>0) {
+              r.normalLocal=v*r.d;
+              updateRef(r);
+              mutex.lock();
+              if (reflectionNumber>=c->reflections.size())
+                c->reflections.resize(int(1.2*reflectionNumber));
+              c->reflections[reflectionNumber] = r;
+              reflectionNumber++;
+              mutex.unlock();
+            }
+
+
           }
-          if (r.orders.size()>0) {
-            r.normalLocal=v*r.d;
-            updateRef(r);
-            kl_layer << r;
-          }
-
-
         }
       }
     }
   }
-  return kl_layer;
 }
 
 
-// Helper Function for generateReflections
-void Reduce(QList<Reflection> &list, const QList<Reflection> res) {
-  list += res;
-}
 
-// TODO: Multithreading, eventually start on change and abort on next change
 void Crystal::generateReflections() {
   if (not updateEnabled)
     return;
@@ -270,12 +287,23 @@ void Crystal::generateReflections() {
   // n*lambda=2*d*sin(theta) => n=2*d/lambda = 2*Q*d
   int hMax = int(2.0*a*Qmax);
 
+  // predicted number of reflections
+  double prediction = 32.0/3.0*M_PI*Qmax*Qmax*Qmax*MReal.det();
+
+
+  reflections.resize(int(1.1*predictionFactor*prediction));
   QTime t1(QTime::currentTime());
-  reflections = QtConcurrent::blockingMappedReduced(IntIterator(-hMax), IntIterator(hMax+1), GenerateReflection(this), Reduce);
+  //reflections = QtConcurrent::blockingMappedReduced(IntIterator(-hMax), IntIterator(hMax+1), GenerateReflection(this), Reduce);
+  QThreadPool::globalInstance()->start(new GenerateReflection(this, hMax));
+  QThreadPool::globalInstance()->waitForDone();
 
   int N = reflections.size();
+
+  predictionFactor *= 0.8;
+  predictionFactor += 0.2*(N/prediction);
+
   int dt = t1.msecsTo(QTime::currentTime());
-  emit info(QString("%1 reflections generated in %2ms (%3 r/ms)").arg(N).arg(dt).arg(1.0*N/dt), 1000);
+  emit info(QString("%1 reflections generated in %2ms (%3 r/ms)  %4 %5 %6 %7").arg(N).arg(dt).arg(1.0*N/dt).arg(predictionFactor*prediction).arg(N/predictionFactor/prediction).arg(MReziprocal.det()).arg(predictionFactor), 0);
 
 }
 
@@ -317,12 +345,12 @@ void Crystal::updateRotation() {
 
 
 int Crystal::reflectionCount() {
-  QList<Reflection> r = getReflectionList();
+  QVector<Reflection> r = getReflectionList();
   return r.size();
 }
 
 Reflection Crystal::getReflection(int i) {
-  QList<Reflection> r = getReflectionList();
+  QVector<Reflection> r = getReflectionList();
   if (i<r.size()) {
     return r[i];
   } else {
@@ -331,7 +359,7 @@ Reflection Crystal::getReflection(int i) {
 }
 
 Reflection Crystal::getClosestReflection(const Vec3D& normal) {
-  QList<Reflection> r = getReflectionList();
+  QVector<Reflection> r = getReflectionList();
   int minIdx=-1;
   double minDist=0;
   for (int n=r.size(); n--; ) {
@@ -349,7 +377,7 @@ Reflection Crystal::getClosestReflection(const Vec3D& normal) {
 }
 
 
-QList<Reflection> Crystal::getReflectionList() {
+QVector<Reflection> Crystal::getReflectionList() {
   if (reflections.empty())
     generateReflections();
   return reflections;

@@ -143,7 +143,7 @@ void Projector::clearInfoItems() {
   }
 }
 
-Projector::ProjectionMapper::ProjectionMapper(Projector *p, QList<Reflection> r):
+Projector::ProjectionMapper::ProjectionMapper(Projector *p, QVector<Reflection> r):
     projector(p),
     reflections(r),
     nextReflection(0),
@@ -525,9 +525,9 @@ void Projector::SpotMarkerGraphicsItem::paint(QPainter *p, const QStyleOptionGra
 
   if (cacheNeedsUpdate) {
     workN = 0;
-    //workerStart.wakeAll();
+    workerStart.wakeAll();
     cache.fill(QColor(0,0,0,0));
-    //workerSync.acquire(workers.size());
+    workerSync.acquire(workers.size());
     QPainter p2(&cache);
     for (int i=0; i<workers.size(); i++) {
       p2.drawImage(QPoint(0,0), workers.at(i)->localCache);

@@ -128,12 +128,12 @@ class Projector: public QObject, public FitObject {
 
         class ProjectionMapper: public QRunnable {
         public:
-          ProjectionMapper(Projector* p, QList<Reflection> r);
+          ProjectionMapper(Projector* p, QVector<Reflection> r);
           ~ProjectionMapper();
           void run();
         private:
           Projector* projector;
-          QList<Reflection> reflections;
+          QVector<Reflection> reflections;
           QAtomicInt nextReflection;
           QAtomicInt nextUnusedPoint;
           QMutex mutex;
