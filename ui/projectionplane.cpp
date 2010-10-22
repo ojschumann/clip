@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QtOpenGL/QGLWidget>
 #include <QTimer>
+#include <QSignalMapper>
 
 ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     QWidget(parent),
@@ -22,15 +23,18 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
 
     QActionGroup *g = new QActionGroup(this);
     g->setExclusive(true);
+    QSignalMapper* m = new QSignalMapper(this);
 
-    g->addAction(ui->toolBar->addAction(QIcon(":/zoom.png"), "Zoom", this, SLOT(slotActivateZoom())));
-    g->addAction(ui->toolBar->addAction(QIcon(":/pan.png"), "Zoom", this, SLOT(slotActivatePan())));
-    g->addAction(ui->toolBar->addAction(QIcon(":/rotate_left.png"), "Zoom", this, SLOT(slotActivateRotate())));
+    m->setMapping(g->addAction(ui->toolBar->addAction(QIcon(":/zoom.png"), "Zoom")), MouseZoom);
+    m->setMapping(g->addAction(ui->toolBar->addAction(QIcon(":/pan.png"), "Pan")), MousePan);
+    m->setMapping(g->addAction(ui->toolBar->addAction(QIcon(":/rotate_left.png"), "Rotate")), MouseRotate);
 
     for (int i=0; i<g->actions().size(); i++) {
         g->actions().at(i)->setCheckable(true);
         g->actions().at(i)->setChecked(i==0);
     }
+    connect(m, SIGNAL(mapped(int)), this, SLOT(slotActivateMouseMode(int)));
+
     mouseMode = MouseZoom;
 
     zoomRubber=new QRubberBand(QRubberBand::Rectangle, ui->view);
@@ -179,19 +183,9 @@ void ProjectionPlane::dropEvent(QDropEvent *e) {
     //self.projector.connectToCrystal(c)
 }
 
-void ProjectionPlane::slotActivatePan() {
-    mouseMode=ProjectionPlane::MousePan;
-    emit info("Pan mode selected", 1000);
-}
-
-void ProjectionPlane::slotActivateZoom() {
-    mouseMode=ProjectionPlane::MouseZoom;
-    emit info("Zoom mode selected", 1000);
-}
-
-void ProjectionPlane::slotActivateRotate() {
-    mouseMode=ProjectionPlane::MouseRotate;
-    emit info("Rotation mode selected", 1000);
+void ProjectionPlane::slotActivateMouseMode(int mode) {
+  mouseMode = MouseMode(mode);
+  emit mouseModeChanged(mode);
 }
 
 void ProjectionPlane::slotUpdateFPS() {

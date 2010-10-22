@@ -2,29 +2,44 @@
 #define CLIP_H
 
 #include <QMainWindow>
+#include <QSignalMapper>
 
 namespace Ui {
-    class Clip;
+  class Clip;
 }
 
 class Clip : public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    explicit Clip(QWidget *parent = 0);
-    ~Clip();
+  explicit Clip(QWidget *parent = 0);
+  ~Clip();
 
-    void addMdiWindow(QWidget*);
+  void addMdiWindow(QWidget*);
+  void addActions();
 
 public slots:
-    void on_actionNew_Crystal_triggered(bool);
-    void on_actionNew_Projection_triggered(bool);
-    void on_actionAbout_triggered(bool);
-    void on_actionAbout_Qt_triggered(bool);
+  void on_actionNew_Crystal_triggered(bool);
+  void on_actionNew_Laue_Projection_triggered(bool);
+  void on_actionNew_Stereo_Projection_triggered(bool);
+  void on_actionAbout_triggered(bool);
+  void on_actionAbout_Qt_triggered(bool);
+  void slotUpdateWindowMenu();
+  void setActiveSubWindow(QWidget *window);
 
 private:
-    Ui::Clip *ui;
+  Ui::Clip *ui;
+
+  QAction *closeAct;
+  QAction *closeAllAct;
+  QAction *tileAct;
+  QAction *cascadeAct;
+  QAction *nextAct;
+  QAction *previousAct;
+  QAction *separatorAct;
+  QSignalMapper *windowMapper;
+
 
 };
 

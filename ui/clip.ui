@@ -41,7 +41,8 @@
      <string>File</string>
     </property>
     <addaction name="actionNew_Crystal"/>
-    <addaction name="actionNew_Projection"/>
+    <addaction name="actionNew_Laue_Projection"/>
+    <addaction name="actionNew_Stereo_Projection"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -74,9 +75,9 @@
     <string>Ctrl+C</string>
    </property>
   </action>
-  <action name="actionNew_Projection">
+  <action name="actionNew_Laue_Projection">
    <property name="text">
-    <string>New Projector</string>
+    <string>New Laue projection</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -87,6 +88,11 @@
   <action name="actionAbout_Qt">
    <property name="text">
     <string>About &amp;Qt</string>
+   </property>
+  </action>
+  <action name="actionNew_Stereo_Projection">
+   <property name="text">
+    <string>New Stereo projection</string>
    </property>
   </action>
  </widget>

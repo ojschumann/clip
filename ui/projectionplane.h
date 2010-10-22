@@ -28,17 +28,16 @@ public:
 protected:
   QRectF zoomSceneRect();
   enum MouseMode {
-    MouseZoom,
-    MousePan,
-    MouseRotate
+    MouseZoom=0,
+    MousePan=1,
+    MouseRotate=2
   };
   MouseMode mouseMode;
 signals:
   void info(QString, int);
+  void mouseModeChanged(int);
 protected slots:
-  void slotActivateZoom();
-  void slotActivatePan();
-  void slotActivateRotate();
+  void slotActivateMouseMode(int);
   void slotUpdateFPS();
   void resizeView();
   void slotLoadCrystalData();
