@@ -1,0 +1,626 @@
+<ui version="4.0" >
+ <class>Reorient</class>
+ <widget class="QWidget" name="Reorient" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>312</width>
+    <height>269</height>
+   </rect>
+  </property>
+  <property name="sizePolicy" >
+   <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize" >
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize" >
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="windowTitle" >
+   <string>Reorient</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_5" >
+   <property name="sizeConstraint" >
+    <enum>QLayout::SetMinAndMaxSize</enum>
+   </property>
+   <property name="margin" >
+    <number>3</number>
+   </property>
+   <property name="spacing" >
+    <number>3</number>
+   </property>
+   <item row="0" column="0" >
+    <layout class="QHBoxLayout" name="horizontalLayout" >
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>Orient </string>
+       </property>
+       <property name="buddy" >
+        <cstring>fromEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="fromEdit" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>70</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="frame" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="RezicheckBox" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text" >
+        <string>Reciprocal</string>
+       </property>
+       <property name="checked" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0" >
+    <layout class="QHBoxLayout" name="horizontalLayout_4" >
+     <item>
+      <widget class="QLabel" name="label_2" >
+       <property name="text" >
+        <string>Towards</string>
+       </property>
+       <property name="buddy" >
+        <cstring>toCombo</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="toCombo" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <item>
+        <property name="text" >
+         <string>Primary Beam (x)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Horizontal (y)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Vertical (z)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Reciprocal</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
+         <string>Real</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="toEdit" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>70</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_5" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0" >
+    <widget class="QLabel" name="label_3" >
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text" >
+      <string>Via Rotations arround</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" >
+    <layout class="QHBoxLayout" name="horizontalLayout_2" >
+     <item>
+      <widget class="QGroupBox" name="groupBox" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title" >
+        <string>First Rotation</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_2" >
+        <property name="margin" >
+         <number>3</number>
+        </property>
+        <property name="spacing" >
+         <number>3</number>
+        </property>
+        <item row="0" column="0" >
+         <widget class="QComboBox" name="axis1Combo" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="currentIndex" >
+           <number>1</number>
+          </property>
+          <item>
+           <property name="text" >
+            <string>Primary Beam (x)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Horizontal (y)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Vertical (z)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Arbitary Axis</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0" >
+         <layout class="QGridLayout" name="gridLayout" >
+          <item rowspan="2" row="0" column="0" >
+           <spacer name="horizontalSpacer" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType" >
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0" >
+             <size>
+              <width>25</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="1" >
+           <widget class="QLineEdit" name="axis1Edit" >
+            <property name="enabled" >
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize" >
+             <size>
+              <width>70</width>
+              <height>0</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" >
+           <widget class="QLineEdit" name="axis1Display" >
+            <property name="enabled" >
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly" >
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_2" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title" >
+        <string>Second Rotation</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4" >
+        <property name="margin" >
+         <number>3</number>
+        </property>
+        <property name="spacing" >
+         <number>3</number>
+        </property>
+        <item row="1" column="0" >
+         <layout class="QGridLayout" name="gridLayout_3" >
+          <item rowspan="2" row="0" column="0" >
+           <spacer name="horizontalSpacer_2" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType" >
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0" >
+             <size>
+              <width>25</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="1" >
+           <widget class="QLineEdit" name="axis2Display" >
+            <property name="enabled" >
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" >
+           <widget class="QLineEdit" name="axis2Edit" >
+            <property name="enabled" >
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize" >
+             <size>
+              <width>70</width>
+              <height>0</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="0" >
+         <widget class="QComboBox" name="axis2Combo" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="currentIndex" >
+           <number>2</number>
+          </property>
+          <item>
+           <property name="text" >
+            <string>Primary Beam (x)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Horizontal (y)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Vertical (z)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Arbitary Axis</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="4" column="0" >
+    <layout class="QHBoxLayout" name="horizontalLayout_3" >
+     <item>
+      <widget class="QPushButton" name="doFirstRatation" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text" >
+        <string>Do First Rotation</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="doRotation" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text" >
+        <string>Do Both Rotation</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>fromEdit</tabstop>
+  <tabstop>RezicheckBox</tabstop>
+  <tabstop>toCombo</tabstop>
+  <tabstop>toEdit</tabstop>
+  <tabstop>axis1Edit</tabstop>
+  <tabstop>doRotation</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>axis1Combo</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>Reorient</receiver>
+   <slot>axis1Changed()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>116</x>
+     <y>156</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>285</x>
+     <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>axis1Edit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>Reorient</receiver>
+   <slot>axis1EditChanged()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>144</x>
+     <y>189</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>285</x>
+     <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>axis2Combo</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>Reorient</receiver>
+   <slot>axis2Changed()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>299</x>
+     <y>156</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>285</x>
+     <y>174</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>axis2Edit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>Reorient</receiver>
+   <slot>axis2EditChanged()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>298</x>
+     <y>189</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>285</x>
+     <y>213</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doRotation</sender>
+   <signal>clicked()</signal>
+   <receiver>Reorient</receiver>
+   <slot>doRotationSlot()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>307</x>
+     <y>264</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>285</x>
+     <y>213</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toCombo</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>Reorient</receiver>
+   <slot>toChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>163</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>285</x>
+     <y>66</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fromEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>Reorient</receiver>
+   <slot>updateDisplay()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>108</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>285</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>doFirstRatation</sender>
+   <signal>clicked()</signal>
+   <receiver>Reorient</receiver>
+   <slot>doFirstRotationSlot()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>69</x>
+     <y>264</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>130</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>RezicheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Reorient</receiver>
+   <slot>updateDisplay()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>199</x>
+     <y>28</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>-3</x>
+     <y>90</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>fromChanged()</slot>
+  <slot>toChanged(int)</slot>
+  <slot>toEditChanged()</slot>
+  <slot>axis1Changed(int)</slot>
+  <slot>axis2Changed(int)</slot>
+  <slot>axis1EditChanged()</slot>
+  <slot>axis2EditChanged()</slot>
+  <slot>doRotationSlot()</slot>
+  <slot>updateDisplay()</slot>
+  <slot>doFirstRotationSlot()</slot>
+ </slots>
+</ui>

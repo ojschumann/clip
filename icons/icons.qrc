@@ -1,0 +1,21 @@
+<!DOCTYPE RCC><RCC version="1.0">
+ <qresource>
+     <file>Clip.png</file>
+     <file>Crystal.png</file>
+     <file>Index.png</file>
+     <file>fileopen.png</file>
+     <file>filesave.png</file>
+     <file>fileclose.png</file>
+     <file>fileprint.png</file>
+     <file>flip_horizontal.png</file>
+     <file>flip_vertical.png</file>
+     <file>rotate_right.png</file>
+     <file>rotate_left.png</file>
+     <file>flag.png</file>
+     <file>info.png</file>
+     <file>configure.png</file>
+     <file>zoom.png</file>
+     <file>pan.png</file>
+     <file>Projector.png</file>
+ </qresource>
+ </RCC>

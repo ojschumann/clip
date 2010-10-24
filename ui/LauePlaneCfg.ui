@@ -1,0 +1,495 @@
+<ui version="4.0" >
+ <class>LauePlaneCfg</class>
+ <widget class="QWidget" name="LauePlaneCfg" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>365</width>
+    <height>460</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Configure Laueplane</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3" >
+   <item row="0" column="0" >
+    <layout class="QVBoxLayout" name="verticalLayout_3" >
+     <item>
+      <widget class="QGroupBox" name="groupBox" >
+       <property name="title" >
+        <string>Detector Parameter</string>
+       </property>
+       <property name="flat" >
+        <bool>true</bool>
+       </property>
+       <layout class="QGridLayout" name="gridLayout" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_4" >
+          <property name="text" >
+           <string>Dist</string>
+          </property>
+          <property name="buddy" >
+           <cstring>detDist</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QDoubleSpinBox" name="detDist" >
+          <property name="minimum" >
+           <double>1.000000000000000</double>
+          </property>
+          <property name="maximum" >
+           <double>300.000000000000000</double>
+          </property>
+          <property name="value" >
+           <double>30.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_2" >
+          <property name="text" >
+           <string>Width</string>
+          </property>
+          <property name="buddy" >
+           <cstring>detWidth</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QDoubleSpinBox" name="detWidth" >
+          <property name="minimum" >
+           <double>10.000000000000000</double>
+          </property>
+          <property name="maximum" >
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="value" >
+           <double>110.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" >
+         <widget class="QLabel" name="label_3" >
+          <property name="text" >
+           <string>Height</string>
+          </property>
+          <property name="buddy" >
+           <cstring>detHeight</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" >
+         <widget class="QDoubleSpinBox" name="detHeight" >
+          <property name="minimum" >
+           <double>10.000000000000000</double>
+          </property>
+          <property name="maximum" >
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="value" >
+           <double>140.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" >
+         <widget class="QLabel" name="label_5" >
+          <property name="text" >
+           <string>minimal Q</string>
+          </property>
+          <property name="buddy" >
+           <cstring>detMinQ</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" >
+         <widget class="QDoubleSpinBox" name="detMinQ" >
+          <property name="suffix" >
+           <string/>
+          </property>
+          <property name="decimals" >
+           <number>3</number>
+          </property>
+          <property name="minimum" >
+           <double>0.000000000000000</double>
+          </property>
+          <property name="singleStep" >
+           <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" >
+         <widget class="QLabel" name="label_6" >
+          <property name="text" >
+           <string>maximal Q</string>
+          </property>
+          <property name="buddy" >
+           <cstring>detMaxQ</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1" >
+         <widget class="QDoubleSpinBox" name="detMaxQ" >
+          <property name="decimals" >
+           <number>3</number>
+          </property>
+          <property name="singleStep" >
+           <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" >
+         <widget class="QLabel" name="label_7" >
+          <property name="text" >
+           <string>Omega</string>
+          </property>
+          <property name="buddy" >
+           <cstring>detOmega</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1" >
+         <widget class="QDoubleSpinBox" name="detOmega" >
+          <property name="minimum" >
+           <double>-360.000000000000000</double>
+          </property>
+          <property name="maximum" >
+           <double>360.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" >
+         <widget class="QLabel" name="label_8" >
+          <property name="text" >
+           <string>Chi</string>
+          </property>
+          <property name="buddy" >
+           <cstring>detChi</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1" >
+         <widget class="QDoubleSpinBox" name="detChi" >
+          <property name="minimum" >
+           <double>-360.000000000000000</double>
+          </property>
+          <property name="maximum" >
+           <double>360.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0" >
+         <widget class="QLabel" name="label_9" >
+          <property name="text" >
+           <string>Phi</string>
+          </property>
+          <property name="buddy" >
+           <cstring>detPhi</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1" >
+         <widget class="QDoubleSpinBox" name="detPhi" >
+          <property name="minimum" >
+           <double>-360.000000000000000</double>
+          </property>
+          <property name="maximum" >
+           <double>360.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="1" >
+         <widget class="QDoubleSpinBox" name="detDx" >
+          <property name="minimum" >
+           <double>-360.000000000000000</double>
+          </property>
+          <property name="maximum" >
+           <double>360.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="1" >
+         <widget class="QDoubleSpinBox" name="detDy" >
+          <property name="minimum" >
+           <double>-360.000000000000000</double>
+          </property>
+          <property name="maximum" >
+           <double>360.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0" >
+         <widget class="QLabel" name="label_13" >
+          <property name="text" >
+           <string>Dx</string>
+          </property>
+          <property name="buddy" >
+           <cstring>detPhi</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0" >
+         <widget class="QLabel" name="label_14" >
+          <property name="text" >
+           <string>Dy</string>
+          </property>
+          <property name="buddy" >
+           <cstring>detPhi</cstring>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_2" >
+       <property name="orientation" >
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="1" >
+    <layout class="QVBoxLayout" name="verticalLayout_5" >
+     <item>
+      <widget class="QGroupBox" name="renderParams" >
+       <property name="title" >
+        <string>Render Parameters</string>
+       </property>
+       <property name="flat" >
+        <bool>true</bool>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout" >
+        <item>
+         <widget class="QCheckBox" name="renderAntialias" >
+          <property name="text" >
+           <string>Antialias Items</string>
+          </property>
+          <property name="checked" >
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="renderAntialiasText" >
+          <property name="text" >
+           <string>Antialias Text</string>
+          </property>
+          <property name="checked" >
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_2" >
+       <property name="title" >
+        <string>Show Items</string>
+       </property>
+       <property name="alignment" >
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
+       <property name="flat" >
+        <bool>true</bool>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2" >
+        <item>
+         <widget class="QCheckBox" name="checkBox_5" >
+          <property name="text" >
+           <string>Primary Beam Marker</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="detSpotsEnabled" >
+          <property name="text" >
+           <string>Projected Spots</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2" >
+          <item>
+           <widget class="QLabel" name="label" >
+            <property name="text" >
+             <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">label Reflections to h&lt;span style=" font-weight:600; vertical-align:super;">2&lt;/span>+k&lt;span style=" font-weight:600; vertical-align:super;">2&lt;/span>+l&lt;span style=" font-weight:600; vertical-align:super;">2&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+            </property>
+            <property name="wordWrap" >
+             <bool>true</bool>
+            </property>
+            <property name="buddy" >
+             <cstring>maxRefLabel</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="maxRefLabel" />
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_3" >
+       <property name="title" >
+        <string>Element Size</string>
+       </property>
+       <property name="flat" >
+        <bool>true</bool>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_2" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_11" >
+          <property name="text" >
+           <string>Text Size</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QDoubleSpinBox" name="detTextSize" >
+          <property name="suffix" >
+           <string> %</string>
+          </property>
+          <property name="decimals" >
+           <number>1</number>
+          </property>
+          <property name="maximum" >
+           <double>100.000000000000000</double>
+          </property>
+          <property name="singleStep" >
+           <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_12" >
+          <property name="text" >
+           <string>Spot Size</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QDoubleSpinBox" name="detSpotSize" >
+          <property name="suffix" >
+           <string> %</string>
+          </property>
+          <property name="decimals" >
+           <number>1</number>
+          </property>
+          <property name="maximum" >
+           <double>100.000000000000000</double>
+          </property>
+          <property name="singleStep" >
+           <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer" >
+       <property name="orientation" >
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>20</width>
+         <height>50</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout" >
+       <item>
+        <widget class="QLabel" name="label_10" >
+         <property name="text" >
+          <string>max Q:</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_4" >
+         <item>
+          <widget class="QDoubleSpinBox" name="QDispKEV" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="frame" >
+            <bool>true</bool>
+           </property>
+           <property name="buttonSymbols" >
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="prefix" >
+            <string/>
+           </property>
+           <property name="suffix" >
+            <string> keV</string>
+           </property>
+           <property name="maximum" >
+            <double>10000000.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="QDispA" >
+           <property name="enabled" >
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="frame" >
+            <bool>true</bool>
+           </property>
+           <property name="buttonSymbols" >
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="prefix" >
+            <string/>
+           </property>
+           <property name="suffix" >
+            <string> A</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
