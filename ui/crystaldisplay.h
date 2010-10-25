@@ -7,38 +7,39 @@
 #include <QWidget>
 
 namespace Ui {
-    class CrystalDisplay;
+  class CrystalDisplay;
 }
 
 class CrystalDisplay : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    explicit CrystalDisplay(QWidget *parent = 0);
-    ~CrystalDisplay();
-    void resizeEvent(QResizeEvent *);
-    void mousePressEvent(QMouseEvent *);
+  explicit CrystalDisplay(QWidget *parent = 0);
+  ~CrystalDisplay();
+  void resizeEvent(QResizeEvent *);
+  void mousePressEvent(QMouseEvent *);
 
-    QSize sizeHint() const;
+  QSize sizeHint() const;
 
-    Crystal* getCrystal() {return crystal; }
-
+  Crystal* getCrystal() {return crystal; }
+signals:
+  void info(QString, int);
 public slots:
-    void slotUpdateOM();
-    void slotCellChanged();
-    void slotRotationChanged();
-    void slotSpaceGroupChanged(QString);
-    void slotLoadCellFromCrystal();
-    void slotLoadCrystalData();
-    void slotSaveCrystalData();
-    void slotStartIndexing();
-    void slotSetSGConstrains();
+  void slotUpdateOM();
+  void slotCellChanged();
+  void slotRotationChanged();
+  void slotSpaceGroupChanged(QString);
+  void slotLoadCellFromCrystal();
+  void slotLoadCrystalData();
+  void slotSaveCrystalData();
+  void slotStartIndexing();
+  void slotSetSGConstrains();
 
 private:
-    Ui::CrystalDisplay *ui;
-    Crystal* crystal;
-    bool allowRotationUpdate;
+  Ui::CrystalDisplay *ui;
+  Crystal* crystal;
+  bool allowRotationUpdate;
 };
 
 #endif // CRYSTAL_H

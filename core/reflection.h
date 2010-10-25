@@ -1,7 +1,7 @@
 #ifndef __REFLECTION_H__
 #define __REFLECTION_H__
 
-#include <QtCore/QList>
+#include <QVector>
 #include <tools/mat3D.h>
 #include <tools/vec3D.h>
 
@@ -32,7 +32,7 @@ public:
   double Qscatter;
 
   // All contributing orders
-  QList<int> orders;
+  QVector<int> orders;
   // Real and imaginary part of Structure factor
   //vector<double> Fr;
   //vector<double> Fi;
@@ -46,5 +46,7 @@ public:
   // Direction of scattered ray
   Vec3D scatteredRay;
 };
+
+Q_DECLARE_TYPEINFO(Reflection, Q_MOVABLE_TYPE);
 
 #endif

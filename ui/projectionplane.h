@@ -26,6 +26,7 @@ public:
 
   virtual void dragEnterEvent(QDragEnterEvent *);
   virtual void dropEvent(QDropEvent *);
+  Projector* getProjector() { return projector; }
 signals:
   void showConfig(QWidget*);
 protected:
@@ -36,7 +37,9 @@ protected:
     MouseRotate
   };
   MouseMode mouseMode;
-
+signals:
+  void info(QString, int);
+  void mouseModeChanged(int);
 protected slots:
   void slotChangeMouseMode(int);
   void slotUpdateFPS();

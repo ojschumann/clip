@@ -18,6 +18,9 @@ CrystalDisplay::CrystalDisplay(QWidget *parent) :
   connect(crystal, SIGNAL(cellChanged()), this, SLOT(slotUpdateOM()));
   connect(crystal, SIGNAL(cellChanged()), this, SLOT(slotLoadCellFromCrystal()));
 
+  //connect(crystal, SIGNAL(info(QString)), this, SIGNAL(info(QString)));
+  connect(crystal, SIGNAL(info(QString, int)), this, SIGNAL(info(QString, int)));
+
   connect(crystal->getSpacegroup(), SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
 
   // Add Toolbar buttons

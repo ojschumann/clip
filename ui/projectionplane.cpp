@@ -49,12 +49,9 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   allPlanes << this;
 }
 
-ProjectionPlane::~ProjectionPlane()
-{
+ProjectionPlane::~ProjectionPlane() {
   allPlanes.removeAll(this);
   delete ui;
-  delete zoomRubber;
-  delete projector;
 }
 
 QRectF ProjectionPlane::zoomSceneRect() {
@@ -203,7 +200,7 @@ void ProjectionPlane::slotLoadCrystalData() {
 
 void ProjectionPlane::slotRandomRotation() {
   projector->addRotation(Mat3D(Vec3D(1,2,3).normalized(), 0.01));
-  QTimer::singleShot(0, this, SLOT(slotRandomRotation()));
+  QTimer::singleShot(1, this, SLOT(slotRandomRotation()));
 
 }
 

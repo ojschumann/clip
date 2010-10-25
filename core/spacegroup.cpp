@@ -6,64 +6,64 @@
 
 
 SpaceGroup::SpaceGroupCheck::SpaceGroupCheck(SpaceGroup::System s, QString pg, QString re) {
-    system = s;
-    pointgroup = pg;
-    regexp = QRegExp(re);
+  system = s;
+  pointgroup = pg;
+  regexp = QRegExp(re);
 }
 
 bool SpaceGroup::SpaceGroupCheck::match(QString s) {
-    return regexp.exactMatch(s);
+  return regexp.exactMatch(s);
 }
 
 QStringList SpaceGroup::SpaceGroupCheck::elements() {
-    QStringList r = regexp.capturedTexts();
-    if (not r.empty())
-        r.takeFirst();
-    return r;
+  QStringList r = regexp.capturedTexts();
+  if (not r.empty())
+    r.takeFirst();
+  return r;
 }
 
 
 
 SpaceGroup::SpaceGroup(QObject* parent=NULL): QObject(parent), groups() {
-    groups << SpaceGroupCheck(   triclinic,    "1", "([PABCIF])(1)");
-    groups << SpaceGroupCheck(   triclinic,   "-1", "([PABCIF])(-1)");
+  groups << SpaceGroupCheck(   triclinic,    "1", "([PABCIF])(1)");
+  groups << SpaceGroupCheck(   triclinic,   "-1", "([PABCIF])(-1)");
 
-    groups << SpaceGroupCheck(  monoclinic,    "2", "([PABCIF])(21?)");
-    groups << SpaceGroupCheck(  monoclinic,    "m", "([PABCIF])([mabc])");
-    groups << SpaceGroupCheck(  monoclinic,  "2/m", "([PABCIF])(21?/[mnabcd])");
+  groups << SpaceGroupCheck(  monoclinic,    "2", "([PABCIF])(21?)");
+  groups << SpaceGroupCheck(  monoclinic,    "m", "([PABCIF])([mabc])");
+  groups << SpaceGroupCheck(  monoclinic,  "2/m", "([PABCIF])(21?/[mnabcd])");
 
-    groups << SpaceGroupCheck(orthorhombic,  "222", "([PABCIF])(21?)(21?)(21?)");
-    groups << SpaceGroupCheck(orthorhombic,  "mm2", "([PABCIF])(?=[mnbcde][mnacde]21?|[mnbcde]21?[mnabde]|21?[mnacde][mnabde])([mnabcde]|21?)([mnabcde]|21?)([mnabcde]|21?)");
-    groups << SpaceGroupCheck(orthorhombic,  "mmm", "([PABCIF])([mnbcde])([mnacde])([mnabde])");
+  groups << SpaceGroupCheck(orthorhombic,  "222", "([PABCIF])(21?)(21?)(21?)");
+  groups << SpaceGroupCheck(orthorhombic,  "mm2", "([PABCIF])(?=[mnbcde][mnacde]21?|[mnbcde]21?[mnabde]|21?[mnacde][mnabde])([mnabcde]|21?)([mnabcde]|21?)([mnabcde]|21?)");
+  groups << SpaceGroupCheck(orthorhombic,  "mmm", "([PABCIF])([mnbcde])([mnacde])([mnabde])");
 
-    groups << SpaceGroupCheck(  tetragonal,    "4", "([PCIF])(4[123]?)");
-    groups << SpaceGroupCheck(  tetragonal,   "-4", "([PCIF])(-4[123]?)");
-    groups << SpaceGroupCheck(  tetragonal,  "4/m", "([PCIF])(4[123]?/[mnab])");
-    groups << SpaceGroupCheck(  tetragonal,  "422", "([PCIF])(4[123]?)(21?)(21?)");
-    groups << SpaceGroupCheck(  tetragonal,  "4mm", "([PCIF])(4[123]?)([mnabcd])([mnabcd])");
-    groups << SpaceGroupCheck(  tetragonal, "-42m", "([PCIF])(-4[123]?)(?=21?[mnabcd]|[mnabcd]21?)(21?|[mnabcd])(21?|[mnabcd])");
-    groups << SpaceGroupCheck(  tetragonal,"4/mmm", "([PCIF])(4[123]?/[mnab])([mnabcd])([mnabcd])");
+  groups << SpaceGroupCheck(  tetragonal,    "4", "([PCIF])(4[123]?)");
+  groups << SpaceGroupCheck(  tetragonal,   "-4", "([PCIF])(-4[123]?)");
+  groups << SpaceGroupCheck(  tetragonal,  "4/m", "([PCIF])(4[123]?/[mnab])");
+  groups << SpaceGroupCheck(  tetragonal,  "422", "([PCIF])(4[123]?)(21?)(21?)");
+  groups << SpaceGroupCheck(  tetragonal,  "4mm", "([PCIF])(4[123]?)([mnabcd])([mnabcd])");
+  groups << SpaceGroupCheck(  tetragonal, "-42m", "([PCIF])(-4[123]?)(?=21?[mnabcd]|[mnabcd]21?)(21?|[mnabcd])(21?|[mnabcd])");
+  groups << SpaceGroupCheck(  tetragonal,"4/mmm", "([PCIF])(4[123]?/[mnab])([mnabcd])([mnabcd])");
 
-    groups << SpaceGroupCheck(    trigonal,    "3", "([PRH])(3[12]?)");
-    groups << SpaceGroupCheck(    trigonal,   "-3", "([PRH])(-3)");
-    groups << SpaceGroupCheck(    trigonal,   "32", "([PRH])(-?3[12]?)(?=21|12)(.)(.)");
-    groups << SpaceGroupCheck(    trigonal,   "3m", "([PRH])(-?3)(?=[mnabcd]1?|1[mnabcd])(.)(.?)");
+  groups << SpaceGroupCheck(    trigonal,    "3", "([PRH])(3[12]?)");
+  groups << SpaceGroupCheck(    trigonal,   "-3", "([PRH])(-3)");
+  groups << SpaceGroupCheck(    trigonal,   "32", "([PRH])(-?3[12]?)(?=21|12)(.)(.)");
+  groups << SpaceGroupCheck(    trigonal,   "3m", "([PRH])(-?3)(?=[mnabcd]1?|1[mnabcd])(.)(.?)");
 
-    groups << SpaceGroupCheck(   hexagonal,    "6", "([PH])(6[12345]?)");
-    groups << SpaceGroupCheck(   hexagonal,   "-6", "([PH])(-6)");
-    groups << SpaceGroupCheck(   hexagonal,  "6/m", "([PH])(63?/m)");
-    groups << SpaceGroupCheck(   hexagonal,  "622", "([PH])(6[12345]?)(2)(2)");
-    groups << SpaceGroupCheck(   hexagonal,  "6mm", "([PH])(63?)([mc])([mc])");
-    groups << SpaceGroupCheck(   hexagonal, "-6m2", "([PH])(-6)(?=2[mc]|[mc]2)(.)(.)");
-    groups << SpaceGroupCheck(   hexagonal,"6/mmm", "([PH])(63?/[mc])([mc])([mc])");
+  groups << SpaceGroupCheck(   hexagonal,    "6", "([PH])(6[12345]?)");
+  groups << SpaceGroupCheck(   hexagonal,   "-6", "([PH])(-6)");
+  groups << SpaceGroupCheck(   hexagonal,  "6/m", "([PH])(63?/m)");
+  groups << SpaceGroupCheck(   hexagonal,  "622", "([PH])(6[12345]?)(2)(2)");
+  groups << SpaceGroupCheck(   hexagonal,  "6mm", "([PH])(63?)([mc])([mc])");
+  groups << SpaceGroupCheck(   hexagonal, "-6m2", "([PH])(-6)(?=2[mc]|[mc]2)(.)(.)");
+  groups << SpaceGroupCheck(   hexagonal,"6/mmm", "([PH])(63?/[mc])([mc])([mc])");
 
-    groups << SpaceGroupCheck(       cubic,   "23", "([PIF])(21?)(-?3)");
-    groups << SpaceGroupCheck(       cubic,   "m3", "([PIF])([mnabcd])(-?3)");
-    groups << SpaceGroupCheck(       cubic,  "432", "([PIF])(4[123]?)(-?3)(2)");
-    groups << SpaceGroupCheck(       cubic,  "43m", "([PIF])(-?4[123]?)(-?3)([mnabcd])");
-    groups << SpaceGroupCheck(       cubic,  "m3m", "([PIF])([mnabcd])(-?3)([mnabcd])");
+  groups << SpaceGroupCheck(       cubic,   "23", "([PIF])(21?)(-?3)");
+  groups << SpaceGroupCheck(       cubic,   "m3", "([PIF])([mnabcd])(-?3)");
+  groups << SpaceGroupCheck(       cubic,  "432", "([PIF])(4[123]?)(-?3)(2)");
+  groups << SpaceGroupCheck(       cubic,  "43m", "([PIF])(-?4[123]?)(-?3)([mnabcd])");
+  groups << SpaceGroupCheck(       cubic,  "m3m", "([PIF])([mnabcd])(-?3)([mnabcd])");
 
-    setGroupSymbol("P1");
+  setGroupSymbol("P1");
 }
 
 bool SpaceGroup::setGroupSymbol(QString s) {
@@ -75,9 +75,9 @@ bool SpaceGroup::setGroupSymbol(QString s) {
       bool startup = false;
       QString CenterChg;
       if (symbolElements.empty()) {
-          startup = true;
+        startup = true;
       } else {
-          CenterChg = symbolElements.first();
+        CenterChg = symbolElements.first();
       }
 
       symbol = s;
@@ -87,17 +87,17 @@ bool SpaceGroup::setGroupSymbol(QString s) {
 
       bool TriclinSettingChanged = false;
       if ((crystalsystem==trigonal) && (!SystemChg)) {
-          if ((CenterChg=="HR") || (CenterChg=="PR")) {
-              emit triclinHtoR();
-              TriclinSettingChanged=true;
-          }
-          if ((CenterChg=="RH") || (CenterChg=="RP")) {
-              emit triclinRtoH();
-              TriclinSettingChanged=true;
-          }
+        if ((CenterChg=="HR") || (CenterChg=="PR")) {
+          emit triclinHtoR();
+          TriclinSettingChanged=true;
+        }
+        if ((CenterChg=="RH") || (CenterChg=="RP")) {
+          emit triclinRtoH();
+          TriclinSettingChanged=true;
+        }
       }
       if (startup || SystemChg || TriclinSettingChanged) {
-          emit constrainsChanged();
+        emit constrainsChanged();
       }
       generatePointgroup();
       emit groupChanged();
@@ -108,35 +108,35 @@ bool SpaceGroup::setGroupSymbol(QString s) {
 }
 
 QString SpaceGroup::groupSymbol() const {
-    return symbol;
+  return symbol;
 }
 
 SpaceGroup::System SpaceGroup::crystalSystem() const {
-    return crystalsystem;
+  return crystalsystem;
 }
 
 QList<int> SpaceGroup::getConstrains() const {
-    QList<int> r;
-    if (crystalsystem==triclinic) {
-        r << 0 << 0 << 0 << 0 << 0 << 0;
-    } else if (crystalsystem==monoclinic) {
-        r << 0 << 0 << 0 << -5 << 0 << -5;
-    } else if (crystalsystem==orthorhombic) {
-        r << 0 << 0 << 0 << 90 << 90 << 90;
-    } else if (crystalsystem==tetragonal) {
-        r << 0 << -1 << 0 << 90 << 90 << 90;
-    } else if (crystalsystem==trigonal) {
-        if (this->symbolElements[0]=="R") {
-            r << 0 << -1 << -1 << 0 << -4 << -4;
-        } else {
-            r << 0 << -1 << 0 << 90 << 90 << 120;
-        }
-    } else if (crystalsystem==hexagonal) {
-        r << 0 << -1 << 0 << 90 << 90 << 120;
-    } else if (crystalsystem==cubic) {
-        r << 0 << -1 << -1 << 90 << 90 << 90;
+  QList<int> r;
+  if (crystalsystem==triclinic) {
+    r << 0 << 0 << 0 << 0 << 0 << 0;
+  } else if (crystalsystem==monoclinic) {
+    r << 0 << 0 << 0 << -5 << 0 << -5;
+  } else if (crystalsystem==orthorhombic) {
+    r << 0 << 0 << 0 << 90 << 90 << 90;
+  } else if (crystalsystem==tetragonal) {
+    r << 0 << -1 << 0 << 90 << 90 << 90;
+  } else if (crystalsystem==trigonal) {
+    if (this->symbolElements[0]=="R") {
+      r << 0 << -1 << -1 << 0 << -4 << -4;
+    } else {
+      r << 0 << -1 << 0 << 90 << 90 << 120;
     }
-    return r;
+  } else if (crystalsystem==hexagonal) {
+    r << 0 << -1 << 0 << 90 << 90 << 120;
+  } else if (crystalsystem==cubic) {
+    r << 0 << -1 << -1 << 90 << 90 << 90;
+  }
+  return r;
 }
 
 
@@ -196,11 +196,11 @@ void SpaceGroup::generatePointgroup() {
     pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0);
   } else if (symbolElements.first()=="R") {
   } else if (symbolElements.first()=="H") {
-      pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, 2);
-      //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 4, 4);
-      //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, 2);
-      //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -4, 2);
-      pointgroup << PointgroupElement(0,-1, 0, 1, -1, 0, 0, 0, 1, 0, 0, 0);
+    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, 2);
+    //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 4, 4);
+    //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, 2);
+    //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -4, 2);
+    pointgroup << PointgroupElement(0,-1, 0, 1, -1, 0, 0, 0, 1, 0, 0, 0);
   }
 
   int lastGSize;
@@ -233,7 +233,7 @@ void SpaceGroup::generatePointgroup() {
   }
 }
 
-    /*
+/*
     QStringList g;
 
     g << "P1" << "P-1" << "P2" << "P21" << "C2" << "Pm" << "Pc";
@@ -293,7 +293,7 @@ void SpaceGroup::generatePointgroup() {
 }
     */
 
-    /*
+/*
 
 
 class SpaceGroup:

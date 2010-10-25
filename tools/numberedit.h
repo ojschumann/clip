@@ -5,10 +5,10 @@
 
 class NumberEdit : public QDoubleSpinBox
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    explicit NumberEdit(QWidget *parent = 0);
-    virtual QValidator::State validate( QString & text, int & pos ) const;
+  explicit NumberEdit(QWidget *parent = 0);
+  virtual QValidator::State validate( QString & text, int & pos ) const;
 signals:
 
 public slots:

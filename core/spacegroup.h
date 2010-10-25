@@ -14,79 +14,79 @@ class SpaceGroupCheck;
 
 class SpaceGroup: public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    enum Systems {
-        triclinic,
-        monoclinic,
-        orthorhombic,
-        trigonal,
-        hexagonal,
-        tetragonal,
-        cubic
-    };
-    Q_DECLARE_FLAGS(System, Systems)
+  enum Systems {
+    triclinic,
+    monoclinic,
+    orthorhombic,
+    trigonal,
+    hexagonal,
+    tetragonal,
+    cubic
+  };
+  Q_DECLARE_FLAGS(System, Systems)
 
 
-    SpaceGroup(QObject*);
-    bool setGroupSymbol(QString);
+  SpaceGroup(QObject*);
+  bool setGroupSymbol(QString);
 
-    QString groupSymbol() const;
-    System crystalSystem() const;
-    QList<int> getConstrains() const;
+  QString groupSymbol() const;
+  System crystalSystem() const;
+  QList<int> getConstrains() const;
 
-    bool isExtinct(const TVec3D<int>&);
+  bool isExtinct(const TVec3D<int>&);
 
 
 signals:
-    void groupChanged();
-    void constrainsChanged();
-    void triclinHtoR();
-    void triclinRtoH();
+  void groupChanged();
+  void constrainsChanged();
+  void triclinHtoR();
+  void triclinRtoH();
 
 
 private:
 
-    class SpaceGroupCheck {
-    public:
-        SpaceGroupCheck(SpaceGroup::System, QString, QString);
-        bool match(QString);
-        QStringList elements();
+  class SpaceGroupCheck {
+  public:
+    SpaceGroupCheck(SpaceGroup::System, QString, QString);
+    bool match(QString);
+    QStringList elements();
 
-        SpaceGroup::System system;
-        QString pointgroup;
-        QRegExp regexp;
-    };
+    SpaceGroup::System system;
+    QString pointgroup;
+    QRegExp regexp;
+  };
 
 
-    QString symbol;
-    QStringList symbolElements;
-    System crystalsystem;
+  QString symbol;
+  QStringList symbolElements;
+  System crystalsystem;
 
-    QList<SpaceGroupCheck> groups;
+  QList<SpaceGroupCheck> groups;
 
-    class PointgroupElement {
-    public:
-      PointgroupElement(int m11, int m12, int m13, int m21, int m22, int m23, int m31, int m32, int m33, int t1, int t2, int t3);
-      PointgroupElement(const TMat3D<int>&, const TVec3D<int>&);
-      void normalize();
-      PointgroupElement operator*(const PointgroupElement&);
-      bool operator==(const PointgroupElement&);
-      TMat3D<int> M;
-      TVec3D<int> t;
-    };
+  class PointgroupElement {
+  public:
+    PointgroupElement(int m11, int m12, int m13, int m21, int m22, int m23, int m31, int m32, int m33, int t1, int t2, int t3);
+    PointgroupElement(const TMat3D<int>&, const TVec3D<int>&);
+    void normalize();
+    PointgroupElement operator*(const PointgroupElement&);
+    bool operator==(const PointgroupElement&);
+    TMat3D<int> M;
+    TVec3D<int> t;
+  };
 
-    struct ExtinctionElement {
-      TMat3D<int> M;
-      TVec3D<int> t;
-    };
+  struct ExtinctionElement {
+    TMat3D<int> M;
+    TVec3D<int> t;
+  };
 
-    QList<PointgroupElement> pointgroup;
-    QList<ExtinctionElement> extinctionChecks;
+  QList<PointgroupElement> pointgroup;
+  QList<ExtinctionElement> extinctionChecks;
 
-    void generatePointgroup();
+  void generatePointgroup();
 
-    /*struct PGElem{
+  /*struct PGElem{
         Mat3D R;
         Vec3D t;
     };

@@ -2,31 +2,50 @@
 #define CLIP_H
 
 #include <QMainWindow>
+#include <QSignalMapper>
 #include <core/projector.h>
 
 namespace Ui {
   class Clip;
 }
 
-class Clip : public QMainWindow
-{
+class Clip : public QMainWindow {
   Q_OBJECT
 
 public:
   explicit Clip(QWidget *parent = 0);
   ~Clip();
 
+
 public slots:
+  // Menu Slots
   void on_newCrystal_triggered();
   void on_newLaue_triggered();
   void on_newStereo_triggered();
-  void addMdiWindow(QWidget* w);
+  void on_actionAbout_triggered(bool);
+  void on_actionAbout_Qt_triggered(bool);
+
+  // Slot for update of the Window-Submenu
+  void slotUpdateWindowMenu();
+  // Used by the Windows-Submenu
+  void setActiveSubWindow(QWidget *window);
+  void addMdiWindow(QWidget*);
 
 protected:
   Projector* connectToLastCrystal(Projector*);
   void addProjector(Projector*);
+  void addActions();
 private:
   Ui::Clip *ui;
+
+  QAction *closeAct;
+  QAction *closeAllAct;
+  QAction *tileAct;
+  QAction *cascadeAct;
+  QAction *nextAct;
+  QAction *previousAct;
+  QAction *separatorAct;
+  QSignalMapper *windowMapper;
 };
 
 #endif // CLIP_H

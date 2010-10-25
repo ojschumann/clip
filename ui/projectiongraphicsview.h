@@ -5,24 +5,24 @@
 
 class ProjectionGraphicsView : public QGraphicsView
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    explicit ProjectionGraphicsView(QWidget *parent = 0);
+  explicit ProjectionGraphicsView(QWidget *parent = 0);
 
-    void dragEnterEvent(QDragEnterEvent *);
-    void mousePressEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *);
-    void mouseReleaseEvent(QMouseEvent *);
-    int getFrames();
+  void dragEnterEvent(QDragEnterEvent *);
+  void mousePressEvent(QMouseEvent *e);
+  void mouseMoveEvent(QMouseEvent *);
+  void mouseReleaseEvent(QMouseEvent *);
+  int getFrames();
 signals:
 
 public slots:
 
 protected:
-    void paintEvent(QPaintEvent*);
-    bool viewIgnoresThisMouseEvent;
-    // TODO: Only for debugging!
-    int frames;
+  void paintEvent(QPaintEvent*);
+  bool viewIgnoresThisMouseEvent;
+  // TODO: Only for debugging!
+  int frames;
 
 };
 

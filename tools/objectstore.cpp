@@ -1,4 +1,4 @@
-#include <core/objectstore.h>
+#include <tools/objectstore.h>
 
 ObjectStore::ObjectStore(QObject* parent): QObject(parent), set() {
 }

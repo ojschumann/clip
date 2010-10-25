@@ -4,54 +4,53 @@
 #include <QGraphicsItem>
 
 ProjectionGraphicsView::ProjectionGraphicsView(QWidget *parent) :
-    QGraphicsView(parent)
-{
-    viewIgnoresThisMouseEvent=true;
-    frames=0;
+    QGraphicsView(parent) {
+  viewIgnoresThisMouseEvent=true;
+  frames=0;
 }
 
 void ProjectionGraphicsView::dragEnterEvent(QDragEnterEvent *e) {
-    if (!not e->mimeData()->hasFormat("application/CrystalPointer"))
-        QGraphicsView::dragEnterEvent(e);
-    e->ignore();
+  if (!not e->mimeData()->hasFormat("application/CrystalPointer"))
+    QGraphicsView::dragEnterEvent(e);
+  e->ignore();
 }
 
 void ProjectionGraphicsView::mousePressEvent(QMouseEvent *e) {
-    if (e->buttons()==Qt::LeftButton) {
-        QGraphicsView::mousePressEvent(e);
-        viewIgnoresThisMouseEvent = !e->isAccepted();
-    } else {
-        viewIgnoresThisMouseEvent=true;
-        e->ignore();
-    }
+  if (e->buttons()==Qt::LeftButton) {
+    QGraphicsView::mousePressEvent(e);
+    viewIgnoresThisMouseEvent = !e->isAccepted();
+  } else {
+    viewIgnoresThisMouseEvent=true;
+    e->ignore();
+  }
 }
 
 void ProjectionGraphicsView::mouseMoveEvent(QMouseEvent *e) {
-    if (viewIgnoresThisMouseEvent) {
-        e->ignore();
-    } else {
-        QGraphicsView::mouseMoveEvent(e);
-    }
+  if (viewIgnoresThisMouseEvent) {
+    e->ignore();
+  } else {
+    QGraphicsView::mouseMoveEvent(e);
+  }
 }
 
 void ProjectionGraphicsView::mouseReleaseEvent(QMouseEvent *e) {
-    if (viewIgnoresThisMouseEvent) {
-        e->ignore();
-    } else {
-        QGraphicsView::mouseMoveEvent(e);
-    }
+  if (viewIgnoresThisMouseEvent) {
+    e->ignore();
+  } else {
+    QGraphicsView::mouseMoveEvent(e);
+  }
 }
 
 int ProjectionGraphicsView::getFrames() {
-    int f = frames;
-    frames = 0;
-    return f;
+  int f = frames;
+  frames = 0;
+  return f;
 }
 
 void ProjectionGraphicsView::paintEvent(QPaintEvent *e) {
-    QGraphicsView::paintEvent(e);
-    frames++;
-    /*QTime t=QTime::currentTime();
+  QGraphicsView::paintEvent(e);
+  frames++;
+  /*QTime t=QTime::currentTime();
     QGraphicsView::paintEvent(e);
     int delta = t.msecsTo(QTime::currentTime());
     if (delta>0) {

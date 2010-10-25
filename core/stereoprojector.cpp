@@ -6,10 +6,12 @@
 
 using namespace std;
 
-StereoProjector::StereoProjector(QObject* parent): Projector(parent), localCoordinates() {
+StereoProjector::StereoProjector(QObject* parent):
+    Projector(parent),
+    localCoordinates() {
   setWavevectors(0.0, 1.5*M_1_PI);
   scene.setSceneRect(QRectF(-1.0, -1.0, 2.0, 2.0));
-};
+}
 
 
 QPointF StereoProjector::scattered2det(const Vec3D &v, bool* b) const {

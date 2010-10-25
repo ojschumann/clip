@@ -10,12 +10,13 @@
 #include <algorithm>
 #include <type_traits>
 
+
 using namespace std;
 
 template <typename T> TMat3D<T>::TMat3D() {
-    zero();
-    for (int i=0; i<3; i++)
-        (*this)(i,i)=InitatorValues<T>::One();
+  zero();
+  for (int i=0; i<3; i++)
+    (*this)(i,i)=InitatorValues<T>::One();
 }
 
 template <typename T> TMat3D<T>::TMat3D(const TVec3D<T>& v1,const TVec3D<T>& v2,const TVec3D<T>& v3) {
@@ -59,24 +60,24 @@ template <typename T> TMat3D<T>::TMat3D(vector<T> m) {
 }
 
 template <typename T> TMat3D<T>::TMat3D(T m11, T m12, T m13, T m21, T m22, T m23, T m31, T m32, T m33) {
-    (*this)(0,0) = m11;
-    (*this)(0,1) = m12;
-    (*this)(0,2) = m13;
-    (*this)(1,0) = m21;
-    (*this)(1,1) = m22;
-    (*this)(1,2) = m23;
-    (*this)(2,0) = m31;
-    (*this)(2,1) = m32;
-    (*this)(2,2) = m33;
+  (*this)(0,0) = m11;
+  (*this)(0,1) = m12;
+  (*this)(0,2) = m13;
+  (*this)(1,0) = m21;
+  (*this)(1,1) = m22;
+  (*this)(1,2) = m23;
+  (*this)(2,0) = m31;
+  (*this)(2,1) = m32;
+  (*this)(2,2) = m33;
 }
 
 
 template <typename T> void TMat3D<T>::zero() {
-    for (int i=0; i<3; i++) {
-        for (int j=0; j<3; j++) {
-            (*this)(i,j)=InitatorValues<T>::Zero();
-        }
+  for (int i=0; i<3; i++) {
+    for (int j=0; j<3; j++) {
+      (*this)(i,j)=InitatorValues<T>::Zero();
     }
+  }
 }
 
 
@@ -105,14 +106,14 @@ template <typename T> TMat3D<T> TMat3D<T>::operator*(T a) const {
 }
 
 template <typename T> template <typename U> TVec3D<T> TMat3D<T>::operator*(const TVec3D<U>& v) const {
-    TVec3D<T> r(TVec3D<T>::Key);
-    for (int i=0; i<3; i++) {
-      T tmp = (*this)(i,0)*v(0);
-      for (int j=1; j<3; j++)
-        tmp += (*this)(i,j)*v(j);
-      r(i) = tmp;
-    }
-    return r;
+  TVec3D<T> r(TVec3D<T>::Key);
+  for (int i=0; i<3; i++) {
+    T tmp = (*this)(i,0)*v(0);
+    for (int j=1; j<3; j++)
+      tmp += (*this)(i,j)*v(j);
+    r(i) = tmp;
+  }
+  return r;
 }
 
 template <typename T> TMat3D<T> TMat3D<T>::operator*(const TMat3D<T>& m) const {
@@ -209,16 +210,16 @@ template <typename T> TMat3D<T> TMat3D<T>::orthogonalize() const {
 template <typename T> void TMat3D<T>::transpose() {
   for (int i=0; i<2; i++)
     for (int j=i+1; j<3; j++)
-        std::swap((*this)(i,j), (*this)(j,i));
+      std::swap((*this)(i,j), (*this)(j,i));
 }
-    
+
 
 template <typename T> TMat3D<T> TMat3D<T>::transposed() const {
   TMat3D<T> r(TMat3D<T>::Key);
   for (int i=0; i<3; i++) {
-      for (int j=0; j<3; j++) {
-          r(i,j)=(*this)(j,i);
-      }
+    for (int j=0; j<3; j++) {
+      r(i,j)=(*this)(j,i);
+    }
   }
   return r;
 }
@@ -321,74 +322,74 @@ template <typename T> void TMat3D<T>::upperBidiagonal(TMat3D<T>& L, TMat3D<T>& R
 
 
 template <typename T> void TMat3D<T>::givens(double a, double b, double &c, double &s) {
-    if (b==0.0) {
-        c=1.0;
-        s=0.0;
-    } else if (fabs(a)>fabs(b)) {
-        double t=-b/a;
-        c=1.0/sqrt(1.0+t*t);
-        s=c*t;
-    } else {
-        double t=-a/b;
-        s=1.0/sqrt(1.0+t*t);
-        c=t*s;
-    }
+  if (b==0.0) {
+    c=1.0;
+    s=0.0;
+  } else if (fabs(a)>fabs(b)) {
+    double t=-b/a;
+    c=1.0/sqrt(1.0+t*t);
+    s=c*t;
+  } else {
+    double t=-a/b;
+    s=1.0/sqrt(1.0+t*t);
+    c=t*s;
+  }
 }
 
 
 template <typename T> void TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
 
-    upperBidiagonal(L,R);
-    L.transpose();
-    
-    int maxLoops=512;
-    double sumDiag=0.0;
-    double sumOffdiag=0.0;
-        
-    do {
+  upperBidiagonal(L,R);
+  L.transpose();
 
-        // Givens rotation
-        // TODO: Could be done without the whole matrix multiplications!!! See GSL
-        for (int n=0; n<2; n++) {
-            double c,s;
-            givens((*this)(0,n),(*this)(0,n+1), c, s);
-            TMat3D<T> G1;
-            G1(n,n)=c;
-            G1(n+1,n+1)=c;
-            G1(n+1,n)=-s;
-            G1(n,n+1)=s;
-            
-            (*this)*=G1;
-            R*=G1;
-            
-            givens((*this)(n,n), (*this)(n+1,n), c, s);
-            TMat3D<T> G2;
-            G2(n,n)=c;
-            G2(n+1,n+1)=c;
-            G2(n,n+1)=-s;
-            G2(n+1,n)=s;
-            
-            this->lmult(G2);
-            L.lmult(G2);
-        }    
-        
-        // Make singular values positive!
-        TMat3D<T> Tmp;
-        for (int n=0; n<3; n++)
-            Tmp(n,n)=((*this)(n,n)<0.0)?-1.0:1.0;
-        this->lmult(Tmp);
-        L.lmult(Tmp);
-        
-        sumDiag=0.0;
-        sumOffdiag=0.0;
-        for (int i=0; i<3; i++) sumDiag+=fabs((*this)(i,i));
-        for (int i=0; i<2; i++) sumOffdiag+=fabs((*this)(i,i+1));
-            
-    } while (maxLoops-- and sumDiag<1e20*sumOffdiag);
-    L.transpose();
-    R.transpose();
+  int maxLoops=512;
+  double sumDiag=0.0;
+  double sumOffdiag=0.0;
+
+  do {
+
+    // Givens rotation
+    // TODO: Could be done without the whole matrix multiplications!!! See GSL
+    for (int n=0; n<2; n++) {
+      double c,s;
+      givens((*this)(0,n),(*this)(0,n+1), c, s);
+      TMat3D<T> G1;
+      G1(n,n)=c;
+      G1(n+1,n+1)=c;
+      G1(n+1,n)=-s;
+      G1(n,n+1)=s;
+
+      (*this)*=G1;
+      R*=G1;
+
+      givens((*this)(n,n), (*this)(n+1,n), c, s);
+      TMat3D<T> G2;
+      G2(n,n)=c;
+      G2(n+1,n+1)=c;
+      G2(n,n+1)=-s;
+      G2(n+1,n)=s;
+
+      this->lmult(G2);
+      L.lmult(G2);
+    }
+
+    // Make singular values positive!
+    TMat3D<T> Tmp;
+    for (int n=0; n<3; n++)
+      Tmp(n,n)=((*this)(n,n)<0.0)?-1.0:1.0;
+    this->lmult(Tmp);
+    L.lmult(Tmp);
+
+    sumDiag=0.0;
+    sumOffdiag=0.0;
+    for (int i=0; i<3; i++) sumDiag+=fabs((*this)(i,i));
+    for (int i=0; i<2; i++) sumOffdiag+=fabs((*this)(i,i+1));
+
+  } while (maxLoops-- and sumDiag<1e20*sumOffdiag);
+  L.transpose();
+  R.transpose();
 };    
-    
+
 
 #endif
 #endif
