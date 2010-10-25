@@ -18,8 +18,10 @@ public:
     ~StereoCfg();
   public slots:
     void slotProjectorClosed();
+    void slotSetQRange();
 private:
     Ui::StereoCfg *ui;
+    StereoProjector* projector;
 };
 
 #endif // STEREOCFG_H

@@ -9,12 +9,12 @@ QT       += core gui opengl
 TARGET = Clip
 TEMPLATE = app
 
-# win32 {
-#     debug {
-#         CONFIG += console
-#     }
-# }
-         CONFIG += console
+win32 {
+    debug {
+        CONFIG += console
+    }
+}
+
 
 QMAKE_CXXFLAGS += -std=gnu++0x
 
