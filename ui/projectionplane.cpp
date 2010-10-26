@@ -19,6 +19,7 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   setWindowTitle(projector->displayName());
 
   ui->view->setScene(projector->getScene());
+  ui->view->setTransform(QTransform(1,0,0,-1,0,0));
   //ui->view->setViewport(new QGLWidget);
 
   //ui->toolBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Open", this, SLOT(slotLoadCrystalData()));

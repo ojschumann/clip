@@ -8,7 +8,7 @@
 using namespace std;
 
 LauePlaneProjector::LauePlaneProjector(QObject* parent): Projector(parent), localCoordinates() {
-  setWavevectors(0.0, 4.0*M_1_PI);
+  internalSetWavevectors(0.0, 2.0*M_PI);
   setDetSize(30.0, 110.0, 140.0);
   setDetOrientation(180.0, 0, 0);
   detDx=1.0;
@@ -118,7 +118,7 @@ bool LauePlaneProjector::project(const Reflection &r, QPointF& p) {
   bool doesReflect=false;
   for (int i=0; i<r.orders.size(); i++) {
     int n=r.orders[i];
-    if ((QminVal<=n*r.Qscatter) and (n*r.Qscatter<=QmaxVal)) {
+    if ((2.0*QminVal<=n*r.Qscatter) and (n*r.Qscatter<=2.0*QmaxVal)) {
       doesReflect=true;
       break;
     }

@@ -65,6 +65,8 @@ public:
     public slots:
   virtual QWidget* configWidget()=0;
   void connectToCrystal(Crystal *);
+
+  // Set Wavevectors. Note that the Value is 1/lambda, not 2*pi/lambda
   void setWavevectors(double Qmin, double Qmax);
   void reflectionsUpdated();
 
@@ -184,7 +186,7 @@ protected:
   SpotMarkerGraphicsItem* spotMarkers;
     protected slots:
   virtual void updateImgTransformations();
-private:
+protected:
   void internalSetWavevectors(double, double);
 };
 

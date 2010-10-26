@@ -25,8 +25,9 @@ Projector::Projector(QObject *parent):
   enableSpots();
   enableProjection();
   scene.setItemIndexMethod(QGraphicsScene::NoIndex);
+
   internalSetWavevectors(0.0, 1.0*M_1_PI);
-  setMaxHklSqSum(0);
+  setMaxHklSqSum(3);
   setTextSize(4.0);
   setSpotSize(4.0);
   QTimer::singleShot(0, this, SLOT(decorateScene()));
@@ -186,6 +187,7 @@ void Projector::ProjectionMapper::run() {
 
       if (r.hklSqSum<=(projector->maxHklSqSum)) {
         QGraphicsTextItem*  t = new QGraphicsTextItem();
+        t->setTransform(QTransform(1,0,0,-1,0,0));
         t->setHtml(formatHklText(r.h, r.k, r.l));
         t->setPos(p);
         QRectF r=t->boundingRect();

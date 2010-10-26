@@ -21,8 +21,8 @@ public:
   virtual QWidget* configWidget();
   virtual void decorateScene();
   void setDetOrientation(const Mat3D& M);
+  Mat3D getDetOrientation();
 protected:
-  virtual bool project(const Reflection &r, QGraphicsItem* item);
   virtual bool project(const Reflection &r, QPointF &);
   virtual bool parseXMLElement(QXmlStreamReader&);
 

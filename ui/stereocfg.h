@@ -17,8 +17,10 @@ public:
     explicit StereoCfg(StereoProjector*, QWidget *parent = 0);
     ~StereoCfg();
   public slots:
-    void slotProjectorClosed();
     void slotSetQRange();
+    void slotLoadParams();
+    void slotSetProjectionDirection();
+    void slotUpdateRenderHints();
 private:
     Ui::StereoCfg *ui;
     StereoProjector* projector;

@@ -217,11 +217,11 @@ void Crystal::GenerateReflection::run() {
   while ((h=aktualH.fetchAndAddRelaxed(1))<=hMax) {
 
     //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
-    // k^2 +2*k *h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
+    // k^2 +2*k*h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
     double ns = 1.0/c->bstar.norm_sq();
     double p = c->astar*c->bstar*ns*h;
     double q1 = c->astar.norm_sq()*ns*h*h;
-    double q2 = 4.0*ns*c->Qmax*c->Qmax;
+    double q2 = M_1_PI*M_1_PI*ns*c->Qmax*c->Qmax;
     double s = p*p-q1+q2;
     int kMin = (s>0)?int(-p-sqrt(s)):0;
     int kMax = (s>0)?int(-p+sqrt(s)):0;
@@ -234,7 +234,7 @@ void Crystal::GenerateReflection::run() {
       ns = 1.0/c->cstar.norm_sq();
       p = v*c->cstar*ns;
       q1 = v.norm_sq()*ns;
-      q2 = 4.0*ns*c->Qmax*c->Qmax;
+      q2 = M_1_PI*M_1_PI*ns*c->Qmax*c->Qmax;
       s = p*p-q1+q2;
       int lMin = (s>0)?int(-p-sqrt(s)):0;
       int lMax = (s>0)?int(-p+sqrt(s)):0;
@@ -243,32 +243,28 @@ void Crystal::GenerateReflection::run() {
         // store only lowest order reflections
         if (ggt(hk_ggt, l)==1) {
           v=c->MReziprocal*Vec3D(h,k,l);
-          double Q = 0.5*v.norm();
+          double Q = 2.0*M_PI*v.norm();
 
-          if (Q<=c->Qmax) {
-            Reflection r;
-            r.h=h;
-            r.k=k;
-            r.l=l;
-            r.hklSqSum=h*h+k*k+l*l;
-            r.Q=Q;
-            r.d = 0.5/Q;
-            for (int i=1; i<int(2.0*c->Qmax*r.d+0.9); i++) {
-              if (!c->spaceGroup->isExtinct(TVec3D<int>(i*h, i*k, i*l)))
-                r.orders.push_back(i);
-            }
-            if (r.orders.size()>0) {
-              r.normalLocal=v*r.d;
-              updateRef(r);
-              mutex.lock();
-              if (reflectionNumber>=c->reflections.size())
-                c->reflections.resize(int(1.2*reflectionNumber));
-              c->reflections[reflectionNumber] = r;
-              reflectionNumber++;
-              mutex.unlock();
-            }
-
-
+          Reflection r;
+          r.h=h;
+          r.k=k;
+          r.l=l;
+          r.hklSqSum=h*h+k*k+l*l;
+          r.Q=Q;
+          r.d = 2.0*M_PI/Q;
+          for (int i=1; i<=int(M_1_PI*c->Qmax*r.d+0.9); i++) {
+            if (!c->spaceGroup->isExtinct(TVec3D<int>(i*h, i*k, i*l)))
+              r.orders.push_back(i);
+          }
+          if (r.orders.size()>0) {
+            r.normalLocal=v*r.d;
+            updateRef(r);
+            mutex.lock();
+            if (reflectionNumber>=c->reflections.size())
+              c->reflections.resize(int(1.2*reflectionNumber));
+            c->reflections[reflectionNumber] = r;
+            reflectionNumber++;
+            mutex.unlock();
           }
         }
       }
@@ -281,12 +277,12 @@ void Crystal::GenerateReflection::run() {
 void Crystal::generateReflections() {
   if (not updateEnabled)
     return;
-  // Q=0.5/d/sin(theta)
-  // n*lambda=2*d*sin(theta) => n=2*d/lambda = 2*Q*d
-  int hMax = int(2.0*a*Qmax);
+  // Qmax =2*pi/lambda_min
+  // n*lambda=2*d*sin(theta) => n_max=2*d/lambda = Qmax*d/pi
+  int hMax = int(M_1_PI*a*Qmax);
 
   // predicted number of reflections
-  double prediction = 32.0/3.0*M_PI*Qmax*Qmax*Qmax*MReal.det();
+  double prediction = 4.0/3.0*M_1_PI*M_1_PI*Qmax*Qmax*Qmax*MReal.det();
 
 
   reflections.resize(int(1.1*predictionFactor*prediction));
@@ -314,14 +310,14 @@ void Crystal::UpdateRef::operator()(Reflection &r) {
   // sin(theta) = v*e_x = v.x
   // x direction points toward source, z points upwards
   if (r.normal.x()>0.0) {
-    //Q=0.5/d/sin(theta)=r.Q/sin(theta)
+    //Q=2*pi/d/sin(theta)=r.Q/sin(theta)
     r.Qscatter = r.Q/r.normal.x();
     // Loop over higher orders
 
     int j=0;
-    while (j<r.orders.size() && r.orders[j]*r.Qscatter<c->Qmin) j++;
-    if (j<r.orders.size() && r.orders[j]*r.Qscatter>=c->Qmin) r.lowestDiffOrder=r.orders[j];
-    while (j<r.orders.size() && r.orders[j]*r.Qscatter<=c->Qmax) {
+    while (j<r.orders.size() && r.orders[j]*r.Qscatter<2.0*c->Qmin) j++;
+    if (j<r.orders.size() && r.orders[j]*r.Qscatter>=2.0*c->Qmin) r.lowestDiffOrder=r.orders[j];
+    while (j<r.orders.size() && r.orders[j]*r.Qscatter<=2.0*c->Qmax) {
       r.highestDiffOrder=r.orders[j];
       j++;
     }
@@ -337,6 +333,19 @@ void Crystal::updateRotation() {
     return;
 
   QtConcurrent:: blockingMap(reflections, UpdateRef(this));
+  Vec3D v = hkl2Reziprocal(1,0,0);
+  cout << "(100) = " << v.x() << " " << v.y() << " " << v.z() << endl;
+  v = hkl2Reziprocal(-1,0,0);
+  cout << "(-100) = " << v.x() << " " << v.y() << " " << v.z() << endl;
+  v = hkl2Reziprocal(0,1,0);
+  cout << "(010) = " << v.x() << " " << v.y() << " " << v.z() << endl;
+  v = hkl2Reziprocal(0,-1,0);
+  cout << "(0-10) = " << v.x() << " " << v.y() << " " << v.z() << endl;
+  v = hkl2Reziprocal(0,0,1);
+  cout << "(001) = " << v.x() << " " << v.y() << " " << v.z() << endl;
+  v = hkl2Reziprocal(0,0,-1);
+  cout << "(00-1) = " << v.x() << " " << v.y() << " " << v.z() << endl;
+  cout << endl;
 }
 
 

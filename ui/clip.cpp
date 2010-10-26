@@ -48,6 +48,27 @@ void Clip::addProjector(Projector* p) {
   addMdiWindow(pp);
 }
 
+Projector* Clip::connectToLastCrystal(Projector *p) {
+  QList<QMdiSubWindow*> mdiWindows = ui->mdiArea->subWindowList(QMdiArea::StackingOrder);
+  while (!mdiWindows.empty()) {
+    QMdiSubWindow* window = mdiWindows.takeLast();
+    CrystalDisplay* cd = dynamic_cast<CrystalDisplay*>(window->widget());
+    if (cd) {
+      p->connectToCrystal(cd->getCrystal());
+      break;
+    }
+  }
+  return p;
+}
+
+void Clip::addMdiWindow(QWidget* w) {
+  QMdiSubWindow* m = ui->mdiArea->addSubWindow(w);
+  m->setAttribute(Qt::WA_DeleteOnClose);
+  m->show();
+  connect(w, SIGNAL(destroyed()), m, SLOT(deleteLater()));
+}
+
+
 void Clip::on_actionAbout_triggered(bool) {
   QString message("This is the Cologne Laue Indexation Program (CLIP)\n");
   message += "a program to index and refine laue exposures.\n\n";
@@ -64,24 +85,6 @@ void Clip::on_actionAbout_Qt_triggered(bool) {
   QMessageBox::aboutQt(this, "Cologne Laue Indexation Program");
 }
 
-void Clip::addMdiWindow(QWidget* w) {
-  QMdiSubWindow* m = ui->mdiArea->addSubWindow(w);
-  m->setAttribute(Qt::WA_DeleteOnClose);
-  m->show();
-}
-
-Projector* Clip::connectToLastCrystal(Projector *p) {
-  QList<QMdiSubWindow*> mdiWindows = ui->mdiArea->subWindowList(QMdiArea::StackingOrder);
-  while (!mdiWindows.empty()) {
-    QMdiSubWindow* window = mdiWindows.takeLast();
-    CrystalDisplay* cd = dynamic_cast<CrystalDisplay*>(window->widget());
-    if (cd) {
-      p->connectToCrystal(cd->getCrystal());
-      break;
-    }
-  }
-  return p;
-}
 
 void Clip::slotUpdateWindowMenu() {
   ui->menuWindows->clear();
