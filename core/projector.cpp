@@ -10,6 +10,7 @@
 #include <QWidget>
 #include <QThreadPool>
 #include <QtConcurrentMap>
+#include <QGraphicsView>
 
 using namespace std;
 
@@ -21,10 +22,13 @@ Projector::Projector(QObject *parent):
     markerItems(),
     crystal(),
     scene(this),
-    imgGroup() {
+    imgGroup(),
+    spotMarkers(new SpotMarkerGraphicsItem())
+{
+  scene.addItem(spotMarkers);
   enableSpots();
   enableProjection();
-  scene.setItemIndexMethod(QGraphicsScene::NoIndex);
+  //scene.setItemIndexMethod(QGraphicsScene::NoIndex);
 
   internalSetWavevectors(0.0, 1.0*M_1_PI);
   setMaxHklSqSum(3);
@@ -34,10 +38,12 @@ Projector::Projector(QObject *parent):
   connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
   scene.addItem(&imgGroup);
-  imgGroup.setHandlesChildEvents(false);
+  // obsolete
+  //imgGroup.setHandlesChildEvents(false);
+
+  imgGroup.setFlag(QGraphicsItem::ItemIsPanel, false);
   //imgGroup.setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
-  spotMarkers = new Projector::SpotMarkerGraphicsItem();
-  scene.addItem(spotMarkers);
+
   updateImgTransformations();
 };
 
@@ -310,6 +316,7 @@ void Projector::setSpotSize(double d) {
 
 void Projector::enableSpots(bool b) {
   showSpots=b;
+  spotMarkers->setVisible(b);
   emit projectionParamsChanged();
 }
 
@@ -586,7 +593,10 @@ void Projector::SpotMarkerGraphicsItem::Worker::run() {
       localCache = QImage(spotMarker->cache.size(), QImage::Format_ARGB32_Premultiplied);
     localCache.fill(QColor(0,0,0,0).rgba());
     QPainter p(&localCache);
-    p.setRenderHint(QPainter::Antialiasing);
+
+    QList<QGraphicsView*> l = spotMarker->scene()->views();
+    if (l.size())
+      p.setRenderHints(l.at(0)->renderHints());
     p.setPen(Qt::green);
     int i;
     while ((i=spotMarker->workN.fetchAndAddOrdered(1))<spotMarker->paintUntil) {

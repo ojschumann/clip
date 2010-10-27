@@ -1,0 +1,25 @@
+ProjectionPlane
+  Mark Spots
+  Mark Zones (new)
+  Image Handling (new, multithreaded)
+    Rotate/Flip, Crop (with arbitrary rotation)
+    Measure resolution
+
+ReflectionInfo (port and enhance)
+  including Direction of normal and scattered beam
+
+Marked Spots (call from Crystal) (new)
+  Group Spots (on projector) to define Zones
+
+Indexer (port and enhance)
+
+Refinement (new)
+  Optional show state after each iteration
+
+Rotation (port)
+
+Reorientation (port)
+
+Transfer Curve (port)
+  Image Handling to new class?
+

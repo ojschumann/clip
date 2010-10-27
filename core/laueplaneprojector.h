@@ -35,10 +35,18 @@ public:
 
   virtual void projector2xml(QXmlStreamWriter&);
   //        virtual void loadFromXML(QXmlStreamReader&);
-    public slots:
+public slots:
   void setDetSize(double dist, double width, double height);
   void setDetOrientation(double omega, double chi, double phi);
   void setDetOffset(double dx, double dy);
+  void setDist(double);
+  void setWidth(double);
+  void setHeight(double);
+  void setOmega(double);
+  void setChi(double);
+  void setPhi(double);
+  void setXOffset(double);
+  void setYOffset(double);
   virtual void decorateScene();
   void resizePBMarker();
   void movedPBMarker();

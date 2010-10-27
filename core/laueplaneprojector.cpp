@@ -4,6 +4,7 @@
 #include <QtGui/QCursor>
 #include <tools/signalingellipse.h>
 #include <iostream>
+#include <ui/laueplanecfg.h>
 
 using namespace std;
 
@@ -110,6 +111,39 @@ void LauePlaneProjector::setDetOffset(double dx, double dy) {
       emit projectionParamsChanged();
   }
 }
+
+void LauePlaneProjector::setDist(double v) {
+  setDetSize(v, width(), height());
+}
+
+void LauePlaneProjector::setWidth(double v) {
+  setDetSize(dist(), v, height());
+}
+
+void LauePlaneProjector::setHeight(double v) {
+  setDetSize(dist(), width(), v);
+}
+
+void LauePlaneProjector::setOmega(double v) {
+  setDetOrientation(v, chi(), phi());
+}
+
+void LauePlaneProjector::setChi(double v) {
+  setDetOrientation(omega(), v, phi());
+}
+
+void LauePlaneProjector::setPhi(double v) {
+  setDetOrientation(omega(), chi(), v);
+}
+
+void LauePlaneProjector::setXOffset(double v) {
+  setDetOffset(v, yOffset());
+}
+
+void LauePlaneProjector::setYOffset(double v) {
+  setDetOffset(xOffset(), v);
+}
+
 
 bool LauePlaneProjector::project(const Reflection &r, QPointF& p) {
   if (r.lowestDiffOrder==0)
@@ -236,8 +270,7 @@ void LauePlaneProjector::updatePBPos() {
 }
 
 QWidget* LauePlaneProjector::configWidget() {
-  //FIXME: Implement
-  return new QWidget();
+  return new LauePlaneCfg(this);
 }
 
 QString LauePlaneProjector::projectorName() {

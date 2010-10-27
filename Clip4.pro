@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     core/laueplaneprojector.cpp \
     core/stereoprojector.cpp \
     tools/signalingellipse.cpp \
-    ui/stereocfg.cpp
+    ui/stereocfg.cpp \
+    ui/laueplanecfg.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -60,12 +61,14 @@ HEADERS  += ui/clip.h \
     core/stereoprojector.h \
     tools/signalingellipse.h \
     tools/init3D.h \
-    ui/stereocfg.h
+    ui/stereocfg.h \
+    ui/laueplanecfg.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
     ui/projectionplane.ui \
-    ui/stereocfg.ui
+    ui/stereocfg.ui \
+    ui/laueplanecfg.ui
 
 RESOURCES += \
     icons/icons.qrc
@@ -73,3 +76,6 @@ RESOURCES += \
 win32 {
     RC_FILE = icons/clip.rc
 }
+
+OTHER_FILES += \
+    Todo.txt
