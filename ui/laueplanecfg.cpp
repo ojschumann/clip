@@ -74,8 +74,9 @@ void LauePlaneCfg::slotLoadParams() {
 
   QList<QGraphicsView*> l = projector->getScene()->views();
   if (l.size()) {
-    ui->renderAntialias->setChecked(l.at(0)->renderHints()&QPainter::Antialiasing);
-    ui->renderAntialiasText->setChecked(l.at(0)->renderHints()&QPainter::TextAntialiasing);
+    QPainter::RenderHints hints = l.at(0)->renderHints();
+    ui->renderAntialias->setChecked(hints.testFlag(QPainter::Antialiasing));
+    ui->renderAntialiasText->setChecked(hints.testFlag(QPainter::TextAntialiasing));
   }
 }
 

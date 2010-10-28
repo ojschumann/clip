@@ -1,4 +1,8 @@
 #include <tools/signalingellipse.h>
+#include <iostream>
+
+using namespace std;
+
 
 SignalingEllipseItem::SignalingEllipseItem(QGraphicsItem *parent): QObject(), QGraphicsEllipseItem(parent) {
   skipNextPosChange=false;
@@ -25,6 +29,8 @@ QVariant SignalingEllipseItem::itemChange(GraphicsItemChange change, const QVari
 }
 
 void SignalingEllipseItem::setPosNoSig(const QPointF &p) {
-  skipNextPosChange=true;
-  setPos(p);
+  if (p!=pos()) {
+    skipNextPosChange=true;
+    setPos(p);
+  }
 }

@@ -191,9 +191,9 @@ void ProjectionPlane::slotChangeMouseMode(int m) {
 
 
 void ProjectionPlane::slotUpdateFPS() {
-  int frames = ui->view->getFrames();
-  ui->fpsDisplay->setText(QString::number(frames/2));
-  QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
+  //int frames = ui->view->getFrames();
+  //ui->fpsDisplay->setText(QString::number(frames/2));
+  //QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
 }
 
 void ProjectionPlane::slotLoadCrystalData() {

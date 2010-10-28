@@ -5,7 +5,7 @@
 
 ProjectionGraphicsView::ProjectionGraphicsView(QWidget *parent) :
     QGraphicsView(parent) {
-  viewIgnoresThisMouseEvent=true;
+  viewIgnoresThisMouseEvent=false;
   frames=0;
 }
 
@@ -16,13 +16,8 @@ void ProjectionGraphicsView::dragEnterEvent(QDragEnterEvent *e) {
 }
 
 void ProjectionGraphicsView::mousePressEvent(QMouseEvent *e) {
-  if (e->buttons()==Qt::LeftButton) {
-    QGraphicsView::mousePressEvent(e);
-    viewIgnoresThisMouseEvent = !e->isAccepted();
-  } else {
-    viewIgnoresThisMouseEvent=true;
-    e->ignore();
-  }
+  QGraphicsView::mousePressEvent(e);
+  viewIgnoresThisMouseEvent = (e->buttons()==Qt::LeftButton) && !e->isAccepted();
 }
 
 void ProjectionGraphicsView::mouseMoveEvent(QMouseEvent *e) {
@@ -36,8 +31,9 @@ void ProjectionGraphicsView::mouseMoveEvent(QMouseEvent *e) {
 void ProjectionGraphicsView::mouseReleaseEvent(QMouseEvent *e) {
   if (viewIgnoresThisMouseEvent) {
     e->ignore();
+    viewIgnoresThisMouseEvent=false;
   } else {
-    QGraphicsView::mouseMoveEvent(e);
+    QGraphicsView::mouseReleaseEvent(e);
   }
 }
 

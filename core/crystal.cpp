@@ -71,7 +71,6 @@ Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), M
 }
 
 Crystal::Crystal(const Crystal& c) {
-  cout << "Crystal Copy Constructor" << endl;
   spaceGroup = new SpaceGroup(this);
   spaceGroup->setGroupSymbol(c.spaceGroup->groupSymbol());
   internalSetCell(c.a,c.b,c.c,c.alpha,c.beta,c.gamma);
@@ -166,9 +165,6 @@ void Crystal::addRotation(const Vec3D& axis, double angle) {
 }
 
 void Crystal::addRotation(const Mat3D& M) {
-#ifdef __DEBUG__
-  cout << "AddRotation" << endl;
-#endif
   MRot.lmult(M);
   MRot.orthogonalize();
   updateRotation();
@@ -177,9 +173,6 @@ void Crystal::addRotation(const Mat3D& M) {
 }
 
 void Crystal::setRotation(const Mat3D& M) {
-#ifdef __DEBUG__
-  cout << "setRotation" << endl;
-#endif
   MRot = M;
   updateRotation();
   emit orientationChanged();
@@ -333,19 +326,6 @@ void Crystal::updateRotation() {
     return;
 
   QtConcurrent:: blockingMap(reflections, UpdateRef(this));
-  Vec3D v = hkl2Reziprocal(1,0,0);
-  cout << "(100) = " << v.x() << " " << v.y() << " " << v.z() << endl;
-  v = hkl2Reziprocal(-1,0,0);
-  cout << "(-100) = " << v.x() << " " << v.y() << " " << v.z() << endl;
-  v = hkl2Reziprocal(0,1,0);
-  cout << "(010) = " << v.x() << " " << v.y() << " " << v.z() << endl;
-  v = hkl2Reziprocal(0,-1,0);
-  cout << "(0-10) = " << v.x() << " " << v.y() << " " << v.z() << endl;
-  v = hkl2Reziprocal(0,0,1);
-  cout << "(001) = " << v.x() << " " << v.y() << " " << v.z() << endl;
-  v = hkl2Reziprocal(0,0,-1);
-  cout << "(00-1) = " << v.x() << " " << v.y() << " " << v.z() << endl;
-  cout << endl;
 }
 
 

@@ -124,7 +124,8 @@ protected:
   bool projectionEnabled;
 
   QGraphicsScene scene;
-  QGraphicsItemGroup imgGroup;
+  QGraphicsPixmapItem* imgGroup;
+  QGraphicsPixmapItem* img;
 
   class ProjectionMapper: public QRunnable {
   public:
@@ -149,12 +150,23 @@ protected:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual QRectF boundingRect() const;
 
+    void setSpotsize(double s) { spotSize = s; cacheNeedsUpdate=true; }
+    void pointsUpdated();
     QVector<QPointF> coordinates;
     int paintUntil;
-
-    void setSpotsize(double s) { spotSize = s; cacheNeedsUpdate=true; }
+  protected:
     bool cacheNeedsUpdate;
-        protected:
+    void updateCache();
+
+    QPixmap cache;
+    double spotSize;
+    QTransform transform;
+
+    QMutex mutex;
+    QWaitCondition workerStart;
+    QSemaphore workerSync;
+    QAtomicInt workN;
+
     class Worker: public QThread {
     public:
       Worker(SpotMarkerGraphicsItem* s, int t):
@@ -167,20 +179,10 @@ protected:
       int threadNr;
       QImage localCache;
       bool shouldStop;
-            private:
+    private:
       Worker(const Worker&) {};
     };
-
     QList<Worker*> workers;
-    QPixmap cache;
-    double spotSize;
-    QTransform transform;
-
-    QMutex mutex;
-    QWaitCondition workerStart;
-    QSemaphore workerSync;
-    QAtomicInt workN;
-
   };
 
   SpotMarkerGraphicsItem* spotMarkers;

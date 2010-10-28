@@ -22,7 +22,6 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent): Projector(parent), loca
 };
 
 LauePlaneProjector::LauePlaneProjector(const LauePlaneProjector& p): Projector(p) {
-  cout << "Laueplaneprojector Copy Constructor" << endl;
   setDetSize(p.dist(), p.width(), p.height());
   setDetOrientation(p.omega(), p.chi(), p.phi());
   detDx=p.detDx;
@@ -179,28 +178,29 @@ void LauePlaneProjector::decorateScene() {
     delete item;
   }
 
-  QTransform t;
-  t.scale(det2img.m11(), det2img.m22());
+  SignalingEllipseItem* center=new SignalingEllipseItem(-0.5*spotSize, -0.5*spotSize, spotSize, spotSize, imgGroup);
 
-  SignalingEllipseItem* center=new SignalingEllipseItem(-0.5*spotSize, -0.5*spotSize, spotSize, spotSize, &imgGroup);
   center->setPen(QPen(Qt::red));
   center->setFlag(QGraphicsItem::ItemIsMovable, true);
-  center->setCursor(QCursor(Qt::SizeAllCursor));
-  center->setTransform(t);
+  center->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+  center->setCursor(Qt::SizeAllCursor);
+  center->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
 
-  SignalingEllipseItem* handle=new SignalingEllipseItem(-0.5*spotSize, -0.5*spotSize, spotSize, spotSize,center);
+  QGraphicsEllipseItem* marker=new QGraphicsEllipseItem(0.1, 0.1, 0.13, 0.13, center);
+  marker->setPen(QPen(Qt::red));
+
+  SignalingEllipseItem* handle=new SignalingEllipseItem(-0.5*spotSize, -0.5*spotSize, spotSize, spotSize, center);
   handle->setPen(QPen(Qt::red));
   handle->moveBy(0.1, 0);
   handle->setFlag(QGraphicsItem::ItemIsMovable, true);
-  handle->setCursor(QCursor(Qt::SizeAllCursor));
-  QGraphicsEllipseItem* marker=new QGraphicsEllipseItem(0.1, 0.1, 0.13, 0.13, center);
-  marker->setPen(QPen(Qt::red));
+  handle->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+  handle->setCursor(Qt::SizeAllCursor);
+
 
   decorationItems.append(center);
   decorationItems.append(handle);
   decorationItems.append(marker);
 
-  //center->setPos(0.5, 0.5);
   updatePBPos();
 
 
@@ -231,41 +231,31 @@ void LauePlaneProjector::movedPBMarker() {
     return;
   QGraphicsEllipseItem* center=dynamic_cast<QGraphicsEllipseItem*>(decorationItems[0]);
   QPointF p=center->scenePos();
+  QPointF p2 = center->pos();
 
-  bool b;
+  bool b=false;
   QPointF q;
   if (omega()>90.5) {
-    detDx=0.0;
-    detDy=0.0;
     q=(scattered2det(Vec3D(1,0,0), &b));
   } else if (omega()<89.5) {
-    detDx=0.0;
-    detDy=0.0;
     q=scattered2det(Vec3D(-1,0,0), &b);
-  } else {
-    b=false;
   }
   if (b) {
-    detDx=p.x()-q.x();
-    detDy=p.y()-q.y();
+    setDetOffset(xOffset()+(p.x()-q.x())*dist(), yOffset()+(p.y()-q.y())*dist());
   }
-  if (projectionEnabled)
-    emit projectionParamsChanged();
 }
 
 void LauePlaneProjector::updatePBPos() {
-  bool b;
+  bool b=false;
   QPointF q;
   if (omega()>90.5) {
     q=(scattered2det(Vec3D(1,0,0), &b));
   } else if (omega()<89.5) {
     q=scattered2det(Vec3D(-1,0,0), &b);
-  } else {
-    b=false;
   }
   if (b and decorationItems.size()>2) {
-    QGraphicsEllipseItem* center=dynamic_cast<QGraphicsEllipseItem*>(decorationItems[0]);
-    center->setPos(det2img.map(q));
+    SignalingEllipseItem* center=dynamic_cast<SignalingEllipseItem*>(decorationItems[0]);
+    center->setPosNoSig(det2img.map(q));
   }
 }
 

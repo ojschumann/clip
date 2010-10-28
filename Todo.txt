@@ -23,3 +23,4 @@ Reorientation (port)
 Transfer Curve (port)
   Image Handling to new class?
 
+Save Default Values for Projector Variables (Distance, Height, Width, ...)
