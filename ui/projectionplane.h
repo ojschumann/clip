@@ -26,32 +26,30 @@ public:
 
   virtual void dragEnterEvent(QDragEnterEvent *);
   virtual void dropEvent(QDropEvent *);
+
   Projector* getProjector() { return projector; }
+
 signals:
   void showConfig(QWidget*);
-protected:
-  QRectF zoomSceneRect();
-  enum MouseMode {
-    MouseZoom,
-    MousePan,
-    MouseRotate
-  };
-  MouseMode mouseMode;
-signals:
   void info(QString, int);
-  void mouseModeChanged(int);
 protected slots:
-  void slotChangeMouseMode(int);
+  void slotChangeMouseDragMode();
   void slotUpdateFPS();
   void resizeView();
   void slotLoadCrystalData();
-  //FIXME: Only for debuging
-  void slotRandomRotation();
+  void slotLoadImage();
+  void slotCloseImage();
   void slotOpenProjectorConfig();
-private:
+  void slotOpenResolutionCalc();
+protected:
+  void setupToolbar();
+  QRectF zoomSceneRect();
+
   Ui::ProjectionPlane *ui;
   Projector* projector;
+
   QPointer<QWidget> projectorConfig;
+  QPointer<QWidget> resoluctionCalc;
 
   QPointF mousePressOrigin;
   QPointF lastMousePosition;
@@ -60,7 +58,27 @@ private:
   QList<QRectF> zoomSteps;
 
   static QList<ProjectionPlane*> allPlanes;
-  QActionGroup* mouseModeGroup;
+
+  QAction* zoomAction;
+  QAction* panAction;
+  QAction* rotAction;
+  QAction* rulerAction;
+  QAction* markAction;
+  QAction* infoAction;
+  QAction* openImgAction;
+  QAction* closeImgAction;
+  QAction* flipHAction;
+  QAction* flipVAction;
+  QAction* rotCWAction;
+  QAction* rotCCWAction;
+  QAction* colorCurveAction;
+  QAction* printAction;
+  QAction* configAction;
+
+  QList<QAction*> imageTools;
 };
+
+
+
 
 #endif // PROJECTIONPLANE_H

@@ -37,6 +37,7 @@ Projector::Projector(QObject *parent):
   QPixmap pix("../Clip4/Silver.jpg");
   img = new QGraphicsPixmapItem(pix, imgGroup);
   img->setTransform(QTransform::fromScale(1.0/pix.width(), 1.0/pix.height()));
+  img->setTransformationMode(Qt::SmoothTransformation);
 
   enableSpots();
   enableProjection();
@@ -197,7 +198,7 @@ void Projector::ProjectionMapper::run() {
       projector->spotMarkers->coordinates[nextUnusedPoint.fetchAndAddOrdered(1)]=p;
 
       if (r.hklSqSum<=(projector->maxHklSqSum)) {
-        QGraphicsTextItem*  t = new QGraphicsTextItem();
+        QGraphicsTextItem* t = new QGraphicsTextItem();
         t->setTransform(QTransform(1,0,0,-1,0,0));
         t->setHtml(formatHklText(r.h, r.k, r.l));
         t->setPos(p);
@@ -336,9 +337,7 @@ void Projector::addMarker(const QPointF& p) {
   marker->setPen(QPen(QColor(0xFF,0xAA,0x33)));
   marker->setRect(r);
   marker->setPos(det2img.map(p));
-  QTransform t;
-  t.scale(det2img.m11(), det2img.m22());
-  marker->setTransform(t);
+  marker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
 
   markerItems.append(marker);
 };
@@ -377,6 +376,47 @@ QList<Vec3D> Projector::getMarkerNormals() const {
     r << det2normal(img2det.map(item->pos()));
   return r;
 }
+
+// ---------------  Ruler Handline ---------------------------
+int Projector::rulerNumber() const {
+  return rulerItems.size();
+}
+
+void Projector::addRuler(const QPointF& p1, const QPointF& p2) {
+  RulerItem* ruler = new RulerItem(det2img.map(p1), det2img.map(p2), getSpotSize(), imgGroup);
+  ruler->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
+  rulerItems << ruler;
+  emit rulersAdded();
+}
+
+void Projector::updateMostRecentRuler(const QPointF& p) {
+  if (!rulerItems.isEmpty()) {
+    rulerItems.last()->setEnd(det2img.map(p));
+  }
+}
+
+QPair<QPointF, QPointF> Projector::getRulerCoordinates(int n) {
+  if (n<rulerItems.size()) {
+    return qMakePair(img2det.map(rulerItems.at(n)->getStart()), img2det.map(rulerItems.at(n)->getEnd()));
+  }
+  return QPair<QPointF, QPointF>();
+}
+
+double Projector::getRulerSize(int n) {
+  if (n<rulerItems.size()) {
+    return rulerItems.at(n)->data(0).toDouble();
+  }
+  return -1.0;
+}
+
+void Projector::setRulerSize(int n, double v) {
+  if (n<rulerItems.size()) {
+    rulerItems[n]->setData(0, QVariant(v));
+  }
+}
+
+
+
 
 void Projector::updateImgTransformations() {
   const QRectF r=scene.sceneRect();

@@ -18,6 +18,7 @@
 #include <QSemaphore>
 #include <QThread>
 #include <QWidget>
+#include <tools/ruleritem.h>
 
 class Projector: public QObject, public FitObject {
   Q_OBJECT
@@ -55,9 +56,6 @@ public:
   double getSpotSize() const;
   bool spotsEnabled() const;
 
-  int markerNumber() const;
-  QPointF getMarkerDetPos(int n) const;
-  QList<Vec3D> getMarkerNormals() const;
 
   virtual void projector2xml(QXmlStreamWriter&);
   virtual void loadFromXML(QXmlStreamReader&);
@@ -82,8 +80,18 @@ public:
   // For speedup of fitting...
   void enableProjection(bool b=true);
 
+  int markerNumber() const;
   void addMarker(const QPointF& p);
   void delMarkerNear(const QPointF& p);
+  QPointF getMarkerDetPos(int n) const;
+  QList<Vec3D> getMarkerNormals() const;
+
+  int rulerNumber() const;
+  void addRuler(const QPointF& p1, const QPointF& p2);
+  void updateMostRecentRuler(const QPointF& p);
+  QPair<QPointF, QPointF> getRulerCoordinates(int);
+  double getRulerSize(int);
+  void setRulerSize(int, double);
 
   virtual void doImgRotation(int CWRSteps, bool flip);
 
@@ -92,6 +100,7 @@ public:
 
 signals:
   void projectedPointsUpdated();
+  void rulersAdded();
   void wavevectorsUpdated();
   void projectionParamsChanged();
   void projectionRectPosChanged();
@@ -101,8 +110,7 @@ protected:
   virtual bool project(const Reflection &r, QPointF &point)=0;
   virtual bool parseXMLElement(QXmlStreamReader&);
 
-  // These are the reflections
-  QList<QGraphicsItem*> projectedItems;
+
   // Stuff like Primary beam marker, Coordinate lines
   QList<QGraphicsItem*> decorationItems;
   // written indexes in the scene
@@ -111,6 +119,8 @@ protected:
   QList<QGraphicsEllipseItem*> markerItems;
   // Info Items. These will be set on Mousepress from Python and be deleted on orientation change or slot!
   QList<QGraphicsItem*> infoItems;
+  // Ruler Item
+  QList<RulerItem*> rulerItems;
 
   // Pointer to the connected crystal
   QPointer<Crystal> crystal;

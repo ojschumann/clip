@@ -40,7 +40,9 @@ SOURCES += main.cpp\
     core/stereoprojector.cpp \
     tools/signalingellipse.cpp \
     ui/stereocfg.cpp \
-    ui/laueplanecfg.cpp
+    ui/laueplanecfg.cpp \
+    tools/ruleritem.cpp \
+    ui/resolutioncalculator.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -62,13 +64,16 @@ HEADERS  += ui/clip.h \
     tools/signalingellipse.h \
     tools/init3D.h \
     ui/stereocfg.h \
-    ui/laueplanecfg.h
+    ui/laueplanecfg.h \
+    tools/ruleritem.h \
+    ui/resolutioncalculator.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
     ui/projectionplane.ui \
     ui/stereocfg.ui \
-    ui/laueplanecfg.ui
+    ui/laueplanecfg.ui \
+    ui/resolutioncalculator.ui
 
 RESOURCES += \
     icons/icons.qrc
