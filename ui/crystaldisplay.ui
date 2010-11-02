@@ -41,15 +41,15 @@
      <item>
       <widget class="QLabel" name="label_Spacegroup">
        <property name="text">
-        <string>SpaceGroup</string>
+        <string>Spacegroup</string>
        </property>
        <property name="buddy">
-        <cstring>SpaceGroup</cstring>
+        <cstring>Spacegroup</cstring>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="SpaceGroup"/>
+      <widget class="QLineEdit" name="Spacegroup"/>
      </item>
     </layout>
    </item>
@@ -592,7 +592,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>SpaceGroup</tabstop>
+  <tabstop>Spacegroup</tabstop>
   <tabstop>latticeA</tabstop>
   <tabstop>latticeB</tabstop>
   <tabstop>latticeC</tabstop>
@@ -657,10 +657,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>SpaceGroup</sender>
+   <sender>Spacegroup</sender>
    <signal>textChanged(QString)</signal>
    <receiver>CrystalDisplay</receiver>
-   <slot>slotSpaceGroupChanged(QString)</slot>
+   <slot>slotSpacegroupChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>131</x>
@@ -772,6 +772,6 @@
  <slots>
   <slot>slotCellChanged()</slot>
   <slot>slotRotationChanged()</slot>
-  <slot>slotSpaceGroupChanged(QString)</slot>
+  <slot>slotSpacegroupChanged(QString)</slot>
  </slots>
 </ui>

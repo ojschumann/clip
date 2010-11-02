@@ -1,7 +1,6 @@
 #ifndef __PROJECTOR_H__
 #define __PROJECTOR_H__
 
-#include <core/reflection.h>
 #include <QObject>
 #include <QVector>
 #include <QPointF>
@@ -12,13 +11,20 @@
 #include <QString>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <core/crystal.h>
 #include <core/fitobject.h>
 #include <QWaitCondition>
 #include <QSemaphore>
 #include <QThread>
 #include <QWidget>
-#include <tools/ruleritem.h>
+#include <QSignalMapper>
+#include <tools/vec3D.h>
+#include <tools/mat3D.h>
+#include <QRunnable>
+#include <QMutex>
+
+class Crystal;
+class Reflection;
+class RulerItem;
 
 class Projector: public QObject, public FitObject {
   Q_OBJECT
@@ -60,8 +66,8 @@ public:
   virtual void projector2xml(QXmlStreamWriter&);
   virtual void loadFromXML(QXmlStreamReader&);
 
-    public slots:
   virtual QWidget* configWidget()=0;
+    public slots:
   void connectToCrystal(Crystal *);
 
   // Set Wavevectors. Note that the Value is 1/lambda, not 2*pi/lambda
@@ -90,8 +96,10 @@ public:
   void addRuler(const QPointF& p1, const QPointF& p2);
   void updateMostRecentRuler(const QPointF& p);
   QPair<QPointF, QPointF> getRulerCoordinates(int);
-  double getRulerSize(int);
-  void setRulerSize(int, double);
+  void highlightRuler(int, bool);
+  bool rulerIsHighlighted(int);
+  QVariant getRulerData(int);
+  void setRulerData(int, QVariant);
 
   virtual void doImgRotation(int CWRSteps, bool flip);
 
@@ -100,7 +108,8 @@ public:
 
 signals:
   void projectedPointsUpdated();
-  void rulersAdded();
+  void rulerAdded();
+  void rulerChanged(int);
   void wavevectorsUpdated();
   void projectionParamsChanged();
   void projectionRectPosChanged();
@@ -121,6 +130,7 @@ protected:
   QList<QGraphicsItem*> infoItems;
   // Ruler Item
   QList<RulerItem*> rulerItems;
+  QSignalMapper rulerMapper;
 
   // Pointer to the connected crystal
   QPointer<Crystal> crystal;
@@ -182,12 +192,12 @@ protected:
       Worker(SpotMarkerGraphicsItem* s, int t):
           spotMarker(s),
           threadNr(t),
-          localCache(s->cache.size(), QImage::Format_ARGB32_Premultiplied),
+          localCache(0),
           shouldStop(false) {}
       void run();
       SpotMarkerGraphicsItem* spotMarker;
       int threadNr;
-      QImage localCache;
+      QImage* localCache;
       bool shouldStop;
     private:
       Worker(const Worker&) {};

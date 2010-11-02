@@ -17,5 +17,6 @@
         <file>Projector.png</file>
         <file>rotate_cw.png</file>
         <file>rotate_ccw.png</file>
+        <file>ruler.png</file>
     </qresource>
 </RCC>

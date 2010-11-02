@@ -1,9 +1,12 @@
 ProjectionPlane
   Mark Spots
+  Info Widgets
   Mark Zones (new)
   Image Handling (new, multithreaded)
     Rotate/Flip, Crop (with arbitrary rotation)
-    Measure resolution
+
+Spacegroup
+  implement point group generators for all crystal systems
 
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam

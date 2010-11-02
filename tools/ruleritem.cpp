@@ -2,27 +2,32 @@
 #include <QPainter>
 #include <QCursor>
 #include <iostream>
+#include <core/projector.h>
+#include <tools/signalingellipse.h>
 
 using namespace std;
 
 
-RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, qreal r, QGraphicsItem* parent):
+RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, qreal r, Projector* p, QGraphicsItem* parent):
     QGraphicsObject(parent),
-    startHandle(new QGraphicsEllipseItem(this)),
-    endHandle(new QGraphicsEllipseItem(this)),
-    radius(0.01*r)
+    startHandle(new SignalingEllipseItem(this)),
+    endHandle(new SignalingEllipseItem(this)),
+    radius(0.01*r),
+    projector(p)
 {
+  highlighted=true;
+  highlight(false);
   startHandle->setPos(p1);
   endHandle->setPos(p2);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
-  QList<QGraphicsEllipseItem*> l;
+  QList<SignalingEllipseItem*> l;
   l << startHandle << endHandle;
-  foreach (QGraphicsEllipseItem* item, l) {
+  foreach (SignalingEllipseItem* item, l) {
     item->setRect(-radius, -radius, 2*radius, 2*radius);
-    item->setPen(QPen(Qt::yellow));
+    item->setPen(QPen(Qt::red));
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
-    //item->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+    connect(item, SIGNAL(positionChanged()), this, SIGNAL(rulerChanged()));
   }
 }
 
@@ -31,15 +36,12 @@ RulerItem::~RulerItem() {
 }
 
 QRectF RulerItem::boundingRect() const {
-  QRectF r1 = startHandle->boundingRect().translated(startHandle->pos());
-  QRectF r2 = endHandle->boundingRect().translated(endHandle->pos());
-  return r1 | r2;
+  return childrenBoundingRect();
 }
 
 void RulerItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
   if (startHandle->pos()!=endHandle->pos()) {
-    cout << "RulerItem " << startHandle->pos().x() << " " << startHandle->pos().y() << " <-> " << endHandle->pos().x() << " " << endHandle->pos().y() << endl;
-    p->setPen(Qt::yellow);
+    p->setPen(pen);
     QVector<QLineF> lines;
     QLineF l(startHandle->pos(), endHandle->pos());
 
@@ -55,19 +57,15 @@ void RulerItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) 
     lines << l;
     l.setAngle(l.angle()-60.0);
     lines << l;
-
     p->drawLines(lines);
   }
 }
 
 void RulerItem::setStart(const QPointF& p) {
-  cout << "SetStart " << p.x() << " " << p.y() << endl;
-
   startHandle->setPos(p);
 }
 
 void RulerItem::setEnd(const QPointF& p) {
-  cout << "SetEnd " << p.x() << " " << p.y() << endl;
   endHandle->setPos(p);
 }
 
@@ -79,6 +77,27 @@ QPointF RulerItem::getEnd() {
   return endHandle->pos();
 }
 
+void RulerItem::highlight(bool h) {
+  if (h!=highlighted) {
+    highlighted=h;
+    if (isHighlighted()) {
+      pen = QPen(QColor(255, 128, 0));
+      pen.setWidthF(2.5);
+      pen.setCosmetic(true);
+    } else {
+      pen = QPen(QColor(255, 128, 0));
+      pen.setWidthF(0.0);
+    }
+    startHandle->setPen(pen);
+    endHandle->setPen(pen);
+
+    update();
+  }
+}
+
+bool RulerItem::isHighlighted() {
+  return highlighted;
+}
 
 QVariant RulerItem::itemChange(GraphicsItemChange change, const QVariant &value) {
   if (change == ItemTransformChange) {

@@ -1,7 +1,8 @@
 #include "crystaldisplay.h"
 #include "ui_crystaldisplay.h"
 #include <tools/mat3D.h>
-
+#include <core/crystal.h>
+#include <core/spacegroup.h>
 #include <QTableWidgetItem>
 #include <QDrag>
 #include <QMimeData>
@@ -99,7 +100,7 @@ void CrystalDisplay::slotUpdateOM() {
 
 void CrystalDisplay::slotLoadCellFromCrystal() {
   // Update space group symbol
-  ui->SpaceGroup->setText(crystal->getSpacegroup()->groupSymbol());
+  ui->Spacegroup->setText(crystal->getSpacegroup()->groupSymbol());
 
   // Get Cell from crystal
   QList<double> cell = crystal->getCell();
@@ -138,14 +139,14 @@ void CrystalDisplay::slotCellChanged() {
   crystal->setCell(cell);
 }
 
-void CrystalDisplay::slotSpaceGroupChanged(QString s) {
-  QPalette p = ui->SpaceGroup->palette();
+void CrystalDisplay::slotSpacegroupChanged(QString s) {
+  QPalette p = ui->Spacegroup->palette();
   if (crystal->getSpacegroup()->setGroupSymbol(s)) {
     p.setColor(QPalette::Base, Qt::white);
   } else {
     p.setColor(QPalette::Base, QColor(255, 200, 200));
   }
-  ui->SpaceGroup->setPalette(p);
+  ui->Spacegroup->setPalette(p);
 }
 
 

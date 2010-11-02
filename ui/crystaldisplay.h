@@ -1,10 +1,9 @@
 #ifndef CRYSTALDISPLAY_H
 #define CRYSTALDISPLAY_H
 
-#include <core/crystal.h>
-#include <core/spacegroup.h>
-
 #include <QWidget>
+
+class Crystal;
 
 namespace Ui {
   class CrystalDisplay;
@@ -29,7 +28,7 @@ public slots:
   void slotUpdateOM();
   void slotCellChanged();
   void slotRotationChanged();
-  void slotSpaceGroupChanged(QString);
+  void slotSpacegroupChanged(QString);
   void slotLoadCellFromCrystal();
   void slotLoadCrystalData();
   void slotSaveCrystalData();

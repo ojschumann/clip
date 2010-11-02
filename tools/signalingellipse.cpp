@@ -6,14 +6,17 @@ using namespace std;
 
 SignalingEllipseItem::SignalingEllipseItem(QGraphicsItem *parent): QObject(), QGraphicsEllipseItem(parent) {
   skipNextPosChange=false;
+  setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 };
 
 SignalingEllipseItem::SignalingEllipseItem(const QRectF& rect, QGraphicsItem * parent): QObject(), QGraphicsEllipseItem(rect,parent) {
   skipNextPosChange=false;
+  setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 };
 
 SignalingEllipseItem::SignalingEllipseItem(qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent): QObject(), QGraphicsEllipseItem(x,y,width,height,parent) {
   skipNextPosChange=false;
+  setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 };
 
 

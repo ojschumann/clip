@@ -42,7 +42,9 @@ SOURCES += main.cpp\
     ui/stereocfg.cpp \
     ui/laueplanecfg.cpp \
     tools/ruleritem.cpp \
-    ui/resolutioncalculator.cpp
+    ui/resolutioncalculator.cpp \
+    tools/rulermodel.cpp \
+    tools/zoneitem.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -66,7 +68,9 @@ HEADERS  += ui/clip.h \
     ui/stereocfg.h \
     ui/laueplanecfg.h \
     tools/ruleritem.h \
-    ui/resolutioncalculator.h
+    ui/resolutioncalculator.h \
+    tools/rulermodel.h \
+    tools/zoneitem.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

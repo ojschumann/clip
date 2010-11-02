@@ -3,7 +3,8 @@
 
 #include <QMainWindow>
 #include <QSignalMapper>
-#include <core/projector.h>
+
+class Projector;
 
 namespace Ui {
   class Clip;

@@ -9,6 +9,7 @@ namespace Ui {
 }
 
 class Projector;
+class RulerModel;
 
 class ResolutionCalculator : public QWidget
 {
@@ -17,12 +18,13 @@ class ResolutionCalculator : public QWidget
 public:
   explicit ResolutionCalculator(Projector* p, QWidget *parent = 0);
   ~ResolutionCalculator();
-
 public slots:
-  void slotReloadModel();
+  void slotSelectionChanged();
+  void slotCalcResolution();
 private:
   Ui::ResolutionCalculator *ui;
   Projector* projector;
+  RulerModel* model;
 };
 
 #endif // RESOLUTIONCALCULATOR_H

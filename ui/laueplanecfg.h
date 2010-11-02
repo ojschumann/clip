@@ -2,7 +2,8 @@
 #define LAUEPLANECFG_H
 
 #include <QWidget>
-#include <core/laueplaneprojector.h>
+
+class LauePlaneProjector;
 
 namespace Ui {
   class LauePlaneCfg;

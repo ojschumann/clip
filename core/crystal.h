@@ -6,14 +6,14 @@
 #include <tools/vec3D.h>
 #include <tools/mat3D.h>
 #include <tools/objectstore.h>
-#include <core/reflection.h>
 #include <core/fitobject.h>
-#include <core/spacegroup.h>
 
 #include <QFuture>
 #include <QMutex>
 
 class Projector;
+class Reflection;
+class Spacegroup;
 
 class Crystal: public QObject, public FitObject {
   Q_OBJECT
@@ -48,7 +48,7 @@ public:
   void calcEulerAngles(double &omega, double &chi, double &phi);
   void setEulerAngles(double omega, double chi, double phi);
 
-  SpaceGroup* getSpacegroup();
+  Spacegroup* getSpacegroup();
   bool setSpacegroup();
 
   Vec3D getRotationAxis() const;
@@ -113,7 +113,7 @@ private:
   double Qmin;
   double Qmax;
 
-  SpaceGroup* spaceGroup;
+  Spacegroup* spaceGroup;
   QVector<Reflection> reflections;
 
   // Factor for ab initio prediction of the number of reflections.

@@ -3,6 +3,7 @@
 #include <QtGui/QGraphicsEllipseItem>
 #include <iostream>
 #include <ui/stereocfg.h>
+#include <core/reflection.h>
 
 using namespace std;
 

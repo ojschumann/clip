@@ -2,7 +2,7 @@
 #include "ui_stereocfg.h"
 
 #include <QGraphicsView>
-
+#include <core/stereoprojector.h>
 
 StereoCfg::StereoCfg(StereoProjector* p, QWidget *parent) :
     QWidget(parent),    

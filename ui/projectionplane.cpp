@@ -9,9 +9,12 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <ui/resolutioncalculator.h>
+#include <core/crystal.h>
+#include <core/projector.h>
+
 
 ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
-    QWidget(parent),
+    QMainWindow(parent),
     ui(new Ui::ProjectionPlane),
     projector(p)
 {
@@ -40,26 +43,6 @@ ProjectionPlane::~ProjectionPlane() {
 }
 
 void ProjectionPlane::setupToolbar() {
-  zoomAction = ui->toolBar->addAction(QIcon(":/zoom.png"), "Zoom", this, SLOT(slotChangeMouseDragMode()));
-  panAction = ui->toolBar->addAction(QIcon(":/pan.png"), "Pan", this, SLOT(slotChangeMouseDragMode()));
-  rotAction = ui->toolBar->addAction(QIcon(":/rotate_cw.png"), "Rotate", this, SLOT(slotChangeMouseDragMode()));
-  rulerAction = ui->toolBar->addAction(QIcon(":/info.png"), "Measure resolution", this, SLOT(slotChangeMouseDragMode()));
-  connect(rulerAction, SIGNAL(triggered()), this, SLOT(slotOpenResolutionCalc()));
-
-  ui->toolBar->addSeparator();
-
-  markAction = ui->toolBar->addAction(QIcon(":/flag.png"), "Mark Spots");
-  infoAction = ui->toolBar->addAction(QIcon(":/info.png"), "Info on Spot");
-
-  ui->toolBar->addSeparator();
-
-  openImgAction = ui->toolBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Open Image", this, SLOT(slotLoadImage()));
-  closeImgAction = ui->toolBar->addAction(style()->standardIcon(QStyle::SP_DialogCloseButton), "Close Image", this, SLOT(slotCloseImage()));
-
-  flipHAction = ui->toolBar->addAction(QIcon(":/flip_horizontal.png"), "Flip horizontally");
-  flipVAction = ui->toolBar->addAction(QIcon(":/flip_vertical.png"), "Flip horizontally");
-  rotCWAction = ui->toolBar->addAction(QIcon(":/rotate_cw.png"), "Rotate Image clockwise");
-  rotCCWAction = ui->toolBar->addAction(QIcon(":/rotate_ccw.png"), "Rotate Image counterclockwise");
   colorCurveAction = ui->toolBar->addAction(QIcon(":/rotate_ccw.png"), "Open Color Curve Tool");
 
   ui->toolBar->addSeparator();
@@ -291,9 +274,9 @@ void ProjectionPlane::slotOpenProjectorConfig() {
 void ProjectionPlane::slotOpenResolutionCalc() {
   if (resoluctionCalc.isNull()) {
     resoluctionCalc = new ResolutionCalculator(projector);
-    emit showConfig(projectorConfig);
+    emit showConfig(resoluctionCalc);
   } else {
-    QMdiSubWindow* mdi = dynamic_cast<QMdiSubWindow*>(projectorConfig->parent());
+    QMdiSubWindow* mdi = dynamic_cast<QMdiSubWindow*>(resoluctionCalc->parent());
     if (mdi) {
       mdi->mdiArea()->setActiveSubWindow(mdi);
     }

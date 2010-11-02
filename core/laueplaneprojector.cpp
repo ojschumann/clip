@@ -5,6 +5,7 @@
 #include <tools/signalingellipse.h>
 #include <iostream>
 #include <ui/laueplanecfg.h>
+#include <core/reflection.h>
 
 using namespace std;
 

@@ -1,20 +1,18 @@
-#ifndef RULERITEM_H
-#define RULERITEM_H
+#ifndef ZONEITEM_H
+#define ZONEITEM_H
 
 #include <QGraphicsObject>
 #include <QGraphicsEllipseItem>
 #include <QPen>
 
 class Projector;
-class SignalingEllipseItem;
 
-
-class RulerItem : public QGraphicsObject
+class ZoneItem : public QGraphicsObject
 {
   Q_OBJECT
 public:
-  RulerItem(const QPointF&, const QPointF&, qreal, Projector* p, QGraphicsItem* parent=0);
-  ~RulerItem();
+  ZoneItem(const QPointF&, const QPointF&, qreal, Projector* p, QGraphicsItem* parent=0);
+  ~ZoneItem();
   QRectF boundingRect() const;
   void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
   void setStart(const QPointF&);
@@ -27,12 +25,14 @@ public:
 signals:
   void rulerChanged();
 protected:
-  SignalingEllipseItem* startHandle;
-  SignalingEllipseItem* endHandle;
+  QGraphicsEllipseItem* startHandle;
+  QGraphicsEllipseItem* endHandle;
   qreal radius;
+  QPointF startPos;
+  QPointF endPos;
   bool highlighted;
   QPen pen;
   Projector* projector;
 };
 
-#endif // RULERITEM_H
+#endif // ZONEITEM_H

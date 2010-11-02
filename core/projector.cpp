@@ -11,6 +11,10 @@
 #include <QThreadPool>
 #include <QtConcurrentMap>
 #include <QGraphicsView>
+#include <tools/ruleritem.h>
+#include <core/reflection.h>
+#include <core/crystal.h>
+
 
 using namespace std;
 
@@ -34,10 +38,10 @@ Projector::Projector(QObject *parent):
   imgGroup->stackBefore(spotMarkers);
 
 
-  QPixmap pix("../Clip4/Silver.jpg");
-  img = new QGraphicsPixmapItem(pix, imgGroup);
-  img->setTransform(QTransform::fromScale(1.0/pix.width(), 1.0/pix.height()));
-  img->setTransformationMode(Qt::SmoothTransformation);
+  //QPixmap pix("../Clip4/Silver.jpg");
+  //img = new QGraphicsPixmapItem(pix, imgGroup);
+  //img->setTransform(QTransform::fromScale(1.0/pix.width(), 1.0/pix.height()));
+  //img->setTransformationMode(Qt::SmoothTransformation);
 
   enableSpots();
   enableProjection();
@@ -51,6 +55,7 @@ Projector::Projector(QObject *parent):
   QTimer::singleShot(0, this, SLOT(decorateScene()));
   connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
+  connect(&rulerMapper, SIGNAL(mapped(int)), this, SIGNAL(rulerChanged(int)));
 
 };
 
@@ -377,16 +382,18 @@ QList<Vec3D> Projector::getMarkerNormals() const {
   return r;
 }
 
-// ---------------  Ruler Handline ---------------------------
+// ---------------  Ruler handling ---------------------------
 int Projector::rulerNumber() const {
   return rulerItems.size();
 }
 
 void Projector::addRuler(const QPointF& p1, const QPointF& p2) {
-  RulerItem* ruler = new RulerItem(det2img.map(p1), det2img.map(p2), getSpotSize(), imgGroup);
+  RulerItem* ruler = new RulerItem(det2img.map(p1), det2img.map(p2), getSpotSize(), this, imgGroup);
   ruler->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
+  rulerMapper.setMapping(ruler, rulerItems.size());
+  connect(ruler, SIGNAL(rulerChanged()), &rulerMapper, SLOT(map()));
   rulerItems << ruler;
-  emit rulersAdded();
+  emit rulerAdded();
 }
 
 void Projector::updateMostRecentRuler(const QPointF& p) {
@@ -402,16 +409,29 @@ QPair<QPointF, QPointF> Projector::getRulerCoordinates(int n) {
   return QPair<QPointF, QPointF>();
 }
 
-double Projector::getRulerSize(int n) {
+void Projector::highlightRuler(int n, bool b) {
   if (n<rulerItems.size()) {
-    return rulerItems.at(n)->data(0).toDouble();
+    rulerItems.at(n)->highlight(b);
   }
-  return -1.0;
 }
 
-void Projector::setRulerSize(int n, double v) {
+bool Projector::rulerIsHighlighted(int n) {
   if (n<rulerItems.size()) {
-    rulerItems[n]->setData(0, QVariant(v));
+    return rulerItems.at(n)->isHighlighted();
+  }
+  return false;
+}
+
+QVariant Projector::getRulerData(int n) {
+  if (n<rulerItems.size()) {
+    return rulerItems.at(n)->data(0);
+  }
+  return QVariant();
+}
+
+void Projector::setRulerData(int n, QVariant v) {
+  if (n<rulerItems.size()) {
+    rulerItems[n]->setData(0, v);
   }
 }
 
@@ -590,9 +610,10 @@ void Projector::SpotMarkerGraphicsItem::updateCache() {
     workerStart.wakeAll();
     cache.fill(QColor(0,0,0,0));
     workerSync.acquire(workers.size());
+
     QPainter p2(&cache);
-    for (int i=0; i<workers.size(); i++) {
-      p2.drawImage(QPoint(0,0), workers.at(i)->localCache);
+    foreach (Worker* worker, workers) {
+      p2.drawImage(QPoint(0,0), *worker->localCache);
     }
     cacheNeedsUpdate=false;
   }
@@ -650,6 +671,7 @@ void Projector::SpotMarkerGraphicsItem::Worker::run() {
 
     if (shouldStop) {
       spotMarker->workerSync.release(1);
+      delete localCache;
       return;
     }
 
@@ -657,10 +679,10 @@ void Projector::SpotMarkerGraphicsItem::Worker::run() {
     double ry = spotMarker->transform.m22()*spotMarker->spotSize;
 
 
-    if (localCache.size()!=spotMarker->cache.size())
-      localCache = QImage(spotMarker->cache.size(), QImage::Format_ARGB32_Premultiplied);
-    localCache.fill(QColor(0,0,0,0).rgba());
-    QPainter painter(&localCache);
+    if (!localCache || localCache->size()!=spotMarker->cache.size())
+      localCache = new QImage(spotMarker->cache.size(), QImage::Format_ARGB32_Premultiplied);
+    localCache->fill(QColor(0,0,0,0).rgba());
+    QPainter painter(localCache);
     QList<QGraphicsView*> l = spotMarker->scene()->views();
     if (l.size())
       painter.setRenderHints(l.at(0)->renderHints());
@@ -671,7 +693,6 @@ void Projector::SpotMarkerGraphicsItem::Worker::run() {
 
     }
     painter.end();
-
     spotMarker->workerSync.release(1);
 
   }

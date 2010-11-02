@@ -3,6 +3,7 @@
 
 #include <QGraphicsView>
 #include <QPair>
+#include <core/laueplaneprojector.h>
 
 LauePlaneCfg::LauePlaneCfg(LauePlaneProjector* p, QWidget *parent) :
     QWidget(parent),

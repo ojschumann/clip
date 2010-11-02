@@ -3,6 +3,8 @@
 #include <iostream>
 #include <core/projector.h>
 #include <tools/optimalrotation.h>
+#include <core/reflection.h>
+#include <core/spacegroup.h>
 
 #include <QTime>
 #include <QtConcurrentMap>
@@ -54,7 +56,7 @@ public:
 
 
 Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), MReziprocal(), MRot(), reflections(), connectedProjectors(this), rotationAxis(1,0,0) {
-  spaceGroup = new SpaceGroup(this);
+  spaceGroup = new Spacegroup(this);
   spaceGroup->setGroupSymbol("Pm3m");
   internalSetCell(5.0, 5.0, 5.0, 90.0, 90.0, 90.0);
   Qmin=0.0;
@@ -71,7 +73,7 @@ Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), M
 }
 
 Crystal::Crystal(const Crystal& c) {
-  spaceGroup = new SpaceGroup(this);
+  spaceGroup = new Spacegroup(this);
   spaceGroup->setGroupSymbol(c.spaceGroup->groupSymbol());
   internalSetCell(c.a,c.b,c.c,c.alpha,c.beta,c.gamma);
   Qmin=c.Qmin;
@@ -467,7 +469,7 @@ QList<double> Crystal::getCell() {
   return cell;
 }
 
-SpaceGroup* Crystal::getSpacegroup() {
+Spacegroup* Crystal::getSpacegroup() {
   return spaceGroup;
 }
 

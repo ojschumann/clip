@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ProjectionPlane</class>
- <widget class="QWidget" name="ProjectionPlane">
+ <widget class="QMainWindow" name="ProjectionPlane">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>672</width>
-    <height>410</height>
+    <width>303</width>
+    <height>316</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -16,72 +16,237 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <property name="margin">
-    <number>0</number>
+  <widget class="QWidget" name="viewFrame">
+   <property name="minimumSize">
+    <size>
+     <width>100</width>
+     <height>100</height>
+    </size>
    </property>
-   <property name="spacing">
-    <number>0</number>
+   <widget class="ProjectionGraphicsView" name="view">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>211</width>
+      <height>201</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>100</width>
+      <height>100</height>
+     </size>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="renderHints">
+     <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
+    </property>
+    <property name="viewportUpdateMode">
+     <enum>QGraphicsView::FullViewportUpdate</enum>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
    </property>
-   <item row="0" column="0">
-    <widget class="ToolBar" name="toolBar" native="true"/>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QWidget" name="viewFrame" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>250</width>
-       <height>250</height>
-      </size>
-     </property>
-     <property name="acceptDrops">
-      <bool>true</bool>
-     </property>
-     <widget class="ProjectionGraphicsView" name="view">
-      <property name="geometry">
-       <rect>
-        <x>220</x>
-        <y>70</y>
-        <width>250</width>
-        <height>250</height>
-       </rect>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="renderHints">
-       <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
-      </property>
-      <property name="viewportUpdateMode">
-       <enum>QGraphicsView::FullViewportUpdate</enum>
-      </property>
-     </widget>
-    </widget>
-   </item>
-  </layout>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="zoomAction"/>
+   <addaction name="panAction"/>
+   <addaction name="rotAction"/>
+   <addaction name="separator"/>
+   <addaction name="markAction"/>
+   <addaction name="infoAction"/>
+   <addaction name="separator"/>
+   <addaction name="openImgAction"/>
+   <addaction name="closeImgAction"/>
+   <addaction name="configAction"/>
+  </widget>
+  <widget class="QToolBar" name="imgToolBar">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>LeftToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="rulerAction"/>
+   <addaction name="rotCWAction"/>
+   <addaction name="rotCCWAction"/>
+   <addaction name="flipHAction"/>
+   <addaction name="flipVAction"/>
+   <addaction name="colorCurvesAction"/>
+  </widget>
+  <action name="zoomAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/zoom.png</normaloff>:/zoom.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom</string>
+   </property>
+  </action>
+  <action name="panAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/pan.png</normaloff>:/pan.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pan</string>
+   </property>
+  </action>
+  <action name="rotAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/rotate_cw.png</normaloff>:/rotate_cw.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotation</string>
+   </property>
+  </action>
+  <action name="markAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/flag.png</normaloff>:/flag.png</iconset>
+   </property>
+   <property name="text">
+    <string>Mark</string>
+   </property>
+  </action>
+  <action name="infoAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/info.png</normaloff>:/info.png</iconset>
+   </property>
+   <property name="text">
+    <string>Info</string>
+   </property>
+  </action>
+  <action name="configAction">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
+   </property>
+   <property name="text">
+    <string>Configure</string>
+   </property>
+  </action>
+  <action name="openImgAction">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/fileopen.png</normaloff>:/fileopen.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
+  <action name="closeImgAction">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/fileclose.png</normaloff>:/fileclose.png</iconset>
+   </property>
+   <property name="text">
+    <string>Close Image</string>
+   </property>
+  </action>
+  <action name="rulerAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/ruler.png</normaloff>:/ruler.png</iconset>
+   </property>
+   <property name="text">
+    <string>Measure Resolution</string>
+   </property>
+  </action>
+  <action name="rotCWAction">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/rotate_cw.png</normaloff>:/rotate_cw.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clockwise Rotation</string>
+   </property>
+  </action>
+  <action name="rotCCWAction">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/rotate_ccw.png</normaloff>:/rotate_ccw.png</iconset>
+   </property>
+   <property name="text">
+    <string>Counter Clockwise Rotation</string>
+   </property>
+  </action>
+  <action name="flipHAction">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/flip_horizontal.png</normaloff>:/flip_horizontal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flip Horizontally</string>
+   </property>
+  </action>
+  <action name="flipVAction">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/flip_vertical.png</normaloff>:/flip_vertical.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flip Vertically</string>
+   </property>
+  </action>
+  <action name="colorCurvesAction">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/Crystal.png</normaloff>:/Crystal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Color Curves</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>ToolBar</class>
-   <extends>QWidget</extends>
-   <header>defs.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>ProjectionGraphicsView</class>
    <extends>QGraphicsView</extends>
    <header>ui/projectiongraphicsview.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../icons/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

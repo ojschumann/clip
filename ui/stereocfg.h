@@ -2,7 +2,8 @@
 #define STEREOCFG_H
 
 #include <QWidget>
-#include <core/stereoprojector.h>
+
+class StereoProjector;
 
 
 namespace Ui {

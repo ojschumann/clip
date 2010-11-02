@@ -10,9 +10,9 @@
 #include <tools/vec3D.h>
 #include <tools/mat3D.h>
 
-class SpaceGroupCheck;
+class SpacegroupCheck;
 
-class SpaceGroup: public QObject
+class Spacegroup: public QObject
 {
   Q_OBJECT
 public:
@@ -28,7 +28,7 @@ public:
   Q_DECLARE_FLAGS(System, Systems)
 
 
-  SpaceGroup(QObject*);
+  Spacegroup(QObject*);
   bool setGroupSymbol(QString);
 
   QString groupSymbol() const;
@@ -47,13 +47,13 @@ signals:
 
 private:
 
-  class SpaceGroupCheck {
+  class SpacegroupCheck {
   public:
-    SpaceGroupCheck(SpaceGroup::System, QString, QString);
+    SpacegroupCheck(Spacegroup::System, QString, QString);
     bool match(QString);
     QStringList elements();
 
-    SpaceGroup::System system;
+    Spacegroup::System system;
     QString pointgroup;
     QRegExp regexp;
   };
@@ -63,7 +63,7 @@ private:
   QStringList symbolElements;
   System crystalsystem;
 
-  QList<SpaceGroupCheck> groups;
+  QList<SpacegroupCheck> groups;
 
   class PointgroupElement {
   public:

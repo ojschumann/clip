@@ -1,18 +1,20 @@
 #ifndef PROJECTIONPLANE_H
 #define PROJECTIONPLANE_H
 
-#include <QWidget>
+#include <QMainWindow>
 #include <QRubberBand>
-#include <core/projector.h>
 #include <QCustomEvent>
 #include <tools/objectstore.h>
 #include <QActionGroup>
+#include <QPointer>
+
+class Projector;
 
 namespace Ui {
   class ProjectionPlane;
 }
 
-class ProjectionPlane : public QWidget
+class ProjectionPlane : public QMainWindow
 {
   Q_OBJECT
 

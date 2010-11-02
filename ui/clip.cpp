@@ -2,6 +2,7 @@
 #include "ui_clip.h"
 #include <ui/crystaldisplay.h>
 #include <QMdiSubWindow>
+#include <core/projector.h>
 #include <ui/projectionplane.h>
 #include <core/laueplaneprojector.h>
 #include <core/stereoprojector.h>
