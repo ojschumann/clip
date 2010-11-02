@@ -11,6 +11,7 @@
 #include <QThreadPool>
 #include <QtConcurrentMap>
 #include <QGraphicsView>
+#include <tools/signalingellipse.h>
 #include <tools/ruleritem.h>
 #include <tools/zoneitem.h>
 #include <core/reflection.h>
@@ -334,17 +335,18 @@ void Projector::enableSpots(bool b) {
 }
 
 void Projector::addMarker(const QPointF& p) {
-  QRectF r(-0.5*spotSize, -0.5*spotSize, spotSize, spotSize);
+  QRectF r(-spotSize, -spotSize, 2.0*spotSize, 2.0*spotSize);
   //QRectF r(-5.0,-5.0,10.0,10.0);
 
-  QGraphicsEllipseItem* marker=new QGraphicsEllipseItem(imgGroup);
+  SignalingEllipseItem* marker=new SignalingEllipseItem(imgGroup);
   marker->setFlag(QGraphicsItem::ItemIsMovable, true);
   marker->setCursor(QCursor(Qt::SizeAllCursor));
   marker->setPen(QPen(QColor(0xFF,0xAA,0x33)));
   marker->setRect(r);
   marker->setPos(det2img.map(p));
   marker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
-
+  connect(marker, SIGNAL(positionChanged()), this, SIGNAL(spotMarkerChanged()));
+  emit spotMarkerAdded();
   markerItems.append(marker);
 };
 
@@ -446,6 +448,8 @@ int Projector::zoneMarkerNumber() const {
 void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
   ZoneItem* zoneMarker = new ZoneItem(det2img.map(p1), det2img.map(p2), this, imgGroup);
   zoneMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
+  connect(this, SIGNAL(spotMarkerAdded()), zoneMarker, SLOT(updatePolygon()));
+  connect(this, SIGNAL(spotMarkerChanged()), zoneMarker, SLOT(updatePolygon()));
   zoneMarkerItems << zoneMarker;
   emit zoneMarkerAdded();
 }

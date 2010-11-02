@@ -109,14 +109,6 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
       zoomRubber = new QRubberBand(QRubberBand::Rectangle, ui->view->viewport());
       zoomRubber->setGeometry(QRect());
       zoomRubber->show();
-    } else if (ui->rulerAction->isChecked()) {
-      projector->addRuler(mousePressOrigin, mousePressOrigin);
-      QMouseEvent e_again(e->type(), ui->view->viewport()->mapFromGlobal(e->globalPos()), e->button(), e->buttons(), e->modifiers());
-      ui->view->mousePressEvent(&e_again);
-    } else if (ui->markZonesAction->isChecked()) {
-      projector->addZoneMarker(mousePressOrigin, mousePressOrigin);
-      QMouseEvent e_again(e->type(), ui->view->viewport()->mapFromGlobal(e->globalPos()), e->button(), e->buttons(), e->modifiers());
-      ui->view->mousePressEvent(&e_again);
     }
   } else if (e->buttons()==Qt::RightButton) {
     if (zoomSteps.size()>0)
@@ -128,9 +120,19 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
 
 void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
   QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
+  QPointF dp = (p-mousePressOrigin);
+  bool largeMove = hypot(dp.x(), dp.y())>0.01*projector->getSpotSize();
   if (e->buttons()==Qt::LeftButton) {
     if (ui->zoomAction->isChecked()) {
       zoomRubber->setGeometry(QRect(ui->view->mapFromScene(mousePressOrigin), ui->view->mapFromScene(p)).normalized());
+    } else if (ui->rulerAction->isChecked() && largeMove) {
+      projector->addRuler(mousePressOrigin, p);
+      QMouseEvent e_again(QEvent::MouseButtonPress, ui->view->viewport()->mapFromGlobal(e->globalPos()), Qt::LeftButton, e->buttons(), e->modifiers());
+      ui->view->mousePressEvent(&e_again);
+    } else if (ui->markZonesAction->isChecked() && largeMove) {
+      projector->addZoneMarker(mousePressOrigin, p);
+      QMouseEvent e_again(QEvent::MouseButtonPress, ui->view->viewport()->mapFromGlobal(e->globalPos()), Qt::LeftButton, e->buttons(), e->modifiers());
+      ui->view->mousePressEvent(&e_again);
     } else if (ui->panAction->isChecked()) {
       bool b1, b2;
       Vec3D v1 = projector->det2normal(lastMousePosition, &b1);
@@ -176,13 +178,21 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
 
 void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
   QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
+  QPointF dp = (p-mousePressOrigin);
+  bool largeMove = hypot(dp.x(), dp.y())>0.01*projector->getSpotSize();
   if (e->button()==Qt::LeftButton) {
     if (ui->zoomAction->isChecked()) {
-      zoomSteps.append(QRectF(mousePressOrigin, p).normalized());
+      if (largeMove) zoomSteps.append(QRectF(mousePressOrigin, p).normalized());
       zoomRubber->hide();
       delete zoomRubber;
       zoomRubber=0;
       resizeView();
+    }
+    if (!largeMove) {
+      if (ui->infoAction->isChecked()) {
+      } else if (ui->markAction->isChecked()) {
+        projector->addMarker(p);
+      }
     }
   }
   //ui->view->setDragMode(QGraphicsView::NoDrag);

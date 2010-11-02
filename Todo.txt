@@ -10,7 +10,7 @@ Spacegroup
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
 
-Marked Spots (call from Crystal) (new)
+Marked Spots and Zone info (call from Crystal) (new)
   Group Spots (on projector) to define Zones
 
 Indexer (port and enhance)

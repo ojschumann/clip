@@ -114,6 +114,8 @@ signals:
   void projectedPointsUpdated();
   void rulerAdded();
   void rulerChanged(int);
+  void spotMarkerAdded();
+  void spotMarkerChanged();
   void zoneMarkerAdded();
   void wavevectorsUpdated();
   void projectionParamsChanged();

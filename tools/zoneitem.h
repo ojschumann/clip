@@ -25,9 +25,11 @@ public:
   bool isHighlighted();
 private slots:
   void updatePolygon();
+  void updateOptimalZone();
 signals:
   void zoneChanged();
 protected:
+  QList<QPolygonF> generatePolygon(const Vec3D&);
   SignalingEllipseItem* startHandle;
   SignalingEllipseItem* endHandle;
   qreal radius;
