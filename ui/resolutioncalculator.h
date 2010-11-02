@@ -25,6 +25,10 @@ private:
   Ui::ResolutionCalculator *ui;
   Projector* projector;
   RulerModel* model;
+
+private slots:
+    void on_cancelButton_clicked();
+    void on_acceptButton_clicked();
 };
 
 #endif // RESOLUTIONCALCULATOR_H

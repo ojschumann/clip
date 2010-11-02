@@ -8,11 +8,10 @@
 using namespace std;
 
 
-RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, qreal r, Projector* p, QGraphicsItem* parent):
+RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* parent):
     QGraphicsObject(parent),
     startHandle(new SignalingEllipseItem(this)),
     endHandle(new SignalingEllipseItem(this)),
-    radius(0.01*r),
     projector(p)
 {
   highlighted=true;
@@ -22,6 +21,7 @@ RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, qreal r, Projector* p
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
   QList<SignalingEllipseItem*> l;
   l << startHandle << endHandle;
+  double radius = 0.01*projector->getSpotSize();
   foreach (SignalingEllipseItem* item, l) {
     item->setRect(-radius, -radius, 2*radius, 2*radius);
     item->setPen(QPen(Qt::red));
@@ -44,6 +44,8 @@ void RulerItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) 
     p->setPen(pen);
     QVector<QLineF> lines;
     QLineF l(startHandle->pos(), endHandle->pos());
+
+    double radius = 0.01*projector->getSpotSize();
 
     lines << l;
     l.setLength(0.7*radius);

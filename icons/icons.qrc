@@ -18,5 +18,7 @@
         <file>rotate_cw.png</file>
         <file>rotate_ccw.png</file>
         <file>ruler.png</file>
+        <file>cut.png</file>
+        <file>color_curve.png</file>
     </qresource>
 </RCC>

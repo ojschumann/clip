@@ -3,29 +3,34 @@
 #include <QCursor>
 #include <iostream>
 #include <core/projector.h>
+#include <tools/signalingellipse.h>
 
 using namespace std;
 
 
-ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, qreal r, Projector* p, QGraphicsItem* parent):
+ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* parent):
     QGraphicsObject(parent),
-    startHandle(new QGraphicsEllipseItem(this)),
-    endHandle(new QGraphicsEllipseItem(this)),
-    radius(0.01*r),
+    startHandle(new SignalingEllipseItem(this)),
+    endHandle(new SignalingEllipseItem(this)),
     projector(p)
 {
+  highlighted=true;
   highlight(false);
-  startHandle->setPos(p1);
-  endHandle->setPos(p2);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
-  QList<QGraphicsEllipseItem*> l;
+  QList<SignalingEllipseItem*> l;
   l << startHandle << endHandle;
-  foreach (QGraphicsEllipseItem* item, l) {
+  double radius = 0.01*projector->getSpotSize();
+  connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updatePolygon()));
+  foreach (SignalingEllipseItem* item, l) {
     item->setRect(-radius, -radius, 2*radius, 2*radius);
     item->setPen(QPen(Qt::red));
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
+    connect(item, SIGNAL(positionChanged()), this, SIGNAL(zoneChanged()));
+    connect(item, SIGNAL(positionChanged()), this, SLOT(updatePolygon()));
   }
+  startHandle->setPos(p1);
+  endHandle->setPos(p2);
 }
 
 
@@ -33,41 +38,57 @@ ZoneItem::~ZoneItem() {
 }
 
 QRectF ZoneItem::boundingRect() const {
-  return childrenBoundingRect();
+  QRectF r = childrenBoundingRect();
+  foreach (QPolygonF zoneSeg, zoneSegments) {
+    QRectF b = zoneSeg.boundingRect();
+    double radius = 0.01*projector->getSpotSize();
+    b.adjust(-radius, -radius, radius, radius);
+    r |= b;
+  }
+  r &= projector->getScene()->sceneRect();
+  return r;
 }
 
 void ZoneItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
-  if (startHandle->pos()!=startPos || endHandle->pos()!=endPos) {
-    startPos=startHandle->pos();
-    endPos=endHandle->pos();
-    emit rulerChanged();
-  }
-  if (startHandle->pos()!=endHandle->pos()) {
-    p->setPen(pen);
-    QVector<QLineF> lines;
-    QLineF l(startHandle->pos(), endHandle->pos());
+  p->setPen(pen);
+  foreach (QPolygonF poly, zoneSegments)
+    p->drawPolyline(poly);
+}
 
-    QPolygonF zone;
-    Vec3D u = projector->det2normal(projector->img2det.map(startPos));
-    Vec3D v = projector->det2normal(projector->img2det.map(endPos));
+void ZoneItem::updatePolygon() {
+  zoneSegments.clear();
+  if (startHandle->pos()!=endHandle->pos()) {
+
+    Vec3D u = projector->det2normal(projector->img2det.map(startHandle->pos()));
+    Vec3D v = projector->det2normal(projector->img2det.map(endHandle->pos()));
     Vec3D z = u%v;
     z.normalize();
     Vec3D n = u;
     Mat3D M(z, 2.0*M_PI/400);
 
-    for (int i=0; i<401; i++) {
-      bool ok;
-      QPointF p2 = projector->det2img.map(projector->normal2det(n, &ok));
-      if (ok) {
-        zone << p2;
-      } else if (zone.size()>1) {
-        p->drawPolyline(zone);
-        zone.clear();
-      }
+    QVector<bool> ok(400);
+    QPolygonF zone(400);
+    for (int i=0; i<400; i++) {
+      zone[i] = projector->det2img.map(projector->normal2det(n, &ok[i]));
       n = M*n;
     }
-    if (zone.size()>1) {
-      p->drawPolyline(zone);
+    int startIdx = ok.indexOf(false);
+    if (startIdx==-1) {
+      zone << zone.first();
+      zoneSegments << zone;
+    } else if (ok.indexOf(true)!=-1) {
+      int idx=(startIdx+1)%400;
+      while (idx!=startIdx) {
+        while (!ok[idx]) idx=(idx+1)%400;
+        QPolygonF zoneSegment;
+        while (ok[idx]) {
+          zoneSegment << zone[idx];
+          idx=(idx+1)%400;
+        }
+        if (zoneSegment.size()>1)
+          zoneSegments << zoneSegment;
+      }
+
     }
   }
 }
@@ -89,21 +110,18 @@ QPointF ZoneItem::getEnd() {
 }
 
 void ZoneItem::highlight(bool h) {
-  if (h!=highlighted) {
+  if (h!=isHighlighted()) {
     highlighted=h;
+    double radius = 0.01*projector->getSpotSize();
     if (isHighlighted()) {
-      pen = QPen(QColor(255, 128, 0));
-      pen.setWidthF(3.0);
-      pen.setCosmetic(true);
+      pen = QPen(QColor(255, 192, 0, 128));
+      pen.setWidthF(1.5*radius);
     } else {
-      //pen = QPen(Qt::yellow);
-      //pen.setWidthF(0.0);
       pen = QPen(QColor(255, 255, 0, 128));
       pen.setWidthF(1.5*radius);
     }
     startHandle->setPen(pen);
     endHandle->setPen(pen);
-
     update();
   }
 }
@@ -111,6 +129,7 @@ void ZoneItem::highlight(bool h) {
 bool ZoneItem::isHighlighted() {
   return highlighted;
 }
+
 
 QVariant ZoneItem::itemChange(GraphicsItemChange change, const QVariant &value) {
   if (change == ItemTransformChange) {

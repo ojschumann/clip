@@ -21,6 +21,7 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   ui->setupUi(this);
   projector->setParent(this); // Ensures, that projector is deleted at end
   setWindowTitle(projector->displayName());
+  connect(projector, SIGNAL(projectionRectSizeChanged()), this, SLOT(resizeView()));
 
   ui->view->setScene(projector->getScene());
   ui->view->setTransform(QTransform(1,0,0,-1,0,0));
@@ -43,51 +44,24 @@ ProjectionPlane::~ProjectionPlane() {
 }
 
 void ProjectionPlane::setupToolbar() {
-  colorCurveAction = ui->toolBar->addAction(QIcon(":/rotate_ccw.png"), "Open Color Curve Tool");
-
-  ui->toolBar->addSeparator();
-
-  printAction = ui->toolBar->addAction(QIcon(":/fileprint.png"), "Flip horizontally");
-  configAction = ui->toolBar->addAction(QIcon(":/configure.png"), "Configuration", this, SLOT(slotOpenProjectorConfig()));
 
   // Handling for MouseDrags
   QActionGroup* actionGroup = new QActionGroup(this);
   actionGroup->setExclusive(true);
-  actionGroup->addAction(zoomAction);
-  actionGroup->addAction(panAction);
-  actionGroup->addAction(rotAction);
-  actionGroup->addAction(rulerAction);
-  foreach (QAction* action, actionGroup->actions()) {
-    action->setCheckable(true);
-  }
-  zoomAction->setChecked(true);
+  actionGroup->addAction(ui->zoomAction);
+  actionGroup->addAction(ui->panAction);
+  actionGroup->addAction(ui->rotAction);
+  actionGroup->addAction(ui->rulerAction);
+  actionGroup->addAction(ui->markZonesAction);
+  ui->zoomAction->setChecked(true);
 
   actionGroup = new QActionGroup(this);
   actionGroup->setExclusive(true);
-  actionGroup->addAction(infoAction);
-  actionGroup->addAction(markAction);
-  foreach (QAction* action, actionGroup->actions()) {
-    action->setCheckable(true);
-  }
-  infoAction->setChecked(true);
+  actionGroup->addAction(ui->infoAction);
+  actionGroup->addAction(ui->markAction);
+  ui->infoAction->setChecked(true);
 
-  imageTools << rulerAction << closeImgAction << flipHAction << flipVAction << rotCWAction << rotCCWAction << colorCurveAction;
-  foreach (QAction* action, imageTools)
-    action->setVisible(false);
-  /*zoomAction->setChecked(true);
-  connect(mouseDragModeGroup, SIGNAL(triggered(QAction*)), this, SLOT(slotChangeMouseDragMode(QAction*)));
-  */
-
-  // Hide if no Image
-/*  imageToolsGroup = new QActionGroup(this);
-  imageToolsGroup->setExclusive(false);
-  imageToolsGroup->setVisible(false);
-  //imageToolsGroup->addAction(rulerAction);
-  imageToolsGroup->addAction(closeImgAction);
-  imageToolsGroup->addAction(flipHAction);
-  imageToolsGroup->addAction(flipVAction);
-  imageToolsGroup->addAction(rotCWAction);
-  imageToolsGroup->addAction(rotCCWAction); */
+  ui->imgToolBar->setVisible(false);
 }
 
 
@@ -125,17 +99,24 @@ void ProjectionPlane::resizeEvent(QResizeEvent *e) {
 
 
 void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
-  mousePressOrigin = ui->view->mapToScene(ui->view->mapFromGlobal(e->globalPos()));
+  mousePressOrigin = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
   if (e->buttons()==Qt::LeftButton) {
-    if (zoomAction->isChecked()) {
+    if (ui->zoomAction->isChecked()) {
       if (zoomRubber) {
         delete zoomRubber;
+        zoomRubber = 0;
       }
-      zoomRubber = new QRubberBand(QRubberBand::Rectangle, ui->view);
+      zoomRubber = new QRubberBand(QRubberBand::Rectangle, ui->view->viewport());
       zoomRubber->setGeometry(QRect());
       zoomRubber->show();
-    } else if (rulerAction->isChecked()) {
+    } else if (ui->rulerAction->isChecked()) {
       projector->addRuler(mousePressOrigin, mousePressOrigin);
+      QMouseEvent e_again(e->type(), ui->view->viewport()->mapFromGlobal(e->globalPos()), e->button(), e->buttons(), e->modifiers());
+      ui->view->mousePressEvent(&e_again);
+    } else if (ui->markZonesAction->isChecked()) {
+      projector->addZoneMarker(mousePressOrigin, mousePressOrigin);
+      QMouseEvent e_again(e->type(), ui->view->viewport()->mapFromGlobal(e->globalPos()), e->button(), e->buttons(), e->modifiers());
+      ui->view->mousePressEvent(&e_again);
     }
   } else if (e->buttons()==Qt::RightButton) {
     if (zoomSteps.size()>0)
@@ -146,13 +127,11 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
 }
 
 void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
-  QPointF p = ui->view->mapToScene(ui->view->mapFromGlobal(e->globalPos()));
+  QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
   if (e->buttons()==Qt::LeftButton) {
-    if (zoomAction->isChecked()) {
+    if (ui->zoomAction->isChecked()) {
       zoomRubber->setGeometry(QRect(ui->view->mapFromScene(mousePressOrigin), ui->view->mapFromScene(p)).normalized());
-    } else if (rulerAction->isChecked()) {
-      projector->updateMostRecentRuler(p);
-    } else if (panAction->isChecked()) {
+    } else if (ui->panAction->isChecked()) {
       bool b1, b2;
       Vec3D v1 = projector->det2normal(lastMousePosition, &b1);
       Vec3D v2 = projector->det2normal(p, &b2);
@@ -169,7 +148,7 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
         //    QtGui.qApp.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
       }
-    } else if (rotAction->isChecked()) {
+    } else if (ui->rotAction->isChecked()) {
       bool b1, b2;
       Vec3D v1 = projector->det2normal(lastMousePosition, &b1);
       Vec3D v2 = projector->det2normal(p, &b2);
@@ -196,9 +175,9 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
-  QPointF p = ui->view->mapToScene(ui->view->mapFromGlobal(e->globalPos()));
+  QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
   if (e->button()==Qt::LeftButton) {
-    if (zoomAction->isChecked()) {
+    if (ui->zoomAction->isChecked()) {
       zoomSteps.append(QRectF(mousePressOrigin, p).normalized());
       zoomRubber->hide();
       delete zoomRubber;
@@ -229,9 +208,9 @@ void ProjectionPlane::dropEvent(QDropEvent *e) {
 
 void ProjectionPlane::slotChangeMouseDragMode() {
   foreach(ProjectionPlane* plane, allPlanes) {
-    plane->zoomAction->setChecked(zoomAction->isChecked());
-    plane->panAction->setChecked(panAction->isChecked());
-    plane->rotAction->setChecked(rotAction->isChecked());
+    plane->ui->zoomAction->setChecked(ui->zoomAction->isChecked());
+    plane->ui->panAction->setChecked(ui->panAction->isChecked());
+    plane->ui->rotAction->setChecked(ui->rotAction->isChecked());
   }
 }
 
@@ -243,32 +222,6 @@ void ProjectionPlane::slotUpdateFPS() {
 }
 
 void ProjectionPlane::slotLoadCrystalData() {
-}
-
-void ProjectionPlane::slotLoadImage() {
-  foreach (QAction* action, imageTools)
-    action->setVisible(true);
-
-}
-
-void ProjectionPlane::slotCloseImage() {
-  foreach (QAction* action, imageTools)
-    action->setVisible(false);
-
-}
-
-
-void ProjectionPlane::slotOpenProjectorConfig() {
-  if (projectorConfig.isNull()) {
-    projectorConfig = projector->configWidget();
-    emit showConfig(projectorConfig);
-  } else {
-    QMdiSubWindow* mdi = dynamic_cast<QMdiSubWindow*>(projectorConfig->parent());
-    if (mdi) {
-      mdi->mdiArea()->setActiveSubWindow(mdi);
-    }
-
-  }
 }
 
 void ProjectionPlane::slotOpenResolutionCalc() {
@@ -284,5 +237,26 @@ void ProjectionPlane::slotOpenResolutionCalc() {
   }
 }
 
+void ProjectionPlane::on_closeImgAction_triggered() {
+  ui->imgToolBar->setVisible(false);
+}
+
+void ProjectionPlane::on_openImgAction_triggered() {
+  ui->imgToolBar->setVisible(true);
+}
+
+void ProjectionPlane::on_configAction_triggered() {
+  if (projectorConfig.isNull()) {
+    projectorConfig = projector->configWidget();
+    emit showConfig(projectorConfig);
+  } else {
+    QMdiSubWindow* mdi = dynamic_cast<QMdiSubWindow*>(projectorConfig->parent());
+    if (mdi) {
+      mdi->mdiArea()->setActiveSubWindow(mdi);
+    }
+  }
+}
 
 QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
+
+

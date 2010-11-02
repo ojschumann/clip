@@ -103,14 +103,13 @@ void LauePlaneProjector::setDetOrientation(double omega, double chi, double phi)
 void LauePlaneProjector::setDetOffset(double dx, double dy) {
   dx/=dist();
   dy/=dist();
-  if ((dx!=detDx) or (dy!=detDy)) {
-    detDx=dx;
-    detDy=dy;
-    updatePBPos();
-    if (projectionEnabled)
-      emit projectionParamsChanged();
-  }
+  detDx=dx;
+  detDy=dy;
+  updatePBPos();
+  if (projectionEnabled)
+    emit projectionParamsChanged();
 }
+
 
 void LauePlaneProjector::setDist(double v) {
   setDetSize(v, width(), height());

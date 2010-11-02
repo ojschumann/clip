@@ -25,6 +25,7 @@
 class Crystal;
 class Reflection;
 class RulerItem;
+class ZoneItem;
 
 class Projector: public QObject, public FitObject {
   Q_OBJECT
@@ -94,12 +95,15 @@ public:
 
   int rulerNumber() const;
   void addRuler(const QPointF& p1, const QPointF& p2);
-  void updateMostRecentRuler(const QPointF& p);
+  void clearRulers();
   QPair<QPointF, QPointF> getRulerCoordinates(int);
   void highlightRuler(int, bool);
   bool rulerIsHighlighted(int);
   QVariant getRulerData(int);
   void setRulerData(int, QVariant);
+
+  int zoneMarkerNumber() const;
+  void addZoneMarker(const QPointF& p1, const QPointF& p2);
 
   virtual void doImgRotation(int CWRSteps, bool flip);
 
@@ -110,6 +114,7 @@ signals:
   void projectedPointsUpdated();
   void rulerAdded();
   void rulerChanged(int);
+  void zoneMarkerAdded();
   void wavevectorsUpdated();
   void projectionParamsChanged();
   void projectionRectPosChanged();
@@ -131,6 +136,8 @@ protected:
   // Ruler Item
   QList<RulerItem*> rulerItems;
   QSignalMapper rulerMapper;
+  // Zone markers
+  QList<ZoneItem*> zoneMarkerItems;
 
   // Pointer to the connected crystal
   QPointer<Crystal> crystal;

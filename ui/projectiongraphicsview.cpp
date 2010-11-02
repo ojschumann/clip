@@ -2,6 +2,10 @@
 #include <QMouseEvent>
 #include <QTime>
 #include <QGraphicsItem>
+#include <QString>
+#include <iostream>
+
+using namespace std;
 
 ProjectionGraphicsView::ProjectionGraphicsView(QWidget *parent) :
     QGraphicsView(parent) {

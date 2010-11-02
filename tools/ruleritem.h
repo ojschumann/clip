@@ -13,7 +13,7 @@ class RulerItem : public QGraphicsObject
 {
   Q_OBJECT
 public:
-  RulerItem(const QPointF&, const QPointF&, qreal, Projector* p, QGraphicsItem* parent=0);
+  RulerItem(const QPointF&, const QPointF&, Projector* p, QGraphicsItem* parent=0);
   ~RulerItem();
   QRectF boundingRect() const;
   void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
@@ -29,7 +29,6 @@ signals:
 protected:
   SignalingEllipseItem* startHandle;
   SignalingEllipseItem* endHandle;
-  qreal radius;
   bool highlighted;
   QPen pen;
   Projector* projector;

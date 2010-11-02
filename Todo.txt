@@ -1,7 +1,6 @@
 ProjectionPlane
   Mark Spots
   Info Widgets
-  Mark Zones (new)
   Image Handling (new, multithreaded)
     Rotate/Flip, Crop (with arbitrary rotation)
 

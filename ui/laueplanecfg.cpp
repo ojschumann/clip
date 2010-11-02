@@ -22,20 +22,20 @@ LauePlaneCfg::LauePlaneCfg(LauePlaneProjector* p, QWidget *parent) :
   connect(ui->renderAntialias, SIGNAL(toggled(bool)), this, SLOT(slotUpdateRenderHints()));
   connect(ui->renderAntialiasText, SIGNAL(toggled(bool)), this, SLOT(slotUpdateRenderHints()));
 
-  QList<QPair<QDoubleSpinBox*, const char*> > l;
-  QPair<QDoubleSpinBox*, const char*> pair;
+  QList<QPair<QDoubleSpinBox*, QByteArray> > l;
+  QPair<QDoubleSpinBox*, QByteArray> pair;
 
-  l << qMakePair(ui->detDist, SLOT(setDist(double)));
-  l << qMakePair(ui->detWidth, SLOT(setWidth(double)));
-  l << qMakePair(ui->detHeight, SLOT(setHeight(double)));
-  l << qMakePair(ui->detOmega, SLOT(setOmega(double)));
-  l << qMakePair(ui->detChi, SLOT(setChi(double)));
-  l << qMakePair(ui->detPhi, SLOT(setPhi(double)));
-  l << qMakePair(ui->detDx, SLOT(setXOffset(double)));
-  l << qMakePair(ui->detDy, SLOT(setYOffset(double)));
+  l << qMakePair(ui->detDist, QByteArray(SLOT(setDist(double))));
+  l << qMakePair(ui->detWidth, QByteArray(SLOT(setWidth(double))));
+  l << qMakePair(ui->detHeight, QByteArray(SLOT(setHeight(double))));
+  l << qMakePair(ui->detOmega, QByteArray(SLOT(setOmega(double))));
+  l << qMakePair(ui->detChi, QByteArray(SLOT(setChi(double))));
+  l << qMakePair(ui->detPhi, QByteArray(SLOT(setPhi(double))));
+  l << qMakePair(ui->detDx, QByteArray(SLOT(setXOffset(double))));
+  l << qMakePair(ui->detDy, QByteArray(SLOT(setYOffset(double))));
 
-  l << qMakePair(ui->detTextSize, SLOT(setTextSize(double)));
-  l << qMakePair(ui->detSpotSize, SLOT(setSpotSize(double)));
+  l << qMakePair(ui->detTextSize, QByteArray(SLOT(setTextSize(double))));
+  l << qMakePair(ui->detSpotSize, QByteArray(SLOT(setSpotSize(double))));
 
   foreach (pair, l) {
     connect(pair.first, SIGNAL(valueChanged(double)), projector, pair.second);

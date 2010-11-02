@@ -12,6 +12,7 @@
 #include <QtConcurrentMap>
 #include <QGraphicsView>
 #include <tools/ruleritem.h>
+#include <tools/zoneitem.h>
 #include <core/reflection.h>
 #include <core/crystal.h>
 
@@ -388,7 +389,7 @@ int Projector::rulerNumber() const {
 }
 
 void Projector::addRuler(const QPointF& p1, const QPointF& p2) {
-  RulerItem* ruler = new RulerItem(det2img.map(p1), det2img.map(p2), getSpotSize(), this, imgGroup);
+  RulerItem* ruler = new RulerItem(det2img.map(p1), det2img.map(p2), this, imgGroup);
   ruler->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
   rulerMapper.setMapping(ruler, rulerItems.size());
   connect(ruler, SIGNAL(rulerChanged()), &rulerMapper, SLOT(map()));
@@ -396,10 +397,12 @@ void Projector::addRuler(const QPointF& p1, const QPointF& p2) {
   emit rulerAdded();
 }
 
-void Projector::updateMostRecentRuler(const QPointF& p) {
-  if (!rulerItems.isEmpty()) {
-    rulerItems.last()->setEnd(det2img.map(p));
+void Projector::clearRulers() {
+  foreach (RulerItem* item, rulerItems) {
+    scene.removeItem(item);
+    delete item;
   }
+  rulerItems.clear();
 }
 
 QPair<QPointF, QPointF> Projector::getRulerCoordinates(int n) {
@@ -433,6 +436,18 @@ void Projector::setRulerData(int n, QVariant v) {
   if (n<rulerItems.size()) {
     rulerItems[n]->setData(0, v);
   }
+}
+
+// ----------------------- Handling of Zone Markers -------------
+int Projector::zoneMarkerNumber() const {
+  return zoneMarkerItems.size();
+}
+
+void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
+  ZoneItem* zoneMarker = new ZoneItem(det2img.map(p1), det2img.map(p2), this, imgGroup);
+  zoneMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
+  zoneMarkerItems << zoneMarker;
+  emit zoneMarkerAdded();
 }
 
 

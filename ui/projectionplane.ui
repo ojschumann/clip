@@ -65,6 +65,7 @@
    <addaction name="zoomAction"/>
    <addaction name="panAction"/>
    <addaction name="rotAction"/>
+   <addaction name="markZonesAction"/>
    <addaction name="separator"/>
    <addaction name="markAction"/>
    <addaction name="infoAction"/>
@@ -75,7 +76,7 @@
   </widget>
   <widget class="QToolBar" name="imgToolBar">
    <property name="windowTitle">
-    <string>toolBar_2</string>
+    <string>Image Toolbar</string>
    </property>
    <attribute name="toolBarArea">
     <enum>LeftToolBarArea</enum>
@@ -84,11 +85,11 @@
     <bool>false</bool>
    </attribute>
    <addaction name="rulerAction"/>
+   <addaction name="colorCurvesAction"/>
    <addaction name="rotCWAction"/>
    <addaction name="rotCCWAction"/>
    <addaction name="flipHAction"/>
    <addaction name="flipVAction"/>
-   <addaction name="colorCurvesAction"/>
   </widget>
   <action name="zoomAction">
    <property name="checkable">
@@ -231,10 +232,22 @@
   <action name="colorCurvesAction">
    <property name="icon">
     <iconset resource="../icons/icons.qrc">
-     <normaloff>:/Crystal.png</normaloff>:/Crystal.png</iconset>
+     <normaloff>:/color_curve.png</normaloff>:/color_curve.png</iconset>
    </property>
    <property name="text">
     <string>Color Curves</string>
+   </property>
+  </action>
+  <action name="markZonesAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/Projector.png</normaloff>:/Projector.png</iconset>
+   </property>
+   <property name="text">
+    <string>Mark Zones</string>
    </property>
   </action>
  </widget>
@@ -248,5 +261,26 @@
  <resources>
   <include location="../icons/icons.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>rulerAction</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>ProjectionPlane</receiver>
+   <slot>slotOpenResolutionCalc()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>151</x>
+     <y>157</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slotOpenResolutionCalc()</slot>
+  <slot>resizeView()</slot>
+ </slots>
 </ui>

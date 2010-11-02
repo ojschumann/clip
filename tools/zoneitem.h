@@ -6,12 +6,13 @@
 #include <QPen>
 
 class Projector;
+class SignalingEllipseItem;
 
 class ZoneItem : public QGraphicsObject
 {
   Q_OBJECT
 public:
-  ZoneItem(const QPointF&, const QPointF&, qreal, Projector* p, QGraphicsItem* parent=0);
+  ZoneItem(const QPointF&, const QPointF&, Projector* p, QGraphicsItem* parent=0);
   ~ZoneItem();
   QRectF boundingRect() const;
   void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
@@ -22,17 +23,18 @@ public:
   virtual QVariant itemChange(GraphicsItemChange, const QVariant &);
   void highlight(bool);
   bool isHighlighted();
+private slots:
+  void updatePolygon();
 signals:
-  void rulerChanged();
+  void zoneChanged();
 protected:
-  QGraphicsEllipseItem* startHandle;
-  QGraphicsEllipseItem* endHandle;
+  SignalingEllipseItem* startHandle;
+  SignalingEllipseItem* endHandle;
   qreal radius;
-  QPointF startPos;
-  QPointF endPos;
   bool highlighted;
   QPen pen;
   Projector* projector;
+  QList<QPolygonF> zoneSegments;
 };
 
 #endif // ZONEITEM_H

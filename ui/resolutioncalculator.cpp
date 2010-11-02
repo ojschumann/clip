@@ -77,3 +77,16 @@ void ResolutionCalculator::slotCalcResolution() {
     model->setResolution(-1,-1);
   }
 }
+
+void ResolutionCalculator::on_acceptButton_clicked()
+{
+  //TODO: Do something usefull...
+  projector->clearRulers();
+  deleteLater();
+}
+
+void ResolutionCalculator::on_cancelButton_clicked()
+{
+  projector->clearRulers();
+  deleteLater();
+}

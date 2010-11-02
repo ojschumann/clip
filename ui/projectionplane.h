@@ -39,9 +39,6 @@ protected slots:
   void slotUpdateFPS();
   void resizeView();
   void slotLoadCrystalData();
-  void slotLoadImage();
-  void slotCloseImage();
-  void slotOpenProjectorConfig();
   void slotOpenResolutionCalc();
 protected:
   void setupToolbar();
@@ -61,23 +58,11 @@ protected:
 
   static QList<ProjectionPlane*> allPlanes;
 
-  QAction* zoomAction;
-  QAction* panAction;
-  QAction* rotAction;
-  QAction* rulerAction;
-  QAction* markAction;
-  QAction* infoAction;
-  QAction* openImgAction;
-  QAction* closeImgAction;
-  QAction* flipHAction;
-  QAction* flipVAction;
-  QAction* rotCWAction;
-  QAction* rotCCWAction;
-  QAction* colorCurveAction;
-  QAction* printAction;
-  QAction* configAction;
 
-  QList<QAction*> imageTools;
+private slots:
+    void on_configAction_triggered();
+    void on_openImgAction_triggered();
+    void on_closeImgAction_triggered();
 };
 
 
