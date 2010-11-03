@@ -1,9 +1,11 @@
 #include "zoneitem.h"
 #include <QPainter>
+#include <QPen>
 #include <QCursor>
 #include <iostream>
 #include <core/projector.h>
 #include <tools/signalingellipse.h>
+
 
 using namespace std;
 
@@ -38,59 +40,107 @@ ZoneItem::~ZoneItem() {
 }
 
 QRectF ZoneItem::boundingRect() const {
-  QRectF r = childrenBoundingRect();
-  foreach (QPolygonF zoneSeg, zoneSegments) {
-    QRectF b = zoneSeg.boundingRect();
-    double radius = 0.01*projector->getSpotSize();
-    b.adjust(-radius, -radius, radius, radius);
-    r |= b;
-  }
-  r &= projector->getScene()->sceneRect();
-  return r;
+  return projector->getScene()->sceneRect();
 }
 
 void ZoneItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
+  QPen pen;
+  pen.setColor(QColor(255, 128, 0, 128));
+  pen.setWidth(0);
+  pen.setStyle(Qt::DashLine);
   p->setPen(pen);
-  foreach (QPolygonF poly, zoneSegments)
+  foreach (QPolygonF poly, zoneLines)
     p->drawPolyline(poly);
+
+  p->setPen(Qt::NoPen);
+  p->setBrush(QBrush(QColor(255, 128, 0, 128)));
+  foreach (QPolygonF poly, zonePolys)
+    p->drawPolygon(poly);
 }
 
-void ZoneItem::updatePolygon() {
-  zoneSegments.clear();
-  if (startHandle->pos()!=endHandle->pos()) {
 
+void ZoneItem::updatePolygon() {
+  zoneLines.clear();
+  zonePolys.clear();
+  if (startHandle->pos()!=endHandle->pos()) {
     Vec3D u = projector->det2normal(projector->img2det.map(startHandle->pos()));
     Vec3D v = projector->det2normal(projector->img2det.map(endHandle->pos()));
-    Vec3D z = u%v;
-    z.normalize();
-    Vec3D n = u;
-    Mat3D M(z, 2.0*M_PI/400);
+    // Vector perpendicular to u and v
+    Vec3D n = u%v;
+    n.normalize();
+    // in-plane Vector perpendiculat to u
+    Vec3D r = n%u;
+    // Rotate u 1 deg out of plane
+    Mat3D R = Mat3D(r, M_PI*1.0/180);
+    v = R*u;
+    u = R.transposed()*u;
 
-    QVector<bool> ok(400);
-    QPolygonF zone(400);
-    for (int i=0; i<400; i++) {
-      zone[i] = projector->det2img.map(projector->normal2det(n, &ok[i]));
-      n = M*n;
-    }
-    int startIdx = ok.indexOf(false);
-    if (startIdx==-1) {
-      zone << zone.first();
-      zoneSegments << zone;
-    } else if (ok.indexOf(true)!=-1) {
-      int idx=(startIdx+1)%400;
-      while (idx!=startIdx) {
-        while (!ok[idx]) idx=(idx+1)%400;
-        QPolygonF zoneSegment;
-        while (ok[idx]) {
-          zoneSegment << zone[idx];
-          idx=(idx+1)%400;
-        }
-        if (zoneSegment.size()>1)
-          zoneSegments << zoneSegment;
+    QList<QPolygonF> poly1 = generatePolygon(n, u);
+    QList<QPolygonF> poly2 = generatePolygon(n, v);
+
+
+    if ((poly1.size()==1) && (poly2.size()==1) && (!poly1[0].isClosed()) && (!poly2[0].isClosed())) {
+      QPolygonF p1 = poly1[0];
+      QPolygonF p2 = poly2[0];
+      QLineF l1(p1.first(), p2.last());
+      QLineF l2(p1.last(), p2.first());
+      if (l1.intersect(l2, 0)==QLineF::BoundedIntersection) {
+        cout << "ff (" << p1.first().x() << "," << p1.first().y() << ") <-> (" << p2.first().x() << "," << p2.first().y() << ")";
+        cout << "(" << p1.last().x() << "," << p1.last().y() << ") <-> (" << p2.last().x() << "," << p2.last().y() << ")" << endl;
+        for (int i=p2.size(); i--; ) p1 << p2[i];
+      } else {
+        cout << "fl (" << p1.first().x() << "," << p1.first().y() << ") <-> (" << p2.last().x() << "," << p2.last().y() << ")";
+        cout << "(" << p1.last().x() << "," << p1.last().y() << ") <-> (" << p2.first().x() << "," << p2.first().y() << ")" << endl;
+        p1 << p2;
       }
+      p1 << p1.first();
+      zonePolys << p1;
 
+    } else {
+      zoneLines << poly1 << poly2;
     }
+
   }
+}
+
+/*
+ Optimal Plane:
+ Set of Vectors vi
+ M = sum(vi^vi)
+ M.svd(Q1,Q2)
+ smalest eigenvalue at M(2,2), thus Eigenvector with that value is
+ n = Q2.transposed()*Vec3D(0,0,1)
+ */
+void ZoneItem::updateOptimalZone() {}
+
+QList<QPolygonF> ZoneItem::generatePolygon(const Vec3D& n, const Vec3D& _v) {
+  QList<QPolygonF> zoneSegs;
+  Vec3D v(_v);
+  Mat3D M(n, 2.0*M_PI/400);
+  QPolygonF zone;
+  bool first_ok;
+  bool ok;
+  for (int i=0; i<400; i++) {
+    QPointF p = projector->det2img.map(projector->normal2det(v, &ok));
+    if (ok) {
+      zone << p;
+    } else {
+      if (zone.size()>1)
+        zoneSegs << zone;
+      zone.clear();
+    }
+    if (i==0) first_ok = ok;
+    v = M*v;
+  }
+  if (first_ok && ok && !zoneSegs.empty()) {
+    zone << zoneSegs.first();
+    zoneSegs.removeFirst();
+  }
+  if (zone.size()==400) zone << zone.first();
+  if (zone.size()>1)
+    zoneSegs << zone;
+
+  return zoneSegs;
 }
 
 void ZoneItem::setStart(const QPointF& p) {
@@ -117,8 +167,9 @@ void ZoneItem::highlight(bool h) {
       pen = QPen(QColor(255, 192, 0, 128));
       pen.setWidthF(1.5*radius);
     } else {
-      pen = QPen(QColor(255, 255, 0, 128));
+      pen = QPen(QColor(0,0,0,255));
       pen.setWidthF(1.5*radius);
+      pen.setWidthF(0);
     }
     startHandle->setPen(pen);
     endHandle->setPen(pen);

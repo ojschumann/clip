@@ -4,6 +4,7 @@
 #include <QGraphicsObject>
 #include <QGraphicsEllipseItem>
 #include <QPen>
+#include <tools/vec3D.h>
 
 class Projector;
 class SignalingEllipseItem;
@@ -29,14 +30,15 @@ private slots:
 signals:
   void zoneChanged();
 protected:
-  QList<QPolygonF> generatePolygon(const Vec3D&);
+  QList<QPolygonF> generatePolygon(const Vec3D&, const Vec3D&);
   SignalingEllipseItem* startHandle;
   SignalingEllipseItem* endHandle;
   qreal radius;
   bool highlighted;
   QPen pen;
   Projector* projector;
-  QList<QPolygonF> zoneSegments;
+  QList<QPolygonF> zoneLines;
+  QList<QPolygonF> zonePolys;
 };
 
 #endif // ZONEITEM_H
