@@ -75,30 +75,16 @@ void ZoneItem::updatePolygon() {
     v = R*u;
     u = R.transposed()*u;
 
-    QList<QPolygonF> poly1 = generatePolygon(n, u);
-    QList<QPolygonF> poly2 = generatePolygon(n, v);
-
-
-    if ((poly1.size()==1) && (poly2.size()==1) && (!poly1[0].isClosed()) && (!poly2[0].isClosed())) {
-      QPolygonF p1 = poly1[0];
-      QPolygonF p2 = poly2[0];
-      QLineF l1(p1.first(), p2.last());
-      QLineF l2(p1.last(), p2.first());
-      if (l1.intersect(l2, 0)==QLineF::BoundedIntersection) {
-        cout << "ff (" << p1.first().x() << "," << p1.first().y() << ") <-> (" << p2.first().x() << "," << p2.first().y() << ")";
-        cout << "(" << p1.last().x() << "," << p1.last().y() << ") <-> (" << p2.last().x() << "," << p2.last().y() << ")" << endl;
-        for (int i=p2.size(); i--; ) p1 << p2[i];
-      } else {
-        cout << "fl (" << p1.first().x() << "," << p1.first().y() << ") <-> (" << p2.last().x() << "," << p2.last().y() << ")";
-        cout << "(" << p1.last().x() << "," << p1.last().y() << ") <-> (" << p2.first().x() << "," << p2.first().y() << ")" << endl;
-        p1 << p2;
-      }
-      p1 << p1.first();
-      zonePolys << p1;
-
-    } else {
-      zoneLines << poly1 << poly2;
+    QPolygonF poly;
+    foreach (QPolygonF p, generatePolygon(n*(-1), u)) {
+     cout << "(" << p.first().x() << "," << p.first().y() << ")-(" << p.last().x() << "," << p.last().y() << ") ";
+      poly << p;
     }
+    foreach (QPolygonF p, generatePolygon(n, v)) { poly << p;
+    cout << "(" << p.first().x() << "," << p.first().y() << ")-(" << p.last().x() << "," << p.last().y() << ") ";
+  }
+    cout << endl << endl;
+    zonePolys << poly;
 
   }
 }
