@@ -10,9 +10,7 @@ TARGET = Clip
 TEMPLATE = app
 
 win32 {
-    debug {
         CONFIG += console
-    }
 }
 
 

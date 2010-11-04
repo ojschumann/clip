@@ -30,6 +30,7 @@ private slots:
 signals:
   void zoneChanged();
 protected:
+  QRectF imgRect;
   QList<QPolygonF> generatePolygon(const Vec3D&, const Vec3D&);
   SignalingEllipseItem* startHandle;
   SignalingEllipseItem* endHandle;

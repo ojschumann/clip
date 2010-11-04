@@ -26,3 +26,9 @@ Transfer Curve (port)
   Image Handling to new class?
 
 Save Default Values for Projector Variables (Distance, Height, Width, ...)
+
+Load img from last directory
+
+Allow to configure colors
+
+Allow to "print" to pdf/png/jpeg
