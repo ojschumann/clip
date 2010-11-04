@@ -54,16 +54,9 @@ void ZoneItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
 
   //p->setPen(Qt::DashLine);
 
-  //p->setBrush(QBrush(QColor(255, 128, 0, 128)));
-  //foreach (QPolygonF poly, zonePolys)
-  //  p->drawPolyline(poly);
-
-  QList<QColor> c;
-  c << Qt::red << Qt::blue << Qt::green << Qt::black;
-  for (int i=0; i<zonePolys.size(); i++) {
-    //p->setPen(c[i%4]);
-    p->drawPolyline(zonePolys.at(i));
-  }
+  p->setBrush(QBrush(QColor(255, 128, 0, 128)));
+  foreach (QPolygonF poly, zonePolys)
+    p->drawPolygon(poly);
 
 }
 
@@ -87,6 +80,7 @@ QPolygonF getPath(const QPointF& from, const QPointF& to, QRectF on, bool clockw
 
   while (quadrant!=quadrant_to) {
     path << corners[quadrant];
+    cout << "Quadrant " << quadrant << endl;
     if (clockwise) {
       quadrant = (quadrant+1)%4;
     } else {
@@ -137,12 +131,47 @@ void ZoneItem::updatePolygon() {
 
     qSort(borderPoints.begin(), borderPoints.end(), PointSort);
 
+    cout << "<<<<<<<<<  Begin  >>>>>>>>>>>>>>>>" << endl << endl;
+    foreach (QPolygonF p, polys) {
+      cout << "polys[].first = (" << p.first().x() << "," << p.first().y() << ")" << endl;
+      cout << "polys[].last = (" << p.last().x() << "," << p.last().y() << ")" << endl;
+    }
+    cout << endl;
     QPolygonF fillpoly;
+    QList<QPolygonF> closedItems;
+    int next=0;
+    int idx;
     while (!polys.empty()) {
-      int idx;
-      if (fillpoly.empty() || ((idx=borderPoints.lastIndexOf(fillpoly.last()))==-1)) {
+      if (fillpoly.empty()) {
         fillpoly << polys.takeFirst();
+        next=0;
+      } else if (borderPoints.contains(fillpoly.last())) {
+        for (next=0; next<polys.size(); next++) {
+          if (fillpoly.last()==polys[next].first()) {
+            fillpoly.pop_back();
+            fillpoly << polys[next];
+            break;
+          } else if (fillpoly.last()==polys[next].last()) {
+            fillpoly.pop_back();
+            for (int n=polys[next].size(); n--; ) fillpoly << polys[next][n];
+            break;
+          }
+        }
+        if (next==polys.size()) {
+          cout << "Error!!!!!!" << endl;
+        }
+        polys.removeAt(next);
+        if (next==polys.size()) next=0;
       } else {
+        if (!borderPoints.contains(polys[next].first())) {
+          fillpoly << polys[next];
+        } else {
+          for (int n=polys[next].size(); n--; ) fillpoly << polys[next][n];
+        }
+        polys.removeAt(next);
+        if (next==polys.size()) next=0;
+      }
+      if ((idx=borderPoints.indexOf(fillpoly.last()))!=-1) {
         // last point is on Border
         int idx2 = (idx+1)%borderPoints.size();
         QPointF via;
@@ -153,42 +182,46 @@ void ZoneItem::updatePolygon() {
           idx2 = (idx+borderPoints.size()-1)%borderPoints.size();
           cornerPath = getPath(borderPoints[idx], borderPoints[idx2], imgRect, false, via);
         }
-        for (int i=1; i<cornerPath.size()-1; i++) fillpoly << cornerPath.at(i);
-        borderPoints.removeOne(cornerPath.first());
-        borderPoints.removeOne(cornerPath.last());
-        QPointF next = cornerPath.last();
+        cout << "Corner_first (" << cornerPath.first().x() << "," << cornerPath.first().y() << ")" << endl;
+        cout << "Corner_last (" << cornerPath.last().x() << "," << cornerPath.last().y() << ")" << endl;
+        fillpoly << cornerPath;
+      }
+      cout << "Nr polys" << polys.size() << endl;
+      cout << "fillpoly.Last = (" << fillpoly.last().x() << "," << fillpoly.last().y() << ")" << endl;
+      foreach (QPolygonF p, polys) {
+        cout << "polys[].first = (" << p.first().x() << "," << p.first().y() << ")" << endl;
+        cout << "polys[].last = (" << p.last().x() << "," << p.last().y() << ")" << endl;
+      }
+      cout << endl;
 
-        if (fillpoly.first()==next) {
-          idx = idx2;
-          idx2 = (idx+1)%borderPoints.size();
-          cornerPath = getPath(borderPoints[idx], borderPoints[idx2], imgRect, true, via);
-          v = projector->det2normal(projector->img2det.map(via), &ok);
-          if (!ok || fabs(v*z)>sin(M_PI/180)) {
-            idx2 = (idx+borderPoints.size()-1)%borderPoints.size();
-            cornerPath = getPath(borderPoints[idx], borderPoints[idx2], imgRect, false, via);
-          }
-          for (int i=1; i<cornerPath.size(); i++) fillpoly << cornerPath.at(i);
-          borderPoints.removeOne(cornerPath.first());
-          borderPoints.removeOne(cornerPath.last());
-          zonePolys << fillpoly;
-          fillpoly.clear();
-        } else {
-          foreach (QPolygonF q, polys) {
-            if (next==q.first()) {
-              polys.removeOne(q);
-              fillpoly << q;
-              break;
-            } else if (next==q.last()) {
-              polys.removeOne(q);
-              for (int i=q.size(); i--; ) fillpoly << q[i];
-              break;
-            }
-          }
-        }
+      if (fillpoly.isClosed()) {
+        closedItems << fillpoly;
+        fillpoly.clear();
       }
     }
     if (!fillpoly.empty())
       zonePolys << fillpoly;
+    for (int n=0; n<closedItems.size(); n++) {
+      for (int m=0; m<closedItems.size(); m++) {
+        if (m==n) continue;
+        bool allContained=true;
+        foreach (QPointF p, closedItems[m]) {
+          if (!closedItems[n].contains(p)) {
+            allContained = false;
+            break;
+          }
+        }
+        if (allContained) {
+          QPolygonF poly;
+          closedItems[n] << closedItems[m];
+          closedItems[m].clear();
+        }
+      }
+    }
+    foreach (QPolygonF p, closedItems) {
+      if (!p.empty())
+        zonePolys<< p;
+    }
 
   }
 }
