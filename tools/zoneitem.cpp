@@ -79,12 +79,13 @@ QPolygonF getPath(const QPointF& from, const QPointF& to, QRectF on, bool clockw
   corners << on.topLeft() << on.topRight() << on.bottomRight() << on.bottomLeft();
 
   while (quadrant!=quadrant_to) {
-    path << corners[quadrant];
     cout << "Quadrant " << quadrant << endl;
     if (clockwise) {
+      path << corners[quadrant];
       quadrant = (quadrant+1)%4;
     } else {
       quadrant = (quadrant+3)%4;
+      path << corners[quadrant];
     }
   }
 
@@ -159,6 +160,7 @@ void ZoneItem::updatePolygon() {
         }
         if (next==polys.size()) {
           cout << "Error!!!!!!" << endl;
+
         }
         polys.removeAt(next);
         if (next==polys.size()) next=0;
