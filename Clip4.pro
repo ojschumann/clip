@@ -13,6 +13,9 @@ win32 {
         CONFIG += console
 }
 
+CLIPVERSION = $$SYSTEM(C:/Programme/TortoiseHG/hg.exe -q id)
+DEFINES += CLIPVERSION=\\\"$$CLIPVERSION\\\"
+
 
 QMAKE_CXXFLAGS += -std=gnu++0x
 
