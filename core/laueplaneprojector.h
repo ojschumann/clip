@@ -7,11 +7,17 @@ class LauePlaneProjector: public Projector {
   Q_OBJECT
 public:
   LauePlaneProjector(QObject* parent=0);
-  LauePlaneProjector(const LauePlaneProjector&);
-  virtual QPointF scattered2det(const Vec3D&, bool* b=NULL) const;
-  virtual Vec3D det2scattered(const QPointF&, bool* b=NULL) const;
-  virtual QPointF normal2det(const Vec3D&, bool* b=NULL) const;
-  virtual Vec3D det2normal(const QPointF&, bool* b=NULL) const;
+  virtual QPointF scattered2det(const Vec3D&) const;
+  virtual QPointF scattered2det(const Vec3D&, bool& b) const;
+
+  virtual Vec3D det2scattered(const QPointF&) const;
+  virtual Vec3D det2scattered(const QPointF&, bool& b) const;
+
+  virtual QPointF normal2det(const Vec3D&) const;
+  virtual QPointF normal2det(const Vec3D&, bool& b) const;
+
+  virtual Vec3D det2normal(const QPointF&) const;
+  virtual Vec3D det2normal(const QPointF&, bool& b) const;
 
   virtual QWidget* configWidget();
   virtual QString projectorName();
@@ -66,6 +72,8 @@ protected:
   double detPhi;
   double detDx;
   double detDy;
+private:
+  LauePlaneProjector(const LauePlaneProjector&) {};
 };
 
 #endif

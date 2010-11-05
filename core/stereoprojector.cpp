@@ -14,48 +14,64 @@ StereoProjector::StereoProjector(QObject* parent):
   scene.setSceneRect(QRectF(-1.0, -1.0, 2.0, 2.0));
 }
 
-
-QPointF StereoProjector::scattered2det(const Vec3D &v, bool* b) const {
-  if (b) {
-    Vec3D v(scattered2normal(v,b));
-    if (*b) {
-      return normal2det(v,b);
-    } else {
-      return QPointF();
-    }
-  }
+QPointF StereoProjector::scattered2det(const Vec3D &v) const {
   return normal2det(scattered2normal(v));
 }
 
-Vec3D StereoProjector::det2scattered(const QPointF& p, bool* b) const {
+QPointF StereoProjector::scattered2det(const Vec3D &v, bool& b) const {
+  Vec3D t(scattered2normal(v,b));
   if (b) {
-    Vec3D v(det2normal(p,b));
-    if (*b) {
-      return normal2scattered(v,b);
-    } else {
-      return Vec3D();
-    }
+    return normal2det(t,b);
+  } else {
+    return QPointF();
   }
+}
+
+Vec3D StereoProjector::det2scattered(const QPointF& p) const {
   return normal2scattered(det2normal(p));
 }
 
-QPointF StereoProjector::normal2det(const Vec3D& n, bool* b) const {
+Vec3D StereoProjector::det2scattered(const QPointF& p, bool& b) const {
+  Vec3D t(det2normal(p,b));
+  if (b) {
+    return normal2scattered(t,b);
+  } else {
+    return Vec3D();
+  }
+}
+
+QPointF StereoProjector::normal2det(const Vec3D& n) const {
   Vec3D v=localCoordinates*n;
   double s=1.0+v.x();
   if (s<1e-5) {
-    if (b) *b=false;
     return QPointF();
   }
-  if (b) *b=true;
   return QPointF(v.y()/s, v.z()/s);
 }
 
+QPointF StereoProjector::normal2det(const Vec3D& n, bool& b) const {
+  Vec3D v=localCoordinates*n;
+  double s=1.0+v.x();
+  if (s<1e-5) {
+    b=false;
+    return QPointF();
+  }
+  b=true;
+  return QPointF(v.y()/s, v.z()/s);
+}
 
-Vec3D StereoProjector::det2normal(const QPointF& p, bool* b) const {
+Vec3D StereoProjector::det2normal(const QPointF& p) const {
   double x=p.x();
   double y=p.y();
   double n=1.0/(x*x+y*y+1.0);
-  if (b) *b=true;
+  return localCoordinates.transposed()*Vec3D(n*(1.0-x*x-y*y), 2*x*n, 2*y*n);
+}
+
+Vec3D StereoProjector::det2normal(const QPointF& p, bool& b) const {
+  double x=p.x();
+  double y=p.y();
+  double n=1.0/(x*x+y*y+1.0);
+  b=true;
   return localCoordinates.transposed()*Vec3D(n*(1.0-x*x-y*y), 2*x*n, 2*y*n);
 }
 

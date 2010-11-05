@@ -31,21 +31,29 @@ class Projector: public QObject, public FitObject {
   Q_OBJECT
 public:
   Projector(QObject* parent=0);
-  Projector(const Projector&);
   ~Projector();
 
   // Functions for transformations in the different Coordinate systems
 
-  static Vec3D normal2scattered(const Vec3D&, bool* b=NULL);
-  static Vec3D scattered2normal(const Vec3D&, bool* b=NULL);
+  static Vec3D normal2scattered(const Vec3D&);
+  static Vec3D normal2scattered(const Vec3D&, bool &b);
+  static Vec3D scattered2normal(const Vec3D&);
+  static Vec3D scattered2normal(const Vec3D&, bool &b);
 
   QTransform det2img;
   QTransform img2det;
 
-  virtual QPointF scattered2det(const Vec3D&, bool* b=NULL) const =0;
-  virtual Vec3D det2scattered(const QPointF&, bool* b=NULL) const =0;
-  virtual QPointF normal2det(const Vec3D&, bool* b=NULL) const =0;
-  virtual Vec3D det2normal(const QPointF&, bool* b=NULL) const =0;
+  virtual QPointF scattered2det(const Vec3D&) const = 0;
+  virtual QPointF scattered2det(const Vec3D&, bool& b) const = 0;
+
+  virtual Vec3D det2scattered(const QPointF&) const =0;
+  virtual Vec3D det2scattered(const QPointF&, bool& b) const = 0;
+
+  virtual QPointF normal2det(const Vec3D&) const = 0;
+  virtual QPointF normal2det(const Vec3D&, bool& b) const = 0;
+
+  virtual Vec3D det2normal(const QPointF&) const = 0;
+  virtual Vec3D det2normal(const QPointF&, bool& b) const = 0;
 
   QGraphicsScene* getScene();
   Crystal* getCrystal();
@@ -63,12 +71,33 @@ public:
   double getSpotSize() const;
   bool spotsEnabled() const;
 
-
   virtual void projector2xml(QXmlStreamWriter&);
   virtual void loadFromXML(QXmlStreamReader&);
 
   virtual QWidget* configWidget()=0;
-    public slots:
+
+  int spotMarkerNumber() const;
+  void addSpotMarker(const QPointF& p);
+  void delSpotMarkerNear(const QPointF& p);
+  QPointF getSpotMarkerDetPos(int n) const;
+  QList<Vec3D> getSpotMarkerNormals() const;
+
+  int rulerNumber() const;
+  void addRuler(const QPointF& p1, const QPointF& p2);
+  void clearRulers();
+  QPair<QPointF, QPointF> getRulerCoordinates(int);
+  void highlightRuler(int, bool);
+  bool rulerIsHighlighted(int);
+  QVariant getRulerData(int);
+  void setRulerData(int, QVariant);
+
+  int zoneMarkerNumber() const;
+  void addZoneMarker(const QPointF& p1, const QPointF& p2);
+
+  void addInfoItem(const QString& text, const QPointF& p);
+  void clearInfoItems();
+
+public slots:
   void connectToCrystal(Crystal *);
 
   // Set Wavevectors. Note that the Value is 1/lambda, not 2*pi/lambda
@@ -87,29 +116,8 @@ public:
   // For speedup of fitting...
   void enableProjection(bool b=true);
 
-  int markerNumber() const;
-  void addMarker(const QPointF& p);
-  void delMarkerNear(const QPointF& p);
-  QPointF getMarkerDetPos(int n) const;
-  QList<Vec3D> getMarkerNormals() const;
-
-  int rulerNumber() const;
-  void addRuler(const QPointF& p1, const QPointF& p2);
-  void clearRulers();
-  QPair<QPointF, QPointF> getRulerCoordinates(int);
-  void highlightRuler(int, bool);
-  bool rulerIsHighlighted(int);
-  QVariant getRulerData(int);
-  void setRulerData(int, QVariant);
-
-  int zoneMarkerNumber() const;
-  void addZoneMarker(const QPointF& p1, const QPointF& p2);
 
   virtual void doImgRotation(int CWRSteps, bool flip);
-
-  void addInfoItem(const QString& text, const QPointF& p);
-  void clearInfoItems();
-
 signals:
   void projectedPointsUpdated();
   void rulerAdded();
@@ -132,14 +140,14 @@ protected:
   // written indexes in the scene
   QList<QGraphicsItem*> textMarkerItems;
   // Markers for indexation and fit
-  QList<QGraphicsEllipseItem*> markerItems;
+  QList<QGraphicsEllipseItem*> spotMarkerItems;
+  // Zone markers
+  QList<ZoneItem*> zoneMarkerItems;
   // Info Items. These will be set on Mousepress from Python and be deleted on orientation change or slot!
   QList<QGraphicsItem*> infoItems;
   // Ruler Item
   QList<RulerItem*> rulerItems;
   QSignalMapper rulerMapper;
-  // Zone markers
-  QList<ZoneItem*> zoneMarkerItems;
 
   // Pointer to the connected crystal
   QPointer<Crystal> crystal;
@@ -219,6 +227,8 @@ protected:
   virtual void updateImgTransformations();
 protected:
   void internalSetWavevectors(double, double);
+private:
+  Projector(const Projector&);
 };
 
 double getDoubleAttrib(QXmlStreamReader &r, QString name, double def);

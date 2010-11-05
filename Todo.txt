@@ -1,6 +1,6 @@
 ProjectionPlane
-  Mark Spots
   Info Widgets
+  Context Menu (Del SpotMarkers, del ZoneMarkers, ...
   Image Handling (new, multithreaded)
     Rotate/Flip, Crop (with arbitrary rotation)
 

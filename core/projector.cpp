@@ -25,7 +25,9 @@ Projector::Projector(QObject *parent):
     FitObject(),
     decorationItems(),
     textMarkerItems(),
-    markerItems(),
+    spotMarkerItems(),
+    zoneMarkerItems(),
+    rulerItems(),
     crystal(),
     scene(this),
     spotMarkers(new SpotMarkerGraphicsItem())
@@ -61,35 +63,7 @@ Projector::Projector(QObject *parent):
 
 };
 
-Projector::Projector(const Projector &p):
-    QObject(),
-    FitObject(),
-    det2img(p.det2img),
-    img2det(p.img2det),
-    decorationItems(),
-    textMarkerItems(),
-    markerItems(),
-    infoItems(),
-    crystal(),
-    scene(this)
-{
-  enableSpots(p.spotsEnabled());
-  enableProjection(p.projectionEnabled);
-  internalSetWavevectors(p.Qmin(), p.Qmax());
-  setMaxHklSqSum(p.getMaxHklSqSum());
-  setTextSize(p.getTextSize());
-  setSpotSize(p.getSpotSize());
-
-  for (int n=0; n<p.markerNumber(); n++)
-    addMarker(p.getMarkerDetPos(n));
-
-  connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
-  connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
-
-  spotMarkers = new Projector::SpotMarkerGraphicsItem();
-  scene.addItem(spotMarkers);
-  updateImgTransformations();
-}
+Projector::Projector(const Projector &p): QObject() { }
 
 Projector::~Projector() {
 }
@@ -248,29 +222,51 @@ void Projector::reflectionsUpdated() {
 }
 
 
-Vec3D Projector::normal2scattered(const Vec3D &v, bool* b) {
+Vec3D Projector::normal2scattered(const Vec3D &v) {
   double x=v.x();
   if (x<=0.0) {
-    if (b) *b=false;
     return Vec3D();
   }
   double y=v.y();
   double z=v.z();
-  if (b) *b=true;
   return Vec3D(2*x*x-1.0, 2.0*x*y, 2.0*x*z);
 }
 
-Vec3D Projector::scattered2normal(const Vec3D& v, bool* b) {
+Vec3D Projector::normal2scattered(const Vec3D &v, bool& b) {
+  double x=v.x();
+  if (x<=0.0) {
+    b=false;
+    return Vec3D();
+  }
+  double y=v.y();
+  double z=v.z();
+  b=true;
+  return Vec3D(2*x*x-1.0, 2.0*x*y, 2.0*x*z);
+}
+
+Vec3D Projector::scattered2normal(const Vec3D& v) {
   double x=v.x();
   double y=v.y();
   double z=v.z();
 
   x=sqrt(0.5*(x+1.0));
   if (x==0.0) {
-    if (b) *b=false;
     return Vec3D();
   }
-  if (b) *b=true;
+  return Vec3D(x, 0.5*y/x, 0.5*z/x);
+}
+
+Vec3D Projector::scattered2normal(const Vec3D& v, bool& b) {
+  double x=v.x();
+  double y=v.y();
+  double z=v.z();
+
+  x=sqrt(0.5*(x+1.0));
+  if (x==0.0) {
+    b=false;
+    return Vec3D();
+  }
+  b=true;
   return Vec3D(x, 0.5*y/x, 0.5*z/x);
 }
 
@@ -334,9 +330,8 @@ void Projector::enableSpots(bool b) {
   emit projectionParamsChanged();
 }
 
-void Projector::addMarker(const QPointF& p) {
+void Projector::addSpotMarker(const QPointF& p) {
   QRectF r(-spotSize, -spotSize, 2.0*spotSize, 2.0*spotSize);
-  //QRectF r(-5.0,-5.0,10.0,10.0);
 
   SignalingEllipseItem* marker=new SignalingEllipseItem(imgGroup);
   marker->setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -346,41 +341,41 @@ void Projector::addMarker(const QPointF& p) {
   marker->setPos(det2img.map(p));
   marker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
   connect(marker, SIGNAL(positionChanged()), this, SIGNAL(spotMarkerChanged()));
+  spotMarkerItems.append(marker);
   emit spotMarkerAdded();
-  markerItems.append(marker);
 };
 
-void Projector::delMarkerNear(const QPointF& p) {
-  if (markerItems.isEmpty())
+void Projector::delSpotMarkerNear(const QPointF& p) {
+  if (spotMarkerItems.isEmpty())
     return;
   double minDist=0.0;
   int minIdx=-1;
   QGraphicsEllipseItem* m;
   QPointF imgPos=det2img.map(p);
-  for (int i=0; i<markerItems.size(); i++) {
-    m=markerItems.at(i);
+  for (int i=0; i<spotMarkerItems.size(); i++) {
+    m=spotMarkerItems.at(i);
     double d=hypot(imgPos.x()-m->pos().x(), imgPos.y()-m->pos().y());
     if (i==0 or d<minDist) {
       minDist=d;
       minIdx=i;
     }
   }
-  m=markerItems.takeAt(minIdx);
+  m=spotMarkerItems.takeAt(minIdx);
   scene.removeItem(m);
   delete m;
 };
 
-int Projector::markerNumber() const {
-  return markerItems.size();
+int Projector::spotMarkerNumber() const {
+  return spotMarkerItems.size();
 }
 
-QPointF Projector::getMarkerDetPos(int n) const {
-  return img2det.map(markerItems.at(n)->pos());
+QPointF Projector::getSpotMarkerDetPos(int n) const {
+  return img2det.map(spotMarkerItems.at(n)->pos());
 }
 
-QList<Vec3D> Projector::getMarkerNormals() const {
+QList<Vec3D> Projector::getSpotMarkerNormals() const {
   QList<Vec3D> r;
-  foreach (QGraphicsItem* item, markerItems)
+  foreach (QGraphicsItem* item, spotMarkerItems)
     r << det2normal(img2det.map(item->pos()));
   return r;
 }
@@ -448,8 +443,8 @@ int Projector::zoneMarkerNumber() const {
 void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
   ZoneItem* zoneMarker = new ZoneItem(det2img.map(p1), det2img.map(p2), this, imgGroup);
   zoneMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
-  connect(this, SIGNAL(spotMarkerAdded()), zoneMarker, SLOT(updatePolygon()));
-  connect(this, SIGNAL(spotMarkerChanged()), zoneMarker, SLOT(updatePolygon()));
+  connect(this, SIGNAL(spotMarkerAdded()), zoneMarker, SLOT(updateOptimalZone()));
+  connect(this, SIGNAL(spotMarkerChanged()), zoneMarker, SLOT(updateOptimalZone()));
   zoneMarkerItems << zoneMarker;
   emit zoneMarkerAdded();
 }
@@ -522,8 +517,8 @@ void Projector::projector2xml(QXmlStreamWriter& w) {
     w.writeAttribute("spotsEnabled", "1");
 
   w.writeStartElement("SpotMarkers");
-  for (int n=0; n<markerNumber(); n++) {
-    QPointF p=getMarkerDetPos(n);
+  for (int n=0; n<spotMarkerNumber(); n++) {
+    QPointF p=getSpotMarkerDetPos(n);
     w.writeEmptyElement("Spot");
     w.writeAttribute("x", QString::number(p.x()));
     w.writeAttribute("y", QString::number(p.y()));
@@ -589,7 +584,7 @@ bool Projector::parseXMLElement(QXmlStreamReader &r) {
         double x = r.attributes().value("x").toString().toDouble(&b1);
         double y = r.attributes().value("y").toString().toDouble(&b2);
         if (b1 and b2) {
-          addMarker(QPointF(x,y));
+          addSpotMarker(QPointF(x,y));
         }
       }
     }

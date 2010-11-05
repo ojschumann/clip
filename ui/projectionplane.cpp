@@ -135,8 +135,8 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
       ui->view->mousePressEvent(&e_again);
     } else if (ui->panAction->isChecked()) {
       bool b1, b2;
-      Vec3D v1 = projector->det2normal(lastMousePosition, &b1);
-      Vec3D v2 = projector->det2normal(p, &b2);
+      Vec3D v1 = projector->det2normal(lastMousePosition, b1);
+      Vec3D v2 = projector->det2normal(p, b2);
 
       if (b1 and b2) {
         Vec3D r=v1%v2;
@@ -152,8 +152,8 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
       }
     } else if (ui->rotAction->isChecked()) {
       bool b1, b2;
-      Vec3D v1 = projector->det2normal(lastMousePosition, &b1);
-      Vec3D v2 = projector->det2normal(p, &b2);
+      Vec3D v1 = projector->det2normal(lastMousePosition, b1);
+      Vec3D v2 = projector->det2normal(p, b2);
       Crystal* c=projector->getCrystal();
       if (c and b1 and b2) {
         Vec3D ax=c->getLabSystamRotationAxis();
@@ -191,7 +191,7 @@ void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
     if (!largeMove) {
       if (ui->infoAction->isChecked()) {
       } else if (ui->markAction->isChecked()) {
-        projector->addMarker(p);
+        projector->addSpotMarker(p);
       }
     }
   }

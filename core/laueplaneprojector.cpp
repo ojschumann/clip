@@ -22,53 +22,61 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent): Projector(parent), loca
   setFitParameterNames(fitParameterNames);
 };
 
-LauePlaneProjector::LauePlaneProjector(const LauePlaneProjector& p): Projector(p) {
-  setDetSize(p.dist(), p.width(), p.height());
-  setDetOrientation(p.omega(), p.chi(), p.phi());
-  detDx=p.detDx;
-  detDy=p.detDy;
-};
-
-QPointF LauePlaneProjector::scattered2det(const Vec3D &v, bool* b) const{
+QPointF LauePlaneProjector::scattered2det(const Vec3D &v) const{
   Vec3D w=localCoordinates*v;
   if (w.x()<=0.0) {
-    if (b) *b=false;
     return QPointF();
   }
-  if (b) *b=true;
   return QPointF(w.y()/w.x()+detDx, w.z()/w.x()+detDy);
 }
 
-Vec3D LauePlaneProjector::det2scattered(const QPointF& p, bool* b) const{
+QPointF LauePlaneProjector::scattered2det(const Vec3D &v, bool& b) const{
+  Vec3D w=localCoordinates*v;
+  if (w.x()<=0.0) {
+    b=false;
+    return QPointF();
+  }
+  b=true;
+  return QPointF(w.y()/w.x()+detDx, w.z()/w.x()+detDy);
+}
+
+Vec3D LauePlaneProjector::det2scattered(const QPointF& p) const{
   Vec3D v(1.0 , p.x()-detDx, p.y()-detDy);
   v.normalize();
-  if (b) *b=true;
   return localCoordinates.transposed()*v;
 }
 
-QPointF LauePlaneProjector::normal2det(const Vec3D& n, bool* b) const{
-  if (b) {
-    Vec3D v(normal2scattered(n, b));
-    if (*b) {
-      return scattered2det(v,b);
-    } else {
-      return QPointF();
-    }
-  }
+Vec3D LauePlaneProjector::det2scattered(const QPointF& p, bool& b) const{
+  Vec3D v(1.0 , p.x()-detDx, p.y()-detDy);
+  v.normalize();
+  b=true;
+  return localCoordinates.transposed()*v;
+}
+
+QPointF LauePlaneProjector::normal2det(const Vec3D& n) const{
   return scattered2det(normal2scattered(n));
 }
 
-
-Vec3D LauePlaneProjector::det2normal(const QPointF& p, bool* b)  const {
+QPointF LauePlaneProjector::normal2det(const Vec3D& n, bool& b) const{
+  Vec3D v(normal2scattered(n, b));
   if (b) {
-    Vec3D v(det2scattered(p, b));
-    if (*b) {
-      return scattered2normal(v,b);
-    } else {
-      return Vec3D();
-    }
+    return scattered2det(v,b);
+  } else {
+    return QPointF();
   }
+}
+
+Vec3D LauePlaneProjector::det2normal(const QPointF& p)  const {
   return scattered2normal(det2scattered(p));
+}
+
+Vec3D LauePlaneProjector::det2normal(const QPointF& p, bool& b)  const {
+  Vec3D v(det2scattered(p, b));
+  if (b) {
+    return scattered2normal(v,b);
+  } else {
+    return Vec3D();
+  }
 }
 
 void LauePlaneProjector::setDetSize(double dist, double width, double height) {
@@ -236,9 +244,9 @@ void LauePlaneProjector::movedPBMarker() {
   bool b=false;
   QPointF q;
   if (omega()>90.5) {
-    q=(scattered2det(Vec3D(1,0,0), &b));
+    q=(scattered2det(Vec3D(1,0,0), b));
   } else if (omega()<89.5) {
-    q=scattered2det(Vec3D(-1,0,0), &b);
+    q=scattered2det(Vec3D(-1,0,0), b);
   }
   if (b) {
     setDetOffset(xOffset()+(p.x()-q.x())*dist(), yOffset()+(p.y()-q.y())*dist());
@@ -249,9 +257,9 @@ void LauePlaneProjector::updatePBPos() {
   bool b=false;
   QPointF q;
   if (omega()>90.5) {
-    q=(scattered2det(Vec3D(1,0,0), &b));
+    q=(scattered2det(Vec3D(1,0,0), b));
   } else if (omega()<89.5) {
-    q=scattered2det(Vec3D(-1,0,0), &b);
+    q=scattered2det(Vec3D(-1,0,0), b);
   }
   if (b and decorationItems.size()>2) {
     SignalingEllipseItem* center=dynamic_cast<SignalingEllipseItem*>(decorationItems[0]);
@@ -400,7 +408,7 @@ double LauePlaneProjector::maxCos(Vec3D n) const {
   double dy = 0.5*height()/dist();
 
   bool b;
-  QPointF p=scattered2det(n, &b);
+  QPointF p=scattered2det(n, b);
   if (b and (fabs(p.x())<dx) and (fabs(p.y())<dy))
     return 1.0;
 

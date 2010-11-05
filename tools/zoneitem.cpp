@@ -3,6 +3,7 @@
 #include <QPen>
 #include <QCursor>
 #include <iostream>
+#include <QPointF>
 #include <core/projector.h>
 #include <tools/signalingellipse.h>
 
@@ -23,6 +24,7 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
   l << startHandle << endHandle;
   double radius = 0.01*projector->getSpotSize();
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updatePolygon()));
+  connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updateOptimalZone()));
   foreach (SignalingEllipseItem* item, l) {
     item->setRect(-radius, -radius, 2*radius, 2*radius);
     item->setPen(QPen(Qt::red));
@@ -30,6 +32,7 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
     item->setCursor(QCursor(Qt::SizeAllCursor));
     connect(item, SIGNAL(positionChanged()), this, SIGNAL(zoneChanged()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updatePolygon()));
+    connect(item, SIGNAL(positionChanged()), this, SLOT(updateOptimalZone()));
   }
   startHandle->setPos(p1);
   endHandle->setPos(p2);
@@ -44,20 +47,18 @@ QRectF ZoneItem::boundingRect() const {
 }
 
 void ZoneItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
-  QPen pen;
-  pen.setColor(QColor(255, 128, 0, 128));
-  pen.setWidth(0);
-  pen.setStyle(Qt::DashLine);
-  p->setPen(pen);
-  foreach (QPolygonF poly, zoneLines)
-    p->drawPolyline(poly);
-
-  //p->setPen(Qt::DashLine);
-
+  p->setPen(Qt::NoPen);
   p->setBrush(QBrush(QColor(255, 128, 0, 128)));
   foreach (QPolygonF poly, zonePolys)
     p->drawPolygon(poly);
 
+  QPen pen;
+  pen.setWidth(0);
+  pen.setColor(Qt::black);
+  pen.setStyle(Qt::DashLine);
+  p->setPen(pen);
+  foreach (QPolygonF poly, zoneLines)
+    p->drawPolyline(poly);
 }
 
 
@@ -71,15 +72,15 @@ QPolygonF getPath(const QPointF& from, const QPointF& to, QRectF on, bool clockw
   int quadrant = int(M_2_PI*(atan2(from.y()-0.5, from.x()-0.5)+5*M_PI/4))%4;
   int quadrant_to = int(M_2_PI*(atan2(to.y()-0.5, to.x()-0.5)+5*M_PI/4))%4;
 
-  cout << "GetPath:" << quadrant << " " << quadrant_to << " ";
-  cout << M_2_PI*(atan2(from.y()-0.5, from.x()-0.5)+5*M_PI/4) << " ";
-  cout << M_2_PI*(atan2(to.y()-0.5, to.x()-0.5)+5*M_PI/4) << endl;
+  //cout << "GetPath:" << quadrant << " " << quadrant_to << " ";
+  //cout << M_2_PI*(atan2(from.y()-0.5, from.x()-0.5)+5*M_PI/4) << " ";
+  //cout << M_2_PI*(atan2(to.y()-0.5, to.x()-0.5)+5*M_PI/4) << endl;
 
   QPolygonF corners;
   corners << on.topLeft() << on.topRight() << on.bottomRight() << on.bottomLeft();
 
   while (quadrant!=quadrant_to) {
-    cout << "Quadrant " << quadrant << endl;
+    //cout << "Quadrant " << quadrant << endl;
     if (clockwise) {
       path << corners[quadrant];
       quadrant = (quadrant+1)%4;
@@ -97,7 +98,6 @@ QPolygonF getPath(const QPointF& from, const QPointF& to, QRectF on, bool clockw
 }
 
 void ZoneItem::updatePolygon() {
-  zoneLines.clear();
   zonePolys.clear();
   if (startHandle->pos()!=endHandle->pos()) {
 
@@ -123,86 +123,84 @@ void ZoneItem::updatePolygon() {
     QList<QPolygonF> polys;
     polys << generatePolygon(z*(-1), u) << generatePolygon(z, v);
 
+    //cout << "Generate Border Points" << endl;
     QList<QPointF> borderPoints;
     QRectF sImgRect = imgRect.adjusted(0.0001, 0.0001, -0.0001, -0.0001);
     foreach (QPolygonF q, polys) {
       if (!sImgRect.contains(q.first())) borderPoints << q.first();
       if (!sImgRect.contains(q.last())) borderPoints << q.last();
     }
-
     qSort(borderPoints.begin(), borderPoints.end(), PointSort);
 
-    cout << "<<<<<<<<<  Begin  >>>>>>>>>>>>>>>>" << endl << endl;
-    foreach (QPolygonF p, polys) {
-      cout << "polys[].first = (" << p.first().x() << "," << p.first().y() << ")" << endl;
-      cout << "polys[].last = (" << p.last().x() << "," << p.last().y() << ")" << endl;
+    //cout << "Clear Border Points " << borderPoints.size() <<  endl;
+    if (borderPoints.size()%2==1) {
+      cout << "odd borderpointsize..." << endl;
+      foreach (QPointF p, borderPoints) {
+        cout << "(" << p.x() << "," << p.y() << ")" << endl;
+      }
+      cout << "Polys.size()=" << polys.size() << endl;
+      foreach (QPolygonF p, polys) {
+        cout << "(" << p.first().x() << "," << p.first().y() << ") -> ";
+        cout << "(" << p.last().x() << "," << p.last().y() << ")" << endl;
+      }
     }
-    cout << endl;
-    QPolygonF fillpoly;
-    QList<QPolygonF> closedItems;
-    int next=0;
-    int idx;
-    while (!polys.empty()) {
-      if (fillpoly.empty()) {
-        fillpoly << polys.takeFirst();
-        next=0;
-      } else if (borderPoints.contains(fillpoly.last())) {
-        for (next=0; next<polys.size(); next++) {
-          if (fillpoly.last()==polys[next].first()) {
-            fillpoly.pop_back();
-            fillpoly << polys[next];
+    while (borderPoints.size()>1) {
+      QPointF p = borderPoints.takeFirst();
+      QPointF q;
+      QPointF via;
+      bool ok;
+      QPolygonF cornerPath = getPath(p, borderPoints.first(), imgRect, true, via);
+      Vec3D v = projector->det2normal(projector->img2det.map(via), ok);
+      if (!ok || fabs(v*z)>sin(M_PI/180)) {
+        cornerPath = getPath(p, borderPoints.last(), imgRect, false, via);
+        q = borderPoints.takeLast();
+      } else {
+        q = borderPoints.takeFirst();
+      }
+      QPolygonF res;
+      foreach (QPolygonF poly, polys) {
+        if (poly.last()==p) {
+          res << poly;
+          polys.removeOne(poly);
+          break;
+        } else if (poly.first()==p) {
+          for (int n=poly.size(); n--; ) res << poly[n];
+          polys.removeOne(poly);
+          break;
+        }
+      }
+      res << cornerPath;
+      if (res.first()!=q) {
+        foreach (QPolygonF poly, polys) {
+          if (poly.first()==q) {
+            res << poly;
+            polys.removeOne(poly);
             break;
-          } else if (fillpoly.last()==polys[next].last()) {
-            fillpoly.pop_back();
-            for (int n=polys[next].size(); n--; ) fillpoly << polys[next][n];
+          } else if (poly.last()==q) {
+            for (int n=poly.size(); n--; ) res << poly[n];
+            polys.removeOne(poly);
             break;
           }
         }
-        if (next==polys.size()) {
-          cout << "Error!!!!!!" << endl;
+      }
+      polys << res;
 
-        }
-        polys.removeAt(next);
-        if (next==polys.size()) next=0;
-      } else {
-        if (!borderPoints.contains(polys[next].first())) {
-          fillpoly << polys[next];
-        } else {
-          for (int n=polys[next].size(); n--; ) fillpoly << polys[next][n];
-        }
-        polys.removeAt(next);
-        if (next==polys.size()) next=0;
-      }
-      if ((idx=borderPoints.indexOf(fillpoly.last()))!=-1) {
-        // last point is on Border
-        int idx2 = (idx+1)%borderPoints.size();
-        QPointF via;
-        bool ok;
-        QPolygonF cornerPath = getPath(borderPoints[idx], borderPoints[idx2], imgRect, true, via);
-        Vec3D v = projector->det2normal(projector->img2det.map(via), &ok);
-        if (!ok || fabs(v*z)>sin(M_PI/180)) {
-          idx2 = (idx+borderPoints.size()-1)%borderPoints.size();
-          cornerPath = getPath(borderPoints[idx], borderPoints[idx2], imgRect, false, via);
-        }
-        cout << "Corner_first (" << cornerPath.first().x() << "," << cornerPath.first().y() << ")" << endl;
-        cout << "Corner_last (" << cornerPath.last().x() << "," << cornerPath.last().y() << ")" << endl;
-        fillpoly << cornerPath;
-      }
-      cout << "Nr polys" << polys.size() << endl;
-      cout << "fillpoly.Last = (" << fillpoly.last().x() << "," << fillpoly.last().y() << ")" << endl;
-      foreach (QPolygonF p, polys) {
-        cout << "polys[].first = (" << p.first().x() << "," << p.first().y() << ")" << endl;
-        cout << "polys[].last = (" << p.last().x() << "," << p.last().y() << ")" << endl;
-      }
-      cout << endl;
-
-      if (fillpoly.isClosed()) {
-        closedItems << fillpoly;
-        fillpoly.clear();
-      }
     }
-    if (!fillpoly.empty())
-      zonePolys << fillpoly;
+
+
+    ////cout << "Search closed Items" << endl;
+    QList<QPolygonF> closedItems;
+    QPolygonF bigPoly;
+    foreach (QPolygonF p, polys)
+      if (p.isClosed()) {
+      closedItems << p;
+    } else {
+      bigPoly << p;
+    }
+    if (!bigPoly.isEmpty())
+      zonePolys << bigPoly;
+
+    //cout << "Search containing Items" << endl;
     for (int n=0; n<closedItems.size(); n++) {
       for (int m=0; m<closedItems.size(); m++) {
         if (m==n) continue;
@@ -220,12 +218,16 @@ void ZoneItem::updatePolygon() {
         }
       }
     }
+    //cout << "Fill items to zonePolys" << endl;
     foreach (QPolygonF p, closedItems) {
       if (!p.empty())
         zonePolys<< p;
     }
 
+    //cout << "Finished" << endl;
   }
+
+
 }
 
 /*
@@ -236,7 +238,41 @@ void ZoneItem::updatePolygon() {
  smalest eigenvalue at M(2,2), thus Eigenvector with that value is
  n = Q2.transposed()*Vec3D(0,0,1)
  */
-void ZoneItem::updateOptimalZone() {}
+void ZoneItem::updateOptimalZone() {
+  Vec3D u = projector->det2normal(projector->img2det.map(startHandle->pos()));
+  Vec3D v = projector->det2normal(projector->img2det.map(endHandle->pos()));
+  // Vector perpendicular to u and v
+  Vec3D z = u%v;
+  z.normalize();
+
+  Mat3D M;
+  M.zero();
+  M+= u^u;
+  M+= v^v;
+
+  foreach (v, projector->getSpotMarkerNormals()) {
+    if (fabs(v*z)<sin(M_PI/180))
+      M += v^v;
+  }
+
+  Mat3D Q1, Q2;
+  M.svd(Q1, Q2);
+
+  z = Q2.transposed()*Vec3D(0,0,1);
+
+  // Maximal scattering angle in this zone
+  Vec3D n(-1,0,0);
+  n = n-z*(z*n);
+  if (n.norm()<1e-8) {
+    n = Vec3D(0,0,1);
+  } else {
+    n.normalize();
+  }
+
+  zoneLines = generatePolygon(z, n);
+  update();
+
+}
 
 
 
@@ -256,10 +292,10 @@ QList<QPolygonF> ZoneItem::generatePolygon(const Vec3D& n, const Vec3D& _v) {
 
   bool firstOk = false;
   bool lastOk=false;
+  bool ok=false;
   QPointF lastP;
   for (int i=0; i<401; i++) {
-    bool ok;
-    QPointF p = projector->det2img.map(projector->normal2det(v, &ok));
+    QPointF p = projector->det2img.map(projector->normal2det(v, ok));
     ok = ok && imgRect.contains(p);
     if (i>0) {
       if (lastOk != ok) {
@@ -283,8 +319,9 @@ QList<QPolygonF> ZoneItem::generatePolygon(const Vec3D& n, const Vec3D& _v) {
     if (i==1) firstOk=ok;
     v = M*v;
   }
+  if (firstOk && ok && !zonePoly.empty()) zonePoly << zonePolys.takeFirst();
+  if (zonePoly.size()==400) zonePoly << zonePoly.first();
   if (zonePoly.size()>1) zonePolys << zonePoly;
-
 
   return zonePolys;
 }
