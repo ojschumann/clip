@@ -13,9 +13,24 @@ win32 {
         CONFIG += console
 }
 
-CLIPVERSION = $$SYSTEM(C:/Programme/TortoiseHG/hg.exe -q id)
-DEFINES += CLIPVERSION=\\\"$$CLIPVERSION\\\"
+HG = 'C:\\Programme\\TortoiseHG\\hg.exe'
+HGID = $$SYSTEM($$HG -q id)
+HGREV = $$SYSTEM($$HG -q parent --template {rev})
+HGDATE = $$SYSTEM($$HG -q parent --template \"{date|date}\")
 
+HGID_CSTR = $$sprintf("const char* HG_REPRO_ID = \"%1\";", $$HGID)
+HGREV_CSTR = $$sprintf("const char* HG_REPRO_REV = \"%1\";", $$HGREV)
+HGDATE_CSTR = $$sprintf("const char* HG_REPRO_DATE = \"%1\";", $$HGDATE)
+
+hg.cpp.target = hg.cpp
+hg.cpp.commands = @echo "$$HGID_CSTR $$HGREV_CSTR $$HGDATE_CSTR" > defs.cpp
+hg.cpp.depends = lala
+
+lala.commands = @echo $$HGDATE
+
+
+QMAKE_EXTRA_TARGETS += hg.cpp lala
+PRE_TARGETDEPS += hg.cpp
 
 QMAKE_CXXFLAGS += -std=gnu++0x
 
@@ -45,7 +60,8 @@ SOURCES += main.cpp\
     tools/ruleritem.cpp \
     ui/resolutioncalculator.cpp \
     tools/rulermodel.cpp \
-    tools/zoneitem.cpp
+    tools/zoneitem.cpp \
+    defs.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \

@@ -7,6 +7,7 @@
 #include <core/laueplaneprojector.h>
 #include <core/stereoprojector.h>
 #include <QMessageBox>
+#include <defs.h>
 
 Clip::Clip(QWidget *parent) :
     QMainWindow(parent),
@@ -74,7 +75,8 @@ void Clip::on_actionAbout_triggered(bool) {
   QString message("This is the Cologne Laue Indexation Program (CLIP)\n");
   message += "a program to index and refine laue exposures.\n\n";
   message += "Version 4.0\n";
-  message += "Mercurial info: $Revision$ $Date$\n\n";
+  message += "Mercurial ID: " + QString(HG_REPRO_ID) + " Revision: " + HG_REPRO_REV + "\n";
+  message += "Mercurial Date: " + QString(HG_REPRO_DATE) + "\n\n";
   message += "Copyright (c) 2010 O.J.Schumann (o.j.schumann@gmail.com)\n";
   message += "Clip is licensed under the terms of the GNU General Public License.";
 
