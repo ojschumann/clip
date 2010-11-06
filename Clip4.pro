@@ -13,10 +13,14 @@ win32 {
         CONFIG += console
 }
 
-HG = 'C:\\Programme\\TortoiseHG\\hg.exe'
-HGID = $$SYSTEM($$HG -q id)
-HGREV = $$SYSTEM($$HG -q parent --template {rev})
-HGDATE = $$SYSTEM($$HG -q parent --template \"{date|date}\")
+win32 {
+  PATH += C:/Program Files (x86)/TortoiseHg
+  PATH += C:/Programme/TortoiseHG
+}
+
+HGID = $$SYSTEM(hg -q id)
+HGREV = $$SYSTEM(hg -q parent --template {rev})
+HGDATE = $$system(hg -q parent --template \"{date|date}\")
 
 HGID_CSTR = $$sprintf("const char* HG_REPRO_ID = \"%1\";", $$HGID)
 HGREV_CSTR = $$sprintf("const char* HG_REPRO_REV = \"%1\";", $$HGREV)
@@ -61,7 +65,8 @@ SOURCES += main.cpp\
     ui/resolutioncalculator.cpp \
     tools/rulermodel.cpp \
     tools/zoneitem.cpp \
-    defs.cpp
+    defs.cpp \
+    tools/laueimage.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -87,7 +92,8 @@ HEADERS  += ui/clip.h \
     tools/ruleritem.h \
     ui/resolutioncalculator.h \
     tools/rulermodel.h \
-    tools/zoneitem.h
+    tools/zoneitem.h \
+    tools/laueimage.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

@@ -46,6 +46,13 @@ QRectF ZoneItem::boundingRect() const {
   return imgRect;
 }
 
+QPainterPath ZoneItem::shape() const {
+  QPainterPath path;
+  foreach (QPolygonF poly, zonePolys)
+    path.addPolygon(poly);
+  return path;
+}
+
 void ZoneItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
   p->setPen(Qt::NoPen);
   p->setBrush(QBrush(QColor(255, 128, 0, 128)));

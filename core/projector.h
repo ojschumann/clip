@@ -26,6 +26,8 @@ class Crystal;
 class Reflection;
 class RulerItem;
 class ZoneItem;
+class LaueImage;
+
 
 class Projector: public QObject, public FitObject {
   Q_OBJECT
@@ -79,11 +81,13 @@ public:
   int spotMarkerNumber() const;
   void addSpotMarker(const QPointF& p);
   void delSpotMarkerNear(const QPointF& p);
+  bool delSpotMarkerAt(const QPointF& p);
   QPointF getSpotMarkerDetPos(int n) const;
   QList<Vec3D> getSpotMarkerNormals() const;
 
   int rulerNumber() const;
   void addRuler(const QPointF& p1, const QPointF& p2);
+  bool delRulerAt(const QPointF& p);
   void clearRulers();
   QPair<QPointF, QPointF> getRulerCoordinates(int);
   void highlightRuler(int, bool);
@@ -93,10 +97,11 @@ public:
 
   int zoneMarkerNumber() const;
   void addZoneMarker(const QPointF& p1, const QPointF& p2);
+  bool delZoneMarkerAt(const QPointF& p);
 
   void addInfoItem(const QString& text, const QPointF& p);
+  bool delInfoItemAt(const QPointF& p);
   void clearInfoItems();
-
 public slots:
   void connectToCrystal(Crystal *);
 
@@ -115,6 +120,10 @@ public slots:
   void enableSpots(bool b=true);
   // For speedup of fitting...
   void enableProjection(bool b=true);
+
+  void loadImage(QString);
+  void closeImage();
+  void transferImageData();
 
 
   virtual void doImgRotation(int CWRSteps, bool flip);
@@ -161,8 +170,9 @@ protected:
   bool projectionEnabled;
 
   QGraphicsScene scene;
-  QGraphicsPixmapItem* imgGroup;
-  QGraphicsPixmapItem* img;
+  QGraphicsPixmapItem* imagePlane;
+  QGraphicsPixmapItem* imageItemsPlane;
+  LaueImage* imageData;
 
   class ProjectionMapper: public QRunnable {
   public:

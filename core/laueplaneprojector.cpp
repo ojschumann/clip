@@ -186,7 +186,7 @@ void LauePlaneProjector::decorateScene() {
     delete item;
   }
 
-  SignalingEllipseItem* center=new SignalingEllipseItem(-0.5*spotSize, -0.5*spotSize, spotSize, spotSize, imgGroup);
+  SignalingEllipseItem* center=new SignalingEllipseItem(-0.5*spotSize, -0.5*spotSize, spotSize, spotSize, imageItemsPlane);
 
   center->setPen(QPen(Qt::red));
   center->setFlag(QGraphicsItem::ItemIsMovable, true);

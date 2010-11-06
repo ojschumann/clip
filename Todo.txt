@@ -1,6 +1,6 @@
 ProjectionPlane
   Info Widgets
-  Context Menu (Del SpotMarkers, del ZoneMarkers, ...
+  Context Menu
   Image Handling (new, multithreaded)
     Rotate/Flip, Crop (with arbitrary rotation)
 
@@ -15,7 +15,7 @@ Marked Spots and Zone info (call from Crystal) (new)
 
 Indexer (port and enhance)
 
-Refinement (new)
+Refinement (partly new)
   Optional show state after each iteration
 
 Rotation (port)

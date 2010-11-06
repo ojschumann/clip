@@ -34,6 +34,7 @@ public:
 signals:
   void showConfig(QWidget*);
   void info(QString, int);
+  void reflexInfo(int,int,int);
 protected slots:
   void slotChangeMouseDragMode();
   void slotUpdateFPS();
@@ -58,6 +59,7 @@ protected:
 
   static QList<ProjectionPlane*> allPlanes;
 
+  QString lastImageOpenDir;
 
 private slots:
     void on_configAction_triggered();

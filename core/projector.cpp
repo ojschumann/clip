@@ -16,6 +16,7 @@
 #include <tools/zoneitem.h>
 #include <core/reflection.h>
 #include <core/crystal.h>
+#include <tools/laueimage.h>
 
 
 using namespace std;
@@ -30,22 +31,23 @@ Projector::Projector(QObject *parent):
     rulerItems(),
     crystal(),
     scene(this),
+    imagePlane(new QGraphicsPixmapItem()),
+    imageItemsPlane(new QGraphicsPixmapItem()),
+    imageData(0),
     spotMarkers(new SpotMarkerGraphicsItem())
 {
+  imagePlane->setFlag(QGraphicsItem::ItemIsMovable, false);
+  imagePlane->setVisible(false);
+  imagePlane->setTransformationMode(Qt::SmoothTransformation);
+  imagePlane->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+  imageItemsPlane->setFlag(QGraphicsItem::ItemIsMovable, false);
+
   scene.addItem(spotMarkers);
+  scene.addItem(imagePlane);
+  scene.addItem(imageItemsPlane);
 
-
-  imgGroup = new QGraphicsPixmapItem();
-  imgGroup->setFlag(QGraphicsItem::ItemIsMovable, false);
-  //imgGroup->setFlag(QGraphicsItem::ItemHasNoContents, true);
-  scene.addItem(imgGroup);
-  imgGroup->stackBefore(spotMarkers);
-
-
-  //QPixmap pix("../Clip4/Silver.jpg");
-  //img = new QGraphicsPixmapItem(pix, imgGroup);
-  //img->setTransform(QTransform::fromScale(1.0/pix.width(), 1.0/pix.height()));
-  //img->setTransformationMode(Qt::SmoothTransformation);
+  imagePlane->stackBefore(spotMarkers);
+  spotMarkers->stackBefore(imageItemsPlane);
 
   enableSpots();
   enableProjection();
@@ -111,22 +113,9 @@ void Projector::internalSetWavevectors(double Qmin, double Qmax)  {
 
 }
 
-QString formatOveline(int i) {
-  if (i<0)
-    return QString("<span style=""text-decoration:overline"">%1</span>").arg(-i);
-  return QString("<span>%1</span>").arg(i);
-}
-
-QString formatHklText(int h, int k, int l) {
-  if (h<10 and k<10 and l<10) {
-    return formatOveline(h)+formatOveline(k)+formatOveline(l);
-  } else {
-    return formatOveline(h)+" "+formatOveline(k)+" "+formatOveline(l);
-  }
-}
-
 void Projector::addInfoItem(const QString& text, const QPointF& p) {
   QGraphicsRectItem* bg=new QGraphicsRectItem();
+  bg->setTransform(QTransform(1,0,0,-1,0,0));
   bg->setPen(QPen(Qt::black));
   bg->setBrush(QBrush(QColor(0xF0,0xF0,0xF0)));
   bg->setPos(p);
@@ -144,6 +133,18 @@ void Projector::addInfoItem(const QString& text, const QPointF& p) {
   bg->scale(s,s);
   scene.addItem(bg);
   infoItems.append(bg);
+}
+
+bool Projector::delInfoItemAt(const QPointF& p) {
+  foreach (QGraphicsItem* item, infoItems) {
+    if (item->contains(item->mapFromScene(p))) {
+      scene.removeItem(item);
+      infoItems.removeOne(item);
+      delete item;
+      return true;
+    }
+  }
+  return false;
 }
 
 void Projector::clearInfoItems() {
@@ -181,7 +182,7 @@ void Projector::ProjectionMapper::run() {
       if (r.hklSqSum<=(projector->maxHklSqSum)) {
         QGraphicsTextItem* t = new QGraphicsTextItem();
         t->setTransform(QTransform(1,0,0,-1,0,0));
-        t->setHtml(formatHklText(r.h, r.k, r.l));
+        t->setHtml(r.toText());
         t->setPos(p);
         QRectF r=t->boundingRect();
         double sx=projector->textSize*projector->scene.width()/r.width();
@@ -333,7 +334,7 @@ void Projector::enableSpots(bool b) {
 void Projector::addSpotMarker(const QPointF& p) {
   QRectF r(-spotSize, -spotSize, 2.0*spotSize, 2.0*spotSize);
 
-  SignalingEllipseItem* marker=new SignalingEllipseItem(imgGroup);
+  SignalingEllipseItem* marker=new SignalingEllipseItem(imageItemsPlane);
   marker->setFlag(QGraphicsItem::ItemIsMovable, true);
   marker->setCursor(QCursor(Qt::SizeAllCursor));
   marker->setPen(QPen(QColor(0xFF,0xAA,0x33)));
@@ -363,7 +364,21 @@ void Projector::delSpotMarkerNear(const QPointF& p) {
   m=spotMarkerItems.takeAt(minIdx);
   scene.removeItem(m);
   delete m;
+  emit spotMarkerChanged();
 };
+
+bool Projector::delSpotMarkerAt(const QPointF& p) {
+  foreach (QGraphicsEllipseItem* item, spotMarkerItems) {
+    if (item->contains(item->mapFromScene(p))) {
+      scene.removeItem(item);
+      spotMarkerItems.removeOne(item);
+      delete item;
+      emit spotMarkerChanged();
+      return true;
+    }
+  }
+  return false;
+}
 
 int Projector::spotMarkerNumber() const {
   return spotMarkerItems.size();
@@ -386,12 +401,24 @@ int Projector::rulerNumber() const {
 }
 
 void Projector::addRuler(const QPointF& p1, const QPointF& p2) {
-  RulerItem* ruler = new RulerItem(det2img.map(p1), det2img.map(p2), this, imgGroup);
+  RulerItem* ruler = new RulerItem(det2img.map(p1), det2img.map(p2), this, imageItemsPlane);
   ruler->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
   rulerMapper.setMapping(ruler, rulerItems.size());
   connect(ruler, SIGNAL(rulerChanged()), &rulerMapper, SLOT(map()));
   rulerItems << ruler;
   emit rulerAdded();
+}
+
+bool Projector::delRulerAt(const QPointF& p) {
+  foreach (RulerItem* item, rulerItems) {
+    if (item->contains(item->mapFromScene(p))) {
+      scene.removeItem(item);
+      rulerItems.removeOne(item);
+      delete item;
+      return true;
+    }
+  }
+  return false;
 }
 
 void Projector::clearRulers() {
@@ -441,7 +468,7 @@ int Projector::zoneMarkerNumber() const {
 }
 
 void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
-  ZoneItem* zoneMarker = new ZoneItem(det2img.map(p1), det2img.map(p2), this, imgGroup);
+  ZoneItem* zoneMarker = new ZoneItem(det2img.map(p1), det2img.map(p2), this, imageItemsPlane);
   zoneMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
   connect(this, SIGNAL(spotMarkerAdded()), zoneMarker, SLOT(updateOptimalZone()));
   connect(this, SIGNAL(spotMarkerChanged()), zoneMarker, SLOT(updateOptimalZone()));
@@ -449,7 +476,18 @@ void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
   emit zoneMarkerAdded();
 }
 
-
+bool Projector::delZoneMarkerAt(const QPointF& p) {
+  foreach (ZoneItem* item, zoneMarkerItems) {
+    if (item->contains(item->mapFromScene(p))) {
+      scene.removeItem(item);
+      zoneMarkerItems.removeOne(item);
+      delete item;
+      emit spotMarkerChanged();
+      return true;
+    }
+  }
+  return false;
+}
 
 
 void Projector::updateImgTransformations() {
@@ -462,19 +500,50 @@ void Projector::updateImgTransformations() {
     det2img.translate(-r.x(),  -r.y());
     img2det=det2img.inverted();
   }
-  imgGroup->setTransform(img2det);
+  if (imageData) {
+    QPixmap pix = imageData->getPixmap();
+    cout << "Trans " << pix.width() << "x"  << pix.height() << endl;
+    imagePlane->setTransform(QTransform::fromScale(1.0/pix.width(), 1.0/pix.height())*img2det);
+  }
+  imageItemsPlane->setTransform(img2det);
   QTransform t = QTransform::fromScale(det2img.m11(), det2img.m22());
-  foreach (QGraphicsItem* item, imgGroup->childItems()) {
-    if (item != img)
-      item->setTransform(t);
+  foreach (QGraphicsItem* item, imageItemsPlane->childItems()) {
+    item->setTransform(t);
   }
   emit imgTransformUpdated();
+}
+
+void Projector::loadImage(QString s) {
+  LaueImage* tmpImage = new LaueImage(s, this);
+  if (tmpImage->isValid()) {
+    if (imageData) delete imageData;
+    imageData = tmpImage;
+    connect(imageData, SIGNAL(imageDataChanged()), this, SLOT(transferImageData()));
+    transferImageData();
+    imagePlane->setVisible(true);
+    updateImgTransformations();
+    cout << "Image ok" << endl;
+  } else {
+    delete tmpImage;
+  }
+}
+
+void Projector::closeImage() {
+  if (imageData) delete imageData;
+  imageData = 0;
+  imagePlane->setVisible(false);
+}
+
+void Projector::transferImageData() {
+  if (imageData) {
+    imagePlane->setPixmap(imageData->getPixmap());
+  }
 }
 
 // Rotates and flips the Decorations, which are bound to the Image
 void Projector::doImgRotation(int CWRSteps, bool flip) {
   QTransform t;
-  foreach (QGraphicsItem* item, imgGroup->childItems()) {
+  foreach (QGraphicsItem* item, imageItemsPlane->childItems()) {
     double x = item->pos().x();
     double y = item->pos().y();
 

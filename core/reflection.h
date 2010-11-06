@@ -45,6 +45,10 @@ public:
 
   // Direction of scattered ray
   Vec3D scatteredRay;
+
+  static QString formatOverline(int);
+  static QString hkl2text(int, int, int);
+  QString toText() const;
 };
 
 Q_DECLARE_TYPEINFO(Reflection, Q_MOVABLE_TYPE);

@@ -11,7 +11,9 @@
 #include <ui/resolutioncalculator.h>
 #include <core/crystal.h>
 #include <core/projector.h>
-
+#include <core/reflection.h>
+#include <QFileDialog>
+#include <QFileInfo>
 
 ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     QMainWindow(parent),
@@ -111,9 +113,16 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
       zoomRubber->show();
     }
   } else if (e->buttons()==Qt::RightButton) {
-    if (zoomSteps.size()>0)
-      zoomSteps.removeLast();
-    resizeView();
+
+    if (projector->delSpotMarkerAt(mousePressOrigin)) {
+    } else if (projector->delZoneMarkerAt(mousePressOrigin)) {
+    } else if (projector->delRulerAt(mousePressOrigin)) {
+    } else if (projector->delInfoItemAt(mousePressOrigin)) {
+    } else {
+      if (zoomSteps.size()>0)
+        zoomSteps.removeLast();
+      resizeView();
+    }
   }
   lastMousePosition = mousePressOrigin;
 }
@@ -189,7 +198,15 @@ void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
       resizeView();
     }
     if (!largeMove) {
-      if (ui->infoAction->isChecked()) {
+      if (ui->infoAction->isChecked() && projector->getCrystal()) {
+        Reflection r = projector->getCrystal()->getClosestReflection(projector->det2normal(mousePressOrigin));
+        if (r.normal(0)>=0.0) {
+          double TT=180.0-360.0*M_1_PI*acos(max(-1.0, min(1.0, r.normal(0))));
+          QString s = r.toText();
+          s+=QString("<br>2T=%1").arg(TT, 0,'f',1);
+          projector->addInfoItem(s, mousePressOrigin);
+          emit reflexInfo(r.h, r.k, r.l);
+        }
       } else if (ui->markAction->isChecked()) {
         projector->addSpotMarker(p);
       }
@@ -247,12 +264,23 @@ void ProjectionPlane::slotOpenResolutionCalc() {
   }
 }
 
-void ProjectionPlane::on_closeImgAction_triggered() {
-  ui->imgToolBar->setVisible(false);
+void ProjectionPlane::on_openImgAction_triggered() {
+  QString fileName = QFileDialog::getOpenFileName(this, "Load Laue pattern", lastImageOpenDir, "Image Plate Files (*.img);;All Images (*.jpg *.jpeg *.bmp *.png *.tif *.tiff *.gif *.img);;All Files (*)");
+  QFileInfo fInfo(fileName);
+
+  if (fInfo.exists()) {
+    lastImageOpenDir = fInfo.canonicalFilePath();
+    projector->loadImage(fileName);
+  }
+
+  ui->imgToolBar->setVisible(true);
+  resizeView();
 }
 
-void ProjectionPlane::on_openImgAction_triggered() {
-  ui->imgToolBar->setVisible(true);
+void ProjectionPlane::on_closeImgAction_triggered() {
+  projector->closeImage();
+  ui->imgToolBar->setVisible(false);
+  resizeView();
 }
 
 void ProjectionPlane::on_configAction_triggered() {

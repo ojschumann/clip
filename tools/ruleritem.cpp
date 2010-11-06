@@ -31,12 +31,20 @@ RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphi
   }
 }
 
-
 RulerItem::~RulerItem() {
 }
 
 QRectF RulerItem::boundingRect() const {
   return childrenBoundingRect();
+}
+
+QPainterPath RulerItem::shape() const {
+  QPainterPath path(startHandle->pos());
+  double radius = 0.01*projector->getSpotSize();
+  path.addEllipse(startHandle->pos(), radius, radius);
+  path.lineTo(endHandle->pos());
+  path.addEllipse(endHandle->pos(), radius, radius);
+  return path;
 }
 
 void RulerItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {

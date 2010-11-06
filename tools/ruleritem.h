@@ -16,6 +16,7 @@ public:
   RulerItem(const QPointF&, const QPointF&, Projector* p, QGraphicsItem* parent=0);
   ~RulerItem();
   QRectF boundingRect() const;
+  QPainterPath shape() const;
   void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
   void setStart(const QPointF&);
   void setEnd(const QPointF&);
