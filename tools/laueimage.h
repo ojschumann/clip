@@ -11,6 +11,9 @@ public:
   explicit LaueImage(QString, QObject *parent = 0);
   QImage getImage();
   QPixmap getPixmap();
+  int width() { return image.width(); };
+  int height() { return image.height(); };
+  QSize size() { return image.size(); };
   bool isValid() { return valid; }
 signals:
   void imageDataChanged();

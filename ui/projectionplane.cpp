@@ -14,6 +14,7 @@
 #include <core/reflection.h>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QLabel>
 
 ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     QMainWindow(parent),
@@ -24,9 +25,14 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   projector->setParent(this); // Ensures, that projector is deleted at end
   setWindowTitle(projector->displayName());
   connect(projector, SIGNAL(projectionRectSizeChanged()), this, SLOT(resizeView()));
+  connect(projector, SIGNAL(imageLoaded(LaueImage*)), ui->view, SLOT(setImage(LaueImage*)));
 
   ui->view->setScene(projector->getScene());
   ui->view->setTransform(QTransform(1,0,0,-1,0,0));
+  ui->view->setCacheMode(QGraphicsView::CacheBackground);
+
+  //ui->view->viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
+  //ui->view->setBackgroundBrush(QBrush(Qt::black));
   //ui->view->setViewport(new QGLWidget);
 
   setupToolbar();
@@ -129,6 +135,12 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
 
 void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
   QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
+
+  cout << "Mouse pos: " << e->pos().x() << "," << e->pos().y() << " = ";
+  cout << p.x() << "," << p.y() << " = ";
+  QPointF q = projector->det2img.map(p);
+  cout << q.x() << "," << q.y() << endl;
+
   QPointF dp = (p-mousePressOrigin);
   bool largeMove = hypot(dp.x(), dp.y())>0.01*projector->getSpotSize();
   if (e->buttons()==Qt::LeftButton) {
@@ -265,7 +277,8 @@ void ProjectionPlane::slotOpenResolutionCalc() {
 }
 
 void ProjectionPlane::on_openImgAction_triggered() {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load Laue pattern", lastImageOpenDir, "Image Plate Files (*.img);;All Images (*.jpg *.jpeg *.bmp *.png *.tif *.tiff *.gif *.img);;All Files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load Laue pattern", lastImageOpenDir,
+                                                  "Images (*.jpg *.jpeg *.bmp *.png *.tif *.tiff *.gif *.img);;All Files (*)");
   QFileInfo fInfo(fileName);
 
   if (fInfo.exists()) {

@@ -26,6 +26,9 @@ void ProjectionGraphicsView::mousePressEvent(QMouseEvent *e) {
 }
 
 void ProjectionGraphicsView::mouseMoveEvent(QMouseEvent *e) {
+  //cout << "Mouse pos: " << e->posF().x() << "," << e->posF().y() << " = ";
+  //QPointF p = mapToScene(e->pos());
+  //cout << p.x() << "," << p.y() << endl;
   if (viewIgnoresThisMouseEvent) {
     e->ignore();
   } else {
@@ -51,43 +54,51 @@ int ProjectionGraphicsView::getFrames() {
 void ProjectionGraphicsView::paintEvent(QPaintEvent *e) {
   QGraphicsView::paintEvent(e);
   frames++;
-  /*QTime t=QTime::currentTime();
-    QGraphicsView::paintEvent(e);
-    int delta = t.msecsTo(QTime::currentTime());
-    if (delta>0) {
-       double ips = 1000.0*scene()->items().size()/delta;
-       QPainter p(viewport());
+}
 
-       p.setPen(Qt::black);
-       p.drawText(15, 15, QString("%1").arg(ips, 9, 'f', 2));
-       p.drawText(15,30,QString("%1").arg(delta));
-    }
-    t=QTime::currentTime();
-    QPainter p(viewport());
-    p.setRenderHint(QPainter::Antialiasing);
-    p.setPen(QPen(QBrush(Qt::black), 0));
-    QPainterPath path;
-    path.addEllipse(-4.0, -4.0, 8.0, 8.0);
-    QPolygonF poly = path.toFillPolygon();
-    QPointF l;
-    for (int i=0; i<scene()->items().size(); i++) {
+void ProjectionGraphicsView::setImage(LaueImage * img) {
+  image = img;
+}
 
-        QGraphicsItem* it = scene()->items().at(i);
-        QPointF pos = mapFromScene(it->pos() );
-        //p.drawEllipse(pos, 2.5, 2.5);
-        poly.translate(pos-l);
-        l=pos;
-        p.drawPolygon(poly);
-    }
-    p.end();
-    delta = t.msecsTo(QTime::currentTime());
-    if (delta>0) {
-       double ips = 1000.0*scene()->items().size()/delta;
-       QPainter p(viewport());
+#include <QPaintEngine>
+#include <QImage>
 
-       p.setPen(Qt::black);
-       p.drawText(15,45, QString("%1").arg(ips, 9, 'f', 2));
-       p.drawText(15,60,QString("%1").arg(delta));
+void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rect) {
+  if (image.isNull()) {
+    painter->fillRect(rect, Qt::gray);
+  } else {
+    QTransform t = painter->deviceTransform();
+    QRectF sc = sceneRect();
+    QPointF p2 = t.map(rect.topRight());
+    int w = p2.x();
+    int h = p2.y();
+    QImage img(w, h, QImage::Format_ARGB32_Premultiplied);
+    QTransform ti = t.inverted();
+    for (int x=0; x<w; x++) {
+      for (int y=0; y<h; y++) {
+        // widget -> scene
+        double ix = rect.left()+1.0*x/(w-1)*rect.width();
+        double iy = rect.bottom()-1.0*y/(h-1)*rect.height();
+        //scene -> image
+        ix = (ix-sc.left())/sc.width()*image->width();
+        iy = (iy-sc.top())/sc.height()*image->height();
+
+        int iix = int(ix);
+        int iiy = int(iy);
+        iix = std::min(std::max(0, iix), image->width()-1);
+        iiy = std::min(std::max(0, iiy), image->height()-1);
+
+        img.setPixel(x,y,image->getImage().pixel(iix, iiy));
+      }
     }
-*/
+
+    cout << "Draw BG ";
+    cout << p2.x() << " ";
+    cout << p2.y() << endl;
+    //painter->drawImage(sr, image->getImage());
+    painter->save();
+    painter->resetTransform();
+    painter->drawImage(0,0,img);
+    painter->restore();
+  }
 }

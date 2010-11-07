@@ -124,6 +124,7 @@ public slots:
   void loadImage(QString);
   void closeImage();
   void transferImageData();
+  //LaueImage* getImage();
 
 
   virtual void doImgRotation(int CWRSteps, bool flip);
@@ -139,6 +140,7 @@ signals:
   void projectionRectPosChanged();
   void projectionRectSizeChanged();
   void imgTransformUpdated();
+  void imageLoaded(LaueImage*);
 protected:
   virtual bool project(const Reflection &r, QPointF &point)=0;
   virtual bool parseXMLElement(QXmlStreamReader&);
@@ -205,7 +207,7 @@ protected:
     bool cacheNeedsUpdate;
     void updateCache();
 
-    QPixmap cache;
+    QPixmap* cache;
     double spotSize;
     QTransform transform;
 

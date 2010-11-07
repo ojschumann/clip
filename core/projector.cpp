@@ -38,7 +38,7 @@ Projector::Projector(QObject *parent):
 {
   imagePlane->setFlag(QGraphicsItem::ItemIsMovable, false);
   imagePlane->setVisible(false);
-  imagePlane->setTransformationMode(Qt::SmoothTransformation);
+  imagePlane->setTransformationMode(Qt::FastTransformation);
   imagePlane->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
   imageItemsPlane->setFlag(QGraphicsItem::ItemIsMovable, false);
 
@@ -518,11 +518,12 @@ void Projector::loadImage(QString s) {
   if (tmpImage->isValid()) {
     if (imageData) delete imageData;
     imageData = tmpImage;
-    connect(imageData, SIGNAL(imageDataChanged()), this, SLOT(transferImageData()));
-    transferImageData();
+    emit imageLoaded(imageData);
+    /*connect(imageData, SIGNAL(imageDataChanged()), this, SLOT(transferImageData()));
+    /transferImageData();
     imagePlane->setVisible(true);
     updateImgTransformations();
-    cout << "Image ok" << endl;
+    cout << "Image ok" << endl; */
   } else {
     delete tmpImage;
   }
@@ -533,6 +534,10 @@ void Projector::closeImage() {
   imageData = 0;
   imagePlane->setVisible(false);
 }
+
+/*LaueImage* getImage() {
+  return imageData;
+}*/
 
 void Projector::transferImageData() {
   if (imageData) {
@@ -667,6 +672,7 @@ bool Projector::parseXMLElement(QXmlStreamReader &r) {
 Projector::SpotMarkerGraphicsItem::SpotMarkerGraphicsItem(): QGraphicsItem(), workerSync(0) {
   setCacheMode(NoCache);
   cacheNeedsUpdate = true;
+  cache = 0;
   for (int i=0; i<QThread::idealThreadCount(); i++) {
     Worker* w = new Worker(this, i);
     w->start();
@@ -684,17 +690,17 @@ Projector::SpotMarkerGraphicsItem::~SpotMarkerGraphicsItem() {
     delete workers[i];
   }
   workers.clear();
-
+  delete cache;
 }
 
 void Projector::SpotMarkerGraphicsItem::updateCache() {
   if (cacheNeedsUpdate) {
     workN = 0;
     workerStart.wakeAll();
-    cache.fill(QColor(0,0,0,0));
+    cache->fill(QColor(0,0,0,0));
     workerSync.acquire(workers.size());
 
-    QPainter p2(&cache);
+    QPainter p2(cache);
     foreach (Worker* worker, workers) {
       p2.drawImage(QPoint(0,0), *worker->localCache);
     }
@@ -704,8 +710,9 @@ void Projector::SpotMarkerGraphicsItem::updateCache() {
 
 void Projector::SpotMarkerGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem *option, QWidget *w) {  
 
-  if (cache.size()!=p->viewport().size()) {
-    cache = QPixmap(p->viewport().size());
+  if (!cache || (cache->size()!=p->viewport().size())) {
+    if (cache) delete cache;
+    cache = new QPixmap(p->viewport().size());
     cacheNeedsUpdate = true;
   }
 
@@ -718,7 +725,7 @@ void Projector::SpotMarkerGraphicsItem::paint(QPainter *p, const QStyleOptionGra
 
   p->save();
   p->resetTransform();
-  p->drawPixmap(QPoint(0,0), cache);
+  p->drawPixmap(QPoint(0,0), *cache);
   p->restore();
 
 
@@ -762,8 +769,8 @@ void Projector::SpotMarkerGraphicsItem::Worker::run() {
     double ry = spotMarker->transform.m22()*spotMarker->spotSize;
 
 
-    if (!localCache || localCache->size()!=spotMarker->cache.size())
-      localCache = new QImage(spotMarker->cache.size(), QImage::Format_ARGB32_Premultiplied);
+    if (!localCache || localCache->size()!=spotMarker->cache->size())
+      localCache = new QImage(spotMarker->cache->size(), QImage::Format_ARGB32_Premultiplied);
     localCache->fill(QColor(0,0,0,0).rgba());
     QPainter painter(localCache);
     QList<QGraphicsView*> l = spotMarker->scene()->views();

@@ -2,6 +2,8 @@
 #define PROJECTIONGRAPHICSVIEW_H
 
 #include <QGraphicsView>
+#include <tools/laueimage.h>
+#include <QPointer>
 
 class ProjectionGraphicsView : public QGraphicsView
 {
@@ -18,8 +20,11 @@ signals:
 
 public slots:
   void retakeMouseEvent() { viewIgnoresThisMouseEvent = false; };
+  void setImage(LaueImage*);
 protected:
   void paintEvent(QPaintEvent*);
+  void drawBackground(QPainter *painter, const QRectF &rect);
+  QPointer<LaueImage> image;
   bool viewIgnoresThisMouseEvent;
   // TODO: Only for debugging!
   int frames;
