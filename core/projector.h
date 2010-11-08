@@ -123,8 +123,6 @@ public slots:
 
   void loadImage(QString);
   void closeImage();
-  void transferImageData();
-  //LaueImage* getImage();
 
 
   virtual void doImgRotation(int CWRSteps, bool flip);
@@ -172,7 +170,6 @@ protected:
   bool projectionEnabled;
 
   QGraphicsScene scene;
-  QGraphicsPixmapItem* imagePlane;
   QGraphicsPixmapItem* imageItemsPlane;
   LaueImage* imageData;
 

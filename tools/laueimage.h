@@ -10,7 +10,7 @@ class LaueImage : public QObject
 public:
   explicit LaueImage(QString, QObject *parent = 0);
   QImage getImage();
-  QPixmap getPixmap();
+  QImage getScaledImage(const QSize& , const QRectF&);
   int width() { return image.width(); };
   int height() { return image.height(); };
   QSize size() { return image.size(); };

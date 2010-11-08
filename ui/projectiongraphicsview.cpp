@@ -62,43 +62,36 @@ void ProjectionGraphicsView::setImage(LaueImage * img) {
 
 #include <QPaintEngine>
 #include <QImage>
+#include <QRectF>
+
+template<class T> void printRect(const T& r) {
+  cout << "Rect = " << r.left() << " <-> " << r.right() << " | " << r.top() << " <-> " << r.bottom() << "  (" << r.width() << " x " << r.height() << ")" << endl;
+}
 
 void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rect) {
   if (image.isNull()) {
-    painter->fillRect(rect, Qt::gray);
+    painter->fillRect(rect, Qt::white);
   } else {
-    QTransform t = painter->deviceTransform();
-    QRectF sc = sceneRect();
-    QPointF p2 = t.map(rect.topRight());
-    int w = p2.x();
-    int h = p2.y();
-    QImage img(w, h, QImage::Format_ARGB32_Premultiplied);
-    QTransform ti = t.inverted();
-    for (int x=0; x<w; x++) {
-      for (int y=0; y<h; y++) {
-        // widget -> scene
-        double ix = rect.left()+1.0*x/(w-1)*rect.width();
-        double iy = rect.bottom()-1.0*y/(h-1)*rect.height();
-        //scene -> image
-        ix = (ix-sc.left())/sc.width()*image->width();
-        iy = (iy-sc.top())/sc.height()*image->height();
+    QRectF visRect(mapToScene(0,0), mapToScene(viewport()->width(), viewport()->height()));
+    if (visualRect!=visRect || cache.size()!=viewport()->size()) {
 
-        int iix = int(ix);
-        int iiy = int(iy);
-        iix = std::min(std::max(0, iix), image->width()-1);
-        iiy = std::min(std::max(0, iiy), image->height()-1);
-
-        img.setPixel(x,y,image->getImage().pixel(iix, iiy));
-      }
+      QRectF sc(sceneRect());
+      QRectF r((visRect.left()-sc.left())/sc.width(), (-visRect.bottom()-sc.top())/sc.height(), visRect.width()/sc.width(), visRect.height()/sc.height());
+      cache = image->getScaledImage(viewport()->size(), r.normalized());
+      visualRect = visRect;
     }
 
-    cout << "Draw BG ";
-    cout << p2.x() << " ";
-    cout << p2.y() << endl;
-    //painter->drawImage(sr, image->getImage());
+    QRect viewportUpdateRect(mapFromScene(rect.topLeft()), mapFromScene(rect.bottomRight()));
+    viewportUpdateRect = viewportUpdateRect.normalized();
+
+    printRect(visRect);
+    printRect(viewportUpdateRect);
+    printRect(viewport()->rect());
+
     painter->save();
     painter->resetTransform();
-    painter->drawImage(0,0,img);
+    //painter->drawImage(viewportUpdateRect, cache, viewportUpdateRect);
+    painter->drawImage(0, 0, cache);
     painter->restore();
   }
 }

@@ -29,7 +29,8 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
 
   ui->view->setScene(projector->getScene());
   ui->view->setTransform(QTransform(1,0,0,-1,0,0));
-  ui->view->setCacheMode(QGraphicsView::CacheBackground);
+  //ui->view->setCacheMode(QGraphicsView::CacheBackground);
+  ui->view->setCacheMode(QGraphicsView::CacheNone);
 
   //ui->view->viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
   //ui->view->setBackgroundBrush(QBrush(Qt::black));

@@ -25,6 +25,9 @@ protected:
   void paintEvent(QPaintEvent*);
   void drawBackground(QPainter *painter, const QRectF &rect);
   QPointer<LaueImage> image;
+  QRectF visualRect;
+  QImage cache;
+
   bool viewIgnoresThisMouseEvent;
   // TODO: Only for debugging!
   int frames;

@@ -31,22 +31,15 @@ Projector::Projector(QObject *parent):
     rulerItems(),
     crystal(),
     scene(this),
-    imagePlane(new QGraphicsPixmapItem()),
     imageItemsPlane(new QGraphicsPixmapItem()),
     imageData(0),
     spotMarkers(new SpotMarkerGraphicsItem())
 {
-  imagePlane->setFlag(QGraphicsItem::ItemIsMovable, false);
-  imagePlane->setVisible(false);
-  imagePlane->setTransformationMode(Qt::FastTransformation);
-  imagePlane->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
   imageItemsPlane->setFlag(QGraphicsItem::ItemIsMovable, false);
 
   scene.addItem(spotMarkers);
-  scene.addItem(imagePlane);
   scene.addItem(imageItemsPlane);
 
-  imagePlane->stackBefore(spotMarkers);
   spotMarkers->stackBefore(imageItemsPlane);
 
   enableSpots();
@@ -500,11 +493,6 @@ void Projector::updateImgTransformations() {
     det2img.translate(-r.x(),  -r.y());
     img2det=det2img.inverted();
   }
-  if (imageData) {
-    QPixmap pix = imageData->getPixmap();
-    cout << "Trans " << pix.width() << "x"  << pix.height() << endl;
-    imagePlane->setTransform(QTransform::fromScale(1.0/pix.width(), 1.0/pix.height())*img2det);
-  }
   imageItemsPlane->setTransform(img2det);
   QTransform t = QTransform::fromScale(det2img.m11(), det2img.m22());
   foreach (QGraphicsItem* item, imageItemsPlane->childItems()) {
@@ -519,11 +507,6 @@ void Projector::loadImage(QString s) {
     if (imageData) delete imageData;
     imageData = tmpImage;
     emit imageLoaded(imageData);
-    /*connect(imageData, SIGNAL(imageDataChanged()), this, SLOT(transferImageData()));
-    /transferImageData();
-    imagePlane->setVisible(true);
-    updateImgTransformations();
-    cout << "Image ok" << endl; */
   } else {
     delete tmpImage;
   }
@@ -532,17 +515,6 @@ void Projector::loadImage(QString s) {
 void Projector::closeImage() {
   if (imageData) delete imageData;
   imageData = 0;
-  imagePlane->setVisible(false);
-}
-
-/*LaueImage* getImage() {
-  return imageData;
-}*/
-
-void Projector::transferImageData() {
-  if (imageData) {
-    imagePlane->setPixmap(imageData->getPixmap());
-  }
 }
 
 // Rotates and flips the Decorations, which are bound to the Image

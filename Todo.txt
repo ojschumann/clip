@@ -1,5 +1,4 @@
 ProjectionPlane
-  Info Widgets
   Context Menu
   Image Handling (new, multithreaded)
     Rotate/Flip, Crop (with arbitrary rotation)
@@ -26,8 +25,8 @@ Transfer Curve (port)
   Image Handling to new class?
 
 Save Default Values for Projector Variables (Distance, Height, Width, ...)
-
-Load img from last directory
+  * Load/Save Workspace on startup
+  * Load Default Projector/Crystal on creation
 
 Allow to configure colors
 
