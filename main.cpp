@@ -9,9 +9,11 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
-  Clip w;
-  w.show();
-  return a.exec();
+  Clip* w = Clip::getInstance();
+  w->show();
+  int r = a.exec();
+  delete w;
+  return r;
 }
 
 

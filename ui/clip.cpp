@@ -31,6 +31,14 @@ Clip::~Clip(){
   delete ui;
 }
 
+Clip* Clip::instance = 0;
+
+Clip* Clip::getInstance() {
+  if (!instance)
+    instance = new Clip();
+  return instance;
+}
+
 void Clip::on_newCrystal_triggered() {
   addMdiWindow(new CrystalDisplay(this));
 }
@@ -70,6 +78,20 @@ void Clip::addMdiWindow(QWidget* w) {
   connect(w, SIGNAL(destroyed()), m, SLOT(deleteLater()));
 }
 
+void Clip::setActiveSubWindow(QWidget *window) {
+  if (!window)
+    return;
+  QMdiSubWindow* mdiWin= qobject_cast<QMdiSubWindow *>(window);
+  if (mdiWin) {
+    ui->mdiArea->setActiveSubWindow(mdiWin);
+  } else {
+    foreach (mdiWin, ui->mdiArea->subWindowList()) {
+      if (mdiWin->widget()==window) {
+        ui->mdiArea->setActiveSubWindow(mdiWin);
+      }
+    }
+  }
+}
 
 void Clip::on_actionAbout_triggered(bool) {
   QString message("This is the Cologne Laue Indexation Program (CLIP)\n");
@@ -159,8 +181,3 @@ void Clip::addActions() {
 
 }
 
-void Clip::setActiveSubWindow(QWidget *window) {
-  if (!window)
-    return;
-  ui->mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
-}

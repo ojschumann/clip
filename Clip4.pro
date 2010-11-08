@@ -66,7 +66,10 @@ SOURCES += main.cpp\
     tools/rulermodel.cpp \
     tools/zoneitem.cpp \
     defs.cpp \
-    tools/laueimage.cpp
+    image/laueimage.cpp \
+    image/ImageTools.cpp \
+    image/BezierCurve.cpp \
+    ui/imagetoolbox.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -93,14 +96,18 @@ HEADERS  += ui/clip.h \
     ui/resolutioncalculator.h \
     tools/rulermodel.h \
     tools/zoneitem.h \
-    tools/laueimage.h
+    image/laueimage.h \
+    image/ImageTools.h \
+    image/BezierCurve.h \
+    ui/imagetoolbox.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
     ui/projectionplane.ui \
     ui/stereocfg.ui \
     ui/laueplanecfg.ui \
-    ui/resolutioncalculator.ui
+    ui/resolutioncalculator.ui \
+    ui/imagetoolbox.ui
 
 RESOURCES += \
     icons/icons.qrc

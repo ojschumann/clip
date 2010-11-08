@@ -2,7 +2,7 @@
 #define PROJECTIONGRAPHICSVIEW_H
 
 #include <QGraphicsView>
-#include <tools/laueimage.h>
+#include <image/laueimage.h>
 #include <QPointer>
 
 class ProjectionGraphicsView : public QGraphicsView

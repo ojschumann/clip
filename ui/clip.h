@@ -15,7 +15,7 @@ class Clip : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit Clip(QWidget *parent = 0);
+  static Clip* getInstance();
   ~Clip();
 
 
@@ -32,12 +32,13 @@ public slots:
   // Used by the Windows-Submenu
   void setActiveSubWindow(QWidget *window);
   void addMdiWindow(QWidget*);
-
 protected:
   Projector* connectToLastCrystal(Projector*);
   void addProjector(Projector*);
   void addActions();
 private:
+  explicit Clip(QWidget *parent = 0);
+  static Clip* instance;
   Ui::Clip *ui;
 
   QAction *closeAct;

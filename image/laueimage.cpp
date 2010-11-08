@@ -1,6 +1,9 @@
 #include "laueimage.h"
 #include <QImage>
 #include <QPixmap>
+#include <ui/imagetoolbox.h>
+#include <ui/clip.h>
+#include <QApplication>
 
 LaueImage::LaueImage(QString s, QObject *parent) :
     QObject(parent), image()
@@ -11,6 +14,16 @@ LaueImage::LaueImage(QString s, QObject *parent) :
 
 QImage LaueImage::getImage() {
   return image;
+}
+
+void LaueImage::showToolbox() {
+  if (imageToolbox.isNull()) {
+    imageToolbox = new ImageToolbox(this);
+    connect(this, SIGNAL(destroyed()), imageToolbox.data(), SLOT(deleteLater()));
+    Clip::getInstance()->addMdiWindow(imageToolbox);
+  } else {
+    Clip::getInstance()->setActiveSubWindow(imageToolbox);
+  }
 }
 
 

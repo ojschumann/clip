@@ -16,7 +16,7 @@
 #include <tools/zoneitem.h>
 #include <core/reflection.h>
 #include <core/crystal.h>
-#include <tools/laueimage.h>
+#include <image/laueimage.h>
 
 
 using namespace std;
@@ -281,6 +281,10 @@ void Projector::setRotation(const Mat3D& M) {
 
 QGraphicsScene* Projector::getScene() {
   return &scene;
+}
+
+LaueImage* Projector::getLaueImage() {
+  return imageData;
 }
 
 Crystal* Projector::getCrystal() {

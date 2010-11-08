@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QImage>
+#include <QPointer>
+
+class ImageToolbox;
 
 class LaueImage : public QObject
 {
@@ -18,8 +21,10 @@ public:
 signals:
   void imageDataChanged();
 public slots:
+  void showToolbox();
 private:
   QImage image;
+  QPointer<ImageToolbox> imageToolbox;
   bool valid;
 };
 

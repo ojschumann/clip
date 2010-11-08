@@ -59,6 +59,9 @@ public:
 
   QGraphicsScene* getScene();
   Crystal* getCrystal();
+  virtual QWidget* configWidget()=0;
+  LaueImage* getLaueImage();
+
   virtual QString projectorName()=0;
   virtual QString displayName()=0;
 
@@ -75,8 +78,6 @@ public:
 
   virtual void projector2xml(QXmlStreamWriter&);
   virtual void loadFromXML(QXmlStreamReader&);
-
-  virtual QWidget* configWidget()=0;
 
   int spotMarkerNumber() const;
   void addSpotMarker(const QPointF& p);

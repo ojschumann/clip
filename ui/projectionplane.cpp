@@ -9,12 +9,17 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <ui/resolutioncalculator.h>
+#include <ui/imagetoolbox.h>
 #include <core/crystal.h>
 #include <core/projector.h>
 #include <core/reflection.h>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QLabel>
+
+// List of all projectors. Sort of a hack ;-)
+QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
+
 
 ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     QMainWindow(parent),
@@ -285,6 +290,7 @@ void ProjectionPlane::on_openImgAction_triggered() {
   if (fInfo.exists()) {
     lastImageOpenDir = fInfo.canonicalFilePath();
     projector->loadImage(fileName);
+    connect(ui->colorCurvesAction, SIGNAL(triggered()), projector->getLaueImage(), SLOT(showToolbox()));
   }
 
   ui->imgToolBar->setVisible(true);
@@ -309,6 +315,6 @@ void ProjectionPlane::on_configAction_triggered() {
   }
 }
 
-QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
+
 
 
