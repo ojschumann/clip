@@ -48,6 +48,10 @@ private:
   QList<BoundedEllipse*> handleMarkers;
   QList<QGraphicsPathItem*> curves;
   int activeCurve;
+
+private slots:
+    void on_actionSave_Curve_triggered();
+    void on_actionLoad_Curve_triggered();
 };
 
 #endif // IMAGETOOLBOX_H

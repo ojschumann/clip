@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>282</width>
-    <height>302</height>
+    <width>249</width>
+    <height>238</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,9 +26,9 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="contrastTab">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>Contrast</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="1">
@@ -118,7 +118,7 @@
            </size>
           </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string/>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -146,7 +146,7 @@
            </size>
           </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string/>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -161,7 +161,7 @@
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>File Info</string>
        </attribute>
       </widget>
      </widget>
@@ -178,7 +178,27 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionLoad_Curve"/>
+   <addaction name="actionSave_Curve"/>
   </widget>
+  <action name="actionLoad_Curve">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/fileopen.png</normaloff>:/fileopen.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Curve</string>
+   </property>
+  </action>
+  <action name="actionSave_Curve">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/filesave.png</normaloff>:/filesave.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Curve</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -188,6 +208,8 @@
    <header>tools/diagramgv.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../icons/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

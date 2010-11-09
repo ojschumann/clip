@@ -9,6 +9,8 @@
 #include <QMessageBox>
 #include <defs.h>
 
+
+
 Clip::Clip(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Clip)
@@ -25,6 +27,7 @@ Clip::Clip(QWidget *parent) :
   on_newCrystal_triggered();
   on_newLaue_triggered();
   on_newStereo_triggered();
+
 }
 
 Clip::~Clip(){

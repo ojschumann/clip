@@ -47,21 +47,20 @@ ImageToolbox::~ImageToolbox()
 }
 
 void ImageToolbox::changeToCurve(int n) {
-  if (n!=activeCurve) {
-    activeCurve=n;
-    foreach (BoundedEllipse* item, handleMarkers) {
-      scene.removeItem(item);
-      delete item;
-    }
-    handleMarkers.clear();
-    foreach (QPointF p, bezierCurves[n]->getPoints()) {
-      newMarker(p);
-    }
-    handleMarkers.first()->setBBox(QRectF(0,0,0,1));
-    handleMarkers.first()->setAcceptedMouseButtons(Qt::LeftButton|Qt::RightButton);
-    handleMarkers.last()->setBBox(QRectF(1,0,0,1));
-    handleMarkers.last()->setAcceptedMouseButtons(Qt::LeftButton|Qt::RightButton);
+  activeCurve=n;
+  foreach (BoundedEllipse* item, handleMarkers) {
+    scene.removeItem(item);
+    delete item;
   }
+  handleMarkers.clear();
+  foreach (QPointF p, bezierCurves[n]->getPoints()) {
+    newMarker(p);
+  }
+  handleMarkers.first()->setBBox(QRectF(0,0,0,1));
+  handleMarkers.first()->setAcceptedMouseButtons(Qt::LeftButton|Qt::RightButton);
+  handleMarkers.last()->setBBox(QRectF(1,0,0,1));
+  handleMarkers.last()->setAcceptedMouseButtons(Qt::LeftButton|Qt::RightButton);
+
 }
 
 void ImageToolbox::newMarker(const QPointF& p) {
@@ -199,4 +198,95 @@ QVariant ImageToolbox::BoundedEllipse::itemChange(GraphicsItemChange change, con
     return SignalingEllipseItem::itemChange(change, QVariant(p));
   }
   return SignalingEllipseItem::itemChange(change, value);
+}
+
+#include <QtXml/QDomDocument>
+#include <QFileDialog>
+#include <QFileInfo>
+
+void ImageToolbox::on_actionLoad_Curve_triggered()
+{
+  QString fileName = QFileDialog::getOpenFileName(this, "Choose Curve to load from File", "", "Clip Curve files (*.curve);;All Files (*)");
+  QFileInfo fInfo(fileName);
+
+  QDomDocument doc("curves");
+  QFile file(fileName);
+  if (!file.open(QIODevice::ReadOnly))
+      return;
+  if (!doc.setContent(&file)) {
+      file.close();
+      return;
+  }
+  file.close();
+
+  QStringList curveNames;
+  curveNames << "Value" << "Red" << "Green" << "Blue";
+  QList< QList<QPointF> > allCurvePoints;
+  foreach (QString name, curveNames) {
+    QDomElement curve = doc.elementsByTagName(name).at(0).toElement();
+    if (curve.isNull()) return;
+    QList<QPointF> points;
+    QDomNodeList curvePointElements = curve.elementsByTagName("Point");
+    for (int i=0; i<curvePointElements.size(); i++) {
+      bool okx, oky;
+      double x = curvePointElements.at(i).toElement().attribute("x").toDouble(&okx);
+      double y = curvePointElements.at(i).toElement().attribute("y").toDouble(&oky);
+      if (!okx || !oky || x<0.0 || x>1.0 || y<0.0 || y>1.0) return;
+      points << QPointF(x,y);
+    }
+    if (points.size()<2) return;
+    allCurvePoints << points;
+  }
+  for (int i=0; i<4; i++) {
+    bezierCurves[i]->setPoints(allCurvePoints[i]);
+    updateCurveLines(i);
+  }
+  changeToCurve(activeCurve);
+}
+
+/*def saveCurves(self):
+      #FIXME: Change to QXmlSimpleWriter
+      import xml.dom.minidom
+      doc=xml.dom.minidom.Document()
+      base=doc.appendChild(doc.createElement('Transfercurves'))
+      for i, name in enumerate(('Value', 'Red',  'Green', 'Blue')):
+          curve=base.appendChild(doc.createElement(name))
+          for p in self.transferCurveMarkers[i]:
+              point=curve.appendChild(doc.createElement('Point'))
+              point.setAttribute('x', str(p.pos().x()))
+              point.setAttribute('y', str(p.pos().y()))
+
+      fileName = QtGui.QFileDialog.getSaveFileName(self, 'Choose File to save Curves', '', 'Clip Curve files (*.curve);;All Files (*)')
+      if fileName!="":
+          doc.writexml(open(fileName, 'w'), addindent='  ',newl='\n')
+
+}
+*/
+
+#include <QTextStream>
+
+void ImageToolbox::on_actionSave_Curve_triggered()
+{
+  QDomDocument doc("curves");
+  QDomNode base = doc.appendChild(doc.createElement("Transfercurves"));
+  QStringList curveNames;
+  curveNames << "Value" << "Red" << "Green" << "Blue";
+  QList<BezierCurve*>::Iterator it = bezierCurves.begin();
+  foreach (QString name, curveNames) {
+    QDomNode curve = base.appendChild(doc.createElement(name));
+    foreach (QPointF p, (*it)->getPoints()) {
+      QDomElement point = curve.appendChild(doc.createElement("Point")).toElement();
+      point.setAttribute("x", p.x());
+      point.setAttribute("y", p.y());
+    }
+    it++;
+  }
+  QString filename = QFileDialog::getSaveFileName(this, "Choose File to save Curves", "", "Clip Curve files (*.curve);;All Files (*)");
+  QFile file(filename);
+
+  if (file.open(QIODevice::ReadWrite | QIODevice::Truncate)) {
+    QTextStream ts(&file);
+    doc.save(ts, 0);
+    file.close();
+  }
 }
