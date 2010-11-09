@@ -69,7 +69,8 @@ SOURCES += main.cpp\
     image/laueimage.cpp \
     image/ImageTools.cpp \
     image/BezierCurve.cpp \
-    ui/imagetoolbox.cpp
+    ui/imagetoolbox.cpp \
+    tools/diagramgv.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -99,7 +100,9 @@ HEADERS  += ui/clip.h \
     image/laueimage.h \
     image/ImageTools.h \
     image/BezierCurve.h \
-    ui/imagetoolbox.h
+    ui/imagetoolbox.h \
+    tools/diagramgv.h \
+    tools/debug.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

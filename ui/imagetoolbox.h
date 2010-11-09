@@ -21,18 +21,24 @@ class ImageToolbox : public QMainWindow
 public:
   explicit ImageToolbox(LaueImage* img, QWidget *parent = 0);
   ~ImageToolbox();
-  void resizeEvent(QResizeEvent *);
   void mousePressEvent(QMouseEvent *);
 public slots:
-  void newMarker(int, const QPointF&);
+  void newMarker(const QPointF&);
   void changeToCurve(int);
   void markerChanged();
   void updateCurveLines(int);
+  void makeScales();
+  void makeHScale();
+  void makeVScale();
 private:
   class BoundedEllipse: public SignalingEllipseItem {
   public:
     BoundedEllipse(QGraphicsItem *parent=0);
     QVariant itemChange(GraphicsItemChange change, const QVariant & value);
+    void setBBox(const QRectF& b) { bbox = b; };
+    bool operator<(const BoundedEllipse& o);
+  private:
+    QRectF bbox;
   };
 
   Ui::ImageToolbox *ui;

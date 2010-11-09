@@ -13,7 +13,7 @@ using namespace std;
 class BezierCurve {
     public:
         BezierCurve();
-        bool setPoints(QList<QPointF> &p);
+        bool setPoints(const QList<QPointF>& p);
         QList<QPointF> getPoints();
     
         float operator()(float x);

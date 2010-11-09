@@ -11,7 +11,7 @@ BezierCurve::BezierCurve(): params() {
   setPoints(p);
 };
 
-bool BezierCurve::setPoints(QList<QPointF>& p) {
+bool BezierCurve::setPoints(const QList<QPointF>& p) {
   points=p;
   // this ist stolen from GIMP. Hale the GPL!!!
   // File: GIMP/app/base/curves.c

@@ -63,10 +63,8 @@ void ProjectionGraphicsView::setImage(LaueImage * img) {
 #include <QPaintEngine>
 #include <QImage>
 #include <QRectF>
+#include <tools/debug.h>
 
-template<class T> void printRect(const T& r) {
-  cout << "Rect = " << r.left() << " <-> " << r.right() << " | " << r.top() << " <-> " << r.bottom() << "  (" << r.width() << " x " << r.height() << ")" << endl;
-}
 
 void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rect) {
   if (image.isNull()) {

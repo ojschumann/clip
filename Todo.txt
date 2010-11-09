@@ -21,8 +21,12 @@ Rotation (port)
 
 Reorientation (port)
 
-Transfer Curve (port)
-  Image Handling to new class?
+Transfer Curve
+  Load/Save curves
+
+Image Handling
+  Dataprovider + Scaler
+  Would allow to support live detectors
 
 Save Default Values for Projector Variables (Distance, Height, Width, ...)
   * Load/Save Workspace on startup
@@ -31,3 +35,5 @@ Save Default Values for Projector Variables (Distance, Height, Width, ...)
 Allow to configure colors
 
 Allow to "print" to pdf/png/jpeg
+
+

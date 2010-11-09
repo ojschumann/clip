@@ -79,7 +79,7 @@
          </layout>
         </item>
         <item row="1" column="1">
-         <widget class="QGraphicsView" name="gv">
+         <widget class="DiagramGV" name="gv">
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
@@ -181,6 +181,13 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>DiagramGV</class>
+   <extends>QGraphicsView</extends>
+   <header>tools/diagramgv.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
