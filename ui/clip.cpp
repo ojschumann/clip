@@ -30,15 +30,16 @@ Clip::Clip(QWidget *parent) :
 
 }
 
+Clip::Clip(const Clip &) {
+}
+
+
 Clip::~Clip(){
   delete ui;
 }
 
-Clip* Clip::instance = 0;
-
-Clip* Clip::getInstance() {
-  if (!instance)
-    instance = new Clip();
+Clip& Clip::getInstance() {
+  static Clip instance;
   return instance;
 }
 
@@ -99,10 +100,11 @@ void Clip::setActiveSubWindow(QWidget *window) {
 void Clip::on_actionAbout_triggered(bool) {
   QString message("This is the Cologne Laue Indexation Program (CLIP)\n");
   message += "a program to index and refine laue exposures.\n\n";
-  message += "Version 4.0\n";
+  message += "Version 4.0alpha\n";
   message += "Mercurial ID: " + QString(HG_REPRO_ID) + " Revision: " + HG_REPRO_REV + "\n";
-  message += "Mercurial Date: " + QString(HG_REPRO_DATE) + "\n\n";
-  message += "Copyright (c) 2010 O.J.Schumann (o.j.schumann@gmail.com)\n";
+  message += "Mercurial Date: " + QString(HG_REPRO_DATE) + "\n";
+  message += "Build Date: " + QString(BUILD_DATE) +" " + QString(BUILD_TIME) + "\n\n";
+  message += "Copyright (C) 2010 O.J.Schumann (o.j.schumann@gmail.com)\n";
   message += "Clip is licensed under the terms of the GNU General Public License.";
 
 

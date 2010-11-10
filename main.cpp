@@ -5,15 +5,16 @@
 #include <tools/vec3D.h>
 #include <QTime>
 #include <iostream>
+#include <image/dataproviderfactory.h>
+
+
 using namespace std;
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
-  Clip* w = Clip::getInstance();
-  w->show();
-  int r = a.exec();
-  delete w;
-  return r;
+  Clip& w = Clip::getInstance();
+  w.show();
+  return a.exec();
 }
 
 

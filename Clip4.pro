@@ -13,28 +13,22 @@ win32 {
         CONFIG += console
 }
 
+DEFFILE = $(OBJECTS_DIR)/defs.o
 win32 {
+  DEFFILE = $(OBJECTS_DIR)\defs.o
   PATH += C:/Program Files (x86)/TortoiseHg
   PATH += C:/Programme/TortoiseHG
 }
 
-HGID = $$SYSTEM(hg -q id)
-HGREV = $$SYSTEM(hg -q parent --template {rev})
-HGDATE = $$system(hg -q parent --template \"{date|date}\")
-
-HGID_CSTR = $$sprintf("const char* HG_REPRO_ID = \"%1\";", $$HGID)
-HGREV_CSTR = $$sprintf("const char* HG_REPRO_REV = \"%1\";", $$HGREV)
-HGDATE_CSTR = $$sprintf("const char* HG_REPRO_DATE = \"%1\";", $$HGDATE)
-
-hg.cpp.target = hg.cpp
-hg.cpp.commands = @echo "$$HGID_CSTR $$HGREV_CSTR $$HGDATE_CSTR" > defs.cpp
-hg.cpp.depends = lala
-
-lala.commands = @echo $$HGDATE
+defs.commands = -\$(DEL_FILE) $$DEFFILE
+QMAKE_EXTRA_TARGETS += defs
+PRE_TARGETDEPS += defs
 
 
-QMAKE_EXTRA_TARGETS += hg.cpp lala
-PRE_TARGETDEPS += hg.cpp
+DEFINES += __HG_REPRO_ID__="\\\"\$(shell hg -R \"$$PWD\" -q id)\\\""
+DEFINES += __HG_REPRO_REV__="\\\"\$(shell hg -R \"$$PWD\" -q parent --template {rev})\\\""
+DEFINES += __HG_REPRO_DATE__="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\\\"\""
+
 
 QMAKE_CXXFLAGS += -std=gnu++0x
 
@@ -65,12 +59,16 @@ SOURCES += main.cpp\
     ui/resolutioncalculator.cpp \
     tools/rulermodel.cpp \
     tools/zoneitem.cpp \
-    defs.cpp \
     image/laueimage.cpp \
     image/ImageTools.cpp \
     image/BezierCurve.cpp \
     ui/imagetoolbox.cpp \
-    tools/diagramgv.cpp
+    tools/diagramgv.cpp \
+    defs.cpp \
+    image/dataprovider.cpp \
+    image/dataproviderfactory.cpp \
+    image/qimagedataprovider.cpp \
+    image/basdataprovider.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -102,7 +100,11 @@ HEADERS  += ui/clip.h \
     image/BezierCurve.h \
     ui/imagetoolbox.h \
     tools/diagramgv.h \
-    tools/debug.h
+    tools/debug.h \
+    image/dataprovider.h \
+    image/dataproviderfactory.h \
+    image/qimagedataprovider.h \
+    image/basdataprovider.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

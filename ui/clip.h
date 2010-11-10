@@ -15,9 +15,11 @@ class Clip : public QMainWindow {
   Q_OBJECT
 
 public:
-  static Clip* getInstance();
+  static Clip& getInstance();
+private:
+  explicit Clip(QWidget *parent = 0);
+  Clip(const Clip&);
   ~Clip();
-
 
 public slots:
   // Menu Slots
@@ -37,8 +39,6 @@ protected:
   void addProjector(Projector*);
   void addActions();
 private:
-  explicit Clip(QWidget *parent = 0);
-  static Clip* instance;
   Ui::Clip *ui;
 
   QAction *closeAct;

@@ -20,9 +20,9 @@ void LaueImage::showToolbox() {
   if (imageToolbox.isNull()) {
     imageToolbox = new ImageToolbox(this);
     connect(this, SIGNAL(destroyed()), imageToolbox.data(), SLOT(deleteLater()));
-    Clip::getInstance()->addMdiWindow(imageToolbox);
+    Clip::getInstance().addMdiWindow(imageToolbox);
   } else {
-    Clip::getInstance()->setActiveSubWindow(imageToolbox);
+    Clip::getInstance().setActiveSubWindow(imageToolbox);
   }
 }
 

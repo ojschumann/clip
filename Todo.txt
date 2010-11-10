@@ -23,6 +23,7 @@ Reorientation (port)
 
 Transfer Curve
   Load/Save curves
+  Port to own widget and only add to ImageTollbox
 
 Image Handling
   Dataprovider + Scaler
