@@ -68,7 +68,10 @@ SOURCES += main.cpp\
     image/dataprovider.cpp \
     image/dataproviderfactory.cpp \
     image/qimagedataprovider.cpp \
-    image/basdataprovider.cpp
+    image/basdataprovider.cpp \
+    image/datascaler.cpp \
+    image/datascalerfactory.cpp \
+    image/simplergbscaler.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -104,7 +107,10 @@ HEADERS  += ui/clip.h \
     image/dataprovider.h \
     image/dataproviderfactory.h \
     image/qimagedataprovider.h \
-    image/basdataprovider.h
+    image/basdataprovider.h \
+    image/datascaler.h \
+    image/datascalerfactory.h \
+    image/simplergbscaler.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

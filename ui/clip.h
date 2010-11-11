@@ -15,11 +15,13 @@ class Clip : public QMainWindow {
   Q_OBJECT
 
 public:
-  static Clip& getInstance();
+  static Clip* getInstance();
+  static void clearInstance();
 private:
   explicit Clip(QWidget *parent = 0);
   Clip(const Clip&);
   ~Clip();
+  static Clip* instance;
 
 public slots:
   // Menu Slots

@@ -4,12 +4,16 @@
 #include <ui/imagetoolbox.h>
 #include <ui/clip.h>
 #include <QApplication>
+#include <image/dataproviderfactory.h>
 
 LaueImage::LaueImage(QString s, QObject *parent) :
     QObject(parent), image()
 {
   valid = image.load(s);
   image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+
+  DataProviderFactory::getInstance().loadImage(s);
+
 }
 
 QImage LaueImage::getImage() {
@@ -20,9 +24,9 @@ void LaueImage::showToolbox() {
   if (imageToolbox.isNull()) {
     imageToolbox = new ImageToolbox(this);
     connect(this, SIGNAL(destroyed()), imageToolbox.data(), SLOT(deleteLater()));
-    Clip::getInstance().addMdiWindow(imageToolbox);
+    Clip::getInstance()->addMdiWindow(imageToolbox);
   } else {
-    Clip::getInstance().setActiveSubWindow(imageToolbox);
+    Clip::getInstance()->setActiveSubWindow(imageToolbox);
   }
 }
 

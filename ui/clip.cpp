@@ -38,9 +38,19 @@ Clip::~Clip(){
   delete ui;
 }
 
-Clip& Clip::getInstance() {
-  static Clip instance;
+Clip* Clip::instance = 0;
+
+Clip* Clip::getInstance() {
+  if (!instance)
+    instance = new Clip();
   return instance;
+}
+
+void Clip::clearInstance() {
+  if (instance) {
+    delete instance;
+    instance = 0;
+  }
 }
 
 void Clip::on_newCrystal_triggered() {
