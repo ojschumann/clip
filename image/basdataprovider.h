@@ -18,6 +18,7 @@ public:
   virtual int height();
   virtual int bytesCount();
   virtual int pixelCount();
+  virtual Format format();
 private:
   explicit BasDataProvider(QObject *parent = 0);
 signals:

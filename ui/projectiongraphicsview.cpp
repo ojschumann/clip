@@ -71,13 +71,9 @@ void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rec
     painter->fillRect(rect, Qt::white);
   } else {
     QRectF visRect(mapToScene(0,0), mapToScene(viewport()->width(), viewport()->height()));
-    if (visualRect!=visRect || cache.size()!=viewport()->size()) {
-
-      QRectF sc(sceneRect());
-      QRectF r((visRect.left()-sc.left())/sc.width(), (-visRect.bottom()-sc.top())/sc.height(), visRect.width()/sc.width(), visRect.height()/sc.height());
-      cache = image->getScaledImage(viewport()->size(), r.normalized());
-      visualRect = visRect;
-    }
+    QRectF sc(sceneRect());
+    QRectF r((visRect.left()-sc.left())/sc.width(), (-visRect.bottom()-sc.top())/sc.height(), visRect.width()/sc.width(), visRect.height()/sc.height());
+    QImage cache = image->getScaledImage(viewport()->size(), r.normalized());
 
     QRect viewportUpdateRect(mapFromScene(rect.topLeft()), mapFromScene(rect.bottomRight()));
     viewportUpdateRect = viewportUpdateRect.normalized();

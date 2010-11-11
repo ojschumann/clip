@@ -18,6 +18,7 @@ using namespace std;
 BasDataProvider::BasDataProvider(QObject *parent) :
     DataProvider(parent)
 {
+  cout << "init BasDataProvider" << endl;
 }
 
 DataProvider* BasDataProvider::loadImage(const QString& filename) {
@@ -139,11 +140,16 @@ int BasDataProvider::height() {
 }
 
 int BasDataProvider::bytesCount() {
-  return pixelData.size()*sizeof(pixelData::value_type);
+  return pixelData.size()*sizeof(float);
 }
 
 int BasDataProvider::pixelCount() {
   return pixelData.size();
 }
+
+DataProvider::Format BasDataProvider::format() {
+  return Float32;
+}
+
 
 bool BasRegisterOK = DataProviderFactory::registerImageLoader(0, &BasDataProvider::loadImage);

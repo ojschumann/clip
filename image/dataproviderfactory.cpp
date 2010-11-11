@@ -8,6 +8,7 @@ using namespace std;
 DataProviderFactory::DataProviderFactory(QObject *parent) :
     QObject(parent)
 {
+    cout << "init DataProviderFactory" << endl;
 }
 
 DataProviderFactory::DataProviderFactory(const DataProviderFactory &) {};

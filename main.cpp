@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
   w->show();
   int r = a.exec();
   Clip::clearInstance();
-
+  return r;
 }
 
 

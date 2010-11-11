@@ -11,7 +11,7 @@ QImageDataProvider::QImageDataProvider(const QImage& img, QObject *parent) :
     DataProvider(parent),
     data(img)
 {
-
+  cout << "init QImageDataProvider" << endl;
 }
 
 
@@ -19,6 +19,10 @@ QImageDataProvider::DataProvider* QImageDataProvider::loadImage(const QString& f
   cout << "QImageDP tries to load " << qPrintable(filename) << endl;
   QImage img(filename);
   if (!img.isNull()) {
+    foreach (QString key, img.textKeys()) {
+      cout << qPrintable(key) << " -> " << qPrintable(img.text(key)) << endl;
+    }
+
     return new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied));
   }
   return NULL;
@@ -26,7 +30,7 @@ QImageDataProvider::DataProvider* QImageDataProvider::loadImage(const QString& f
 
 
 
-const unsigned char* QImageDataProvider::getData() {
+const void* QImageDataProvider::getData() {
   return data.bits();
 }
 
@@ -46,5 +50,8 @@ int QImageDataProvider::pixelCount() {
   return data.width()*data.height();
 }
 
+DataProvider::Format QImageDataProvider::format() {
+  return RGB8Bit;
+}
 
 bool registerOK = DataProviderFactory::registerImageLoader(128, &QImageDataProvider::loadImage);

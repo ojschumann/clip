@@ -10,12 +10,12 @@ class QImageDataProvider : public DataProvider
 public:
   static DataProvider* loadImage(const QString&);
 
-  virtual const unsigned char* getData();
+  virtual const void* getData();
   virtual int width();
   virtual int height();
   virtual int bytesCount();
   virtual int pixelCount();
-
+  virtual Format format();
 private:
   explicit QImageDataProvider(const QImage& img, QObject *parent = 0);
   QImageDataProvider(const QImageDataProvider&) {}

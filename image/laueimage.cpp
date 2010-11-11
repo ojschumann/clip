@@ -5,19 +5,19 @@
 #include <ui/clip.h>
 #include <QApplication>
 #include <image/dataproviderfactory.h>
+#include <image/datascalerfactory.h>
+
 
 LaueImage::LaueImage(QString s, QObject *parent) :
-    QObject(parent), image()
+    QObject(parent), provider(0), scaler(0)
 {
-  valid = image.load(s);
-  image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
-
-  DataProviderFactory::getInstance().loadImage(s);
-
-}
-
-QImage LaueImage::getImage() {
-  return image;
+  provider = DataProviderFactory::getInstance().loadImage(s);
+  if (provider) {
+    scaler = DataScalerFactory::getInstance().getScaler(provider);
+    provider->setParent(this);
+    if (scaler) scaler->setParent(this);
+  }
+  valid = (provider!=0) && (scaler!=0);
 }
 
 void LaueImage::showToolbox() {
@@ -30,41 +30,7 @@ void LaueImage::showToolbox() {
   }
 }
 
-
 QImage LaueImage::getScaledImage(const QSize& requestedSize, const QRectF& r) {
-  int w = requestedSize.width();
-  int h = requestedSize.height();
-
-  QImage img(requestedSize, image.format());
-
-  double x0 = r.left()*image.width();
-  double dx = r.width()*image.width()/img.width();
-
-  double y0 = r.top()*image.height();
-  double dy = r.height()*image.height()/img.height();
-
-  QRgb* data = (QRgb*)img.bits();
-
-  double fy = y0;
-  int liy = -1;
-  for (int y=0; y<h; y++) {
-    int iy = std::min(std::max(0, int(fy)), image.height()-1);
-    fy += dy;
-    if (liy==iy) {
-      memcpy(data, data-w, img.bytesPerLine());
-      data += w;
-    } else {
-      QRgb* source = (QRgb*)image.scanLine(iy);
-      double fx = x0;
-      for (int x=0; x<w; x++) {
-        int ix = std::min(std::max(0, int(fx)), image.width()-1);
-        fx += dx;
-        *data = *(source+ix);
-        data++;
-      }
-    }
-    liy = iy;
-  }
-  return img;
+  return scaler->getImage(requestedSize, r);
 }
 
