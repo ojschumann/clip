@@ -8,7 +8,7 @@ class QImageDataProvider : public DataProvider
 {
   Q_OBJECT
 public:
-  static DataProvider* loadImage(const QString&);
+  static DataProvider* loadImage(const QString&, QObject*);
 
   virtual const void* getData();
   virtual int width();
@@ -18,6 +18,7 @@ public:
   virtual Format format();
 private:
   explicit QImageDataProvider(const QImage& img, QObject *parent = 0);
+  ~QImageDataProvider();
   QImageDataProvider(const QImageDataProvider&) {}
   QImage data;
 

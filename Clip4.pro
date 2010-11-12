@@ -71,7 +71,8 @@ SOURCES += main.cpp\
     image/basdataprovider.cpp \
     image/datascaler.cpp \
     image/datascalerfactory.cpp \
-    image/simplergbscaler.cpp
+    image/simplergbscaler.cpp \
+    tools/cropmarker.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -110,7 +111,8 @@ HEADERS  += ui/clip.h \
     image/basdataprovider.h \
     image/datascaler.h \
     image/datascalerfactory.h \
-    image/simplergbscaler.h
+    image/simplergbscaler.h \
+    tools/cropmarker.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

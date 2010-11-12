@@ -6,31 +6,30 @@
 #include <QApplication>
 #include <image/dataproviderfactory.h>
 #include <image/datascalerfactory.h>
+#include <iostream>
 
+using namespace std;
 
 LaueImage::LaueImage(QString s, QObject *parent) :
     QObject(parent), provider(0), scaler(0)
 {
-  provider = DataProviderFactory::getInstance().loadImage(s);
+  provider = DataProviderFactory::getInstance().loadImage(s, this);
   if (provider) {
-    scaler = DataScalerFactory::getInstance().getScaler(provider);
-    provider->setParent(this);
-    if (scaler) scaler->setParent(this);
+    scaler = DataScalerFactory::getInstance().getScaler(provider, this);
+    connect(scaler, SIGNAL(imageContentsChanged()), this, SIGNAL(imageContentsChanged()));
   }
   valid = (provider!=0) && (scaler!=0);
+  cout << "init LaueImage" << endl;
 }
 
-void LaueImage::showToolbox() {
-  if (imageToolbox.isNull()) {
-    imageToolbox = new ImageToolbox(this);
-    connect(this, SIGNAL(destroyed()), imageToolbox.data(), SLOT(deleteLater()));
-    Clip::getInstance()->addMdiWindow(imageToolbox);
-  } else {
-    Clip::getInstance()->setActiveSubWindow(imageToolbox);
-  }
+LaueImage::~LaueImage() {
+  cout << "delete LaueImage" << endl;
 }
 
 QImage LaueImage::getScaledImage(const QSize& requestedSize, const QRectF& r) {
   return scaler->getImage(requestedSize, r);
 }
 
+void LaueImage::addTransform(const QTransform &t) {
+  scaler->addTransform(t);
+}

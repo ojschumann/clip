@@ -9,7 +9,7 @@ class SimpleRGBScaler : public DataScaler
 {
     Q_OBJECT
 public:
-  static DataScaler* getScaler(DataProvider* );
+  static DataScaler* getScaler(DataProvider*, QObject*);
 protected:
   virtual void redrawCache();
 private:

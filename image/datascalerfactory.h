@@ -10,12 +10,12 @@ class DataScalerFactory : public QObject
 {
   Q_OBJECT
 public:
-  typedef DataScaler*(*ScalerGenerator)(DataProvider*);
+  typedef DataScaler*(*ScalerGenerator)(DataProvider*, QObject*);
 
   static DataScalerFactory& getInstance();
   static bool registerDataScaler(DataProvider::Format, ScalerGenerator);
 
-  DataScaler* getScaler(DataProvider* dp);
+  DataScaler* getScaler(DataProvider* dp, QObject*);
 
 private:
   explicit DataScalerFactory(QObject *parent = 0);

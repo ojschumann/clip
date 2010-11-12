@@ -1,8 +1,9 @@
-#include <core/projector.h>
+#include "core/projector.h"
+
 #include <cmath>
 #include <iostream>
-#include <QtCore/QTimer>
-#include <QtGui/QCursor>
+#include <QTimer>
+#include <QCursor>
 #include <QTime>
 #include <QFile>
 #include <QTextStream>
@@ -11,12 +12,14 @@
 #include <QThreadPool>
 #include <QtConcurrentMap>
 #include <QGraphicsView>
-#include <tools/signalingellipse.h>
-#include <tools/ruleritem.h>
-#include <tools/zoneitem.h>
-#include <core/reflection.h>
-#include <core/crystal.h>
-#include <image/laueimage.h>
+
+#include "tools/signalingellipse.h"
+#include "tools/ruleritem.h"
+#include "tools/zoneitem.h"
+#include "tools/cropmarker.h"
+#include "core/reflection.h"
+#include "core/crystal.h"
+#include "image/laueimage.h"
 
 
 using namespace std;
@@ -487,6 +490,25 @@ bool Projector::delZoneMarkerAt(const QPointF& p) {
 }
 
 
+// ------------ Handling of Crop Marker ---------------
+void Projector::showCropMarker() {
+  if (cropMarker.isNull()) {
+    cropMarker = new CropMarker(this, QPointF(0.1, 0.1), 0.8, 0.8, 0.0, imageItemsPlane);
+    cropMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
+  } else {
+    cropMarker->show();
+  }
+}
+
+void Projector::delCropMarker() {
+  if (!cropMarker.isNull())
+    delete cropMarker;
+}
+
+CropMarker* Projector::getCropMarker() {
+  return cropMarker;
+}
+
 void Projector::updateImgTransformations() {
   const QRectF r=scene.sceneRect();
   det2img.reset();
@@ -522,32 +544,21 @@ void Projector::closeImage() {
 }
 
 // Rotates and flips the Decorations, which are bound to the Image
-void Projector::doImgRotation(int CWRSteps, bool flip) {
-  QTransform t;
+void Projector::doImgRotation(const QTransform& t) {
   foreach (QGraphicsItem* item, imageItemsPlane->childItems()) {
-    double x = item->pos().x();
-    double y = item->pos().y();
-
-    if (flip) x=1.0-x;
-    double t;
-    switch(CWRSteps) {
-    case 1:
-      t=x;
-      x=y;
-      y=1.0-t;
-      break;
-    case 2:
-      x=1.0-x;
-      y=1.0-y;
-      break;
-    case 3:
-      t=x;
-      x=1.0-y;
-      y=t;
-      break;
+    if (RulerItem* ruler = dynamic_cast<RulerItem*>(item)) {
+      ruler->setStart(t.map(ruler->getStart()));
+      ruler->setEnd(t.map(ruler->getEnd()));
+    } else if (ZoneItem* zone = dynamic_cast<ZoneItem*>(item)) {
+      zone->setStart(t.map(zone->getStart()));
+      zone->setEnd(t.map(zone->getEnd()));
+    } else {
+      item->setPos(t.map(item->pos()));
     }
-    item->setPos(x,y);
   }
+  if (imageData)
+    imageData->addTransform(t);
+  //TODO: change detector size
 }
 
 void Projector::enableProjection(bool b) {

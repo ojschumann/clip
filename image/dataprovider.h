@@ -31,6 +31,7 @@ public:
 
 protected:
   explicit DataProvider(QObject *parent = 0);
+  ~DataProvider();
 private:
 
 signals:

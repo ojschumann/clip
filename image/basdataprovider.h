@@ -11,7 +11,7 @@ class BasDataProvider : public DataProvider
 {
   Q_OBJECT
 public:
-  static DataProvider* loadImage(const QString&);
+  static DataProvider* loadImage(const QString&, QObject*);
 
   virtual const void* getData();
   virtual int width();
@@ -21,6 +21,7 @@ public:
   virtual Format format();
 private:
   explicit BasDataProvider(QObject *parent = 0);
+  ~BasDataProvider();
 signals:
 
 public slots:

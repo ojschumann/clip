@@ -9,14 +9,14 @@ class DataProviderFactory : public QObject
 {
   Q_OBJECT
 public:
-  typedef DataProvider*(*ImageLoader)(const QString&);
-  typedef DataProvider*(*DeviceOpener)();
+  typedef DataProvider*(*ImageLoader)(const QString&, QObject*);
+  typedef DataProvider*(*DeviceOpener)(QObject*);
 
   static DataProviderFactory& getInstance();
   static bool registerImageLoader(int, ImageLoader);
   static bool registerDeviceOpener(int, DeviceOpener);
 
-  DataProvider* loadImage(const QString&);
+  DataProvider* loadImage(const QString&, QObject*);
 
 private:
   explicit DataProviderFactory(QObject *parent = 0);

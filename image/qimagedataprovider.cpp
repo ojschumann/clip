@@ -14,8 +14,11 @@ QImageDataProvider::QImageDataProvider(const QImage& img, QObject *parent) :
   cout << "init QImageDataProvider" << endl;
 }
 
+QImageDataProvider::~QImageDataProvider() {
+  cout << "delete QImageDataProvider" << endl;
+}
 
-QImageDataProvider::DataProvider* QImageDataProvider::loadImage(const QString& filename) {
+QImageDataProvider::DataProvider* QImageDataProvider::loadImage(const QString& filename, QObject* parent) {
   cout << "QImageDP tries to load " << qPrintable(filename) << endl;
   QImage img(filename);
   if (!img.isNull()) {
@@ -23,7 +26,7 @@ QImageDataProvider::DataProvider* QImageDataProvider::loadImage(const QString& f
       cout << qPrintable(key) << " -> " << qPrintable(img.text(key)) << endl;
     }
 
-    return new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied));
+    return new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied), parent);
   }
   return NULL;
 }

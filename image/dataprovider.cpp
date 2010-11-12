@@ -9,6 +9,10 @@ DataProvider::DataProvider(QObject *parent) :
   cout << "init DataProvider" << endl;
 }
 
+DataProvider::~DataProvider() {
+  cout << "delete DataProvider" << endl;
+}
+
 DataProvider* DataProvider::openDevice() {
   return NULL;
 }

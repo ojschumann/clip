@@ -21,7 +21,11 @@ BasDataProvider::BasDataProvider(QObject *parent) :
   cout << "init BasDataProvider" << endl;
 }
 
-DataProvider* BasDataProvider::loadImage(const QString& filename) {
+BasDataProvider::~BasDataProvider() {
+  cout << "delete BasDataProvider" << endl;
+}
+
+DataProvider* BasDataProvider::loadImage(const QString& filename, QObject* parent) {
   cout << "BasDP tries to load " << qPrintable(filename) << endl;
 
   QFileInfo info(filename);
@@ -120,7 +124,7 @@ DataProvider* BasDataProvider::loadImage(const QString& filename) {
   }
 
   cout << "Open OK" << endl;
-  BasDataProvider* provider = new BasDataProvider();
+  BasDataProvider* provider = new BasDataProvider(parent);
   provider->headerData = headerData;
   provider->pixelData = pixelData;
 

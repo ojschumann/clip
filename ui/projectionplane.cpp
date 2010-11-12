@@ -16,6 +16,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QLabel>
+#include <ui/clip.h>
 
 // List of all projectors. Sort of a hack ;-)
 QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
@@ -272,13 +273,9 @@ void ProjectionPlane::slotLoadCrystalData() {
 void ProjectionPlane::slotOpenResolutionCalc() {
   if (resoluctionCalc.isNull()) {
     resoluctionCalc = new ResolutionCalculator(projector);
-    emit showConfig(resoluctionCalc);
+    Clip::getInstance()->addMdiWindow(resoluctionCalc);
   } else {
-    QMdiSubWindow* mdi = dynamic_cast<QMdiSubWindow*>(resoluctionCalc->parent());
-    if (mdi) {
-      mdi->mdiArea()->setActiveSubWindow(mdi);
-    }
-
+    Clip::getInstance()->setActiveSubWindow(resoluctionCalc);
   }
 }
 
@@ -290,7 +287,7 @@ void ProjectionPlane::on_openImgAction_triggered() {
   if (fInfo.exists()) {
     lastImageOpenDir = fInfo.canonicalFilePath();
     projector->loadImage(fileName);
-    connect(ui->colorCurvesAction, SIGNAL(triggered()), projector->getLaueImage(), SLOT(showToolbox()));
+    connect(projector->getLaueImage(), SIGNAL(imageContentsChanged()), projector->getScene(), SLOT(update()));
   }
 
   ui->imgToolBar->setVisible(true);
@@ -306,15 +303,39 @@ void ProjectionPlane::on_closeImgAction_triggered() {
 void ProjectionPlane::on_configAction_triggered() {
   if (projectorConfig.isNull()) {
     projectorConfig = projector->configWidget();
-    emit showConfig(projectorConfig);
+    Clip::getInstance()->addMdiWindow(projectorConfig);
   } else {
-    QMdiSubWindow* mdi = dynamic_cast<QMdiSubWindow*>(projectorConfig->parent());
-    if (mdi) {
-      mdi->mdiArea()->setActiveSubWindow(mdi);
-    }
+    Clip::getInstance()->setActiveSubWindow(projectorConfig);
   }
 }
 
 
+void ProjectionPlane::on_rotCWAction_triggered() {
+  projector->doImgRotation(QTransform(0, -1, 1, 0, 0, 1));
+}
 
+void ProjectionPlane::on_rotCCWAction_triggered() {
+  projector->doImgRotation(QTransform(0, 1, -1, 0, 1, 0));
+}
+
+void ProjectionPlane::on_flipHAction_triggered() {
+  projector->doImgRotation(QTransform(-1, 0, 0, 1, 1, 0));
+}
+
+void ProjectionPlane::on_flipVAction_triggered() {
+  projector->doImgRotation(QTransform(1, 0, 0, -1, 0, 1));
+}
+
+void ProjectionPlane::on_imageToolboxAction_triggered()
+{
+  if (imageToolbox.isNull()) {
+    if (projector->getLaueImage()) {
+      imageToolbox = new ImageToolbox(projector);
+      connect(projector->getLaueImage(), SIGNAL(destroyed()), imageToolbox.data(), SLOT(deleteLater()));
+      Clip::getInstance()->addMdiWindow(imageToolbox);
+    }
+  } else {
+    Clip::getInstance()->setActiveSubWindow(imageToolbox);
+  }
+}
 

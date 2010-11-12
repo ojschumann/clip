@@ -6,11 +6,13 @@
 #include <QMouseEvent>
 #include <image/laueimage.h>
 #include <image/BezierCurve.h>
+#include <core/projector.h>
+#include <tools/cropmarker.h>
 
-ImageToolbox::ImageToolbox(LaueImage* img, QWidget *parent):
+ImageToolbox::ImageToolbox(Projector* p, QWidget *parent):
     QMainWindow(parent),
     ui(new Ui::ImageToolbox),
-    image(img),
+    projector(p),
     bezierCurves(),
     handleMarkers(),
     curves()
@@ -39,10 +41,12 @@ ImageToolbox::ImageToolbox(LaueImage* img, QWidget *parent):
   activeCurve = ui->ColorSelector->currentIndex()+1;
   changeToCurve(ui->ColorSelector->currentIndex());
   connect(ui->ColorSelector, SIGNAL(activated(int)), this, SLOT(changeToCurve(int)));
+  cout << "init ImageToolbox" << endl;
 }
 
 ImageToolbox::~ImageToolbox()
 {
+  cout << "delete imageToolbox" << endl;
   delete ui;
 }
 
@@ -288,5 +292,22 @@ void ImageToolbox::on_actionSave_Curve_triggered()
     QTextStream ts(&file);
     doc.save(ts, 0);
     file.close();
+  }
+}
+
+void ImageToolbox::on_actionCrop_triggered() {
+  projector->showCropMarker();
+}
+
+#include <tools/debug.h>
+
+void ImageToolbox::on_doCrop_clicked()
+{
+  QPolygonF poly = projector->getCropMarker()->getRect();
+  for (QPointF p, poly)
+    printPoint("lala", p);
+  QTransform t;
+  if (QTransform::squareToQuad(poly, t)) {
+    projector->doImgRotation(t);
   }
 }

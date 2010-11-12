@@ -13,18 +13,20 @@ DataProviderFactory::DataProviderFactory(QObject *parent) :
 
 DataProviderFactory::DataProviderFactory(const DataProviderFactory &) {};
 
-DataProviderFactory::~DataProviderFactory() {}
+DataProviderFactory::~DataProviderFactory() {
+  cout << "delete DataProviderFactory" << endl;
+}
 
 DataProviderFactory& DataProviderFactory::getInstance() {
   static DataProviderFactory instance;
   return instance;
 }
 
-DataProvider* DataProviderFactory::loadImage(const QString &filename) {
+DataProvider* DataProviderFactory::loadImage(const QString &filename, QObject* parent) {
   foreach (int key, imageLoaders.uniqueKeys()) {
     cout << "Searching in key " << key << endl;
     foreach (ImageLoader loader, imageLoaders.values(key)) {
-      DataProvider* dp = (*loader)(filename);
+      DataProvider* dp = (*loader)(filename, parent);
       if (dp) return dp;
     }
   }

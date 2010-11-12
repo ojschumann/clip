@@ -9,6 +9,7 @@ namespace Ui {
   class ImageToolbox;
 }
 
+class Projector;
 class LaueImage;
 class SignalingEllipse;
 class BezierCurve;
@@ -19,7 +20,7 @@ class ImageToolbox : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit ImageToolbox(LaueImage* img, QWidget *parent = 0);
+  explicit ImageToolbox(Projector* p, QWidget *parent = 0);
   ~ImageToolbox();
   void mousePressEvent(QMouseEvent *);
 public slots:
@@ -42,7 +43,7 @@ private:
   };
 
   Ui::ImageToolbox *ui;
-  LaueImage* image;
+  Projector* projector;
   QGraphicsScene scene;
   QList<BezierCurve*> bezierCurves;
   QList<BoundedEllipse*> handleMarkers;
@@ -50,6 +51,8 @@ private:
   int activeCurve;
 
 private slots:
+    void on_doCrop_clicked();
+    void on_actionCrop_triggered();
     void on_actionSave_Curve_triggered();
     void on_actionLoad_Curve_triggered();
 };

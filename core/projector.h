@@ -26,6 +26,7 @@ class Crystal;
 class Reflection;
 class RulerItem;
 class ZoneItem;
+class CropMarker;
 class LaueImage;
 
 
@@ -103,6 +104,11 @@ public:
   void addInfoItem(const QString& text, const QPointF& p);
   bool delInfoItemAt(const QPointF& p);
   void clearInfoItems();
+
+  void showCropMarker();
+  void delCropMarker();
+  CropMarker* getCropMarker();
+
 public slots:
   void connectToCrystal(Crystal *);
 
@@ -119,6 +125,7 @@ public slots:
   void setTextSize(double d);
   void setSpotSize(double d);
   void enableSpots(bool b=true);
+
   // For speedup of fitting...
   void enableProjection(bool b=true);
 
@@ -126,7 +133,7 @@ public slots:
   void closeImage();
 
 
-  virtual void doImgRotation(int CWRSteps, bool flip);
+  virtual void doImgRotation(const QTransform&);
 signals:
   void projectedPointsUpdated();
   void rulerAdded();
@@ -158,6 +165,9 @@ protected:
   // Ruler Item
   QList<RulerItem*> rulerItems;
   QSignalMapper rulerMapper;
+  // The Crop Marker
+  QPointer<CropMarker> cropMarker;
+
 
   // Pointer to the connected crystal
   QPointer<Crystal> crystal;

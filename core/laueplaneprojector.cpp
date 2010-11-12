@@ -311,11 +311,9 @@ double LauePlaneProjector::yOffset() const {
   return detDy*dist();
 }
 
-void LauePlaneProjector::doImgRotation(unsigned int CWRSteps, bool flip) {
-  Projector::doImgRotation(CWRSteps, flip);
-  if (CWRSteps%2==1) {
-    setDetSize(dist(), height(), width());
-  }
+void LauePlaneProjector::doImgRotation(const QTransform& t) {
+  Projector::doImgRotation(t);
+  // TODO: change detector size
 }
 
 

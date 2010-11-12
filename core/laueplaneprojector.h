@@ -30,7 +30,7 @@ public:
   double phi() const;
   double xOffset() const;
   double yOffset() const;
-  virtual void doImgRotation(unsigned int CWRSteps, bool flip);
+  virtual void doImgRotation(const QTransform& t);
 
   virtual double TTmin() const;
   virtual double TTmax() const;

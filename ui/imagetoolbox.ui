@@ -21,10 +21,10 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <item row="2" column="1">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="contrastTab">
        <attribute name="title">
@@ -164,6 +164,37 @@
         <string>File Info</string>
        </attribute>
       </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Crop</string>
+       </attribute>
+       <widget class="QPushButton" name="pushButton">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>20</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Delete Crop</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="doCrop">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>60</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Make Crop</string>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -180,6 +211,7 @@
    </attribute>
    <addaction name="actionLoad_Curve"/>
    <addaction name="actionSave_Curve"/>
+   <addaction name="actionCrop"/>
   </widget>
   <action name="actionLoad_Curve">
    <property name="icon">
@@ -197,6 +229,15 @@
    </property>
    <property name="text">
     <string>Save Curve</string>
+   </property>
+  </action>
+  <action name="actionCrop">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/cut.png</normaloff>:/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Crop</string>
    </property>
   </action>
  </widget>

@@ -12,45 +12,50 @@ SimpleRGBScaler::SimpleRGBScaler(DataProvider* dp, QObject *parent) :
 
 SimpleRGBScaler::SimpleRGBScaler(const SimpleRGBScaler &): DataScaler(0)  {}
 
-SimpleRGBScaler::~SimpleRGBScaler() {}
-
-DataScaler* SimpleRGBScaler::getScaler(DataProvider *dp) {
-  return new SimpleRGBScaler(dp);
+SimpleRGBScaler::~SimpleRGBScaler() {
+  cout << "delete SimpleRGBScaler" << endl;
 }
 
+DataScaler* SimpleRGBScaler::getScaler(DataProvider *dp, QObject* parent) {
+  return new SimpleRGBScaler(dp, parent);
+}
+
+#include <tools/debug.h>
+
 void SimpleRGBScaler::redrawCache() {
+  if (!cache) return;
+
   QImage tmp((uchar*)provider->getData(), provider->width(), provider->height(), QImage::Format_RGB32);
+
+  QRgb* source = (QRgb*)tmp.bits();
+  QRgb* data = (QRgb*)cache->bits();
 
   int w = cache->width();
   int h = cache->height();
+  int sw = provider->width();
+  int sh = provider->height();
 
-  double x0 = sourceRect.left()*tmp.width();
-  double dx = sourceRect.width()*tmp.width()/w;
+  QPolygonF poly2(QRectF(0,0,w,h));
+  QPolygonF poly3(sourceRect);
+  poly2.pop_back();
+  poly3.pop_back();
 
-  double y0 = sourceRect.top()*tmp.height();
-  double dy = sourceRect.height()*tmp.height()/h;
+  QTransform out2sqare;
+  QTransform::quadToQuad(poly2, poly3, out2sqare);
+  QTransform t = out2sqare * sqareToRaw;
 
-  QRgb* data = (QRgb*)cache->bits();
-
-  double fy = y0;
-  int liy = -1;
   for (int y=0; y<h; y++) {
-    int iy = std::min(std::max(0, int(fy)), tmp.height()-1);
-    fy += dy;
-    if (liy==iy) {
-      memcpy(data, data-w, cache->bytesPerLine());
-      data += w;
-    } else {
-      QRgb* source = (QRgb*)tmp.scanLine(iy);
-      double fx = x0;
-      for (int x=0; x<w; x++) {
-        int ix = std::min(std::max(0, int(fx)), tmp.width()-1);
-        fx += dx;
-        *data = *(source+ix);
-        data++;
+    for (int x=0; x<w; x++) {
+      QPointF s = t.map(QPointF(0.5+x, 0.5+y));
+      int sx = int(s.x());
+      int sy = int(s.y());
+      if (sx<0 || sx>=sw || sy<0 || sy>=sh) {
+        *data = 0xFFFF0000;
+      } else {
+        *data = *(source+sx+sw*sy);
       }
+      data++;
     }
-    liy = iy;
   }
 }
 

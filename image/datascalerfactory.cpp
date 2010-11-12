@@ -11,17 +11,19 @@ DataScalerFactory::DataScalerFactory(QObject *parent) :
 
 DataScalerFactory::DataScalerFactory(const DataScalerFactory &) {};
 
-DataScalerFactory::~DataScalerFactory() {}
+DataScalerFactory::~DataScalerFactory() {
+  cout << "delete DataScalerFactory" << endl;
+}
 
 DataScalerFactory& DataScalerFactory::getInstance() {
   static DataScalerFactory instance;
   return instance;
 }
 
-DataScaler* DataScalerFactory::getScaler(DataProvider* dp) {
+DataScaler* DataScalerFactory::getScaler(DataProvider* dp, QObject* parent) {
   if (scalerGenerators.contains(dp->format())) {
     ScalerGenerator gen = scalerGenerators[dp->format()];
-    return (*gen)(dp);
+    return (*gen)(dp, parent);
   }
   return NULL;
 }

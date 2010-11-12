@@ -85,7 +85,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="rulerAction"/>
-   <addaction name="colorCurvesAction"/>
+   <addaction name="imageToolboxAction"/>
    <addaction name="rotCWAction"/>
    <addaction name="rotCCWAction"/>
    <addaction name="flipHAction"/>
@@ -229,13 +229,16 @@
     <string>Flip Vertically</string>
    </property>
   </action>
-  <action name="colorCurvesAction">
+  <action name="imageToolboxAction">
    <property name="icon">
     <iconset resource="../icons/icons.qrc">
      <normaloff>:/color_curve.png</normaloff>:/color_curve.png</iconset>
    </property>
    <property name="text">
-    <string>Color Curves</string>
+    <string>Image Toolbox</string>
+   </property>
+   <property name="toolTip">
+    <string>Contrast Enhancement, Resolution Calculation and Cropping of a loaded Image</string>
    </property>
   </action>
   <action name="markZonesAction">
