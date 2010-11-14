@@ -1,12 +1,12 @@
 #ifndef CROPMARKER_H
 #define CROPMARKER_H
 
-#include <QGraphicsObject>
+#include "tools/propagatinggraphicsobject.h"
 
 class SignalingEllipseItem;
 class Projector;
 
-class CropMarker : public QGraphicsObject
+class CropMarker : public PropagatingGraphicsObject
 {
   Q_OBJECT
 public:
@@ -16,13 +16,10 @@ signals:
 public slots:
   void promoteToRectangle() {};
 protected slots:
-  //void centralHandleMoved();
-  //void outerHandleXMoved();
-  //void outerHandleYMoved();
+
 protected:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
   QRectF boundingRect() const;
-  QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
   //void setOuterHandlesFromData();
 

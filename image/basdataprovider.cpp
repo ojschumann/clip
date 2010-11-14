@@ -118,7 +118,8 @@ DataProvider* BasDataProvider::loadImage(const QString& filename, QObject* paren
     for (int i=0; i<pixelCount; i++) {
       in >> pixel;
       if (pixel!=0) {
-        pixelData[i]=linscale * exp(logscale*pixel);
+        //pixelData[i]=linscale * exp(logscale*pixel);
+        pixelData[i]=1.0*pixel;
       }
     }
   }

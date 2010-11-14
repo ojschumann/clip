@@ -6,7 +6,7 @@
 #include "core/projector.h"
 
 CropMarker::CropMarker(Projector* p, const QPointF &pCenter, double _dx, double _dy, double _angle, QGraphicsItem *parent):
-    QGraphicsObject(parent),
+    PropagatingGraphicsObject(parent),
     projector(p)
 {
 
@@ -22,9 +22,9 @@ CropMarker::CropMarker(Projector* p, const QPointF &pCenter, double _dx, double 
   }
 
   handles[0]->setPos(0.1, 0.1);
-  handles[1]->setPos(0.1, 0.9);
+  handles[1]->setPos(0.9, 0.1);
   handles[2]->setPos(0.9, 0.9);
-  handles[3]->setPos(0.9, 0.1);
+  handles[3]->setPos(0.1, 0.9);
 
 }
 
@@ -72,6 +72,7 @@ QPolygonF CropMarker::getRect() {
 return rect;
 }
 
+
 void CropMarker::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
   QPolygonF rect = getRect();
   rect << rect.first();
@@ -84,14 +85,4 @@ void CropMarker::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
 QRectF CropMarker::boundingRect() const {
   return childrenBoundingRect();
-}
-
-QVariant CropMarker::itemChange(GraphicsItemChange change, const QVariant &value) {
-  if (change == ItemTransformChange) {
-    foreach (SignalingEllipseItem* item, handles)
-      item->setTransform(value.value<QTransform>());
-    return QVariant(transform());
-  }
-
-  return QGraphicsItem::itemChange(change, value);
 }

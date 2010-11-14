@@ -7,19 +7,18 @@
 
 class SimpleRGBScaler : public DataScaler
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
   static DataScaler* getScaler(DataProvider*, QObject*);
 protected:
-  virtual void redrawCache();
+  virtual QRgb getRGB(const QPointF &);
 private:
-    explicit SimpleRGBScaler(DataProvider* dp, QObject *parent = 0);
-    SimpleRGBScaler(const SimpleRGBScaler&);
-    ~SimpleRGBScaler();
-signals:
-
-public slots:
-
+  explicit SimpleRGBScaler(DataProvider* dp, QObject *parent = 0);
+  SimpleRGBScaler(const SimpleRGBScaler&);
+  ~SimpleRGBScaler();
+  QRgb const* data;
+  int datawidth;
+  int dataheight;
 };
 
 #endif // SIMPLERGBSCALER_H

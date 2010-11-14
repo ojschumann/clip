@@ -72,8 +72,9 @@ bool BezierCurve::setPoints(const QList<QPointF>& p) {
     }
     params.first().Xmin=-INFINITY;
     params.last().Xmax=INFINITY;
-    return not params.empty();
+    if (params.empty()) return false;
   }
+  emit curveChanged();
   return true;
 }
 
@@ -141,22 +142,7 @@ QList<float> BezierCurve::map(QList<float> X) {
   return r;
 }
 
-QList<float> BezierCurve::mapSorted(QList<float> X) {
-  QList<float> r;
-  int p=getCurveParamIdx(X[0]);
-  int N=X.size();
-  int n=X.size();
-  while (n) {
-    CurveParams& cp=params[p];
-    float x;
-    while (n && ((x=X[N-n])<cp.Xmax)) {
-      r.append(cp.calc(x));
-      n--;
-    }
-    p++;
-  }
-  return r;
-}
+
 
 QList<float> BezierCurve::mapSorted(QList<float> X, QList<int> Idx) {
   QList<float> r(X);

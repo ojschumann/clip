@@ -68,7 +68,6 @@ void Clip::on_newStereo_triggered() {
 
 void Clip::addProjector(Projector* p) {
   ProjectionPlane* pp = new ProjectionPlane(connectToLastCrystal(p), this);
-  connect(pp, SIGNAL(showConfig(QWidget*)), this, SLOT(addMdiWindow(QWidget*)));
   addMdiWindow(pp);
 }
 

@@ -32,7 +32,6 @@ public:
   Projector* getProjector() { return projector; }
 
 signals:
-  void showConfig(QWidget*);
   void info(QString, int);
   void reflexInfo(int,int,int);
 protected slots:
@@ -49,7 +48,6 @@ protected:
   Projector* projector;
 
   QPointer<QWidget> projectorConfig;
-  QPointer<QWidget> resoluctionCalc;
   QPointer<QWidget> imageToolbox;
 
   QPointF mousePressOrigin;
@@ -71,6 +69,7 @@ private slots:
     void on_configAction_triggered();
     void on_openImgAction_triggered();
     void on_closeImgAction_triggered();
+    void debugSlot();
 };
 
 

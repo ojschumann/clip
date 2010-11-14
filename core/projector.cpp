@@ -546,18 +546,15 @@ void Projector::closeImage() {
 // Rotates and flips the Decorations, which are bound to the Image
 void Projector::doImgRotation(const QTransform& t) {
   foreach (QGraphicsItem* item, imageItemsPlane->childItems()) {
-    if (RulerItem* ruler = dynamic_cast<RulerItem*>(item)) {
-      ruler->setStart(t.map(ruler->getStart()));
-      ruler->setEnd(t.map(ruler->getEnd()));
-    } else if (ZoneItem* zone = dynamic_cast<ZoneItem*>(item)) {
-      zone->setStart(t.map(zone->getStart()));
-      zone->setEnd(t.map(zone->getEnd()));
+    if (dynamic_cast<PropagatingGraphicsObject*>(item)) {
+      foreach (QGraphicsItem* subitem, item->childItems())
+        subitem->setPos(t.map(subitem->pos()));
     } else {
       item->setPos(t.map(item->pos()));
     }
   }
   if (imageData)
-    imageData->addTransform(t);
+    imageData->addTransform(t.inverted());
   //TODO: change detector size
 }
 

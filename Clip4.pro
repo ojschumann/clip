@@ -60,7 +60,7 @@ SOURCES += main.cpp\
     tools/rulermodel.cpp \
     tools/zoneitem.cpp \
     image/laueimage.cpp \
-    image/ImageTools.cpp \
+#    image/ImageTools.cpp \
     image/BezierCurve.cpp \
     ui/imagetoolbox.cpp \
     tools/diagramgv.cpp \
@@ -72,7 +72,10 @@ SOURCES += main.cpp\
     image/datascaler.cpp \
     image/datascalerfactory.cpp \
     image/simplergbscaler.cpp \
-    tools/cropmarker.cpp
+    tools/cropmarker.cpp \
+    tools/propagatinggraphicsobject.cpp \
+    ui/contrastcurves.cpp \
+    image/simplemonochromscaler.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -112,7 +115,10 @@ HEADERS  += ui/clip.h \
     image/datascaler.h \
     image/datascalerfactory.h \
     image/simplergbscaler.h \
-    tools/cropmarker.h
+    tools/cropmarker.h \
+    tools/propagatinggraphicsobject.h \
+    ui/contrastcurves.h \
+    image/simplemonochromscaler.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -120,7 +126,8 @@ FORMS    += ui/clip.ui \
     ui/stereocfg.ui \
     ui/laueplanecfg.ui \
     ui/resolutioncalculator.ui \
-    ui/imagetoolbox.ui
+    ui/imagetoolbox.ui \
+    ui/contrastcurves.ui
 
 RESOURCES += \
     icons/icons.qrc

@@ -16,7 +16,8 @@ LaueImage::LaueImage(QString s, QObject *parent) :
   provider = DataProviderFactory::getInstance().loadImage(s, this);
   if (provider) {
     scaler = DataScalerFactory::getInstance().getScaler(provider, this);
-    connect(scaler, SIGNAL(imageContentsChanged()), this, SIGNAL(imageContentsChanged()));
+    if (scaler)
+      connect(scaler, SIGNAL(imageContentsChanged()), this, SIGNAL(imageContentsChanged()));
   }
   valid = (provider!=0) && (scaler!=0);
   cout << "init LaueImage" << endl;
@@ -30,6 +31,15 @@ QImage LaueImage::getScaledImage(const QSize& requestedSize, const QRectF& r) {
   return scaler->getImage(requestedSize, r);
 }
 
+
+QList<BezierCurve*> LaueImage::getTransferCurves() {
+  return scaler->getTransferCurves();
+}
+
 void LaueImage::addTransform(const QTransform &t) {
   scaler->addTransform(t);
+}
+
+void LaueImage::resetAllTransforms() {
+  scaler->resetAllTransforms();
 }

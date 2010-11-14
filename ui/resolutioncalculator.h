@@ -2,7 +2,7 @@
 #define RESOLUTIONCALCULATOR_H
 
 #include <QWidget>
-
+#include "core/projector.h"
 
 namespace Ui {
   class ResolutionCalculator;
@@ -23,7 +23,7 @@ public slots:
   void slotCalcResolution();
 private:
   Ui::ResolutionCalculator *ui;
-  Projector* projector;
+  QPointer<Projector> projector;
   RulerModel* model;
 
 private slots:

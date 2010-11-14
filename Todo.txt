@@ -1,7 +1,11 @@
 ProjectionPlane
   Context Menu
   Image Handling (new, multithreaded)
-    Rotate/Flip, Crop (with arbitrary rotation)
+  Propagate Change of image transformation to Projector (90 deg rotation, etc...)
+  Load detector data from image
+
+CropWidget
+  Nicer than now...
 
 Spacegroup
   implement point group generators for all crystal systems
@@ -10,7 +14,6 @@ ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
 
 Marked Spots and Zone info (call from Crystal) (new)
-  Group Spots (on projector) to define Zones
 
 Indexer (port and enhance)
 
@@ -22,12 +25,8 @@ Rotation (port)
 Reorientation (port)
 
 Transfer Curve
-  Load/Save curves
-  Port to own widget and only add to ImageTollbox
 
 Image Handling
-  Dataprovider + Scaler
-  Would allow to support live detectors
 
 Save Default Values for Projector Variables (Distance, Height, Width, ...)
   * Load/Save Workspace on startup

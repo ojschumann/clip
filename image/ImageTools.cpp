@@ -13,8 +13,8 @@
 //TODO: For BG Fitting by splines, use http://www.netlib.org/dierckx/index.html (Scipy.interpolate)
 
 ImageTransfer::ImageTransfer(): transferedData(), values(), imgData() {
-  for (int i=4; i--; )
-    curves.append(BezierCurve());
+//  for (int i=4; i--; )
+//    curves.append(BezierCurve());
   qimg=NULL;
   schedTransfer=false;
   CWRSteps=0;
@@ -99,7 +99,7 @@ void ImageTransfer::setData(int width, int height, int format, char *inData, int
 
 
 void ImageTransfer::setTransferCurves(QList<BezierCurve> bc) {
-  curves=bc;
+//  curves=bc;
   schedTransfer=true;
 }
 

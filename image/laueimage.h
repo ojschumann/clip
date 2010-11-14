@@ -20,10 +20,12 @@ public:
   int height() { return provider->height(); };
   QSize size() { return QSize(provider->width(), provider->height()); };
   bool isValid() { return valid; }
+  QList<BezierCurve*> getTransferCurves();
 signals:
   void imageContentsChanged();
 public slots:
   void addTransform(const QTransform&);
+  void resetAllTransforms();
 private:
   bool valid;
   DataProvider* provider;

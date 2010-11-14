@@ -13,15 +13,14 @@ ResolutionCalculator::ResolutionCalculator(Projector* p, QWidget *parent) :
     projector(p)
 {
   ui->setupUi(this);
-  model = new RulerModel(projector);
-  ui->rulerView->setModel(model);
-  connect(projector, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
   ui->rulerView->verticalHeader()->setDefaultSectionSize(ui->rulerView->fontMetrics().height());
   ui->rulerView->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
-  connect(ui->rulerView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(slotSelectionChanged()));
+  model = new RulerModel(projector);
+  ui->rulerView->setModel(model);
   connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SLOT(slotCalcResolution()));
+  connect(ui->rulerView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(slotSelectionChanged()));
 
   slotCalcResolution();
 
@@ -34,6 +33,7 @@ ResolutionCalculator::~ResolutionCalculator()
 }
 
 void ResolutionCalculator::slotSelectionChanged() {
+  if (projector.isNull()) return;
   QItemSelectionModel* selection = ui->rulerView->selectionModel();
   for (int n=0; n<projector->rulerNumber(); n++) {
     bool b = selection->isRowSelected(n, QModelIndex());
@@ -42,6 +42,7 @@ void ResolutionCalculator::slotSelectionChanged() {
 }
 
 void ResolutionCalculator::slotCalcResolution() {
+  if (projector.isNull()) return;
   double AA=0.0;
   double AB=0.0;
   double BB=0.0;
@@ -80,13 +81,13 @@ void ResolutionCalculator::slotCalcResolution() {
 
 void ResolutionCalculator::on_acceptButton_clicked()
 {
+  if (projector.isNull()) return;
   //TODO: Do something usefull...
   projector->clearRulers();
-  deleteLater();
 }
 
 void ResolutionCalculator::on_cancelButton_clicked()
 {
+  if (projector.isNull()) return;
   projector->clearRulers();
-  deleteLater();
 }

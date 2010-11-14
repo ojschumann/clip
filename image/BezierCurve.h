@@ -3,10 +3,11 @@
 
 #include <QtCore/QPointF>
 #include <QtCore/QList>
+#include <QObject>
 
 
-
-class BezierCurve {
+class BezierCurve: public QObject {
+  Q_OBJECT
 public:
   BezierCurve();
   bool setPoints(const QList<QPointF>& p);
@@ -18,9 +19,13 @@ public:
   QList<float> range(float x0, float dx, int N);
   QList<QPointF> pointRange(float x0, float dx, int N);
   QList<float> map(QList<float> X);
-  QList<float> mapSorted(QList<float> X);
+  //QList<float> mapSorted(QList<float> X);
+  template <class T> T mapSorted(T);
   QList<float> mapSorted(QList<float> X, QList<int> sortIdx);
-    private:
+
+signals:
+  void curveChanged();
+private:
   class CurveParams{
   public:
     CurveParams(float D0, float D1, float D2, float D3, float _Xmin, float _Xmax): Xmin(_Xmin), Xmax(_Xmax) {
@@ -50,6 +55,23 @@ public:
   QList<CurveParams> params;
   QList<QPointF> points;
 };
+
+template <class T> T BezierCurve::mapSorted(T X) {
+  T r;
+  int p=getCurveParamIdx(X[0]);
+  int N=X.size();
+  int n=X.size();
+  while (n) {
+    CurveParams& cp=params[p];
+    float x;
+    while (n && ((x=X[N-n])<cp.Xmax)) {
+      r.append(cp.calc(x));
+      n--;
+    }
+    p++;
+  }
+  return r;
+}
 
 
 #endif

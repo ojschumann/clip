@@ -9,7 +9,7 @@ using namespace std;
 
 
 RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* parent):
-    QGraphicsObject(parent),
+    PropagatingGraphicsObject(parent),
     startHandle(new SignalingEllipseItem(this)),
     endHandle(new SignalingEllipseItem(this)),
     projector(p)
@@ -107,15 +107,6 @@ void RulerItem::highlight(bool h) {
 
 bool RulerItem::isHighlighted() {
   return highlighted;
-}
-
-QVariant RulerItem::itemChange(GraphicsItemChange change, const QVariant &value) {
-  if (change == ItemTransformChange) {
-    startHandle->setTransform(value.value<QTransform>());
-    endHandle->setTransform(value.value<QTransform>());
-    return QVariant(transform());
-  }
-  return QGraphicsItem::itemChange(change, value);
 }
 
 

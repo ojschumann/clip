@@ -21,7 +21,7 @@ public:
 
   QSize sizeHint() const;
 
-  Crystal* getCrystal() {return crystal; }
+  Crystal* getCrystal() { return crystal; }
 signals:
   void info(QString, int);
 public slots:

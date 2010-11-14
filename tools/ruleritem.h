@@ -1,15 +1,13 @@
 #ifndef RULERITEM_H
 #define RULERITEM_H
 
-#include <QGraphicsObject>
-#include <QGraphicsEllipseItem>
+#include "tools/propagatinggraphicsobject.h"
 #include <QPen>
 
 class Projector;
 class SignalingEllipseItem;
 
-
-class RulerItem : public QGraphicsObject
+class RulerItem : public PropagatingGraphicsObject
 {
   Q_OBJECT
 public:
@@ -22,7 +20,6 @@ public:
   void setEnd(const QPointF&);
   QPointF getStart();
   QPointF getEnd();
-  virtual QVariant itemChange(GraphicsItemChange, const QVariant &);
   void highlight(bool);
   bool isHighlighted();
 signals:

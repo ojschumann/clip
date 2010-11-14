@@ -270,14 +270,6 @@ void ProjectionPlane::slotUpdateFPS() {
 void ProjectionPlane::slotLoadCrystalData() {
 }
 
-void ProjectionPlane::slotOpenResolutionCalc() {
-  if (resoluctionCalc.isNull()) {
-    resoluctionCalc = new ResolutionCalculator(projector);
-    Clip::getInstance()->addMdiWindow(resoluctionCalc);
-  } else {
-    Clip::getInstance()->setActiveSubWindow(resoluctionCalc);
-  }
-}
 
 void ProjectionPlane::on_openImgAction_triggered() {
   QString fileName = QFileDialog::getOpenFileName(this, "Load Laue pattern", lastImageOpenDir,
@@ -287,11 +279,16 @@ void ProjectionPlane::on_openImgAction_triggered() {
   if (fInfo.exists()) {
     lastImageOpenDir = fInfo.canonicalFilePath();
     projector->loadImage(fileName);
-    connect(projector->getLaueImage(), SIGNAL(imageContentsChanged()), projector->getScene(), SLOT(update()));
+    connect(projector->getLaueImage(), SIGNAL(imageContentsChanged()), this, SLOT(debugSlot()));
   }
 
   ui->imgToolBar->setVisible(true);
   resizeView();
+}
+
+void ProjectionPlane::debugSlot() {
+  ui->view->update();
+  cout << "debugSlot()" << endl;
 }
 
 void ProjectionPlane::on_closeImgAction_triggered() {
@@ -339,3 +336,6 @@ void ProjectionPlane::on_imageToolboxAction_triggered()
   }
 }
 
+void ProjectionPlane::slotOpenResolutionCalc() {
+  on_imageToolboxAction_triggered();
+}

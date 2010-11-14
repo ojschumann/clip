@@ -1,15 +1,17 @@
 #ifndef ZONEITEM_H
 #define ZONEITEM_H
 
-#include <QGraphicsObject>
-#include <QGraphicsEllipseItem>
+#include "tools/propagatinggraphicsobject.h"
+
 #include <QPen>
-#include <tools/vec3D.h>
+
+#include "tools/vec3D.h"
 
 class Projector;
 class SignalingEllipseItem;
+class GraphicsEllipseItem;
 
-class ZoneItem : public QGraphicsObject
+class ZoneItem : public PropagatingGraphicsObject
 {
   Q_OBJECT
 public:
@@ -22,7 +24,6 @@ public:
   void setEnd(const QPointF&);
   QPointF getStart();
   QPointF getEnd();
-  virtual QVariant itemChange(GraphicsItemChange, const QVariant &);
   void highlight(bool);
   bool isHighlighted();
 private slots:

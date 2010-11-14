@@ -11,7 +11,7 @@
 using namespace std;
 
 ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* parent):
-    QGraphicsObject(parent),
+    PropagatingGraphicsObject(parent),
     imgRect(0.01, 0.01, 0.98, 0.98),
     startHandle(new SignalingEllipseItem(this)),
     endHandle(new SignalingEllipseItem(this)),
@@ -369,16 +369,6 @@ void ZoneItem::highlight(bool h) {
 
 bool ZoneItem::isHighlighted() {
   return highlighted;
-}
-
-
-QVariant ZoneItem::itemChange(GraphicsItemChange change, const QVariant &value) {
-  if (change == ItemTransformChange) {
-    startHandle->setTransform(value.value<QTransform>());
-    endHandle->setTransform(value.value<QTransform>());
-    return QVariant(transform());
-  }
-  return QGraphicsItem::itemChange(change, value);
 }
 
 
