@@ -9,6 +9,8 @@
 #include "image/BezierCurve.h"
 #include "core/projector.h"
 #include "image/laueimage.h"
+#include "tools/histogramitem.h"
+
 
 
 ContrastCurves::ContrastCurves(Projector* p, QWidget *parent) :
@@ -16,13 +18,17 @@ ContrastCurves::ContrastCurves(Projector* p, QWidget *parent) :
     ui(new Ui::ContrastCurves),
     projector(p),
     handleMarkers(),
-    curves(),
-    histogram()
+    curves()
 {
     ui->setupUi(this);
     scene.setSceneRect(0,0,1,1);
     ui->gv->setScene(&scene);
     ui->gv->scale(1, -1);
+
+    histogram = new HistogramItem();
+    scene.addItem(histogram);
+    connect(projector->getLaueImage()->getScaler(), SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), histogram, SLOT(setHistogram(QVector<int>,QVector<int>,QVector<int>)));
+    connect(ui->spinBox, SIGNAL(valueChanged(int)), histogram, SLOT(setCompMode(int)));
 
     QPen decoPen(Qt::gray, 0, Qt::DotLine);
     QList<double> l;
@@ -42,7 +48,7 @@ ContrastCurves::ContrastCurves(Projector* p, QWidget *parent) :
     activeCurve = ui->ColorSelector->currentIndex()+1;
     changeToCurve(ui->ColorSelector->currentIndex());
     connect(ui->ColorSelector, SIGNAL(activated(int)), this, SLOT(changeToCurve(int)));
-    connect(projector->getLaueImage()->getScaler(), SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), this, SLOT(updateHistogram(QVector<int>,QVector<int>,QVector<int>)));
+
   }
 
 ContrastCurves::~ContrastCurves()
@@ -276,37 +282,5 @@ void ContrastCurves::saveToFile(const QString& filename) {
     QTextStream ts(&file);
     doc.save(ts, 0);
     file.close();
-  }
-}
-
-void ContrastCurves::updateHistogram(QVector<int> r, QVector<int> g, QVector<int> b) {
-  if (histogram.isEmpty()) {
-    QList<QColor> colors;
-    colors << QColor(0xFF, 0, 0, 0x7F)  << QColor(0, 0xFF, 0, 0x7F)  << QColor(0, 0, 0xFF, 0x7F);
-    foreach (QColor color, colors) {
-      QGraphicsPathItem* h = new QGraphicsPathItem();
-      h->setPen(Qt::NoPen);
-      h->setBrush(QBrush(color));
-      scene.addItem(h);
-      histogram << h;
-    }
-  }
-  QList< QPair< QVector<int>, QGraphicsPathItem*> > l;
-  l << qMakePair(r, histogram[0])  << qMakePair(g, histogram[1]) << qMakePair(b, histogram[2]);
-  QPair< QVector<int>, QGraphicsPathItem*> pair;
-  foreach (pair, l) {
-    QPainterPath path;
-    path.moveTo(0,0);
-    double maxValue=0;
-    for (int i=0; i<pair.first.size(); i++) {
-      double val = pair.first[i];
-      if (val>0) val = log(val);
-      path.lineTo(1.0*i/255, val);
-      if (maxValue<val) maxValue = val;
-    }
-    path.lineTo(1,0);
-    path.lineTo(0,0);
-    pair.second->setPath(path);
-    pair.second->setTransform(QTransform::fromScale(1, 1.0/maxValue));
   }
 }

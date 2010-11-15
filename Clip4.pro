@@ -75,7 +75,8 @@ SOURCES += main.cpp\
     tools/cropmarker.cpp \
     tools/propagatinggraphicsobject.cpp \
     ui/contrastcurves.cpp \
-    image/simplemonochromscaler.cpp
+    image/simplemonochromscaler.cpp \
+    tools/histogramitem.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -118,7 +119,8 @@ HEADERS  += ui/clip.h \
     tools/cropmarker.h \
     tools/propagatinggraphicsobject.h \
     ui/contrastcurves.h \
-    image/simplemonochromscaler.h
+    image/simplemonochromscaler.h \
+    tools/histogramitem.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

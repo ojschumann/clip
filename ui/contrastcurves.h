@@ -8,7 +8,7 @@
 class LaueImage;
 class BezierCurve;
 class ObjectStore;
-
+class HistogramItem;
 
 namespace Ui {
     class ContrastCurves;
@@ -32,7 +32,6 @@ public:
     void makeScales();
     void makeHScale();
     void makeVScale();
-    void updateHistogram(QVector<int>, QVector<int>, QVector<int>);
   private:
     class BoundedEllipse: public SignalingEllipseItem {
     public:
@@ -50,7 +49,7 @@ public:
     QList<BoundedEllipse*> handleMarkers;
     QList<QGraphicsPathItem*> curves;
     int activeCurve;
-    QList<QGraphicsPathItem*> histogram;
+    HistogramItem* histogram;
 };
 
 #endif // CONTRASTCURVES_H

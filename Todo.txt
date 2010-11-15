@@ -1,12 +1,13 @@
+Indexer (port and enhance)
+
 ProjectionPlane
   Context Menu
   Image Handling (new, multithreaded)
   Propagate Change of image transformation to Projector (90 deg rotation, etc...)
   Load detector data from image
-  Histogram in ContrastCure Widget
 
 Projector
-  Handling if all Markeritems etc. to one base class.
+  Handling of all Markeritems etc. to one base class.
   Add, DeleteAt, DeleteNear, size, get(int), getNear, ...
 
 CropWidget
@@ -21,9 +22,14 @@ Spacegroup
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
 
+Life info from Mousecursor (new)
+  Position on detector (x, y)
+  Direction of scatter and direction of normal
+  2Theta
+  Image Positon (Pixel x,y) and Image Value (at point, mapped to RGB)
+
 Marked Spots and Zone info (call from Crystal) (new)
 
-Indexer (port and enhance)
 
 Refinement (partly new)
   Optional show state after each iteration
@@ -31,10 +37,6 @@ Refinement (partly new)
 Rotation (port)
 
 Reorientation (port)
-
-Transfer Curve
-
-Image Handling
 
 Save Default Values for Projector Variables (Distance, Height, Width, ...)
   * Load/Save Workspace on startup
