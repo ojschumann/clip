@@ -36,7 +36,7 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   ui->view->setScene(projector->getScene());
   ui->view->setTransform(QTransform(1,0,0,-1,0,0));
   //ui->view->setCacheMode(QGraphicsView::CacheBackground);
-  ui->view->setCacheMode(QGraphicsView::CacheNone);
+  //ui->view->setCacheMode(QGraphicsView::CacheNone);
 
   //ui->view->viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
   //ui->view->setBackgroundBrush(QBrush(Qt::black));
@@ -279,7 +279,7 @@ void ProjectionPlane::on_openImgAction_triggered() {
   if (fInfo.exists()) {
     lastImageOpenDir = fInfo.canonicalFilePath();
     projector->loadImage(fileName);
-    connect(projector->getLaueImage(), SIGNAL(imageContentsChanged()), this, SLOT(debugSlot()));
+    connect(projector->getLaueImage(), SIGNAL(imageContentsChanged()), projector->getScene(), SLOT(update()));
   }
 
   ui->imgToolBar->setVisible(true);
@@ -287,7 +287,10 @@ void ProjectionPlane::on_openImgAction_triggered() {
 }
 
 void ProjectionPlane::debugSlot() {
-  ui->view->update();
+  //ui->view->update();
+  //ui->view->invalidateScene();
+  //ui->view->repaint();
+  projector->getScene()->update();
   cout << "debugSlot()" << endl;
 }
 

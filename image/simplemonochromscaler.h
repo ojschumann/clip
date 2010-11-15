@@ -16,6 +16,7 @@ private:
   explicit SimpleMonochromScaler(DataProvider* dp, QObject *parent = 0);
   SimpleMonochromScaler(const SimpleMonochromScaler&);
   ~SimpleMonochromScaler();
+  void makeValueIndex();
 
   class UniqueHelper {
   public:
@@ -27,10 +28,10 @@ private:
     bool operator<(const UniqueHelper& o) const { return key<o.key; }
   };
 
-  void makeValueIndex();
   int datawidth;
   int dataheight;
   QVector<float> unmappedPixelValues;
+  QVector<int> valueCount;
   QVector<QRgb> mappedPixelValues;
   QVector<int> imagePosToPixelValue;
 };

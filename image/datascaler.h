@@ -20,6 +20,7 @@ public:
   QList<BezierCurve*> getTransferCurves() { return transferCurves; }
 signals:
   void imageContentsChanged();
+  void histogramChanged(QVector<int>, QVector<int>, QVector<int>);
 public slots:
   void addTransform(const QTransform&);
   void resetAllTransforms();

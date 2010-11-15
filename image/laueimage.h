@@ -21,6 +21,7 @@ public:
   QSize size() { return QSize(provider->width(), provider->height()); };
   bool isValid() { return valid; }
   QList<BezierCurve*> getTransferCurves();
+  DataScaler* getScaler() { return scaler; }
 signals:
   void imageContentsChanged();
 public slots:

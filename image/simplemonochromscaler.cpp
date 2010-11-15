@@ -54,13 +54,17 @@ template <typename T> void SimpleMonochromScaler<T>::makeValueIndex() {
   }
 
   unmappedPixelValues.resize(indexSet.size());
+  mappedPixelValues.resize(indexSet.size());
+  valueCount.resize(indexSet.size());
   imagePosToPixelValue.resize(provider->pixelCount());
+
   float minPixelValue = static_cast<float>(indexSet.begin()->key);
   float pixelValueRange = static_cast<float>(indexSet.rbegin()->key) - minPixelValue;
 
   int n=0;
   foreach (UniqueHelper u, indexSet) {
     unmappedPixelValues[n]=(static_cast<float>(u.key)-minPixelValue)/pixelValueRange;
+    valueCount[n] = u.indexes.size();
     foreach (int i, u.indexes)
       imagePosToPixelValue[i]=n;
     n++;
@@ -72,38 +76,26 @@ template <typename T> void SimpleMonochromScaler<T>::makeValueIndex() {
 }
 
 template <typename T> void SimpleMonochromScaler<T>::updateContrastMapping() {
-  mappedPixelValues.resize(unmappedPixelValues.size());
+  QList<QVector<int> > channels;
+  channels << QVector<int>(256) << QVector<int>(256) << QVector<int>(256);
+
   QVector<float> vMap = transferCurves[0]->mapSorted(unmappedPixelValues);
-  for (int n=0; n<mappedPixelValues.size(); n++) {
-    unsigned char c = static_cast<unsigned char>(255.0*vMap[n]);
-    mappedPixelValues[n]=qRgb(c,c,c);
+  int Hints[3] = {0, 0, 0};
+  float scale = 256.0*(1.0-1.0/mappedPixelValues.size());
+  for (int n=0; n<vMap.size(); n++) {
+    float v = vMap[n];
+    QRgb color=0xFF;
+    for (int i=0; i<3; i++) {
+      int c = static_cast<int>(scale*(*transferCurves[i+1])(v, Hints[i]));
+      color <<= 8;
+      color |= c;
+      channels[i][c]+=valueCount[n];
+    }
+    mappedPixelValues[n]=color;
   }
   redrawCache();
   emit imageContentsChanged();
-/*
-  QList<float> vMap = curves[0].mapSorted(values);
-  QVector<quint32> colors(vMap.size());
-
-  int hints[4];
-  for (int i=4; i--; ) hints[i]=0;
-  for (int n=vMap.size(); n--; ) {
-    float vval=vMap[n];
-    int rgbVal=0xFF;
-    for (int i=0; i<3; i++) {
-      rgbVal<<=8;
-      rgbVal|=(int)(255.0*curves[i+1](vval,hints[i+1]));
-    }
-    colors[n]=rgbVal;
-  }
-#ifdef __DEBUG__
-  cout << "float transfer: Transfer Image" << endl;
-#endif
-  for (int n=transferedData.size(); n--; ) {
-    transferedData[n]=colors[imgData[n]];
-  }
-}
- */
-
+  emit histogramChanged(channels[0], channels[1], channels[2]);
 }
 
 
