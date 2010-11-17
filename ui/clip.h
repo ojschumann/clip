@@ -22,7 +22,6 @@ private:
   Clip(const Clip&);
   ~Clip();
   static Clip* instance;
-
 public slots:
   // Menu Slots
   void on_newCrystal_triggered();
@@ -51,6 +50,9 @@ private:
   QAction *previousAct;
   QAction *separatorAct;
   QSignalMapper *windowMapper;
+
+private slots:
+    void on_actionReflection_Info_triggered();
 };
 
 #endif // CLIP_H

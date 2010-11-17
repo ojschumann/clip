@@ -48,6 +48,7 @@
     <property name="title">
      <string>Tools</string>
     </property>
+    <addaction name="actionReflection_Info"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -93,6 +94,11 @@
   <action name="newStereo">
    <property name="text">
     <string>New Stereographic projection</string>
+   </property>
+  </action>
+  <action name="actionReflection_Info">
+   <property name="text">
+    <string>Reflection Info</string>
    </property>
   </action>
  </widget>

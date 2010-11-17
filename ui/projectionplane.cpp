@@ -8,15 +8,17 @@
 #include <QSignalMapper>
 #include <QMdiArea>
 #include <QMdiSubWindow>
-#include <ui/resolutioncalculator.h>
-#include <ui/imagetoolbox.h>
-#include <core/crystal.h>
-#include <core/projector.h>
-#include <core/reflection.h>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QLabel>
-#include <ui/clip.h>
+
+#include "ui/clip.h"
+#include "ui/imagetoolbox.h"
+#include "ui/resolutioncalculator.h"
+#include "core/crystal.h"
+#include "core/reflection.h"
+#include "core/projector.h"
+#include "tools/mousepositioninfo.h"
 
 // List of all projectors. Sort of a hack ;-)
 QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
@@ -32,6 +34,8 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   setWindowTitle(projector->displayName());
   connect(projector, SIGNAL(projectionRectSizeChanged()), this, SLOT(resizeView()));
   connect(projector, SIGNAL(imageLoaded(LaueImage*)), ui->view, SLOT(setImage(LaueImage*)));
+  connect(ui->view, SIGNAL(mouseMoved(QPointF)), this, SLOT(generateMousePositionInfo(QPointF)));
+  connect(ui->view, SIGNAL(mouseLeft()), this, SLOT(generateEmptyMousePositionInfo()));
 
   ui->view->setScene(projector->getScene());
   ui->view->setTransform(QTransform(1,0,0,-1,0,0));
@@ -221,7 +225,7 @@ void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
         Reflection r = projector->getCrystal()->getClosestReflection(projector->det2normal(mousePressOrigin));
         if (r.normal(0)>=0.0) {
           double TT=180.0-360.0*M_1_PI*acos(max(-1.0, min(1.0, r.normal(0))));
-          QString s = r.toText();
+          QString s = r.toHtml();
           s+=QString("<br>2T=%1").arg(TT, 0,'f',1);
           projector->addInfoItem(s, mousePressOrigin);
           emit reflexInfo(r.h, r.k, r.l);
@@ -286,12 +290,25 @@ void ProjectionPlane::on_openImgAction_triggered() {
   resizeView();
 }
 
-void ProjectionPlane::debugSlot() {
-  //ui->view->update();
-  //ui->view->invalidateScene();
-  //ui->view->repaint();
-  projector->getScene()->update();
-  cout << "debugSlot()" << endl;
+void ProjectionPlane::generateMousePositionInfo(QPointF p) {
+  MousePositionInfo info;
+  info.valid=true;
+  info.projectorPos = p;
+  info.imagePos = projector->det2img.map(p);
+  info.normal = projector->det2normal(p);
+  info.detQMin = projector->Qmin();
+  info.detQMax = projector->Qmax();
+  info.scattered = projector->det2scattered(p, info.scatteredOk);
+  if (projector->getCrystal()) {
+    info.nearestOk = true;
+    info.nearestReflection = projector->getCrystal()->getClosestReflection(info.normal);
+  }
+  emit mousePositionInfo(info);
+}
+
+void ProjectionPlane::generateEmptyMousePositionInfo() {
+  MousePositionInfo info;
+  emit mousePositionInfo(info);
 }
 
 void ProjectionPlane::on_closeImgAction_triggered() {

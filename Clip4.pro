@@ -76,7 +76,11 @@ SOURCES += main.cpp\
     tools/propagatinggraphicsobject.cpp \
     ui/contrastcurves.cpp \
     image/simplemonochromscaler.cpp \
-    tools/histogramitem.cpp
+    tools/histogramitem.cpp \
+    ui/mouseinfodisplay.cpp \
+#    indexing/indexer.cpp \
+#    indexing/solution.cpp \
+    tools/itemstore.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -120,7 +124,12 @@ HEADERS  += ui/clip.h \
     tools/propagatinggraphicsobject.h \
     ui/contrastcurves.h \
     image/simplemonochromscaler.h \
-    tools/histogramitem.h
+    tools/histogramitem.h \
+    tools/mousepositioninfo.h \
+    ui/mouseinfodisplay.h \
+#    indexing/indexer.h \
+#    indexing/solution.h \
+    tools/itemstore.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -129,7 +138,8 @@ FORMS    += ui/clip.ui \
     ui/laueplanecfg.ui \
     ui/resolutioncalculator.ui \
     ui/imagetoolbox.ui \
-    ui/contrastcurves.ui
+    ui/contrastcurves.ui \
+    ui/mouseinfodisplay.ui
 
 RESOURCES += \
     icons/icons.qrc

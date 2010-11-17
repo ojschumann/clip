@@ -11,16 +11,17 @@
 #include <QString>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <core/fitobject.h>
 #include <QWaitCondition>
 #include <QSemaphore>
 #include <QThread>
 #include <QWidget>
 #include <QSignalMapper>
-#include <tools/vec3D.h>
-#include <tools/mat3D.h>
 #include <QRunnable>
 #include <QMutex>
+
+#include <core/fitobject.h>
+#include <tools/vec3D.h>
+#include <tools/mat3D.h>
 
 class Crystal;
 class Reflection;
@@ -28,7 +29,8 @@ class RulerItem;
 class ZoneItem;
 class CropMarker;
 class LaueImage;
-
+class SignalingEllipseItem;
+template <class T> class ItemStore;
 
 class Projector: public QObject, public FitObject {
   Q_OBJECT
@@ -80,6 +82,7 @@ public:
   virtual void projector2xml(QXmlStreamWriter&);
   virtual void loadFromXML(QXmlStreamReader&);
 
+  ItemStore<SignalingEllipseItem>* spotMarker();
   int spotMarkerNumber() const;
   void addSpotMarker(const QPointF& p);
   void delSpotMarkerNear(const QPointF& p);
@@ -158,6 +161,7 @@ protected:
   QList<QGraphicsItem*> textMarkerItems;
   // Markers for indexation and fit
   QList<QGraphicsEllipseItem*> spotMarkerItems;
+  ItemStore<SignalingEllipseItem>* spotMarkerStore;
   // Zone markers
   QList<ZoneItem*> zoneMarkerItems;
   // Info Items. These will be set on Mousepress from Python and be deleted on orientation change or slot!

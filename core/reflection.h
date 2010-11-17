@@ -48,6 +48,7 @@ public:
 
   static QString formatOverline(int);
   static QString hkl2text(int, int, int);
+  QString toHtml() const;
   QString toText() const;
 };
 

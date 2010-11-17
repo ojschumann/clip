@@ -15,9 +15,11 @@ public:
   void mousePressEvent(QMouseEvent *e);
   void mouseMoveEvent(QMouseEvent *);
   void mouseReleaseEvent(QMouseEvent *);
+  void leaveEvent(QEvent *);
   int getFrames();
 signals:
-
+  void mouseMoved(QPointF);
+  void mouseLeft();
 public slots:
   void retakeMouseEvent() { viewIgnoresThisMouseEvent = false; };
   void setImage(LaueImage*);

@@ -8,6 +8,7 @@
 #include <core/stereoprojector.h>
 #include <QMessageBox>
 #include <defs.h>
+#include "ui/mouseinfodisplay.h"
 
 
 
@@ -195,3 +196,13 @@ void Clip::addActions() {
 
 }
 
+
+void Clip::on_actionReflection_Info_triggered() {
+  MouseInfoDisplay* info = new MouseInfoDisplay();
+  foreach (QMdiSubWindow* mdi, ui->mdiArea->subWindowList()) {
+    if (ProjectionPlane* pp = dynamic_cast<ProjectionPlane*>(mdi->widget())) {
+      connect(pp, SIGNAL(mousePositionInfo(MousePositionInfo)), info, SLOT(showMouseInfo(MousePositionInfo)));
+    }
+  }
+  addMdiWindow(info);
+}

@@ -26,9 +26,7 @@ void ProjectionGraphicsView::mousePressEvent(QMouseEvent *e) {
 }
 
 void ProjectionGraphicsView::mouseMoveEvent(QMouseEvent *e) {
-  //cout << "Mouse pos: " << e->posF().x() << "," << e->posF().y() << " = ";
-  //QPointF p = mapToScene(e->pos());
-  //cout << p.x() << "," << p.y() << endl;
+  emit mouseMoved(mapToScene(e->pos()));
   if (viewIgnoresThisMouseEvent) {
     e->ignore();
   } else {
@@ -43,6 +41,10 @@ void ProjectionGraphicsView::mouseReleaseEvent(QMouseEvent *e) {
   } else {
     QGraphicsView::mouseReleaseEvent(e);
   }
+}
+
+void ProjectionGraphicsView::leaveEvent(QEvent *) {
+  emit mouseLeft();
 }
 
 int ProjectionGraphicsView::getFrames() {

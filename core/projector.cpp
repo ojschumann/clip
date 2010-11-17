@@ -13,6 +13,7 @@
 #include <QtConcurrentMap>
 #include <QGraphicsView>
 
+#include <tools/itemstore.h>
 #include "tools/signalingellipse.h"
 #include "tools/ruleritem.h"
 #include "tools/zoneitem.h"
@@ -30,6 +31,7 @@ Projector::Projector(QObject *parent):
     decorationItems(),
     textMarkerItems(),
     spotMarkerItems(),
+    spotMarkerStore(new ItemStore<SignalingEllipseItem>()),
     zoneMarkerItems(),
     rulerItems(),
     crystal(),
@@ -59,6 +61,8 @@ Projector::Projector(QObject *parent):
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
   connect(&rulerMapper, SIGNAL(mapped(int)), this, SIGNAL(rulerChanged(int)));
 
+  // FIXME: Debug
+  spotMarker()->add(QPointF(0,0));
 };
 
 Projector::Projector(const Projector &p): QObject() { }
@@ -378,6 +382,11 @@ bool Projector::delSpotMarkerAt(const QPointF& p) {
     }
   }
   return false;
+}
+
+
+ItemStore<SignalingEllipseItem>* Projector::spotMarker() {
+  return spotMarkerStore;
 }
 
 int Projector::spotMarkerNumber() const {

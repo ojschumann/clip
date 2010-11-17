@@ -4,9 +4,10 @@
 #include <QMainWindow>
 #include <QRubberBand>
 #include <QCustomEvent>
-#include <tools/objectstore.h>
 #include <QActionGroup>
 #include <QPointer>
+#include "tools/objectstore.h"
+#include "tools/mousepositioninfo.h"
 
 class Projector;
 
@@ -34,12 +35,15 @@ public:
 signals:
   void info(QString, int);
   void reflexInfo(int,int,int);
+  void mousePositionInfo(MousePositionInfo);
 protected slots:
   void slotChangeMouseDragMode();
   void slotUpdateFPS();
   void resizeView();
   void slotLoadCrystalData();
   void slotOpenResolutionCalc();
+  void generateMousePositionInfo(QPointF);
+  void generateEmptyMousePositionInfo();
 protected:
   void setupToolbar();
   QRectF zoomSceneRect();
@@ -61,15 +65,14 @@ protected:
   QString lastImageOpenDir;
 
 private slots:
-    void on_imageToolboxAction_triggered();
-    void on_flipVAction_triggered();
-    void on_flipHAction_triggered();
-    void on_rotCCWAction_triggered();
-    void on_rotCWAction_triggered();
-    void on_configAction_triggered();
-    void on_openImgAction_triggered();
-    void on_closeImgAction_triggered();
-    void debugSlot();
+  void on_imageToolboxAction_triggered();
+  void on_flipVAction_triggered();
+  void on_flipHAction_triggered();
+  void on_rotCCWAction_triggered();
+  void on_rotCWAction_triggered();
+  void on_configAction_triggered();
+  void on_openImgAction_triggered();
+  void on_closeImgAction_triggered();
 };
 
 
