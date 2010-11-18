@@ -2,13 +2,11 @@
 #define RESOLUTIONCALCULATOR_H
 
 #include <QWidget>
-#include "core/projector.h"
-
+#include "tools/itemstore.h"
 namespace Ui {
   class ResolutionCalculator;
 }
 
-class Projector;
 class RulerModel;
 
 class ResolutionCalculator : public QWidget
@@ -16,14 +14,14 @@ class ResolutionCalculator : public QWidget
   Q_OBJECT
 
 public:
-  explicit ResolutionCalculator(Projector* p, QWidget *parent = 0);
+  explicit ResolutionCalculator(ItemStore& r, QWidget *parent = 0);
   ~ResolutionCalculator();
 public slots:
   void slotSelectionChanged();
   void slotCalcResolution();
 private:
   Ui::ResolutionCalculator *ui;
-  QPointer<Projector> projector;
+  ItemStore& rulers;
   RulerModel* model;
 
 private slots:

@@ -1,17 +1,19 @@
 #include "rulermodel.h"
 
-#include <core/projector.h>
+#include <cmath>
+
+#include "tools/ruleritem.h"
 
 
-RulerModel::RulerModel(Projector* p, QObject* parent): QAbstractTableModel(parent), projector(p) {
+RulerModel::RulerModel(ItemStore& r, QObject* parent): QAbstractTableModel(parent), rulers(r) {
   hRes = -1.0;
   vRes = -1.0;
-  connect(p, SIGNAL(rulerAdded()), this, SLOT(slotRulerAdded()));
-  connect(projector, SIGNAL(rulerChanged(int)), this, SLOT(itemChanged(int)));
+  connect(&rulers, SIGNAL(itemAdded(int)), this, SLOT(slotRulerAdded()));
+  connect(&rulers, SIGNAL(itemChanged(int)), this, SLOT(itemChanged(int)));
 }
 
 int RulerModel::rowCount(const QModelIndex & parent = QModelIndex() ) const {
-  return projector->rulerNumber();
+  return rulers.size();
 }
 
 int RulerModel::columnCount(const QModelIndex & parent = QModelIndex() ) const {
@@ -20,18 +22,17 @@ int RulerModel::columnCount(const QModelIndex & parent = QModelIndex() ) const {
 
 QVariant RulerModel::data ( const QModelIndex & index, int role = Qt::DisplayRole ) const {
   if (role==Qt::DisplayRole) {
-    QPair<QPointF, QPointF> c = projector->getRulerCoordinates(index.row());
-    double dx = fabs(c.first.x()-c.second.x());
-    double dy = fabs(c.first.y()-c.second.y());
+    RulerItem* r = dynamic_cast<RulerItem*>(rulers.at(index.row()));
+    double dx = fabs(r->getStart().x()-r->getEnd().x());
+    double dy = fabs(r->getStart().y()-r->getEnd().y());
     if (index.column()==0) {
       return QVariant(QString::number(dx, 'f', 2));
     } else if (index.column()==1) {
-      QPair<QPointF, QPointF> c = projector->getRulerCoordinates(index.row());
       return QVariant(QString::number(dy, 'f', 2));
     } else if (index.column()==2) {
       return QVariant(QString::number(hypot(dx, dy), 'f', 2));
     } else if (index.column()==3) {
-      QVariant v = projector->getRulerData(index.row());
+      QVariant v = rulers.at(index.row())->data(0);
       if (v.convert(QVariant::Double)) {
         return v;
       }
@@ -40,7 +41,7 @@ QVariant RulerModel::data ( const QModelIndex & index, int role = Qt::DisplayRol
     }
   } else if (role==Qt::EditRole) {
     if (index.column()==3) {
-      QVariant v = projector->getRulerData(index.row());
+      QVariant v = rulers.at(index.row())->data(0);
       v.convert(QVariant::Double);
       return v;
 
@@ -70,12 +71,12 @@ bool RulerModel::setData(const QModelIndex &index, const QVariant &value, int ro
   bool b;
   double val = value.toDouble(&b);
   if (b) {
-    projector->setRulerData(index.row(), QVariant(val));
+    rulers.at(index.row())->setData(0, QVariant(val));
     emit dataChanged(index, index);
     return true;
   }
   if (value.toString()=="") {
-    projector->setRulerData(index.row(), QVariant());
+    rulers.at(index.row())->setData(0, QVariant(val));
     emit dataChanged(index, index);
     return true;
   }
@@ -83,7 +84,7 @@ bool RulerModel::setData(const QModelIndex &index, const QVariant &value, int ro
 }
 
 void RulerModel::slotRulerAdded() {
-  int n = projector->rulerNumber()-1;
+  int n = rulers.size()-1;
   beginInsertRows(QModelIndex(), n, n);
   endInsertRows();
 }

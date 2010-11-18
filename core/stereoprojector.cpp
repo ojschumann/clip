@@ -12,6 +12,7 @@ StereoProjector::StereoProjector(QObject* parent):
     localCoordinates() {
   internalSetWavevectors(0, M_PI);
   scene.setSceneRect(QRectF(-1.0, -1.0, 2.0, 2.0));
+  connect(this, SIGNAL(textSizeChanged(double)), this, SLOT(decorateScene()));
 }
 
 QPointF StereoProjector::scattered2det(const Vec3D &v) const {
@@ -136,9 +137,7 @@ void StereoProjector::decorateScene() {
 
     ti->setPos(p);
     QRectF r=ti->boundingRect();
-    double sx=textSize*scene.width()/r.width();
-    double sy=textSize*scene.height()/r.height();
-    double sc=sx<sy?sy:sx;
+    double sc=getTextSize()/std::min(r.width(), r.height());
     ti->scale(sc,sc);
 
     ti->moveBy( std::min(1.0-ti->sceneBoundingRect().right(), 0.0), 0);
@@ -153,7 +152,6 @@ void StereoProjector::decorateScene() {
 }
 
 QWidget* StereoProjector::configWidget() {
-  //FIXME: Implement
   return new StereoCfg(this);
 }
 

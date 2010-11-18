@@ -4,14 +4,13 @@
 #include "tools/propagatinggraphicsobject.h"
 #include <QPen>
 
-class Projector;
-class SignalingEllipseItem;
+class CircleItem;
 
 class RulerItem : public PropagatingGraphicsObject
 {
   Q_OBJECT
 public:
-  RulerItem(const QPointF&, const QPointF&, Projector* p, QGraphicsItem* parent=0);
+  RulerItem(const QPointF&, const QPointF&, double r, QGraphicsItem* parent=0);
   ~RulerItem();
   QRectF boundingRect() const;
   QPainterPath shape() const;
@@ -22,14 +21,16 @@ public:
   QPointF getEnd();
   void highlight(bool);
   bool isHighlighted();
+public slots:
+  void setHandleSize(double);
 signals:
   void rulerChanged();
 protected:
-  SignalingEllipseItem* startHandle;
-  SignalingEllipseItem* endHandle;
+  CircleItem* startHandle;
+  CircleItem* endHandle;
   bool highlighted;
   QPen pen;
-  Projector* projector;
+  double radius;
 };
 
 #endif // RULERITEM_H

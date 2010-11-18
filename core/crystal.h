@@ -52,7 +52,7 @@ public:
   bool setSpacegroup();
 
   Vec3D getRotationAxis() const;
-  Vec3D getLabSystamRotationAxis() const;
+  Vec3D getLabSystemRotationAxis() const;
   RotationAxisType getRotationAxisType() const;
 
   QList<Projector*> getConnectedProjectors();
@@ -65,7 +65,7 @@ public:
   virtual void fitParameterSetValue(int n, double val);
   virtual void fitParameterSetEnabled(int n, bool enable);
 
-    public slots:
+public slots:
   void addRotation(const Vec3D& axis, double angle);
   void addRotation(const Mat3D& M);
   void setRotation(const Mat3D& M);
@@ -79,9 +79,10 @@ public:
   void slotSetSGConstrains();
   void renewReflections();
 
-    private slots:
+private slots:
   void convertHtoR();
   void convertRtoH();
+  void setReflections(QList<Reflections>);
 
 signals:
   void cellChanged();
@@ -113,17 +114,23 @@ private:
   double Qmin;
   double Qmax;
 
-  Spacegroup* spaceGroup;
-  QVector<Reflection> reflections;
-
-  // Factor for ab initio prediction of the number of reflections.
-  double predictionFactor;
-
-
   ObjectStore connectedProjectors;
 
   Vec3D rotationAxis;
   RotationAxisType axisType;
+
+  // Spacegroup, handles sys absents
+  Spacegroup* spaceGroup;
+
+  // List of Reflections
+  QVector<Reflection> reflections;
+  // Lock for ReflectionList
+  QMutex reflectionLock;
+  // Flag, that indicates an running update of the reflection list.
+  bool reflectionUpdateRunning;
+  // Factor for ab initio prediction of the number of reflections.
+  double predictionFactor;
+
 
   bool updateEnabled;
 
@@ -137,19 +144,20 @@ private:
     Crystal* c;
   };
 
-  // Function Object that perfoms the
-  // generation of one layer of refelctions
+  // Runnable, that performes the
+  // generation of reflections
   class GenerateReflection: public QRunnable {
   public:
     GenerateReflection(Crystal*, int);
     ~GenerateReflection();
     void run();
   private:
+    QVector<Reflection> reflections;
     Crystal* c;
     int hMax;
     QAtomicInt aktualH;
     int reflectionNumber;
-    QMutex mutex;
+    QMutex localMutex;
 
   };
 

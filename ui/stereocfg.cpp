@@ -11,8 +11,8 @@ StereoCfg::StereoCfg(StereoProjector* p, QWidget *parent) :
 {
   ui->setupUi(this);
   connect(p, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-  connect(ui->detTextSize, SIGNAL(valueChanged(double)), p, SLOT(setTextSize(double)));
-  connect(ui->detSpotSize, SIGNAL(valueChanged(double)), p, SLOT(setSpotSize(double)));
+  connect(ui->detTextSize, SIGNAL(valueChanged(double)), p, SLOT(setTextSizeFraction(double)));
+  connect(ui->detSpotSize, SIGNAL(valueChanged(double)), p, SLOT(setSpotSizeFraction(double)));
   connect(ui->maxRefLabel, SIGNAL(valueChanged(int)), p, SLOT(setMaxHklSqSum(int)));
   connect(ui->detMinQ, SIGNAL(valueChanged(double)), this, SLOT(slotSetQRange()));
   connect(ui->detMaxQ, SIGNAL(valueChanged(double)), this, SLOT(slotSetQRange()));
@@ -37,8 +37,8 @@ StereoCfg::~StereoCfg() {
 }
 
 void StereoCfg::slotLoadParams() {
-  ui->detTextSize->setValue(projector->getTextSize());
-  ui->detSpotSize->setValue(projector->getSpotSize());
+  ui->detTextSize->setValue(projector->getTextSizeFraction());
+  ui->detSpotSize->setValue(projector->getSpotSizeFraction());
   ui->maxRefLabel->setValue(projector->getMaxHklSqSum());
   ui->detMinQ->setValue(projector->Qmin());
   ui->detMaxQ->setValue(projector->Qmax());

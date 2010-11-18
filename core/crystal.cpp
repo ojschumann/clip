@@ -8,6 +8,7 @@
 
 #include <QTime>
 #include <QtConcurrentMap>
+#include <QMetaObject>
 
 using namespace std;
 
@@ -185,8 +186,7 @@ void Crystal::setWavevectors(double _Qmin, double _Qmax) {
   if ((_Qmin<_Qmax) and ((_Qmin!=Qmin) or (_Qmax!=Qmax))) {
     Qmax=_Qmax;
     Qmin=_Qmin;
-    reflections.clear();
-    emit reflectionsUpdate();
+    renewReflections();
   }
 }
 
@@ -196,10 +196,12 @@ Crystal::GenerateReflection::GenerateReflection(Crystal *_c, int _hMax):
     aktualH(-_hMax) {
   setAutoDelete(true);
   reflectionNumber = 0;
+
 }
 
-Crystal::GenerateReflection::~GenerateReflection() {
+Crystal::GenerateReflection::~GenerateReflection() {  
   c->reflections.resize(reflectionNumber);
+  QMetaObject::invokeMethod(c, "setReflections", Qt::QueuedConnection, Q_ARG(QList<Reflection>, reflection));
 }
 
 void Crystal::GenerateReflection::run() {
@@ -282,7 +284,6 @@ void Crystal::generateReflections() {
 
   reflections.resize(int(1.1*predictionFactor*prediction));
   QTime t1(QTime::currentTime());
-  //reflections = QtConcurrent::blockingMappedReduced(IntIterator(-hMax), IntIterator(hMax+1), GenerateReflection(this), Reduce);
   QThreadPool::globalInstance()->start(new GenerateReflection(this, hMax));
   QThreadPool::globalInstance()->waitForDone();
 
@@ -446,7 +447,7 @@ Vec3D Crystal::getRotationAxis() const {
   return rotationAxis;
 }
 
-Vec3D Crystal::getLabSystamRotationAxis() const {
+Vec3D Crystal::getLabSystemRotationAxis() const {
   if (axisType==ReziprocalSpace) {
     Vec3D v(MRot*MReziprocal*rotationAxis);
     v.normalize();

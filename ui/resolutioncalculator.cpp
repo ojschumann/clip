@@ -1,23 +1,26 @@
 #include "resolutioncalculator.h"
 #include "ui_resolutioncalculator.h"
 
-#include <core/projector.h>
+#include <cmath>
+
 #include <tools/rulermodel.h>
 #include <QAbstractTableModel>
+#include "tools/ruleritem.h"
+#include "tools/itemstore.h"
+#include "tools/mat3D.h"
+#include "tools/vec3D.h"
 
-
-
-ResolutionCalculator::ResolutionCalculator(Projector* p, QWidget *parent) :
+ResolutionCalculator::ResolutionCalculator(ItemStore& r, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ResolutionCalculator),
-    projector(p)
+    rulers(r)
 {
   ui->setupUi(this);
 
   ui->rulerView->verticalHeader()->setDefaultSectionSize(ui->rulerView->fontMetrics().height());
   ui->rulerView->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
-  model = new RulerModel(projector);
+  model = new RulerModel(rulers);
   ui->rulerView->setModel(model);
   connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SLOT(slotCalcResolution()));
   connect(ui->rulerView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(slotSelectionChanged()));
@@ -33,29 +36,28 @@ ResolutionCalculator::~ResolutionCalculator()
 }
 
 void ResolutionCalculator::slotSelectionChanged() {
-  if (projector.isNull()) return;
   QItemSelectionModel* selection = ui->rulerView->selectionModel();
-  for (int n=0; n<projector->rulerNumber(); n++) {
+  for (int n=0; n<rulers.size(); n++) {
     bool b = selection->isRowSelected(n, QModelIndex());
-    projector->highlightRuler(n, b);
+    // Todo: make better
+    dynamic_cast<RulerItem*>(rulers.at(n))->highlight(b);
   }
 }
 
 void ResolutionCalculator::slotCalcResolution() {
-  if (projector.isNull()) return;
   double AA=0.0;
   double AB=0.0;
   double BB=0.0;
   double LA=0.0;
   double LB=0.0;
 
-  for (int n=0; n<projector->rulerNumber(); n++) {
-    QVariant v = projector->getRulerData(n);
+  for (int n=0; n<rulers.size(); n++) {
+    QVariant v = rulers.at(n)->data(0);
     if (v.convert(QVariant::Double)) {
       double l = v.toDouble();
-      QPair<QPointF, QPointF> c = projector->getRulerCoordinates(n);
-      double dx = c.first.x()-c.second.x();
-      double dy = c.first.y()-c.second.y();
+      RulerItem* r = dynamic_cast<RulerItem*>(rulers.at(n));
+      double dx = r->getStart().x()-r->getEnd().x();
+      double dy = r->getStart().y()-r->getEnd().y();
       AA += dx*dx*dx*dx;
       AB += dx*dx*dy*dy;
       BB += dy*dy*dy*dy;
@@ -81,13 +83,11 @@ void ResolutionCalculator::slotCalcResolution() {
 
 void ResolutionCalculator::on_acceptButton_clicked()
 {
-  if (projector.isNull()) return;
   //TODO: Do something usefull...
-  projector->clearRulers();
+  rulers.clear();
 }
 
 void ResolutionCalculator::on_cancelButton_clicked()
 {
-  if (projector.isNull()) return;
-  projector->clearRulers();
+  rulers.clear();
 }

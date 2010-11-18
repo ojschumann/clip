@@ -3,44 +3,32 @@
 
 #include <QObject>
 #include <QPointF>
+#include <QGraphicsItem>
 #include <QSignalMapper>
 
-class Projector;
-
-class AbstractItemStore : public QObject
-{
+class ItemStore: public QObject {
   Q_OBJECT
+friend class Projector;
 public:
-  explicit AbstractItemStore(QObject *parent = 0);
+  explicit ItemStore(QObject* parent=0);
+  int size();
+  QGraphicsItem* at(int);
+public slots:
+  virtual bool delAt(const QPointF& );
+  virtual void clear();
 signals:
   void itemAdded(int);
   void itemChanged(int);
   void itemRemoved(int);
   void itemsCleared();
-public slots:
-  void emitChanged();
-  virtual bool delAt(const QPointF& )=0;
-  virtual void clear()=0;
-};
-
-
-template <class T> class ItemStore: public AbstractItemStore {
-public:
-  explicit ItemStore(Projector* p);
-  int size();
-  T* at(int);
-  virtual T* add(const QPointF&) { return NULL; }
-  virtual T* add(const QPointF&, const QPointF&) { return NULL; }
-  virtual T* add(const QPointF&, const QString&) { return NULL; }
-  virtual bool delAt(const QPointF& );
-  virtual void clear();
+protected:
+  virtual void addItem(QGraphicsItem*);
+protected slots:
+  virtual void emitChanged();
 private:
-  QList<T*> items;
-  Projector* projector;
+  ItemStore(const ItemStore&) {};
+  ItemStore& operator=(const ItemStore&) { return *this; }
+  QList<QGraphicsItem*> items;
 };
-
-class SignalingEllipseItem;
-template<> SignalingEllipseItem* ItemStore<SignalingEllipseItem>::add(const QPointF&);
-
 
 #endif // ITEMSTORE_H

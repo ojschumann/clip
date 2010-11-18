@@ -5,6 +5,7 @@
 #include "tools/cropmarker.h"
 #include "ui/resolutioncalculator.h"
 #include "ui/contrastcurves.h"
+#include "core/projector.h"
 
 ImageToolbox::ImageToolbox(Projector* p, QWidget *parent):
     QMainWindow(parent),
@@ -12,11 +13,15 @@ ImageToolbox::ImageToolbox(Projector* p, QWidget *parent):
     projector(p)
 {
   ui->setupUi(this);
-  connect(projector->getLaueImage(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
-  ui->tabWidget->addTab(new ResolutionCalculator(projector), "Resolution");
-  ui->tabWidget->addTab(new ContrastCurves(projector), "Contrast");
+  if (projector && projector->getLaueImage()) {
+    connect(projector->getLaueImage(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
+    ui->tabWidget->addTab(new ResolutionCalculator(projector->rulers()), "Resolution");
+    ui->tabWidget->addTab(new ContrastCurves(projector->getLaueImage()), "Contrast");
+  } else {
+    deleteLater();
+  }
   cout << "init ImageToolbox" << endl;
 }
 

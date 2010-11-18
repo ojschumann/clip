@@ -7,16 +7,15 @@
 #include <QMouseEvent>
 
 #include "image/BezierCurve.h"
-#include "core/projector.h"
 #include "image/laueimage.h"
 #include "tools/histogramitem.h"
 
 
 
-ContrastCurves::ContrastCurves(Projector* p, QWidget *parent) :
+ContrastCurves::ContrastCurves(LaueImage* img, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ContrastCurves),
-    projector(p),
+    laueImage(img),
     handleMarkers(),
     curves()
 {
@@ -27,7 +26,7 @@ ContrastCurves::ContrastCurves(Projector* p, QWidget *parent) :
 
     histogram = new HistogramItem();
     scene.addItem(histogram);
-    connect(projector->getLaueImage()->getScaler(), SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), histogram, SLOT(setHistogram(QVector<int>,QVector<int>,QVector<int>)));
+    connect(laueImage->getScaler(), SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), histogram, SLOT(setHistogram(QVector<int>,QVector<int>,QVector<int>)));
     connect(ui->spinBox, SIGNAL(valueChanged(int)), histogram, SLOT(setCompMode(int)));
 
     QPen decoPen(Qt::gray, 0, Qt::DotLine);
@@ -57,14 +56,14 @@ ContrastCurves::~ContrastCurves()
 }
 
 void ContrastCurves::changeToCurve(int n) {
-  if (projector.isNull() || projector->getLaueImage()==0) return;
+  if (laueImage.isNull()) return;
   activeCurve=n;
   foreach (BoundedEllipse* item, handleMarkers) {
     scene.removeItem(item);
     delete item;
   }
   handleMarkers.clear();
-  BezierCurve* curve = projector->getLaueImage()->getTransferCurves()[n];
+  BezierCurve* curve = laueImage->getTransferCurves()[n];
   foreach (QPointF p, curve->getPoints()) {
     newMarker(p);
   }
@@ -87,8 +86,8 @@ void ContrastCurves::newMarker(const QPointF& p) {
 }
 
 void ContrastCurves::updateCurveLines(int n) {
-  if (projector.isNull() || projector->getLaueImage()==0) return;
-  BezierCurve* curve = projector->getLaueImage()->getTransferCurves()[n];
+  if (laueImage.isNull()) return;
+  BezierCurve* curve = laueImage->getTransferCurves()[n];
   QList<QPointF> pathPoints = curve->pointRange(0.0, 0.01, 101);
   QPainterPath path(pathPoints[0]);
   for (int i=1; i<pathPoints.size(); i++) {
@@ -104,8 +103,8 @@ void ContrastCurves::markerChanged() {
   foreach (QGraphicsItem* item, handleMarkers)
     points.insert(item->x(), item->pos());
 
-  if (projector.isNull() || projector->getLaueImage()==0) return;
-  BezierCurve* curve = projector->getLaueImage()->getTransferCurves()[activeCurve];
+  if (laueImage.isNull()) return;
+  BezierCurve* curve = laueImage->getTransferCurves()[activeCurve];
   curve->setPoints(points.values());
   updateCurveLines(activeCurve);
   makeScales();
@@ -138,8 +137,8 @@ void ContrastCurves::makeVScale() {
   QPainter p(&vScalePix);
   int w = vScalePix.width();
   int h = vScalePix.height();
-  if (projector.isNull() || projector->getLaueImage()==0) return;
-  QList<BezierCurve*> bezierCurves = projector->getLaueImage()->getTransferCurves();
+  if (laueImage.isNull()) return;
+  QList<BezierCurve*> bezierCurves = laueImage->getTransferCurves();
   QList<float> V = bezierCurves[0]->range(0.0, 1.0/(h-1), h);
   QList<float> R = bezierCurves[1]->map(V);
   QList<float> G = bezierCurves[2]->map(V);
@@ -247,8 +246,8 @@ void ContrastCurves::loadFromFile(const QString& filename) {
     if (points.size()<2) return;
     allCurvePoints << points;
   }
-  if (projector.isNull() || projector->getLaueImage()==0) return;
-  QList<BezierCurve*> bezierCurves = projector->getLaueImage()->getTransferCurves();
+  if (laueImage.isNull()) return;
+  QList<BezierCurve*> bezierCurves = laueImage->getTransferCurves();
   for (int i=0; i<4; i++) {
     bezierCurves[i]->setPoints(allCurvePoints[i]);
     updateCurveLines(i);
@@ -259,8 +258,8 @@ void ContrastCurves::loadFromFile(const QString& filename) {
 
 
 void ContrastCurves::saveToFile(const QString& filename) {
-  if (projector.isNull() || projector->getLaueImage()==0) return;
-  QList<BezierCurve*> bezierCurves = projector->getLaueImage()->getTransferCurves();
+  if (laueImage.isNull()) return;
+  QList<BezierCurve*> bezierCurves = laueImage->getTransferCurves();
 
   QDomDocument doc("curves");
   QDomNode base = doc.appendChild(doc.createElement("Transfercurves"));

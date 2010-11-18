@@ -4,36 +4,38 @@
 #include <QCursor>
 #include <iostream>
 #include <QPointF>
-#include <core/projector.h>
-#include <tools/signalingellipse.h>
 
+#include "core/projector.h"
+#include "tools/circleitem.h"
 
 using namespace std;
 
 ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* parent):
     PropagatingGraphicsObject(parent),
     imgRect(0.01, 0.01, 0.98, 0.98),
-    startHandle(new SignalingEllipseItem(this)),
-    endHandle(new SignalingEllipseItem(this)),
+    startHandle(new CircleItem(0.1, this)),
+    endHandle(new CircleItem(0.1, this)),
     projector(p)    
 {
   highlighted=true;
   highlight(false);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
-  QList<SignalingEllipseItem*> l;
+  QList<CircleItem*> l;
   l << startHandle << endHandle;
-  double radius = 0.01*projector->getSpotSize();
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updatePolygon()));
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updateOptimalZone()));
-  foreach (SignalingEllipseItem* item, l) {
-    item->setRect(-radius, -radius, 2*radius, 2*radius);
-    item->setPen(QPen(Qt::red));
+  foreach (CircleItem* item, l) {
+    item->setRadius(projector->getSpotSize());
+    item->setColor(Qt::red);
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
     connect(item, SIGNAL(positionChanged()), this, SIGNAL(zoneChanged()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updatePolygon()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updateOptimalZone()));
+    connect(projector, SIGNAL(spotSizeChanged(double)), item, SLOT(setRadius(double)));
   }
+  updatePolygon();
+  updateOptimalZone();
   startHandle->setPos(p1);
   endHandle->setPos(p2);
 }
@@ -352,7 +354,7 @@ QPointF ZoneItem::getEnd() {
 void ZoneItem::highlight(bool h) {
   if (h!=isHighlighted()) {
     highlighted=h;
-    double radius = 0.01*projector->getSpotSize();
+    double radius = projector->getSpotSize();
     if (isHighlighted()) {
       pen = QPen(QColor(255, 192, 0, 128));
       pen.setWidthF(1.5*radius);
@@ -361,8 +363,8 @@ void ZoneItem::highlight(bool h) {
       pen.setWidthF(1.5*radius);
       pen.setWidthF(0);
     }
-    startHandle->setPen(pen);
-    endHandle->setPen(pen);
+    //startHandle->setPen(pen);
+    //endHandle->setPen(pen);
     update();
   }
 }

@@ -8,7 +8,7 @@
 #include "tools/vec3D.h"
 
 class Projector;
-class SignalingEllipseItem;
+class CircleItem;
 class GraphicsEllipseItem;
 
 class ZoneItem : public PropagatingGraphicsObject
@@ -34,8 +34,8 @@ signals:
 protected:
   QRectF imgRect;
   QList<QPolygonF> generatePolygon(const Vec3D&, const Vec3D&);
-  SignalingEllipseItem* startHandle;
-  SignalingEllipseItem* endHandle;
+  CircleItem* startHandle;
+  CircleItem* endHandle;
   qreal radius;
   bool highlighted;
   QPen pen;

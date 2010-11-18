@@ -22,6 +22,7 @@
 #include <core/fitobject.h>
 #include <tools/vec3D.h>
 #include <tools/mat3D.h>
+#include "tools/itemstore.h"
 
 class Crystal;
 class Reflection;
@@ -29,8 +30,6 @@ class RulerItem;
 class ZoneItem;
 class CropMarker;
 class LaueImage;
-class SignalingEllipseItem;
-template <class T> class ItemStore;
 
 class Projector: public QObject, public FitObject {
   Q_OBJECT
@@ -76,37 +75,28 @@ public:
 
   int getMaxHklSqSum() const;
   double getTextSize() const;
+  double getTextSizeFraction() const;
   double getSpotSize() const;
+  double getSpotSizeFraction() const;
   bool spotsEnabled() const;
 
   virtual void projector2xml(QXmlStreamWriter&);
   virtual void loadFromXML(QXmlStreamReader&);
 
-  ItemStore<SignalingEllipseItem>* spotMarker();
-  int spotMarkerNumber() const;
-  void addSpotMarker(const QPointF& p);
-  void delSpotMarkerNear(const QPointF& p);
-  bool delSpotMarkerAt(const QPointF& p);
-  QPointF getSpotMarkerDetPos(int n) const;
-  QList<Vec3D> getSpotMarkerNormals() const;
+  ItemStore& spotMarkers();
+  void addSpotMarker(const QPointF&);
+  QPointF getSpotMarkerDetPos(int n);
+  QList<Vec3D> getSpotMarkerNormals();
 
-  int rulerNumber() const;
+  ItemStore& rulers();
   void addRuler(const QPointF& p1, const QPointF& p2);
-  bool delRulerAt(const QPointF& p);
-  void clearRulers();
   QPair<QPointF, QPointF> getRulerCoordinates(int);
-  void highlightRuler(int, bool);
-  bool rulerIsHighlighted(int);
-  QVariant getRulerData(int);
-  void setRulerData(int, QVariant);
 
-  int zoneMarkerNumber() const;
+  ItemStore& zoneMarkers();
   void addZoneMarker(const QPointF& p1, const QPointF& p2);
-  bool delZoneMarkerAt(const QPointF& p);
 
+  ItemStore& infoItems();
   void addInfoItem(const QString& text, const QPointF& p);
-  bool delInfoItemAt(const QPointF& p);
-  void clearInfoItems();
 
   void showCropMarker();
   void delCropMarker();
@@ -125,8 +115,8 @@ public slots:
 
   virtual void decorateScene()=0;
   void setMaxHklSqSum(int m);
-  void setTextSize(double d);
-  void setSpotSize(double d);
+  void setTextSizeFraction(double d);
+  void setSpotSizeFraction(double d);
   void enableSpots(bool b=true);
 
   // For speedup of fitting...
@@ -139,17 +129,14 @@ public slots:
   virtual void doImgRotation(const QTransform&);
 signals:
   void projectedPointsUpdated();
-  void rulerAdded();
-  void rulerChanged(int);
-  void spotMarkerAdded();
-  void spotMarkerChanged();
-  void zoneMarkerAdded();
   void wavevectorsUpdated();
   void projectionParamsChanged();
   void projectionRectPosChanged();
   void projectionRectSizeChanged();
   void imgTransformUpdated();
   void imageLoaded(LaueImage*);
+  void spotSizeChanged(double);
+  void textSizeChanged(double);
 protected:
   virtual bool project(const Reflection &r, QPointF &point)=0;
   virtual bool parseXMLElement(QXmlStreamReader&);
@@ -160,15 +147,13 @@ protected:
   // written indexes in the scene
   QList<QGraphicsItem*> textMarkerItems;
   // Markers for indexation and fit
-  QList<QGraphicsEllipseItem*> spotMarkerItems;
-  ItemStore<SignalingEllipseItem>* spotMarkerStore;
+  ItemStore spotMarkerStore;
   // Zone markers
-  QList<ZoneItem*> zoneMarkerItems;
+  ItemStore zoneMarkerStore;
   // Info Items. These will be set on Mousepress from Python and be deleted on orientation change or slot!
-  QList<QGraphicsItem*> infoItems;
+  ItemStore infoStore;
   // Ruler Item
-  QList<RulerItem*> rulerItems;
-  QSignalMapper rulerMapper;
+  ItemStore rulerStore;
   // The Crop Marker
   QPointer<CropMarker> cropMarker;
 
@@ -179,8 +164,8 @@ protected:
   double QminVal;
   double QmaxVal;
   int maxHklSqSum;
-  double textSize;
-  double spotSize;
+  double textSizeFraction;
+  double spotSizeFraction;
   bool showSpots;
   bool projectionEnabled;
 
@@ -201,12 +186,12 @@ protected:
     QMutex mutex;
   };
 
-  class SpotMarkerGraphicsItem: public QGraphicsItem {
+  class SpotIndicatorGraphicsItem: public QGraphicsItem {
   public:
-    SpotMarkerGraphicsItem();
-    ~SpotMarkerGraphicsItem();
+    SpotIndicatorGraphicsItem();
+    ~SpotIndicatorGraphicsItem();
   private:
-    SpotMarkerGraphicsItem(const SpotMarkerGraphicsItem&);
+    SpotIndicatorGraphicsItem(const SpotIndicatorGraphicsItem&);
   public:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual QRectF boundingRect() const;
@@ -230,13 +215,13 @@ protected:
 
     class Worker: public QThread {
     public:
-      Worker(SpotMarkerGraphicsItem* s, int t):
-          spotMarker(s),
+      Worker(SpotIndicatorGraphicsItem* s, int t):
+          spotIndicator(s),
           threadNr(t),
           localCache(0),
           shouldStop(false) {}
       void run();
-      SpotMarkerGraphicsItem* spotMarker;
+      SpotIndicatorGraphicsItem* spotIndicator;
       int threadNr;
       QImage* localCache;
       bool shouldStop;
@@ -246,7 +231,7 @@ protected:
     QList<Worker*> workers;
   };
 
-  SpotMarkerGraphicsItem* spotMarkers;
+  SpotIndicatorGraphicsItem* spotIndicator;
     protected slots:
   virtual void updateImgTransformations();
 protected:

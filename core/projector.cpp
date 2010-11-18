@@ -13,15 +13,13 @@
 #include <QtConcurrentMap>
 #include <QGraphicsView>
 
-#include <tools/itemstore.h>
-#include "tools/signalingellipse.h"
+#include "tools/circleitem.h"
 #include "tools/ruleritem.h"
 #include "tools/zoneitem.h"
 #include "tools/cropmarker.h"
 #include "core/reflection.h"
 #include "core/crystal.h"
 #include "image/laueimage.h"
-
 
 using namespace std;
 
@@ -30,22 +28,21 @@ Projector::Projector(QObject *parent):
     FitObject(),
     decorationItems(),
     textMarkerItems(),
-    spotMarkerItems(),
-    spotMarkerStore(new ItemStore<SignalingEllipseItem>()),
-    zoneMarkerItems(),
-    rulerItems(),
+    spotMarkerStore(),
+    zoneMarkerStore(),
+    rulerStore(),
     crystal(),
     scene(this),
     imageItemsPlane(new QGraphicsPixmapItem()),
     imageData(0),
-    spotMarkers(new SpotMarkerGraphicsItem())
+    spotIndicator(new SpotIndicatorGraphicsItem())
 {
   imageItemsPlane->setFlag(QGraphicsItem::ItemIsMovable, false);
 
-  scene.addItem(spotMarkers);
+  scene.addItem(spotIndicator);
   scene.addItem(imageItemsPlane);
 
-  spotMarkers->stackBefore(imageItemsPlane);
+  spotIndicator->stackBefore(imageItemsPlane);
 
   enableSpots();
   enableProjection();
@@ -53,16 +50,15 @@ Projector::Projector(QObject *parent):
 
   internalSetWavevectors(0.0, 1.0*M_1_PI);
   setMaxHklSqSum(3);
-  setTextSize(4.0);
-  setSpotSize(4.0);
+  setTextSizeFraction(10.0);
+  setSpotSizeFraction(1.0);
+
+  connect(this, SIGNAL(spotSizeChanged(double)), this, SLOT(reflectionsUpdated()));
+  connect(this, SIGNAL(textSizeChanged(double)), this, SLOT(reflectionsUpdated()));
 
   QTimer::singleShot(0, this, SLOT(decorateScene()));
   connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
-  connect(&rulerMapper, SIGNAL(mapped(int)), this, SIGNAL(rulerChanged(int)));
-
-  // FIXME: Debug
-  spotMarker()->add(QPointF(0,0));
 };
 
 Projector::Projector(const Projector &p): QObject() { }
@@ -81,7 +77,6 @@ void Projector::connectToCrystal(Crystal *c) {
   connect(crystal, SIGNAL(reflectionsUpdate()), this, SLOT(reflectionsUpdated()));
   emit projectionParamsChanged();
 }
-
 
 double Projector::Qmin() const {
   return QminVal;
@@ -125,34 +120,17 @@ void Projector::addInfoItem(const QString& text, const QPointF& p) {
   QGraphicsTextItem*  t = new QGraphicsTextItem(bg);
   t->setHtml(text);
   QRectF r=t->boundingRect();
-  double sx=textSize*scene.width()/r.width();
-  double sy=textSize*scene.height()/r.height();
-  double s=sx<sy?sy:sx;
+  double s=getTextSize()/std::min(r.width(), r.height());
 
   bg->setRect(t->boundingRect());
   bg->scale(s,s);
+
   scene.addItem(bg);
-  infoItems.append(bg);
+  infoStore.addItem(bg);
 }
 
-bool Projector::delInfoItemAt(const QPointF& p) {
-  foreach (QGraphicsItem* item, infoItems) {
-    if (item->contains(item->mapFromScene(p))) {
-      scene.removeItem(item);
-      infoItems.removeOne(item);
-      delete item;
-      return true;
-    }
-  }
-  return false;
-}
-
-void Projector::clearInfoItems() {
-  while (infoItems.size()>0) {
-    QGraphicsItem* item=infoItems.takeLast();
-    scene.removeItem(item);
-    delete item;
-  }
+ItemStore& Projector::infoItems() {
+  return infoStore;
 }
 
 Projector::ProjectionMapper::ProjectionMapper(Projector *p, QVector<Reflection> r):
@@ -161,13 +139,13 @@ Projector::ProjectionMapper::ProjectionMapper(Projector *p, QVector<Reflection> 
     nextReflection(0),
     nextUnusedPoint(0),
     mutex() {
-  if (projector->spotMarkers->coordinates.size()!=r.size())
-    projector->spotMarkers->coordinates.resize(r.size());
+  if (projector->spotIndicator->coordinates.size()!=r.size())
+    projector->spotIndicator->coordinates.resize(r.size());
   setAutoDelete(true);
 }
 
 Projector::ProjectionMapper::~ProjectionMapper() {
-  projector->spotMarkers->paintUntil = nextUnusedPoint;
+  projector->spotIndicator->paintUntil = nextUnusedPoint;
 }
 
 void Projector::ProjectionMapper::run() {
@@ -177,17 +155,15 @@ void Projector::ProjectionMapper::run() {
     QPointF p;
     const Reflection& r = reflections.at(i);
     if (projector->project(r, p)) {
-      projector->spotMarkers->coordinates[nextUnusedPoint.fetchAndAddOrdered(1)]=p;
+      projector->spotIndicator->coordinates[nextUnusedPoint.fetchAndAddOrdered(1)]=p;
 
       if (r.hklSqSum<=(projector->maxHklSqSum)) {
         QGraphicsTextItem* t = new QGraphicsTextItem();
         t->setTransform(QTransform(1,0,0,-1,0,0));
-        t->setHtml(r.toText());
+        t->setHtml(r.toHtml());
         t->setPos(p);
         QRectF r=t->boundingRect();
-        double sx=projector->textSize*projector->scene.width()/r.width();
-        double sy=projector->textSize*projector->scene.height()/r.height();
-        double s=sx<sy?sy:sx;
+        double s=projector->getTextSize()/std::min(r.width(), r.height());
         t->scale(s,s);
         mutex.lock();
         projector->textMarkerItems.append(t);
@@ -209,12 +185,12 @@ void Projector::reflectionsUpdated() {
   }
   textMarkerItems.clear();
 
-  clearInfoItems();
+  infoStore.clear();
 
-  spotMarkers->setSpotsize(spotSize);
+  spotIndicator->setSpotsize(getSpotSize());
   QThreadPool::globalInstance()->start(new ProjectionMapper(this, crystal->getReflectionList()));
   QThreadPool::globalInstance()->waitForDone();
-  spotMarkers->pointsUpdated();
+  spotIndicator->pointsUpdated();
   foreach (QGraphicsItem* item, textMarkerItems) {
     //It is not possiple to add the TextItem in the thread.
     scene.addItem(item);
@@ -303,11 +279,19 @@ int Projector::getMaxHklSqSum() const {
 }
 
 double Projector::getSpotSize() const {
-  return 100.0*spotSize;
+  return spotSizeFraction*std::min(scene.sceneRect().width(), scene.sceneRect().height());
+}
+
+double Projector::getSpotSizeFraction() const {
+  return 100.0*spotSizeFraction;
 }
 
 double Projector::getTextSize() const {
-  return 100.0*textSize;
+  return textSizeFraction*std::min(scene.sceneRect().width(), scene.sceneRect().height());
+}
+
+double Projector::getTextSizeFraction() const {
+  return 100.0*textSizeFraction;
 }
 
 bool Projector::spotsEnabled() const {
@@ -319,190 +303,92 @@ void Projector::setMaxHklSqSum(int m) {
   emit projectionParamsChanged();
 }
 
-void Projector::setTextSize(double d) {
-  textSize=0.01*d;
-  emit projectionParamsChanged();
+void Projector::setTextSizeFraction(double d) {
+  textSizeFraction=0.01*d;
+  emit textSizeChanged(getTextSize());
 }
 
-void Projector::setSpotSize(double d) {
-  spotSize=0.01*d;
-  emit projectionParamsChanged();
+void Projector::setSpotSizeFraction(double d) {
+  spotSizeFraction=0.01*d;
+  cout << "new spotsize " << d <<endl;
+  emit spotSizeChanged(getSpotSize());
 }
 
 void Projector::enableSpots(bool b) {
   showSpots=b;
-  spotMarkers->setVisible(b);
+  spotIndicator->setVisible(b);
   emit projectionParamsChanged();
 }
 
 void Projector::addSpotMarker(const QPointF& p) {
-  QRectF r(-spotSize, -spotSize, 2.0*spotSize, 2.0*spotSize);
-
-  SignalingEllipseItem* marker=new SignalingEllipseItem(imageItemsPlane);
-  marker->setFlag(QGraphicsItem::ItemIsMovable, true);
-  marker->setCursor(QCursor(Qt::SizeAllCursor));
-  marker->setPen(QPen(QColor(0xFF,0xAA,0x33)));
-  marker->setRect(r);
-  marker->setPos(det2img.map(p));
-  marker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
-  connect(marker, SIGNAL(positionChanged()), this, SIGNAL(spotMarkerChanged()));
-  spotMarkerItems.append(marker);
-  emit spotMarkerAdded();
-};
-
-void Projector::delSpotMarkerNear(const QPointF& p) {
-  if (spotMarkerItems.isEmpty())
-    return;
-  double minDist=0.0;
-  int minIdx=-1;
-  QGraphicsEllipseItem* m;
-  QPointF imgPos=det2img.map(p);
-  for (int i=0; i<spotMarkerItems.size(); i++) {
-    m=spotMarkerItems.at(i);
-    double d=hypot(imgPos.x()-m->pos().x(), imgPos.y()-m->pos().y());
-    if (i==0 or d<minDist) {
-      minDist=d;
-      minIdx=i;
-    }
-  }
-  m=spotMarkerItems.takeAt(minIdx);
-  scene.removeItem(m);
-  delete m;
-  emit spotMarkerChanged();
-};
-
-bool Projector::delSpotMarkerAt(const QPointF& p) {
-  foreach (QGraphicsEllipseItem* item, spotMarkerItems) {
-    if (item->contains(item->mapFromScene(p))) {
-      scene.removeItem(item);
-      spotMarkerItems.removeOne(item);
-      delete item;
-      emit spotMarkerChanged();
-      return true;
-    }
-  }
-  return false;
+  CircleItem* item = new CircleItem(getSpotSize(), imageItemsPlane);
+  item->setFlag(QGraphicsItem::ItemIsMovable, true);
+  item->setCursor(QCursor(Qt::SizeAllCursor));
+  item->setColor(QColor(0xFF,0xAA,0x33));
+  connect(this, SIGNAL(spotSizeChanged(double)), item, SLOT(setRadius(double)));
+  item->setPos(det2img.map(p));
+  item->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
+  spotMarkers().addItem(item);
 }
 
-
-ItemStore<SignalingEllipseItem>* Projector::spotMarker() {
+ItemStore& Projector::spotMarkers() {
   return spotMarkerStore;
 }
 
-int Projector::spotMarkerNumber() const {
-  return spotMarkerItems.size();
+QPointF Projector::getSpotMarkerDetPos(int n) {
+  return img2det.map(spotMarkers().at(n)->pos());
 }
 
-QPointF Projector::getSpotMarkerDetPos(int n) const {
-  return img2det.map(spotMarkerItems.at(n)->pos());
-}
-
-QList<Vec3D> Projector::getSpotMarkerNormals() const {
+QList<Vec3D> Projector::getSpotMarkerNormals() {
   QList<Vec3D> r;
-  foreach (QGraphicsItem* item, spotMarkerItems)
-    r << det2normal(img2det.map(item->pos()));
+  for (int i=0; i<spotMarkers().size(); i++)
+    r << det2normal(getSpotMarkerDetPos(i));
   return r;
 }
 
 // ---------------  Ruler handling ---------------------------
-int Projector::rulerNumber() const {
-  return rulerItems.size();
+ItemStore& Projector::rulers() {
+  return rulerStore;
 }
 
 void Projector::addRuler(const QPointF& p1, const QPointF& p2) {
-  RulerItem* ruler = new RulerItem(det2img.map(p1), det2img.map(p2), this, imageItemsPlane);
+  RulerItem* ruler = new RulerItem(det2img.map(p1), det2img.map(p2), getSpotSize(), imageItemsPlane);
   ruler->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
-  rulerMapper.setMapping(ruler, rulerItems.size());
-  connect(ruler, SIGNAL(rulerChanged()), &rulerMapper, SLOT(map()));
-  rulerItems << ruler;
-  emit rulerAdded();
-}
-
-bool Projector::delRulerAt(const QPointF& p) {
-  foreach (RulerItem* item, rulerItems) {
-    if (item->contains(item->mapFromScene(p))) {
-      scene.removeItem(item);
-      rulerItems.removeOne(item);
-      delete item;
-      return true;
-    }
-  }
-  return false;
-}
-
-void Projector::clearRulers() {
-  foreach (RulerItem* item, rulerItems) {
-    scene.removeItem(item);
-    delete item;
-  }
-  rulerItems.clear();
+  connect(this, SIGNAL(spotSizeChanged(double)), ruler, SLOT(setHandleSize(double)));
+  rulers().addItem(ruler);
 }
 
 QPair<QPointF, QPointF> Projector::getRulerCoordinates(int n) {
-  if (n<rulerItems.size()) {
-    return qMakePair(img2det.map(rulerItems.at(n)->getStart()), img2det.map(rulerItems.at(n)->getEnd()));
+  if (n<rulers().size()) {
+    RulerItem* ruler = dynamic_cast<RulerItem*>(rulers().at(n));
+    if (ruler)
+      return qMakePair(img2det.map(ruler->getStart()), img2det.map(ruler->getEnd()));
   }
   return QPair<QPointF, QPointF>();
 }
 
-void Projector::highlightRuler(int n, bool b) {
-  if (n<rulerItems.size()) {
-    rulerItems.at(n)->highlight(b);
-  }
-}
-
-bool Projector::rulerIsHighlighted(int n) {
-  if (n<rulerItems.size()) {
-    return rulerItems.at(n)->isHighlighted();
-  }
-  return false;
-}
-
-QVariant Projector::getRulerData(int n) {
-  if (n<rulerItems.size()) {
-    return rulerItems.at(n)->data(0);
-  }
-  return QVariant();
-}
-
-void Projector::setRulerData(int n, QVariant v) {
-  if (n<rulerItems.size()) {
-    rulerItems[n]->setData(0, v);
-  }
-}
 
 // ----------------------- Handling of Zone Markers -------------
-int Projector::zoneMarkerNumber() const {
-  return zoneMarkerItems.size();
-}
 
 void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
   ZoneItem* zoneMarker = new ZoneItem(det2img.map(p1), det2img.map(p2), this, imageItemsPlane);
   zoneMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
-  connect(this, SIGNAL(spotMarkerAdded()), zoneMarker, SLOT(updateOptimalZone()));
-  connect(this, SIGNAL(spotMarkerChanged()), zoneMarker, SLOT(updateOptimalZone()));
-  zoneMarkerItems << zoneMarker;
-  emit zoneMarkerAdded();
+  connect(&spotMarkers(), SIGNAL(itemAdded(int)), zoneMarker, SLOT(updateOptimalZone()));
+  connect(&spotMarkers(), SIGNAL(itemChanged(int)), zoneMarker, SLOT(updateOptimalZone()));
+  connect(&spotMarkers(), SIGNAL(itemRemoved(int)), zoneMarker, SLOT(updateOptimalZone()));
+  // Todo connect for update of spotsize
+  zoneMarkers().addItem(zoneMarker);
 }
 
-bool Projector::delZoneMarkerAt(const QPointF& p) {
-  foreach (ZoneItem* item, zoneMarkerItems) {
-    if (item->contains(item->mapFromScene(p))) {
-      scene.removeItem(item);
-      zoneMarkerItems.removeOne(item);
-      delete item;
-      emit spotMarkerChanged();
-      return true;
-    }
-  }
-  return false;
+ItemStore& Projector::zoneMarkers() {
+  return zoneMarkerStore;
 }
-
 
 // ------------ Handling of Crop Marker ---------------
 void Projector::showCropMarker() {
   if (cropMarker.isNull()) {
-    cropMarker = new CropMarker(this, QPointF(0.1, 0.1), 0.8, 0.8, 0.0, imageItemsPlane);
+    cropMarker = new CropMarker(QPointF(0.1, 0.1), 0.8, 0.8, 0.0, getSpotSize(), imageItemsPlane);
+    connect(this, SIGNAL(spotSizeChanged(double)), cropMarker, SLOT(setHandleSize(double)));
     cropMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
   } else {
     cropMarker->show();
@@ -510,8 +396,10 @@ void Projector::showCropMarker() {
 }
 
 void Projector::delCropMarker() {
-  if (!cropMarker.isNull())
+  if (!cropMarker.isNull()) {
+    scene.removeItem(cropMarker);
     delete cropMarker;
+  }
 }
 
 CropMarker* Projector::getCropMarker() {
@@ -534,6 +422,8 @@ void Projector::updateImgTransformations() {
     item->setTransform(t);
   }
   emit imgTransformUpdated();
+  emit spotSizeChanged(getSpotSize());
+  emit textSizeChanged(getTextSize());
 }
 
 void Projector::loadImage(QString s) {
@@ -584,7 +474,7 @@ void Projector::projector2xml(QXmlStreamWriter& w) {
     w.writeAttribute("spotsEnabled", "1");
 
   w.writeStartElement("SpotMarkers");
-  for (int n=0; n<spotMarkerNumber(); n++) {
+  for (int n=0; n<spotMarkers().size(); n++) {
     QPointF p=getSpotMarkerDetPos(n);
     w.writeEmptyElement("Spot");
     w.writeAttribute("x", QString::number(p.x()));
@@ -638,13 +528,13 @@ bool Projector::parseXMLElement(QXmlStreamReader &r) {
     return true;
   } else if (r.name()=="Display") {
     setMaxHklSqSum(getIntAttrib(r, "maxHKLSum", (int)getMaxHklSqSum()));
-    setSpotSize(getDoubleAttrib(r, "spotSize", getSpotSize()));
-    setTextSize(getDoubleAttrib(r, "textSize", getTextSize()));
+    setSpotSizeFraction(getDoubleAttrib(r, "spotSize", getSpotSize()));
+    setTextSizeFraction(getDoubleAttrib(r, "textSize", getTextSize()));
     QStringRef sr = r.attributes().value("spotsEnabled");
     enableSpots(not sr.isNull());
     return true;
   } else if (r.name()=="SpotMarkers") {
-    while (not (r.atEnd() or (r.name()=="SpotMarkers" and r.isEndElement()))) {
+    while (not (r.atEnd() or (r.name()=="crkers" and r.isEndElement()))) {
       r.readNext();
       if (r.isStartElement() and r.name()=="Spot") {
         bool b1, b2;
@@ -662,7 +552,7 @@ bool Projector::parseXMLElement(QXmlStreamReader &r) {
 
 
 
-Projector::SpotMarkerGraphicsItem::SpotMarkerGraphicsItem(): QGraphicsItem(), workerSync(0) {
+Projector::SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem(): QGraphicsItem(), workerSync(0) {
   setCacheMode(NoCache);
   cacheNeedsUpdate = true;
   cache = 0;
@@ -673,7 +563,7 @@ Projector::SpotMarkerGraphicsItem::SpotMarkerGraphicsItem(): QGraphicsItem(), wo
   }
 };
 
-Projector::SpotMarkerGraphicsItem::~SpotMarkerGraphicsItem() {
+Projector::SpotIndicatorGraphicsItem::~SpotIndicatorGraphicsItem() {
   for (int i=0; i<workers.size(); i++) {
     workers.at(i)->shouldStop=true;
   }
@@ -686,7 +576,7 @@ Projector::SpotMarkerGraphicsItem::~SpotMarkerGraphicsItem() {
   delete cache;
 }
 
-void Projector::SpotMarkerGraphicsItem::updateCache() {
+void Projector::SpotIndicatorGraphicsItem::updateCache() {
   if (cacheNeedsUpdate) {
     workN = 0;
     workerStart.wakeAll();
@@ -701,7 +591,7 @@ void Projector::SpotMarkerGraphicsItem::updateCache() {
   }
 }
 
-void Projector::SpotMarkerGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem *option, QWidget *w) {  
+void Projector::SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem *option, QWidget *w) {
 
   if (!cache || (cache->size()!=p->viewport().size())) {
     if (cache) delete cache;
@@ -724,12 +614,12 @@ void Projector::SpotMarkerGraphicsItem::paint(QPainter *p, const QStyleOptionGra
 
 }
 
-void Projector::SpotMarkerGraphicsItem::pointsUpdated() {
+void Projector::SpotIndicatorGraphicsItem::pointsUpdated() {
   cacheNeedsUpdate = true;
   prepareGeometryChange();
 }
 
-QRectF Projector::SpotMarkerGraphicsItem::boundingRect() const {
+QRectF Projector::SpotIndicatorGraphicsItem::boundingRect() const {
   if (coordinates.size()>0) {
     QRectF r(coordinates.at(0), QSizeF(0,0));
     for (int i=1; i<paintUntil; i++) {
@@ -746,37 +636,38 @@ QRectF Projector::SpotMarkerGraphicsItem::boundingRect() const {
 }
 
 
-void Projector::SpotMarkerGraphicsItem::Worker::run() {
+void Projector::SpotIndicatorGraphicsItem::Worker::run() {
   forever {
-    spotMarker->mutex.lock();
-    spotMarker->workerStart.wait(&spotMarker->mutex);
-    spotMarker->mutex.unlock();
+    spotIndicator->mutex.lock();
+    spotIndicator->workerStart.wait(&spotIndicator->mutex);
+    spotIndicator->mutex.unlock();
 
     if (shouldStop) {
-      spotMarker->workerSync.release(1);
-      delete localCache;
+      spotIndicator->workerSync.release(1);
+      if (!localCache)
+        delete localCache;
       return;
     }
 
-    double rx = spotMarker->transform.m11()*spotMarker->spotSize;
-    double ry = spotMarker->transform.m22()*spotMarker->spotSize;
+    double rx = spotIndicator->transform.m11()*spotIndicator->spotSize;
+    double ry = spotIndicator->transform.m22()*spotIndicator->spotSize;
 
 
-    if (!localCache || localCache->size()!=spotMarker->cache->size())
-      localCache = new QImage(spotMarker->cache->size(), QImage::Format_ARGB32_Premultiplied);
+    if (!localCache || localCache->size()!=spotIndicator->cache->size())
+      localCache = new QImage(spotIndicator->cache->size(), QImage::Format_ARGB32_Premultiplied);
     localCache->fill(QColor(0,0,0,0).rgba());
     QPainter painter(localCache);
-    QList<QGraphicsView*> l = spotMarker->scene()->views();
+    QList<QGraphicsView*> l = spotIndicator->scene()->views();
     if (l.size())
       painter.setRenderHints(l.at(0)->renderHints());
     painter.setPen(Qt::green);
     int i;
-    while ((i=spotMarker->workN.fetchAndAddOrdered(1))<spotMarker->paintUntil) {
-      painter.drawEllipse(spotMarker->transform.map(spotMarker->coordinates.at(i)), rx, ry);
+    while ((i=spotIndicator->workN.fetchAndAddOrdered(1))<spotIndicator->paintUntil) {
+      painter.drawEllipse(spotIndicator->transform.map(spotIndicator->coordinates.at(i)), rx, ry);
 
     }
     painter.end();
-    spotMarker->workerSync.release(1);
+    spotIndicator->workerSync.release(1);
 
   }
 

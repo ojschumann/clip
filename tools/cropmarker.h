@@ -3,18 +3,18 @@
 
 #include "tools/propagatinggraphicsobject.h"
 
-class SignalingEllipseItem;
-class Projector;
+class CircleItem;
 
 class CropMarker : public PropagatingGraphicsObject
 {
   Q_OBJECT
 public:
-  explicit CropMarker(Projector* p, const QPointF& pCenter, double _dx, double _dy, double _angle, QGraphicsItem  *parent = 0);
+  explicit CropMarker(const QPointF& pCenter, double _dx, double _dy, double _angle, double handleSize, QGraphicsItem  *parent = 0);
   QPolygonF getRect();
 signals:
 public slots:
   void promoteToRectangle() {};
+  void setHandleSize(double);
 protected slots:
 
 protected:
@@ -23,8 +23,7 @@ protected:
 
   //void setOuterHandlesFromData();
 
-  QList<SignalingEllipseItem*> handles;
-  Projector* projector;
+  QList<CircleItem*> handles;
 };
 
 #endif // CROPMARKER_H

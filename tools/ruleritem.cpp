@@ -2,29 +2,26 @@
 #include <QPainter>
 #include <QCursor>
 #include <iostream>
-#include <core/projector.h>
-#include <tools/signalingellipse.h>
+#include "tools/circleitem.h"
 
 using namespace std;
 
 
-RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* parent):
+RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, double r, QGraphicsItem* parent):
     PropagatingGraphicsObject(parent),
-    startHandle(new SignalingEllipseItem(this)),
-    endHandle(new SignalingEllipseItem(this)),
-    projector(p)
+    startHandle(new CircleItem(r, this)),
+    endHandle(new CircleItem(r,this)),
+    radius(r)
 {
   highlighted=true;
   highlight(false);
   startHandle->setPos(p1);
   endHandle->setPos(p2);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
-  QList<SignalingEllipseItem*> l;
+  QList<CircleItem*> l;
   l << startHandle << endHandle;
-  double radius = 0.01*projector->getSpotSize();
-  foreach (SignalingEllipseItem* item, l) {
-    item->setRect(-radius, -radius, 2*radius, 2*radius);
-    item->setPen(QPen(Qt::red));
+  foreach (CircleItem* item, l) {
+    item->setColor(Qt::red);
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
     connect(item, SIGNAL(positionChanged()), this, SIGNAL(rulerChanged()));
@@ -40,7 +37,6 @@ QRectF RulerItem::boundingRect() const {
 
 QPainterPath RulerItem::shape() const {
   QPainterPath path(startHandle->pos());
-  double radius = 0.01*projector->getSpotSize();
   path.addEllipse(startHandle->pos(), radius, radius);
   path.lineTo(endHandle->pos());
   path.addEllipse(endHandle->pos(), radius, radius);
@@ -53,7 +49,6 @@ void RulerItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) 
     QVector<QLineF> lines;
     QLineF l(startHandle->pos(), endHandle->pos());
 
-    double radius = 0.01*projector->getSpotSize();
 
     lines << l;
     l.setLength(0.7*radius);
@@ -98,8 +93,8 @@ void RulerItem::highlight(bool h) {
       pen = QPen(QColor(255, 128, 0));
       pen.setWidthF(0.0);
     }
-    startHandle->setPen(pen);
-    endHandle->setPen(pen);
+    //startHandle->setPen(pen);
+    //endHandle->setPen(pen);
 
     update();
   }
@@ -109,4 +104,8 @@ bool RulerItem::isHighlighted() {
   return highlighted;
 }
 
-
+void RulerItem::setHandleSize(double r) {
+  radius = r;
+  startHandle->setRadius(radius);
+  endHandle->setRadius(radius);
+}

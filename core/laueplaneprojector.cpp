@@ -2,7 +2,7 @@
 #include <cmath>
 #include <QtGui/QGraphicsEllipseItem>
 #include <QtGui/QCursor>
-#include <tools/signalingellipse.h>
+#include <tools/circleitem.h>
 #include <iostream>
 #include <ui/laueplanecfg.h>
 #include <core/reflection.h>
@@ -186,24 +186,26 @@ void LauePlaneProjector::decorateScene() {
     delete item;
   }
 
-  SignalingEllipseItem* center=new SignalingEllipseItem(-0.5*spotSize, -0.5*spotSize, spotSize, spotSize, imageItemsPlane);
+  CircleItem* center=new CircleItem(getSpotSize(), imageItemsPlane);
 
-  center->setPen(QPen(Qt::red));
+  center->setColor(Qt::red);
   center->setFlag(QGraphicsItem::ItemIsMovable, true);
   center->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
   center->setCursor(Qt::SizeAllCursor);
   center->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
 
-  QGraphicsEllipseItem* marker=new QGraphicsEllipseItem(0.1, 0.1, 0.13, 0.13, center);
-  marker->setPen(QPen(Qt::red));
+  CircleItem* marker=new CircleItem(0.1, center);
+  marker->setColor(Qt::red);
 
-  SignalingEllipseItem* handle=new SignalingEllipseItem(-0.5*spotSize, -0.5*spotSize, spotSize, spotSize, center);
-  handle->setPen(QPen(Qt::red));
-  handle->moveBy(0.1, 0);
+  CircleItem* handle=new CircleItem(getSpotSize(), center);
+  handle->setColor(Qt::red);
+  handle->setPos(0.2, 0);
   handle->setFlag(QGraphicsItem::ItemIsMovable, true);
   handle->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
   handle->setCursor(Qt::SizeAllCursor);
 
+  connect(this, SIGNAL(spotSizeChanged(double)), center, SLOT(setRadius(double)));
+  connect(this, SIGNAL(spotSizeChanged(double)), handle, SLOT(setRadius(double)));
 
   decorationItems.append(center);
   decorationItems.append(handle);
@@ -222,22 +224,20 @@ void LauePlaneProjector::resizePBMarker() {
   if (decorationItems.size()<3)
     return;
 
-  QGraphicsEllipseItem* center=dynamic_cast<QGraphicsEllipseItem*>(decorationItems[0]);
-  QGraphicsEllipseItem* handle=dynamic_cast<QGraphicsEllipseItem*>(decorationItems[1]);
-  QGraphicsEllipseItem* marker=dynamic_cast<QGraphicsEllipseItem*>(decorationItems[2]);
+  //CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
+  CircleItem* handle=dynamic_cast<CircleItem*>(decorationItems[1]);
+  CircleItem* marker=dynamic_cast<CircleItem*>(decorationItems[2]);
 
   QPointF p=handle->pos();
   double l=hypot(p.x(), p.y());
 
-  QRectF r(-l, -l, 2*l, 2*l);
-  r.moveCenter(center->rect().center());
-  marker->setRect(r);
+  marker->setRadius(l);
 }
 
 void LauePlaneProjector::movedPBMarker() {
   if (decorationItems.size()<3)
     return;
-  QGraphicsEllipseItem* center=dynamic_cast<QGraphicsEllipseItem*>(decorationItems[0]);
+  CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
   QPointF p=center->scenePos();
   QPointF p2 = center->pos();
 
@@ -262,7 +262,7 @@ void LauePlaneProjector::updatePBPos() {
     q=scattered2det(Vec3D(-1,0,0), b);
   }
   if (b and decorationItems.size()>2) {
-    SignalingEllipseItem* center=dynamic_cast<SignalingEllipseItem*>(decorationItems[0]);
+    CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
     center->setPosNoSig(det2img.map(q));
   }
 }

@@ -80,7 +80,8 @@ SOURCES += main.cpp\
     ui/mouseinfodisplay.cpp \
 #    indexing/indexer.cpp \
 #    indexing/solution.cpp \
-    tools/itemstore.cpp
+    tools/itemstore.cpp \
+    tools/circleitem.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -129,7 +130,8 @@ HEADERS  += ui/clip.h \
     ui/mouseinfodisplay.h \
 #    indexing/indexer.h \
 #    indexing/solution.h \
-    tools/itemstore.h
+    tools/itemstore.h \
+    tools/circleitem.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

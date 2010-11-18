@@ -19,6 +19,7 @@
 #include "core/reflection.h"
 #include "core/projector.h"
 #include "tools/mousepositioninfo.h"
+#include "tools/itemstore.h"
 
 // List of all projectors. Sort of a hack ;-)
 QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
@@ -131,10 +132,10 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
     }
   } else if (e->buttons()==Qt::RightButton) {
 
-    if (projector->delSpotMarkerAt(mousePressOrigin)) {
-    } else if (projector->delZoneMarkerAt(mousePressOrigin)) {
-    } else if (projector->delRulerAt(mousePressOrigin)) {
-    } else if (projector->delInfoItemAt(mousePressOrigin)) {
+    if (projector->spotMarkers().delAt(mousePressOrigin)) {
+    } else if (projector->zoneMarkers().delAt(mousePressOrigin)) {
+    } else if (projector->rulers().delAt(mousePressOrigin)) {
+    } else if (projector->infoItems().delAt(mousePressOrigin)) {
     } else {
       if (zoomSteps.size()>0)
         zoomSteps.removeLast();
@@ -153,7 +154,7 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
   cout << q.x() << "," << q.y() << endl;
 
   QPointF dp = (p-mousePressOrigin);
-  bool largeMove = hypot(dp.x(), dp.y())>0.01*projector->getSpotSize();
+  bool largeMove = hypot(dp.x(), dp.y())>projector->getSpotSize();
   if (e->buttons()==Qt::LeftButton) {
     if (ui->zoomAction->isChecked()) {
       zoomRubber->setGeometry(QRect(ui->view->mapFromScene(mousePressOrigin), ui->view->mapFromScene(p)).normalized());
@@ -188,7 +189,7 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
       Vec3D v2 = projector->det2normal(p, b2);
       Crystal* c=projector->getCrystal();
       if (c and b1 and b2) {
-        Vec3D ax=c->getLabSystamRotationAxis();
+        Vec3D ax=c->getLabSystemRotationAxis();
         v1=v1-ax*(v1*ax);
         v2=v2-ax*(v2*ax);
         v1.normalize();
@@ -211,7 +212,7 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
 void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
   QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
   QPointF dp = (p-mousePressOrigin);
-  bool largeMove = hypot(dp.x(), dp.y())>0.01*projector->getSpotSize();
+  bool largeMove = hypot(dp.x(), dp.y())>projector->getSpotSize();
   if (e->button()==Qt::LeftButton) {
     if (ui->zoomAction->isChecked()) {
       if (largeMove) zoomSteps.append(QRectF(mousePressOrigin, p).normalized());

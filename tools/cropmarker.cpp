@@ -1,21 +1,18 @@
 #include "cropmarker.h"
-#include "tools/signalingellipse.h"
+#include "tools/circleitem.h"
 #include <QPainter>
 #include <QCursor>
 #include <cmath>
-#include "core/projector.h"
 
-CropMarker::CropMarker(Projector* p, const QPointF &pCenter, double _dx, double _dy, double _angle, QGraphicsItem *parent):
-    PropagatingGraphicsObject(parent),
-    projector(p)
+CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _angle, double handleSize, QGraphicsItem *parent):
+    PropagatingGraphicsObject(parent)
 {
 
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
-  double radius = 0.01*projector->getSpotSize();
+  setHandleSize(handleSize);
   for (int i=0; i<4; i++) {
-    SignalingEllipseItem* item = new SignalingEllipseItem(this);
-    item->setRect(-radius, -radius, 2*radius, 2*radius);
-    item->setPen(QPen(Qt::black));
+    CircleItem* item = new CircleItem(handleSize, this);
+    item->setColor(Qt::black);
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
     handles << item;
@@ -27,6 +24,7 @@ CropMarker::CropMarker(Projector* p, const QPointF &pCenter, double _dx, double 
   handles[3]->setPos(0.1, 0.9);
 
 }
+
 
 /*void CropMarker::setOuterHandlesFromData() {
   double s = sin(angle);
@@ -66,7 +64,7 @@ void CropMarker::outerHandleYMoved() {
 
 QPolygonF CropMarker::getRect() {
   QPolygonF rect;
-  foreach (SignalingEllipseItem* item, handles) {
+  foreach (CircleItem* item, handles) {
     rect << item->pos();
   }
 return rect;
@@ -85,4 +83,9 @@ void CropMarker::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
 QRectF CropMarker::boundingRect() const {
   return childrenBoundingRect();
+}
+
+void CropMarker::setHandleSize(double r) {
+  foreach (CircleItem* item, handles)
+    item->setRadius(r);
 }

@@ -1,7 +1,9 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include <iostream>
 
+using namespace std;
 
 template<class T> void printRect(const T& r) {
   cout << "Rect = " << r.left() << " <-> " << r.right() << " | " << r.top() << " <-> " << r.bottom() << "  (" << r.width() << " x " << r.height() << ")" << endl;

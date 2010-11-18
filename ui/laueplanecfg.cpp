@@ -34,8 +34,8 @@ LauePlaneCfg::LauePlaneCfg(LauePlaneProjector* p, QWidget *parent) :
   l << qMakePair(ui->detDx, QByteArray(SLOT(setXOffset(double))));
   l << qMakePair(ui->detDy, QByteArray(SLOT(setYOffset(double))));
 
-  l << qMakePair(ui->detTextSize, QByteArray(SLOT(setTextSize(double))));
-  l << qMakePair(ui->detSpotSize, QByteArray(SLOT(setSpotSize(double))));
+  l << qMakePair(ui->detTextSize, QByteArray(SLOT(setTextSizeFraction(double))));
+  l << qMakePair(ui->detSpotSize, QByteArray(SLOT(setSpotSizeFraction(double))));
 
   foreach (pair, l) {
     connect(pair.first, SIGNAL(valueChanged(double)), projector, pair.second);
@@ -56,8 +56,8 @@ void LauePlaneCfg::slotSetQRange() {
 }
 
 void LauePlaneCfg::slotLoadParams() {
-  ui->detTextSize->setValue(projector->getTextSize());
-  ui->detSpotSize->setValue(projector->getSpotSize());
+  ui->detTextSize->setValue(projector->getTextSizeFraction());
+  ui->detSpotSize->setValue(projector->getSpotSizeFraction());
   ui->maxRefLabel->setValue(projector->getMaxHklSqSum());
   ui->detMinQ->setValue(projector->Qmin());
   ui->detMaxQ->setValue(projector->Qmax());

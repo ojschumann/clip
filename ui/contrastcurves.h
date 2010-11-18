@@ -2,7 +2,10 @@
 #define CONTRASTCURVES_H
 
 #include <QWidget>
-#include "core/projector.h"
+#include <QGraphicsScene>
+#include <QPointer>
+
+#include "image/laueimage.h"
 #include "tools/signalingellipse.h"
 
 class LaueImage;
@@ -19,7 +22,7 @@ class ContrastCurves : public QWidget
     Q_OBJECT
 
 public:
-    explicit ContrastCurves(Projector* p, QWidget *parent = 0);
+    explicit ContrastCurves(LaueImage* img, QWidget *parent = 0);
     ~ContrastCurves();
     void mousePressEvent(QMouseEvent *);
   public slots:
@@ -44,7 +47,7 @@ public:
     };
 
     Ui::ContrastCurves *ui;
-    QPointer<Projector> projector;
+    QPointer<LaueImage> laueImage;
     QGraphicsScene scene;
     QList<BoundedEllipse*> handleMarkers;
     QList<QGraphicsPathItem*> curves;
