@@ -56,26 +56,38 @@ public:
 };
 
 
-Crystal::Crystal(QObject* parent=NULL): QObject(parent), FitObject(), MReal(), MReziprocal(), MRot(), reflections(), connectedProjectors(this), rotationAxis(1,0,0) {
-  spaceGroup = new Spacegroup(this);
-  spaceGroup->setGroupSymbol("Pm3m");
+Crystal::Crystal(QObject* parent=NULL):
+    QObject(parent),
+    FitObject(),
+    MReal(),
+    MReziprocal(),
+    MRot(),
+    connectedProjectors(this),
+    rotationAxis(1,0,0),
+    spaceGroup(this),
+    reflections()
+{
+  spaceGroup.setGroupSymbol("Pm3m");
   internalSetCell(5.0, 5.0, 5.0, 90.0, 90.0, 90.0);
   Qmin=0.0;
   Qmax=1.0;
   predictionFactor = 1.0;
   connect(&connectedProjectors, SIGNAL(objectAdded()), this, SLOT(updateWavevectorsFromProjectors()));
   connect(&connectedProjectors, SIGNAL(objectRemoved()), this, SLOT(updateWavevectorsFromProjectors()));
-  connect(spaceGroup, SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
-  connect(spaceGroup, SIGNAL(triclinHtoR()), this, SLOT(convertHtoR()));
-  connect(spaceGroup, SIGNAL(triclinRtoH()), this, SLOT(convertRtoH()));
-  connect(spaceGroup, SIGNAL(groupChanged()),this, SLOT(renewReflections()));
+  connect(&spaceGroup, SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
+  connect(&spaceGroup, SIGNAL(triclinHtoR()), this, SLOT(convertHtoR()));
+  connect(&spaceGroup, SIGNAL(triclinRtoH()), this, SLOT(convertRtoH()));
+  connect(&spaceGroup, SIGNAL(groupChanged()),this, SLOT(generateReflections()));
+  connect(&updateWatcher, SIGNAL(finished()), this, SIGNAL(reflectionsUpdate()));
   axisType=LabSystem;
   enableUpdate();
+  reflectionUpdateRunning = false;
+  restartReflectionUpdate = false;
+  generateReflections();
 }
 
 Crystal::Crystal(const Crystal& c) {
-  spaceGroup = new Spacegroup(this);
-  spaceGroup->setGroupSymbol(c.spaceGroup->groupSymbol());
+  spaceGroup.setGroupSymbol(c.spaceGroup.groupSymbol());
   internalSetCell(c.a,c.b,c.c,c.alpha,c.beta,c.gamma);
   Qmin=c.Qmin;
   Qmax=c.Qmax;
@@ -86,6 +98,8 @@ Crystal::Crystal(const Crystal& c) {
   setRotation(c.getRotationMatrix());
   setRotationAxis(c.getRotationAxis(), c.getRotationAxisType());
   enableUpdate(c.updateEnabled);
+  reflectionUpdateRunning = false;
+  restartReflectionUpdate = false;
 }
 
 Crystal::~Crystal() {}
@@ -100,7 +114,7 @@ void Crystal::setCell(double _a, double _b, double _c, double _alpha, double _be
 
 void Crystal::setCell(QList<double> cell) {
   if (cell.size()!=6) return;
-  QList<int> constrains = spaceGroup->getConstrains();
+  QList<int> constrains = spaceGroup.getConstrains();
   for (int i=0; i<6; i++) {
     if (constrains[i]>0) cell[i]=constrains[i];
     if (constrains[i]<0) cell[i]=cell[-constrains[i]-1];
@@ -127,9 +141,6 @@ void Crystal::internalSetCell(double _a, double _b, double _c, double _alpha, do
   beta=_beta;
   gamma=_gamma;
 
-  // Clear old reflections, will be automatically regenerated if needed
-  reflections.clear();
-
   // Cosini und Sini of angles between lattice vectors
   double Ca=cos(M_PI/180.0*alpha);
   double Cb=cos(M_PI/180.0*beta);
@@ -155,12 +166,7 @@ void Crystal::internalSetCell(double _a, double _b, double _c, double _alpha, do
   bstar=MReziprocal[1];
   cstar=MReziprocal[2];
   emit cellChanged();
-  emit reflectionsUpdate();
-}
-
-void Crystal::renewReflections() {
-  reflections.clear();
-  emit reflectionsUpdate();
+  generateReflections();
 }
 
 void Crystal::addRotation(const Vec3D& axis, double angle) {
@@ -172,36 +178,47 @@ void Crystal::addRotation(const Mat3D& M) {
   MRot.orthogonalize();
   updateRotation();
   emit orientationChanged();
-  emit reflectionsUpdate();
 }
 
 void Crystal::setRotation(const Mat3D& M) {
   MRot = M;
   updateRotation();
   emit orientationChanged();
-  emit reflectionsUpdate();
 }
 
 void Crystal::setWavevectors(double _Qmin, double _Qmax) {
   if ((_Qmin<_Qmax) and ((_Qmin!=Qmin) or (_Qmax!=Qmax))) {
     Qmax=_Qmax;
     Qmin=_Qmin;
-    renewReflections();
+    generateReflections();
   }
 }
 
-Crystal::GenerateReflection::GenerateReflection(Crystal *_c, int _hMax):
+Crystal::GenerateReflection::GenerateReflection(Crystal *_c):
     c(_c),
-    hMax(_hMax),
-    aktualH(-_hMax) {
+    sg(c->spaceGroup)
+{
   setAutoDelete(true);
   reflectionNumber = 0;
-
+  astar = c->astar;
+  bstar = c->bstar;
+  cstar = c->cstar;
+  MReziprocal = c->MReziprocal;
+  Qmax = c->Qmax;
+  // Qmax =2*pi/lambda_min
+  // n*lambda=2*d*sin(theta) => n_max=2*d/lambda = Qmax*d/pi
+  hMax = int(M_1_PI*c->a*Qmax);;
+  aktualH = -hMax;
+  // predicted number of reflections
+  prediction = 4.0/3.0*M_1_PI*M_1_PI*Qmax*Qmax*Qmax*c->MReal.det();
+  reflections.resize(int(1.1*c->predictionFactor*prediction));
 }
 
 Crystal::GenerateReflection::~GenerateReflection() {  
-  c->reflections.resize(reflectionNumber);
-  QMetaObject::invokeMethod(c, "setReflections", Qt::QueuedConnection, Q_ARG(QList<Reflection>, reflection));
+  reflections.resize(reflectionNumber);
+  QMetaObject::invokeMethod(c, "setReflections", Qt::QueuedConnection,
+                            Q_ARG(QVector<Reflection>, reflections),
+                            Q_ARG(double, prediction));
 }
 
 void Crystal::GenerateReflection::run() {
@@ -215,10 +232,10 @@ void Crystal::GenerateReflection::run() {
 
     //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
     // k^2 +2*k*h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
-    double ns = 1.0/c->bstar.norm_sq();
-    double p = c->astar*c->bstar*ns*h;
-    double q1 = c->astar.norm_sq()*ns*h*h;
-    double q2 = M_1_PI*M_1_PI*ns*c->Qmax*c->Qmax;
+    double ns = 1.0/bstar.norm_sq();
+    double p = astar*bstar*ns*h;
+    double q1 = astar.norm_sq()*ns*h*h;
+    double q2 = M_1_PI*M_1_PI*ns*Qmax*Qmax;
     double s = p*p-q1+q2;
     int kMin = (s>0)?int(-p-sqrt(s)):0;
     int kMax = (s>0)?int(-p+sqrt(s)):0;
@@ -227,11 +244,11 @@ void Crystal::GenerateReflection::run() {
 
       int hk_ggt = ggt(h,k);
 
-      Vec3D v = c->MReziprocal*Vec3D(h,k,0);
-      ns = 1.0/c->cstar.norm_sq();
-      p = v*c->cstar*ns;
+      Vec3D v = MReziprocal*Vec3D(h,k,0);
+      ns = 1.0/cstar.norm_sq();
+      p = v*cstar*ns;
       q1 = v.norm_sq()*ns;
-      q2 = M_1_PI*M_1_PI*ns*c->Qmax*c->Qmax;
+      q2 = M_1_PI*M_1_PI*ns*Qmax*Qmax;
       s = p*p-q1+q2;
       int lMin = (s>0)?int(-p-sqrt(s)):0;
       int lMax = (s>0)?int(-p+sqrt(s)):0;
@@ -239,7 +256,7 @@ void Crystal::GenerateReflection::run() {
       for (int l=lMin; l<=lMax; l++) {
         // store only lowest order reflections
         if (ggt(hk_ggt, l)==1) {
-          v=c->MReziprocal*Vec3D(h,k,l);
+          v=MReziprocal*Vec3D(h,k,l);
           double Q = 2.0*M_PI*v.norm();
 
           Reflection r;
@@ -249,17 +266,17 @@ void Crystal::GenerateReflection::run() {
           r.hklSqSum=h*h+k*k+l*l;
           r.Q=Q;
           r.d = 2.0*M_PI/Q;
-          for (int i=1; i<=int(M_1_PI*c->Qmax*r.d+0.9); i++) {
-            if (!c->spaceGroup->isExtinct(TVec3D<int>(i*h, i*k, i*l)))
+          for (int i=1; i<=int(M_1_PI*Qmax*r.d+0.9); i++) {
+            if (!sg.isExtinct(TVec3D<int>(i*h, i*k, i*l)))
               r.orders.push_back(i);
           }
           if (r.orders.size()>0) {
             r.normalLocal=v*r.d;
             updateRef(r);
             mutex.lock();
-            if (reflectionNumber>=c->reflections.size())
-              c->reflections.resize(int(1.2*reflectionNumber));
-            c->reflections[reflectionNumber] = r;
+            if (reflectionNumber>=reflections.size())
+              reflections.resize(int(1.2*reflectionNumber));
+            reflections[reflectionNumber] = r;
             reflectionNumber++;
             mutex.unlock();
           }
@@ -274,32 +291,37 @@ void Crystal::GenerateReflection::run() {
 void Crystal::generateReflections() {
   if (not updateEnabled)
     return;
-  // Qmax =2*pi/lambda_min
-  // n*lambda=2*d*sin(theta) => n_max=2*d/lambda = Qmax*d/pi
-  int hMax = int(M_1_PI*a*Qmax);
+  if (reflectionUpdateRunning) {
+    restartReflectionUpdate = true;
+  } else {
+    reflectionUpdateRunning = true;
+    cout << "Start " << QThread::currentThreadId() << endl;
+    QThreadPool::globalInstance()->start(new GenerateReflection(this));
+  }
+}
 
-  // predicted number of reflections
-  double prediction = 4.0/3.0*M_1_PI*M_1_PI*Qmax*Qmax*Qmax*MReal.det();
-
-
-  reflections.resize(int(1.1*predictionFactor*prediction));
-  QTime t1(QTime::currentTime());
-  QThreadPool::globalInstance()->start(new GenerateReflection(this, hMax));
-  QThreadPool::globalInstance()->waitForDone();
-
-  int N = reflections.size();
-
+void Crystal::setReflections(QVector<Reflection> r, double prediction) {
+  cout << "done " << QThread::currentThreadId() << endl;
+  reflections = r;
   predictionFactor *= 0.8;
-  predictionFactor += 0.2*(N/prediction);
-
-  int dt = t1.msecsTo(QTime::currentTime());
-  emit info(QString("%1 reflections generated in %2ms (%3 r/ms)  %4 %5 %6 %7").arg(N).arg(dt).arg(1.0*N/dt).arg(predictionFactor*prediction).arg(N/predictionFactor/prediction).arg(MReziprocal.det()).arg(predictionFactor), 0);
-
+  predictionFactor += 0.2*(reflections.size()/prediction);
+  reflectionUpdateRunning = false;
+  if (restartReflectionUpdate) {
+    restartReflectionUpdate = false;
+    generateReflections();
+  }
+  emit reflectionsUpdate();
 }
 
 
+Crystal::UpdateRef::UpdateRef(Crystal *c) {
+  MRot = c->MRot;
+  Qmin = c->Qmin;
+  Qmax = c->Qmax;
+}
+
 void Crystal::UpdateRef::operator()(Reflection &r) {
-  r.normal=c->MRot*r.normalLocal;
+  r.normal=MRot*r.normalLocal;
   r.lowestDiffOrder=0;
   r.highestDiffOrder=0;
 
@@ -311,9 +333,9 @@ void Crystal::UpdateRef::operator()(Reflection &r) {
     // Loop over higher orders
 
     int j=0;
-    while (j<r.orders.size() && r.orders[j]*r.Qscatter<2.0*c->Qmin) j++;
-    if (j<r.orders.size() && r.orders[j]*r.Qscatter>=2.0*c->Qmin) r.lowestDiffOrder=r.orders[j];
-    while (j<r.orders.size() && r.orders[j]*r.Qscatter<=2.0*c->Qmax) {
+    while (j<r.orders.size() && r.orders[j]*r.Qscatter<2.0*Qmin) j++;
+    if (j<r.orders.size() && r.orders[j]*r.Qscatter>=2.0*Qmin) r.lowestDiffOrder=r.orders[j];
+    while (j<r.orders.size() && r.orders[j]*r.Qscatter<=2.0*Qmax) {
       r.highestDiffOrder=r.orders[j];
       j++;
     }
@@ -327,8 +349,9 @@ void Crystal::UpdateRef::operator()(Reflection &r) {
 void Crystal::updateRotation() {
   if (not updateEnabled)
     return;
-
-  QtConcurrent:: blockingMap(reflections, UpdateRef(this));
+  if (updateWatcher.isRunning())
+    updateWatcher.cancel();
+  updateWatcher.setFuture(QtConcurrent::map(reflections, UpdateRef(this)));
 }
 
 
@@ -368,8 +391,10 @@ Reflection Crystal::getClosestReflection(const Vec3D& normal) {
 
 
 QVector<Reflection> Crystal::getReflectionList() {
-  if (reflections.empty())
-    generateReflections();
+  if (updateWatcher.isRunning()) {
+    cout << "Reflectionsupdate running";
+    updateWatcher.waitForFinished();
+  }
   return reflections;
 }
 
@@ -471,7 +496,7 @@ QList<double> Crystal::getCell() {
 }
 
 Spacegroup* Crystal::getSpacegroup() {
-  return spaceGroup;
+  return &spaceGroup;
 }
 
 void Crystal::enableUpdate(bool b) {
@@ -513,7 +538,7 @@ void Crystal::fitParameterSetValue(int n, double val) {
 
 void Crystal::fitParameterSetEnabled(int n, bool enable) {
   int nDist=0;
-  QList<int> spacegroupConstrains = spaceGroup->getConstrains();
+  QList<int> spacegroupConstrains = spaceGroup.getConstrains();
   for (int i=0; i<3; i++) {
     if (spacegroupConstrains[i]==0)
       nDist++;
@@ -557,7 +582,7 @@ void Crystal::setEulerAngles(double omega, double chi, double phi) {
 void Crystal::slotSetSGConstrains() {
   setCell(getCell());
 
-  QList<int> constrains = spaceGroup->getConstrains();
+  QList<int> constrains = spaceGroup.getConstrains();
 
   QList<QString> fitParameterTempNames;
   fitParameterTempNames << "b" << "c" << "alpha" << "beta" << "gamma";

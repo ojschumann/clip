@@ -81,7 +81,9 @@ SOURCES += main.cpp\
 #    indexing/indexer.cpp \
 #    indexing/solution.cpp \
     tools/itemstore.cpp \
-    tools/circleitem.cpp
+    tools/circleitem.cpp \
+    tools/projectionmapper.cpp \
+    tools/spotindicatorgraphicsitem.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -131,7 +133,9 @@ HEADERS  += ui/clip.h \
 #    indexing/indexer.h \
 #    indexing/solution.h \
     tools/itemstore.h \
-    tools/circleitem.h
+    tools/circleitem.h \
+    tools/projectionmapper.h \
+    tools/spotindicatorgraphicsitem.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

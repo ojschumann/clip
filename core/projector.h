@@ -18,11 +18,13 @@
 #include <QSignalMapper>
 #include <QRunnable>
 #include <QMutex>
+#include <QFutureWatcher>
 
 #include <core/fitobject.h>
 #include <tools/vec3D.h>
 #include <tools/mat3D.h>
 #include "tools/itemstore.h"
+#include "tools/projectionmapper.h"
 
 class Crystal;
 class Reflection;
@@ -30,9 +32,12 @@ class RulerItem;
 class ZoneItem;
 class CropMarker;
 class LaueImage;
+class SpotIndicatorGraphicsItem;
+
 
 class Projector: public QObject, public FitObject {
   Q_OBJECT
+  friend class ProjectionMapper;
 public:
   Projector(QObject* parent=0);
   ~Projector();
@@ -106,6 +111,7 @@ public slots:
   void connectToCrystal(Crystal *);
 
   // Set Wavevectors. Note that the Value is 1/lambda, not 2*pi/lambda
+  // Still valid???
   void setWavevectors(double Qmin, double Qmax);
   void reflectionsUpdated();
 
@@ -124,7 +130,6 @@ public slots:
 
   void loadImage(QString);
   void closeImage();
-
 
   virtual void doImgRotation(const QTransform&);
 signals:
@@ -173,67 +178,13 @@ protected:
   QGraphicsPixmapItem* imageItemsPlane;
   LaueImage* imageData;
 
-  class ProjectionMapper: public QRunnable {
-  public:
-    ProjectionMapper(Projector* p, QVector<Reflection> r);
-    ~ProjectionMapper();
-    void run();
-  private:
-    Projector* projector;
-    QVector<Reflection> reflections;
-    QAtomicInt nextReflection;
-    QAtomicInt nextUnusedPoint;
-    QMutex mutex;
-  };
 
-  class SpotIndicatorGraphicsItem: public QGraphicsItem {
-  public:
-    SpotIndicatorGraphicsItem();
-    ~SpotIndicatorGraphicsItem();
-  private:
-    SpotIndicatorGraphicsItem(const SpotIndicatorGraphicsItem&);
-  public:
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    virtual QRectF boundingRect() const;
-
-    void setSpotsize(double s) { spotSize = s; cacheNeedsUpdate=true; }
-    void pointsUpdated();
-    QVector<QPointF> coordinates;
-    int paintUntil;
-  protected:
-    bool cacheNeedsUpdate;
-    void updateCache();
-
-    QPixmap* cache;
-    double spotSize;
-    QTransform transform;
-
-    QMutex mutex;
-    QWaitCondition workerStart;
-    QSemaphore workerSync;
-    QAtomicInt workN;
-
-    class Worker: public QThread {
-    public:
-      Worker(SpotIndicatorGraphicsItem* s, int t):
-          spotIndicator(s),
-          threadNr(t),
-          localCache(0),
-          shouldStop(false) {}
-      void run();
-      SpotIndicatorGraphicsItem* spotIndicator;
-      int threadNr;
-      QImage* localCache;
-      bool shouldStop;
-    private:
-      Worker(const Worker&) {};
-    };
-    QList<Worker*> workers;
-  };
-
+  ProjectionMapper projectionMapper;
   SpotIndicatorGraphicsItem* spotIndicator;
-    protected slots:
+
+protected slots:
   virtual void updateImgTransformations();
+  void reflectionsMapped(QList<QPointF>, QList<QGraphicsItem*>);
 protected:
   void internalSetWavevectors(double, double);
 private:
@@ -242,5 +193,8 @@ private:
 
 double getDoubleAttrib(QXmlStreamReader &r, QString name, double def);
 int getIntAttrib(QXmlStreamReader &r, QString name, double def);
+
+Q_DECLARE_METATYPE(QVector<QPointF>);
+Q_DECLARE_METATYPE(QList<QGraphicsItem*>);
 
 #endif

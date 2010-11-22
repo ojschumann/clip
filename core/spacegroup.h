@@ -28,7 +28,8 @@ public:
   Q_DECLARE_FLAGS(System, Systems)
 
 
-  Spacegroup(QObject*);
+  Spacegroup(QObject* parent=0);
+  Spacegroup(const Spacegroup&);
   bool setGroupSymbol(QString);
 
   QString groupSymbol() const;

@@ -12,6 +12,7 @@
 #include <QThreadPool>
 #include <QtConcurrentMap>
 #include <QGraphicsView>
+#include <QMetaObject>
 
 #include "tools/circleitem.h"
 #include "tools/ruleritem.h"
@@ -20,6 +21,7 @@
 #include "core/reflection.h"
 #include "core/crystal.h"
 #include "image/laueimage.h"
+#include "tools/spotindicatorgraphicsitem.h"
 
 using namespace std;
 
@@ -35,6 +37,7 @@ Projector::Projector(QObject *parent):
     scene(this),
     imageItemsPlane(new QGraphicsPixmapItem()),
     imageData(0),
+    projectionMapper(this),
     spotIndicator(new SpotIndicatorGraphicsItem())
 {
   imageItemsPlane->setFlag(QGraphicsItem::ItemIsMovable, false);
@@ -59,9 +62,10 @@ Projector::Projector(QObject *parent):
   QTimer::singleShot(0, this, SLOT(decorateScene()));
   connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
+  connect(&projectionMapper, SIGNAL(mapFinished(QList<QPointF>,QList<QGraphicsItem*>)), this, SLOT(reflectionsMapped(QList<QPointF>,QList<QGraphicsItem*>)));
 };
 
-Projector::Projector(const Projector &p): QObject() { }
+Projector::Projector(const Projector &p): QObject(), projectionMapper(this) { }
 
 Projector::~Projector() {
 }
@@ -133,71 +137,32 @@ ItemStore& Projector::infoItems() {
   return infoStore;
 }
 
-Projector::ProjectionMapper::ProjectionMapper(Projector *p, QVector<Reflection> r):
-    projector(p),
-    reflections(r),
-    nextReflection(0),
-    nextUnusedPoint(0),
-    mutex() {
-  if (projector->spotIndicator->coordinates.size()!=r.size())
-    projector->spotIndicator->coordinates.resize(r.size());
-  setAutoDelete(true);
-}
-
-Projector::ProjectionMapper::~ProjectionMapper() {
-  projector->spotIndicator->paintUntil = nextUnusedPoint;
-}
-
-void Projector::ProjectionMapper::run() {
-  QThreadPool::globalInstance()->tryStart(this);
-  int i;
-  while ((i=nextReflection.fetchAndAddAcquire(1))<reflections.size()) {
-    QPointF p;
-    const Reflection& r = reflections.at(i);
-    if (projector->project(r, p)) {
-      projector->spotIndicator->coordinates[nextUnusedPoint.fetchAndAddOrdered(1)]=p;
-
-      if (r.hklSqSum<=(projector->maxHklSqSum)) {
-        QGraphicsTextItem* t = new QGraphicsTextItem();
-        t->setTransform(QTransform(1,0,0,-1,0,0));
-        t->setHtml(r.toHtml());
-        t->setPos(p);
-        QRectF r=t->boundingRect();
-        double s=projector->getTextSize()/std::min(r.width(), r.height());
-        t->scale(s,s);
-        mutex.lock();
-        projector->textMarkerItems.append(t);
-        mutex.unlock();
-      }
-
-    }
-  }
-}
-
 
 void Projector::reflectionsUpdated() {
   if (crystal.isNull() or not projectionEnabled)
     return;
+  projectionMapper.start();
+}
 
+void Projector::reflectionsMapped(QList<QPointF> coordinates, QList<QGraphicsItem*> textItems) {
   foreach (QGraphicsItem* item, textMarkerItems) {
     scene.removeItem(item);
     delete item;
   }
   textMarkerItems.clear();
-
-  infoStore.clear();
-
-  spotIndicator->setSpotsize(getSpotSize());
-  QThreadPool::globalInstance()->start(new ProjectionMapper(this, crystal->getReflectionList()));
-  QThreadPool::globalInstance()->waitForDone();
-  spotIndicator->pointsUpdated();
-  foreach (QGraphicsItem* item, textMarkerItems) {
-    //It is not possiple to add the TextItem in the thread.
+  cout << "textitems: " << textItems.size() << " spots: " << coordinates.size() << endl;
+  foreach (QGraphicsItem* item, textItems) {
     scene.addItem(item);
+    textMarkerItems << item;
   }
+  spotIndicator->setSpotsize(getSpotSize());
+  spotIndicator->coordinates.clear();
+  spotIndicator->coordinates.reserve(coordinates.size());
+  foreach (QPointF p, coordinates) spotIndicator->coordinates << p;
+  spotIndicator->paintUntil = spotIndicator->coordinates.size();
+  spotIndicator->pointsUpdated();
   emit projectedPointsUpdated();
 }
-
 
 Vec3D Projector::normal2scattered(const Vec3D &v) {
   double x=v.x();
@@ -552,123 +517,7 @@ bool Projector::parseXMLElement(QXmlStreamReader &r) {
 
 
 
-Projector::SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem(): QGraphicsItem(), workerSync(0) {
-  setCacheMode(NoCache);
-  cacheNeedsUpdate = true;
-  cache = 0;
-  for (int i=0; i<QThread::idealThreadCount(); i++) {
-    Worker* w = new Worker(this, i);
-    w->start();
-    workers << w;
-  }
-};
 
-Projector::SpotIndicatorGraphicsItem::~SpotIndicatorGraphicsItem() {
-  for (int i=0; i<workers.size(); i++) {
-    workers.at(i)->shouldStop=true;
-  }
-  workerStart.wakeAll();
-  workerSync.acquire(workers.size());
-  for (int i=0; i<workers.size(); i++) {
-    delete workers[i];
-  }
-  workers.clear();
-  delete cache;
-}
+int QPointFVector_ID = qRegisterMetaType<QVector<QPointF> >("QVector<QPointF>");
+int QGraphicsItemList_ID = qRegisterMetaType<QList<QGraphicsItem*> >("QList<QGraphicsItem*>");
 
-void Projector::SpotIndicatorGraphicsItem::updateCache() {
-  if (cacheNeedsUpdate) {
-    workN = 0;
-    workerStart.wakeAll();
-    cache->fill(QColor(0,0,0,0));
-    workerSync.acquire(workers.size());
-
-    QPainter p2(cache);
-    foreach (Worker* worker, workers) {
-      p2.drawImage(QPoint(0,0), *worker->localCache);
-    }
-    cacheNeedsUpdate=false;
-  }
-}
-
-void Projector::SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem *option, QWidget *w) {
-
-  if (!cache || (cache->size()!=p->viewport().size())) {
-    if (cache) delete cache;
-    cache = new QPixmap(p->viewport().size());
-    cacheNeedsUpdate = true;
-  }
-
-  if (transform!=p->worldTransform()) {
-    transform = p->worldTransform();
-    cacheNeedsUpdate = true;
-  }
-
-  updateCache();
-
-  p->save();
-  p->resetTransform();
-  p->drawPixmap(QPoint(0,0), *cache);
-  p->restore();
-
-
-}
-
-void Projector::SpotIndicatorGraphicsItem::pointsUpdated() {
-  cacheNeedsUpdate = true;
-  prepareGeometryChange();
-}
-
-QRectF Projector::SpotIndicatorGraphicsItem::boundingRect() const {
-  if (coordinates.size()>0) {
-    QRectF r(coordinates.at(0), QSizeF(0,0));
-    for (int i=1; i<paintUntil; i++) {
-      QPointF p(coordinates.at(i));
-      r.setLeft(qMin(p.x(), r.left()));
-      r.setRight(qMax(p.x(), r.right()));
-      r.setTop(qMin(p.y(), r.top()));
-      r.setBottom(qMax(p.y(), r.bottom()));
-    }
-    return r;
-  } else {
-    return QRectF();
-  }
-}
-
-
-void Projector::SpotIndicatorGraphicsItem::Worker::run() {
-  forever {
-    spotIndicator->mutex.lock();
-    spotIndicator->workerStart.wait(&spotIndicator->mutex);
-    spotIndicator->mutex.unlock();
-
-    if (shouldStop) {
-      spotIndicator->workerSync.release(1);
-      if (!localCache)
-        delete localCache;
-      return;
-    }
-
-    double rx = spotIndicator->transform.m11()*spotIndicator->spotSize;
-    double ry = spotIndicator->transform.m22()*spotIndicator->spotSize;
-
-
-    if (!localCache || localCache->size()!=spotIndicator->cache->size())
-      localCache = new QImage(spotIndicator->cache->size(), QImage::Format_ARGB32_Premultiplied);
-    localCache->fill(QColor(0,0,0,0).rgba());
-    QPainter painter(localCache);
-    QList<QGraphicsView*> l = spotIndicator->scene()->views();
-    if (l.size())
-      painter.setRenderHints(l.at(0)->renderHints());
-    painter.setPen(Qt::green);
-    int i;
-    while ((i=spotIndicator->workN.fetchAndAddOrdered(1))<spotIndicator->paintUntil) {
-      painter.drawEllipse(spotIndicator->transform.map(spotIndicator->coordinates.at(i)), rx, ry);
-
-    }
-    painter.end();
-    spotIndicator->workerSync.release(1);
-
-  }
-
-}

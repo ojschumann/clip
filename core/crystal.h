@@ -7,13 +7,14 @@
 #include <tools/mat3D.h>
 #include <tools/objectstore.h>
 #include <core/fitobject.h>
-
+#include "core/spacegroup.h"
+#include "core/reflection.h"
 #include <QFuture>
+#include <QFutureWatcher>
 #include <QMutex>
 
 class Projector;
-class Reflection;
-class Spacegroup;
+
 
 class Crystal: public QObject, public FitObject {
   Q_OBJECT
@@ -28,7 +29,6 @@ public:
   Crystal(const Crystal &);
   ~Crystal();
 
-  void generateReflections();
   void updateRotation();
 
   int reflectionCount();
@@ -77,12 +77,12 @@ public slots:
   void updateWavevectorsFromProjectors();
   void setRotationAxis(const Vec3D& axis, RotationAxisType type=LabSystem);
   void slotSetSGConstrains();
-  void renewReflections();
+  void generateReflections();
 
 private slots:
   void convertHtoR();
   void convertRtoH();
-  void setReflections(QList<Reflections>);
+  void setReflections(QVector<Reflection>, double);
 
 signals:
   void cellChanged();
@@ -120,17 +120,18 @@ private:
   RotationAxisType axisType;
 
   // Spacegroup, handles sys absents
-  Spacegroup* spaceGroup;
+  Spacegroup spaceGroup;
 
   // List of Reflections
   QVector<Reflection> reflections;
-  // Lock for ReflectionList
-  QMutex reflectionLock;
   // Flag, that indicates an running update of the reflection list.
   bool reflectionUpdateRunning;
+  // flag to restart immediately
+  bool restartReflectionUpdate;
   // Factor for ab initio prediction of the number of reflections.
   double predictionFactor;
 
+  QFutureWatcher<void> updateWatcher;
 
   bool updateEnabled;
 
@@ -138,17 +139,19 @@ private:
   // update of Reflection Parameters depending on rotation
   class UpdateRef {
   public:
-    UpdateRef(Crystal* _c): c(_c) {};
+    UpdateRef(Crystal* _c);
     void operator()(Reflection&);
-        private:
-    Crystal* c;
+  private:
+    Mat3D MRot;
+    double Qmin;
+    double Qmax;
   };
 
   // Runnable, that performes the
   // generation of reflections
   class GenerateReflection: public QRunnable {
   public:
-    GenerateReflection(Crystal*, int);
+    GenerateReflection(Crystal*);
     ~GenerateReflection();
     void run();
   private:
@@ -157,16 +160,22 @@ private:
     int hMax;
     QAtomicInt aktualH;
     int reflectionNumber;
-    QMutex localMutex;
-
+    QMutex mutex;
+    Vec3D astar;
+    Vec3D bstar;
+    Vec3D cstar;
+    Mat3D MReziprocal;
+    double Qmax;
+    double prediction;
+    Spacegroup sg;
   };
 
 
 };
 
-struct CrystalPointer {
-  Crystal* data;
-};
+//struct CrystalPointer {
+//  Crystal* data;
+//};
 
 
 Q_DECLARE_METATYPE(Crystal*)

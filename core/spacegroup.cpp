@@ -24,7 +24,7 @@ QStringList Spacegroup::SpacegroupCheck::elements() {
 
 
 
-Spacegroup::Spacegroup(QObject* parent=NULL): QObject(parent), groups() {
+Spacegroup::Spacegroup(QObject* parent): QObject(parent), groups() {
   groups << SpacegroupCheck(   triclinic,    "1", "([PABCIF])(1)");
   groups << SpacegroupCheck(   triclinic,   "-1", "([PABCIF])(-1)");
 
@@ -64,6 +64,15 @@ Spacegroup::Spacegroup(QObject* parent=NULL): QObject(parent), groups() {
   groups << SpacegroupCheck(       cubic,  "m3m", "([PIF])([mnabcd])(-?3)([mnabcd])");
 
   setGroupSymbol("P1");
+}
+
+Spacegroup::Spacegroup(const Spacegroup &o) {
+  symbol = o.symbol;
+  symbolElements = o.symbolElements;
+  crystalsystem = o.crystalsystem;
+  groups = o.groups;
+  pointgroup = o.pointgroup;
+  extinctionChecks = o.extinctionChecks;
 }
 
 bool Spacegroup::setGroupSymbol(QString s) {

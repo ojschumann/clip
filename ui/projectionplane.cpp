@@ -148,11 +148,6 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
 void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
   QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
 
-  cout << "Mouse pos: " << e->pos().x() << "," << e->pos().y() << " = ";
-  cout << p.x() << "," << p.y() << " = ";
-  QPointF q = projector->det2img.map(p);
-  cout << q.x() << "," << q.y() << endl;
-
   QPointF dp = (p-mousePressOrigin);
   bool largeMove = hypot(dp.x(), dp.y())>projector->getSpotSize();
   if (e->buttons()==Qt::LeftButton) {
