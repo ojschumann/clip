@@ -759,7 +759,7 @@
   </connection>
   <connection>
    <sender>actionIndex</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>CrystalDisplay</receiver>
    <slot>slotStartIndexing()</slot>
    <hints>
