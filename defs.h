@@ -12,4 +12,16 @@ extern const char* HG_REPRO_DATE;
 extern const char* BUILD_DATE;
 extern const char* BUILD_TIME;
 
+static inline unsigned long long rdtsctime()
+{
+     unsigned int eax, edx;
+     unsigned long long val;
+     __asm__ __volatile__("cpuid": : : "ax", "bx", "cx", "dx");
+     __asm__ __volatile__("rdtsc":"=a"(eax), "=d"(edx));
+     val = edx;
+     val = val << 32;
+     val += eax;
+     return val;
+}
+
 #endif // DEFS_H

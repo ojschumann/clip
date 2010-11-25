@@ -18,13 +18,11 @@
 #include <QSignalMapper>
 #include <QRunnable>
 #include <QMutex>
-#include <QFutureWatcher>
 
 #include <core/fitobject.h>
 #include <tools/vec3D.h>
 #include <tools/mat3D.h>
 #include "tools/itemstore.h"
-#include "tools/projectionmapper.h"
 
 class Crystal;
 class Reflection;
@@ -37,7 +35,6 @@ class SpotIndicatorGraphicsItem;
 
 class Projector: public QObject, public FitObject {
   Q_OBJECT
-  friend class ProjectionMapper;
 public:
   Projector(QObject* parent=0);
   ~Projector();
@@ -179,12 +176,10 @@ protected:
   LaueImage* imageData;
 
 
-  ProjectionMapper projectionMapper;
   SpotIndicatorGraphicsItem* spotIndicator;
 
 protected slots:
   virtual void updateImgTransformations();
-  void reflectionsMapped(QList<QPointF>, QList<QGraphicsItem*>);
 protected:
   void internalSetWavevectors(double, double);
 private:

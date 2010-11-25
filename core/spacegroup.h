@@ -86,6 +86,7 @@ private:
   QList<ExtinctionElement> extinctionChecks;
 
   void generatePointgroup();
+  void addToPointgroup(const PointgroupElement&);
 
   /*struct PGElem{
         Mat3D R;

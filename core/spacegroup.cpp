@@ -186,52 +186,50 @@ bool Spacegroup::isExtinct(const TVec3D<int>& reflection) {
   return false;
 }
 
+void Spacegroup::addToPointgroup(const PointgroupElement& e) {
+  if (!pointgroup.contains(e)) {
+    pointgroup << e;
+    int lastGSize;
+    do {
+      lastGSize = pointgroup.size();
+      for (int i=0; i<pointgroup.size(); i++) {
+        for (int j=0; j<pointgroup.size(); j++) {
+          PointgroupElement test = pointgroup[i]*pointgroup[j];
+          if (!pointgroup.contains(e)) {
+            addToPointgroup(e);
+            return;
+          }
+        }
+      }
+    } while(lastGSize!=pointgroup.size());
+  }
+
+}
+
 void Spacegroup::generatePointgroup() {
   pointgroup.clear();
   extinctionChecks.clear();
 
-  pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0);
+  // Identity is always in Pointgroup
+  addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0));
   if (symbolElements.first()=="I") {
-    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 3);
+    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 3));
   } else if (symbolElements.first()=="F") {
-    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 3);
-    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3);
-    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0);
+    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 3));
+    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3));
+    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0));
   } else if (symbolElements.first()=="A") {
-    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 3);
+    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 3));
   } else if (symbolElements.first()=="B") {
-    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3);
+    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3));
   } else if (symbolElements.first()=="C") {
-    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0);
+    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0));
   } else if (symbolElements.first()=="R") {
   } else if (symbolElements.first()=="H") {
-    pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, 2);
-    //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 4, 4);
-    //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, 2);
-    //pointgroup << PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -4, 2);
-    pointgroup << PointgroupElement(0,-1, 0, 1, -1, 0, 0, 0, 1, 0, 0, 0);
+    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, 2));
+    addToPointgroup(PointgroupElement(0,-1, 0, 1, -1, 0, 0, 0, 1, 0, 0, 0));
   }
 
-  int lastGSize;
-  do {
-    lastGSize = pointgroup.size();
-    for (int i=1; i<pointgroup.size(); i++) {
-      for (int j=1; j<pointgroup.size(); j++) {
-        PointgroupElement test = pointgroup[i]*pointgroup[j];
-        bool uniq=true;
-        for (int k=0; k<pointgroup.size(); k++) {
-          if (test==pointgroup[k]) {
-            uniq = false;
-            break;
-          }
-        }
-        if (uniq) {
-          pointgroup << test;
-        }
-
-      }
-    }
-  } while(lastGSize!=pointgroup.size());
   for (int i=0; i<pointgroup.size(); i++) {
     if (!pointgroup.at(i).t.isNull()) {
       ExtinctionElement e;

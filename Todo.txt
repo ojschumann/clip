@@ -51,3 +51,10 @@ Allow to configure colors
 Allow to "print" to pdf/png/jpeg
 
 Get rid of SignalingEllipseItem
+
+Threading
+  Generate Refletions -> QRunnable with Signals and QMetaObject::invoke in destructor
+  Update Rotation -> QtConcurrent with signals
+  ProjectionMapper -> QtConcurrent with persistent functor
+  SpotIndicator -> QThread
+

@@ -82,8 +82,8 @@ public slots:
 private slots:
   void convertHtoR();
   void convertRtoH();
-  void setReflections(QVector<Reflection>, double);
-
+  void reflectionGenerated();
+  void debugSlot();
 signals:
   void cellChanged();
   void orientationChanged();
@@ -125,13 +125,11 @@ private:
   // List of Reflections
   QVector<Reflection> reflections;
   // Flag, that indicates an running update of the reflection list.
-  bool reflectionUpdateRunning;
+  QFutureWatcher<QVector<Reflection> > reflectionFuture;
   // flag to restart immediately
   bool restartReflectionUpdate;
   // Factor for ab initio prediction of the number of reflections.
   double predictionFactor;
-
-  QFutureWatcher<void> updateWatcher;
 
   bool updateEnabled;
 
@@ -147,29 +145,7 @@ private:
     double Qmax;
   };
 
-  // Runnable, that performes the
-  // generation of reflections
-  class GenerateReflection: public QRunnable {
-  public:
-    GenerateReflection(Crystal*);
-    ~GenerateReflection();
-    void run();
-  private:
-    QVector<Reflection> reflections;
-    Crystal* c;
-    int hMax;
-    QAtomicInt aktualH;
-    int reflectionNumber;
-    QMutex mutex;
-    Vec3D astar;
-    Vec3D bstar;
-    Vec3D cstar;
-    Mat3D MReziprocal;
-    double Qmax;
-    double prediction;
-    Spacegroup sg;
-  };
-
+  QVector<Reflection> doGeneration();
 
 };
 

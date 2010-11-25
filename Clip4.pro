@@ -30,10 +30,12 @@ DEFINES += __HG_REPRO_REV__="\\\"\$(shell hg -R \"$$PWD\" -q parent --template {
 DEFINES += __HG_REPRO_DATE__="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\\\"\""
 
 
-QMAKE_CXXFLAGS += -std=gnu++0x
+QMAKE_CXXFLAGS += -std=gnu++0x -g
 
 QMAKE_CXXFLAGS_DEBUG += -pg
 QMAKE_LFLAGS_DEBUG += -pg
+QMAKE_LFLAGS_RELEASE -= -Wl,-s
+
 
 SOURCES += main.cpp\
         ui/clip.cpp \
@@ -82,7 +84,7 @@ SOURCES += main.cpp\
 #    indexing/solution.cpp \
     tools/itemstore.cpp \
     tools/circleitem.cpp \
-    tools/projectionmapper.cpp \
+#    tools/projectionmapper.cpp \
     tools/spotindicatorgraphicsitem.cpp
 
 HEADERS  += ui/clip.h \
@@ -134,7 +136,7 @@ HEADERS  += ui/clip.h \
 #    indexing/solution.h \
     tools/itemstore.h \
     tools/circleitem.h \
-    tools/projectionmapper.h \
+#    tools/projectionmapper.h \
     tools/spotindicatorgraphicsitem.h
 
 FORMS    += ui/clip.ui \

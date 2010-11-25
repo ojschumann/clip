@@ -10,7 +10,6 @@
 #include <QPainter>
 #include <QWidget>
 #include <QThreadPool>
-#include <QtConcurrentMap>
 #include <QGraphicsView>
 #include <QMetaObject>
 
@@ -37,7 +36,6 @@ Projector::Projector(QObject *parent):
     scene(this),
     imageItemsPlane(new QGraphicsPixmapItem()),
     imageData(0),
-    projectionMapper(this),
     spotIndicator(new SpotIndicatorGraphicsItem())
 {
   imageItemsPlane->setFlag(QGraphicsItem::ItemIsMovable, false);
@@ -62,10 +60,9 @@ Projector::Projector(QObject *parent):
   QTimer::singleShot(0, this, SLOT(decorateScene()));
   connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
-  connect(&projectionMapper, SIGNAL(mapFinished(QList<QPointF>,QList<QGraphicsItem*>)), this, SLOT(reflectionsMapped(QList<QPointF>,QList<QGraphicsItem*>)));
 };
 
-Projector::Projector(const Projector &p): QObject(), projectionMapper(this) { }
+Projector::Projector(const Projector &p): QObject() { }
 
 Projector::~Projector() {
 }
@@ -141,24 +138,33 @@ ItemStore& Projector::infoItems() {
 void Projector::reflectionsUpdated() {
   if (crystal.isNull() or not projectionEnabled)
     return;
-  projectionMapper.start();
-}
 
-void Projector::reflectionsMapped(QList<QPointF> coordinates, QList<QGraphicsItem*> textItems) {
   foreach (QGraphicsItem* item, textMarkerItems) {
     scene.removeItem(item);
     delete item;
   }
   textMarkerItems.clear();
-  cout << "textitems: " << textItems.size() << " spots: " << coordinates.size() << endl;
-  foreach (QGraphicsItem* item, textItems) {
-    scene.addItem(item);
-    textMarkerItems << item;
+
+  spotIndicator->coordinates.clear();
+  QVector<Reflection> refs = crystal->getReflectionList();
+  for (int i=0; i<refs.size(); i++) {
+    QPointF p;
+    if (project(refs[i], p)) {
+      spotIndicator->coordinates << p;
+      if (refs.at(i).hklSqSum<=maxHklSqSum) {
+        QGraphicsTextItem* t = new QGraphicsTextItem();
+        t->setTransform(QTransform(1,0,0,-1,0,0));
+        t->setHtml(refs.at(i).toHtml());
+        t->setPos(p);
+        QRectF r=t->boundingRect();
+        double s=getTextSize()/std::min(r.width(), r.height());
+        t->scale(s,s);
+        textMarkerItems.append(t);
+        scene.addItem(t);
+      }
+    }
   }
   spotIndicator->setSpotsize(getSpotSize());
-  spotIndicator->coordinates.clear();
-  spotIndicator->coordinates.reserve(coordinates.size());
-  foreach (QPointF p, coordinates) spotIndicator->coordinates << p;
   spotIndicator->paintUntil = spotIndicator->coordinates.size();
   spotIndicator->pointsUpdated();
   emit projectedPointsUpdated();

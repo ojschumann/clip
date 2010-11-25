@@ -27,7 +27,7 @@ Clip::Clip(QWidget *parent) :
 
   on_newCrystal_triggered();
   on_newLaue_triggered();
-  on_newStereo_triggered();
+  //on_newStereo_triggered();
 
 }
 

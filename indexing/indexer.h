@@ -36,7 +36,7 @@ public:
   void startIndexing(IndexingParameter& p);
   Solution getSolution(unsigned int n);
 
-    public slots:
+public slots:
   void addSolution(Solution s);
   void threadFinished();
 
