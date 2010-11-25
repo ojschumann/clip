@@ -1,7 +1,7 @@
 #ifndef CRYSTALDISPLAY_H
 #define CRYSTALDISPLAY_H
 
-#include <QWidget>
+#include <QMainWindow>
 
 class Crystal;
 
@@ -9,7 +9,7 @@ namespace Ui {
   class CrystalDisplay;
 }
 
-class CrystalDisplay : public QWidget
+class CrystalDisplay : public QMainWindow
 {
   Q_OBJECT
 
@@ -17,7 +17,6 @@ public:
   explicit CrystalDisplay(QWidget *parent = 0);
   ~CrystalDisplay();
   void resizeEvent(QResizeEvent *);
-  void mousePressEvent(QMouseEvent *);
 
   QSize sizeHint() const;
 
@@ -39,6 +38,9 @@ private:
   Ui::CrystalDisplay *ui;
   Crystal* crystal;
   bool allowRotationUpdate;
+
+private slots:
+    void on_actionDrag_hovered();
 };
 
 #endif // CRYSTAL_H

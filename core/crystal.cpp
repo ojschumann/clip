@@ -84,7 +84,7 @@ Crystal::Crystal(QObject* parent=NULL):
   enableUpdate();
   restartReflectionUpdate = false;
   generateReflections();
-  debugSlot();
+  //debugSlot();
 }
 
 Crystal::Crystal(const Crystal& c) {

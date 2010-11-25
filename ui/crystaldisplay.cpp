@@ -1,15 +1,19 @@
 #include "crystaldisplay.h"
 #include "ui_crystaldisplay.h"
-#include <tools/mat3D.h>
-#include <core/crystal.h>
-#include <core/spacegroup.h>
+
 #include <QTableWidgetItem>
 #include <QDrag>
 #include <QMimeData>
 #include <QMouseEvent>
 
+#include "tools/mat3D.h"
+#include "core/crystal.h"
+#include "core/spacegroup.h"
+#include "ui/indexing.h"
+#include "ui/clip.h"
+
 CrystalDisplay::CrystalDisplay(QWidget *parent) :
-    QWidget(parent),
+    QMainWindow(parent),
     ui(new Ui::CrystalDisplay), crystal(new Crystal(this)), allowRotationUpdate(true)
 {
   ui->setupUi(this);
@@ -22,12 +26,12 @@ CrystalDisplay::CrystalDisplay(QWidget *parent) :
   //connect(crystal, SIGNAL(info(QString)), this, SIGNAL(info(QString)));
   connect(crystal, SIGNAL(info(QString, int)), this, SIGNAL(info(QString, int)));
 
-  connect(crystal->getSpacegroup(), SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
+  QWidget* spacer = new QWidget();
+  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  // toolBar is a pointer to an existing toolbar
+  ui->toolBar->insertWidget(ui->actionDrag, spacer);
 
-  // Add Toolbar buttons
-  ui->tollBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), "Open Crystal Data", this, SLOT(slotLoadCrystalData()));
-  ui->tollBar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), "Save Crystal Data", this, SLOT(slotSaveCrystalData()));
-  ui->tollBar->addAction(QIcon(":/Index.png"), "Index", this, SLOT(slotStartIndexing()));
+  connect(crystal->getSpacegroup(), SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
 
   // Init Orientation Matrix Elements
   for (int i=0; i<3; i++)
@@ -58,17 +62,6 @@ void CrystalDisplay::resizeEvent(QResizeEvent *) {
   for (int i=0; i<3; i++) {
     ui->orientationMatrix->setColumnWidth(i, w);
     ui->orientationMatrix->setRowHeight(i, h);
-  }
-}
-
-void CrystalDisplay::mousePressEvent(QMouseEvent* e) {
-  if (e->button()==Qt::LeftButton and ui->dragStart->geometry().contains(e->pos())) {
-    QDrag* drag = new QDrag(this);
-    QMimeData* mime = new QMimeData;
-    mime->setData("application/CrystalPointer", "");
-    mime->setImageData(QVariant::fromValue(crystal));
-    drag->setMimeData(mime);
-    drag->exec(Qt::LinkAction);
   }
 }
 
@@ -177,10 +170,9 @@ void CrystalDisplay::slotSaveCrystalData() {
 }
 
 void CrystalDisplay::slotStartIndexing() {
-  /*    w=Indexing(self.crystal)
-    mdi=self.parent().mdiArea()
-    mdi.addSubWindow(w)
-    w.show() */
+  Indexing* idx = new Indexing();
+  connect(this, SIGNAL(destroyed()), idx, SLOT(deleteLater()));
+  Clip::getInstance()->addMdiWindow(idx);
 }
 
 
@@ -265,3 +257,15 @@ void CrystalDisplay::slotStartIndexing() {
 
 
 */
+
+
+void CrystalDisplay::on_actionDrag_hovered()
+{
+  QDrag* drag = new QDrag(this);
+  QMimeData* mime = new QMimeData;
+  mime->setData("application/CrystalPointer", "");
+  mime->setImageData(QVariant::fromValue(crystal));
+  drag->setMimeData(mime);
+  drag->exec(Qt::LinkAction);
+
+}

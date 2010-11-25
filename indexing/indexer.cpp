@@ -1,13 +1,15 @@
-#include <Indexer.h>
-#include <QtCore/QThreadPool>
-#include <QtCore/QMutexLocker>
+#include "indexer.h"
+
+#include <QThreadPool>
+#include <QMutexLocker>
 #include <iostream>
 #include <iomanip>
 #include <cmath>
-#include <QtCore/QtAlgorithms>
+#include <QtAlgorithms>
 
-#include <vec3D.h>
-#include <mat3D.h>
+#include "tools/vec3D.h"
+#include "tools/mat3D.h"
+#include "tools/optimalrotation.h"
 
 
 
@@ -181,27 +183,15 @@ void IndexWorker::run() {
   }
 }
 
-Mat3D bestRotation(Mat3D M) {
-  Mat3D L,R;
-  M.svd(L,R);
-  double d=L.det()*R.det();
-  if (d<0.0) {
-    Mat3D T;
-    *T.at(2,2)=-1.0;
-    return L*T*R;
-  } else {
-    return L*R;
-  }
-};
-
 #define MAX(x,y) (((x)>(y))?(x):(y))
 
 void IndexWorker::checkGuess(const Reflection &c1, const Reflection &c2,  const AngleInfo &a) {
+  OptimalRotation O;
+  O.addVectorPair(c1.normalLocal, p.markerNormals[a.index1]);
+  O.addVectorPair(c2.normalLocal, p.markerNormals[a.index2]);
   // Prepare Best Rotation Matrix from c1,c2 -> a(1) a(2)
-  Mat3D R=c1.normalLocal^p.markerNormals[a.index1];
-  R+=(c2.normalLocal^p.markerNormals[a.index2]);
 
-  R=bestRotation(R);
+  Mat3D R(O.getOptimalRotation());
 
 
   // Try Indexation of missing reflexions
@@ -225,7 +215,7 @@ void IndexWorker::checkGuess(const Reflection &c1, const Reflection &c2,  const 
       si.l=c2.l;
     } else {
       Vec3D hklVect(OMatInv*R*p.markerNormals.at(n));
-      double max=MAX(MAX(fabs(hklVect[0]),fabs(hklVect[1])),fabs(hklVect[2]));
+      double max=MAX(MAX(fabs(hklVect(0)),fabs(hklVect(1))),fabs(hklVect(2)));
       hklVect*=1.0/max;
       si.initialIndexed=false;
 
@@ -236,15 +226,15 @@ void IndexWorker::checkGuess(const Reflection &c1, const Reflection &c2,  const 
 #endif
         ok=true;
         for (unsigned int i=3; i--; ) {
-          if (fabs(fabs(t[i])-round(fabs(t[i])))>p.maxIntegerDeviation) {
+          if (fabs(fabs(t(i))-round(fabs(t(i))))>p.maxIntegerDeviation) {
             ok=false;
             break;
           }
         }
         if (ok) {
-          si.h=(int)round(t[0]);
-          si.k=(int)round(t[1]);
-          si.l=(int)round(t[2]);
+          si.h=(int)round(t(0));
+          si.k=(int)round(t(1));
+          si.l=(int)round(t(2));
           break;
         }
       }
@@ -258,17 +248,17 @@ void IndexWorker::checkGuess(const Reflection &c1, const Reflection &c2,  const 
 
   if (p.markerNormals.size()==s.items.size()) {
     // yes, we have a solution!!!
-    R*=0.0;
+    O.reset();
     for (unsigned int n=s.items.size(); n--; ) {
       SolutionItem& si=s.items[n];
       Vec3D v(si.h, si.k, si.l);
       v=p.orientationMatrix*v;
       v.normalize();
       si.latticeVector=v;
-      R+=v^p.markerNormals[n];
+      O.addVectorPair(v,p.markerNormals[n]);
     }
 
-    s.bestRotation=bestRotation(R);
+    s.bestRotation=O.getOptimalRotation();
 
     if (newSolution(s.bestRotation)) {
       for (unsigned int n=s.items.size(); n--; ) {

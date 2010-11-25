@@ -1,6 +1,11 @@
 #ifndef SOLUTION_H
 #define SOLUTION_H
 
+#include <QList>
+
+#include "tools/vec3D.h"
+#include "tools/mat3D.h"
+
 class SolutionItem {
 public:
   int h;
@@ -38,6 +43,7 @@ public:
 
 };
 
-Q_DECLARE_METATYPE(Solution)
+#include <QMetaType>
+Q_DECLARE_METATYPE(Solution);
 
 #endif // SOLUTION_H

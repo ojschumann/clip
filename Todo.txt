@@ -10,6 +10,7 @@ LaueImage
   Background loading of image
   Display Filename
   Display More info from file
+  Display of Images from Bruker Apex (reduced Wavelength band)
 
 Nearest Reflection (possibly, if conventional method not fast enougth)
   Quicker search (partitioning)
@@ -27,13 +28,11 @@ Spacegroup
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
 
-Life info from Mousecursor (new)
+Live info from Mousecursor (new)
   Position on detector (x, y)
   Direction of scatter and direction of normal
   2Theta
   Image Positon (Pixel x,y) and Image Value (at point, mapped to RGB)
-
-Marked Spots and Zone info (call from Crystal) (new)
 
 Refinement (partly new)
   Optional show state after each iteration
@@ -52,9 +51,4 @@ Allow to "print" to pdf/png/jpeg
 
 Get rid of SignalingEllipseItem
 
-Threading
-  Generate Refletions -> QRunnable with Signals and QMetaObject::invoke in destructor
-  Update Rotation -> QtConcurrent with signals
-  ProjectionMapper -> QtConcurrent with persistent functor
-  SpotIndicator -> QThread
-
+Marked Spots and Zone info (call from Crystal) (new)

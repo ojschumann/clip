@@ -1,13 +1,13 @@
 #ifndef __INDEXER_H__
 #define __INDEXER_H__
 
-#include <QtCore/QAbstractTableModel>
-#include <QtCore/QRunnable>
-#include <QtCore/QMutex>
-#include <vec3D.h>
-#include <reflection.h>
+#include <QAbstractTableModel>
+#include <QRunnable>
+#include <QMutex>
 
-
+#include "tools/vec3D.h"
+#include "core/reflection.h"
+#include "indexing/solution.h"
 
 
 class Indexer: public QAbstractTableModel {

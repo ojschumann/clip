@@ -9,7 +9,7 @@ double SolutionItem::spatialDeviation() const {
 }
 
 double SolutionItem::hklDeviation() const {
-  return fabs(rationalHkl[0]-h)+fabs(rationalHkl[1]-k)+fabs(rationalHkl[2]-l);
+  return fabs(rationalHkl(0)-h)+fabs(rationalHkl(1)-k)+fabs(rationalHkl(2)-l);
 }
 
 double Solution::angularDeviationSum() const {

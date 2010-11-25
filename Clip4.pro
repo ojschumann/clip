@@ -80,12 +80,13 @@ SOURCES += main.cpp\
     image/simplemonochromscaler.cpp \
     tools/histogramitem.cpp \
     ui/mouseinfodisplay.cpp \
-#    indexing/indexer.cpp \
-#    indexing/solution.cpp \
+    indexing/indexer.cpp \
+    indexing/solution.cpp \
     tools/itemstore.cpp \
     tools/circleitem.cpp \
 #    tools/projectionmapper.cpp \
-    tools/spotindicatorgraphicsitem.cpp
+    tools/spotindicatorgraphicsitem.cpp \
+    ui/indexing.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -132,12 +133,13 @@ HEADERS  += ui/clip.h \
     tools/histogramitem.h \
     tools/mousepositioninfo.h \
     ui/mouseinfodisplay.h \
-#    indexing/indexer.h \
-#    indexing/solution.h \
+    indexing/indexer.h \
+    indexing/solution.h \
     tools/itemstore.h \
     tools/circleitem.h \
 #    tools/projectionmapper.h \
-    tools/spotindicatorgraphicsitem.h
+    tools/spotindicatorgraphicsitem.h \
+    ui/indexing.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -147,7 +149,8 @@ FORMS    += ui/clip.ui \
     ui/resolutioncalculator.ui \
     ui/imagetoolbox.ui \
     ui/contrastcurves.ui \
-    ui/mouseinfodisplay.ui
+    ui/mouseinfodisplay.ui \
+    ui/indexing.ui
 
 RESOURCES += \
     icons/icons.qrc
