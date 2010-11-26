@@ -9,7 +9,7 @@
 #include "tools/mat3D.h"
 #include "core/crystal.h"
 #include "core/spacegroup.h"
-#include "ui/indexing.h"
+#include "ui/indexdisplay.h"
 #include "ui/clip.h"
 
 CrystalDisplay::CrystalDisplay(QWidget *parent) :
@@ -170,9 +170,13 @@ void CrystalDisplay::slotSaveCrystalData() {
 }
 
 void CrystalDisplay::slotStartIndexing() {
-  Indexing* idx = new Indexing();
-  connect(this, SIGNAL(destroyed()), idx, SLOT(deleteLater()));
-  Clip::getInstance()->addMdiWindow(idx);
+  if (indexDisplay.isNull()) {
+    indexDisplay = new IndexDisplay(crystal);
+    connect(this, SIGNAL(destroyed()), indexDisplay, SLOT(deleteLater()));
+    Clip::getInstance()->addMdiWindow(indexDisplay);
+  } else {
+    Clip::getInstance()->setActiveSubWindow(indexDisplay);
+  }
 }
 
 

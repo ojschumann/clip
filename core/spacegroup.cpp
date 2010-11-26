@@ -3,7 +3,7 @@
 #include <QRegExp>
 #include <QStringList>
 #include <QDebug>
-
+#include <iomanip>
 
 Spacegroup::SpacegroupCheck::SpacegroupCheck(Spacegroup::System s, QString pg, QString re) {
   system = s;
@@ -71,7 +71,7 @@ Spacegroup::Spacegroup(const Spacegroup &o) {
   symbolElements = o.symbolElements;
   crystalsystem = o.crystalsystem;
   groups = o.groups;
-  pointgroup = o.pointgroup;
+  group = o.group;
   extinctionChecks = o.extinctionChecks;
 }
 
@@ -108,7 +108,7 @@ bool Spacegroup::setGroupSymbol(QString s) {
       if (startup || SystemChg || TriclinSettingChanged) {
         emit constrainsChanged();
       }
-      generatePointgroup();
+      generateGroup();
       emit groupChanged();
       return true;
     }
@@ -129,7 +129,7 @@ QList<int> Spacegroup::getConstrains() const {
   if (crystalsystem==triclinic) {
     r << 0 << 0 << 0 << 0 << 0 << 0;
   } else if (crystalsystem==monoclinic) {
-    r << 0 << 0 << 0 << -5 << 0 << -5;
+    r << 0 << 0 << 0 << 90 << 0 << 90;
   } else if (crystalsystem==orthorhombic) {
     r << 0 << 0 << 0 << 90 << 90 << 90;
   } else if (crystalsystem==tetragonal) {
@@ -149,27 +149,27 @@ QList<int> Spacegroup::getConstrains() const {
 }
 
 
-Spacegroup::PointgroupElement::PointgroupElement(int m11, int m12, int m13, int m21, int m22, int m23, int m31, int m32, int m33, int t1, int t2, int t3): M(m11, m12, m13, m21, m22, m23, m31, m32, m33), t(t1, t2, t3) {
+Spacegroup::GroupElement::GroupElement(int m11, int m12, int m13, int m21, int m22, int m23, int m31, int m32, int m33, int t1, int t2, int t3): M(m11, m12, m13, m21, m22, m23, m31, m32, m33), t(t1, t2, t3) {
   normalize();
 };
 
-Spacegroup::PointgroupElement::PointgroupElement(const TMat3D<int> &_M, const TVec3D<int> &_t): M(_M), t(_t) {
+Spacegroup::GroupElement::GroupElement(const TMat3D<int> &_M, const TVec3D<int> &_t): M(_M), t(_t) {
   normalize();
 };
 
-void Spacegroup::PointgroupElement::normalize() {
+void Spacegroup::GroupElement::normalize() {
   for (int i=0; i<3; i++) {
-    t(i)%=6;
+    t(i)%=MOD;
     if (t(i)<0)
-      t(i)+=6;
+      t(i)+=MOD;
   }
 }
 
-Spacegroup::PointgroupElement Spacegroup::PointgroupElement::operator *(const Spacegroup::PointgroupElement& o) {
-  return Spacegroup::PointgroupElement(M*o.M, M*o.t + t);
+Spacegroup::GroupElement Spacegroup::GroupElement::operator *(const Spacegroup::GroupElement& o) {
+  return Spacegroup::GroupElement(M*o.M, M*o.t + t);
 }
 
-bool Spacegroup::PointgroupElement::operator==(const Spacegroup::PointgroupElement& o) {
+bool Spacegroup::GroupElement::operator==(const Spacegroup::GroupElement& o) {
   return (M==o.M) && t==o.t;
 }
 
@@ -177,7 +177,7 @@ bool Spacegroup::PointgroupElement::operator==(const Spacegroup::PointgroupEleme
 bool Spacegroup::isExtinct(const TVec3D<int>& reflection) {
   for (int i=0; i<extinctionChecks.size(); i++) {
     int s = reflection*extinctionChecks.at(i).t;
-    if ((s%6)!=0) {
+    if ((s%GroupElement::MOD)!=0) {
       if ((extinctionChecks.at(i).M*reflection).isNull()) {
         return true;
       }
@@ -186,55 +186,125 @@ bool Spacegroup::isExtinct(const TVec3D<int>& reflection) {
   return false;
 }
 
-void Spacegroup::addToPointgroup(const PointgroupElement& e) {
-  if (!pointgroup.contains(e)) {
-    pointgroup << e;
+template <class T> void Spacegroup::addToGroup(QList<T> &group, const T& e) {
+  if (!group.contains(e)) {
+    group << e;
     int lastGSize;
     do {
-      lastGSize = pointgroup.size();
-      for (int i=0; i<pointgroup.size(); i++) {
-        for (int j=0; j<pointgroup.size(); j++) {
-          PointgroupElement test = pointgroup[i]*pointgroup[j];
-          if (!pointgroup.contains(e)) {
-            addToPointgroup(e);
-            return;
+      lastGSize = group.size();
+      for (int i=0; i<group.size(); i++) {
+        for (int j=0; j<group.size(); j++) {
+          GroupElement test = group[i]*group[j];
+          if (!group.contains(e)) {
+            group << e;
           }
         }
       }
-    } while(lastGSize!=pointgroup.size());
+    } while(lastGSize!=group.size());
   }
 
 }
+#include <QStringList>
+void Spacegroup::addGenerator(QString s, const Vec3D &dir, const Mat3D &O) {
+  if (s.contains('/')) {
+    foreach (QString t, s.split('/'))
+      addGenerator(t, dir, O);
+  } else {
+    cout << "AddGen: " << qPrintable(s) << endl;
+    QRegExp rotAxis("(-?)([12346])([12345]?)");
+    if (rotAxis.exactMatch(s)) {
+      QStringList sub = rotAxis.capturedTexts();
+      if (!sub.at(1).isEmpty())
+        addToGroup(group, GroupElement(-1, 0, 0, 0, -1, 0, 0, 0,-1, 0, 0, 0));
 
-void Spacegroup::generatePointgroup() {
-  pointgroup.clear();
+      int multi = sub.at(2).toInt();
+      int trans = 0;
+      if (!sub.at(3).isEmpty()) trans = sub.at(3).toInt();
+
+      Mat3D R(dir.normalized(), 2.0*M_PI/multi);
+      R = O.inverse()*R*O;
+      Vec3D n = dir * GroupElement::MOD * trans / multi;
+
+      addToGroup(group, GroupElement(R.toType<int>(), n.toType<int>()));
+
+    }
+
+  }
+}
+
+void Spacegroup::generateGroup() {
+  group.clear();
   extinctionChecks.clear();
 
   // Identity is always in Pointgroup
-  addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0));
+  addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0));
   if (symbolElements.first()=="I") {
-    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 3));
+    addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, GroupElement::MOD/2, GroupElement::MOD/2, GroupElement::MOD/2));
   } else if (symbolElements.first()=="F") {
-    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 3));
-    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3));
-    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0));
+    addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, GroupElement::MOD/2, GroupElement::MOD/2));
+    addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, GroupElement::MOD/2, 0, GroupElement::MOD/2));
+    addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, GroupElement::MOD/2, GroupElement::MOD/2, 0));
   } else if (symbolElements.first()=="A") {
-    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 3));
+    addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, GroupElement::MOD/2, GroupElement::MOD/2));
   } else if (symbolElements.first()=="B") {
-    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3));
+    addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, GroupElement::MOD/2, 0, GroupElement::MOD/2));
   } else if (symbolElements.first()=="C") {
-    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 3, 0));
+    addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, GroupElement::MOD/2, GroupElement::MOD/2, 0));
   } else if (symbolElements.first()=="R") {
   } else if (symbolElements.first()=="H") {
-    addToPointgroup(PointgroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, 2));
-    addToPointgroup(PointgroupElement(0,-1, 0, 1, -1, 0, 0, 0, 1, 0, 0, 0));
+    addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, GroupElement::MOD*2/3, GroupElement::MOD/3, GroupElement::MOD/3));
+    addToGroup(group, GroupElement(0,-1, 0, 1, -1, 0, 0, 0, 1, 0, 0, 0));
   }
 
-  for (int i=0; i<pointgroup.size(); i++) {
-    if (!pointgroup.at(i).t.isNull()) {
+  for (int i=0; i<symbolElements.size(); i++) {
+    cout << qPrintable(symbolElements.at(i)) << " ";
+  }
+  cout << endl;
+  if (crystalsystem==triclinic) {
+    if (symbolElements.at(1) == "-1")
+      addToGroup(group, GroupElement(-1, 0, 0, 0, -1, 0, 0, 0,-1, 0, 0, 0));
+  } else if (crystalsystem==monoclinic) {
+    addGenerator(symbolElements.at(1), Vec3D(0,1,0), Mat3D());
+  } else if (crystalsystem==orthorhombic) {
+    addGenerator(symbolElements.at(1), Vec3D(1,0,0), Mat3D());
+    addGenerator(symbolElements.at(2), Vec3D(0,1,0), Mat3D());
+    addGenerator(symbolElements.at(3), Vec3D(0,0,1), Mat3D());
+  } else if (crystalsystem==tetragonal) {
+    addGenerator(symbolElements.at(1), Vec3D(0,0,1), Mat3D());
+    if (symbolElements.size()==4) {
+      addGenerator(symbolElements.at(2), Vec3D(1,0,0), Mat3D());
+      addGenerator(symbolElements.at(3), Vec3D(1,1,0), Mat3D());
+    }
+  } else if (crystalsystem==trigonal) {
+    if (this->symbolElements[0]=="R") {
+    } else {
+      Mat3D O(1,-0.5, 0, 0, sqrt(0.75), 0, 0, 0, 1);
+      addGenerator(symbolElements.at(1), Vec3D(0,0,1), O);
+    }
+  } else if (crystalsystem==hexagonal) {
+    Mat3D O(1,-0.5, 0, 0, sqrt(0.75), 0, 0, 0, 1);
+    Vec3D v1 = O*Vec3D(1,0,0);
+    Vec3D v2 = O*Vec3D(0,1,0);
+    Vec3D v3 = O*Vec3D(0,0,1);
+
+    addGenerator(symbolElements.at(1), Vec3D(0,0,1), O);
+    if (symbolElements.size()==4) {
+      addGenerator(symbolElements.at(2), Vec3D(1,0,0), O);
+      addGenerator(symbolElements.at(3), Vec3D(1,1,0), O);
+    }
+  } else if (crystalsystem==cubic) {
+    addGenerator(symbolElements.at(1), Vec3D(1,0,0), Mat3D());
+    addGenerator(symbolElements.at(2), Vec3D(1,1,1), Mat3D());
+    if (symbolElements.size()==4) {
+      addGenerator(symbolElements.at(3), Vec3D(1,1,0), Mat3D());
+    }
+  }
+
+  for (int i=0; i<group.size(); i++) {
+    if (!group.at(i).t.isNull()) {
       ExtinctionElement e;
-      e.M=TMat3D<int>() - pointgroup.at(i).M;
-      e.t=pointgroup.at(i).t;
+      e.M=TMat3D<int>() - group.at(i).M;
+      e.t=group.at(i).t;
       extinctionChecks << e;
     }
   }

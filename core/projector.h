@@ -96,6 +96,7 @@ public:
 
   ItemStore& zoneMarkers();
   void addZoneMarker(const QPointF& p1, const QPointF& p2);
+  QList<Vec3D> getZoneMarkerNormals();
 
   ItemStore& infoItems();
   void addInfoItem(const QString& text, const QPointF& p);

@@ -209,7 +209,6 @@ QVector<Reflection> Crystal::doGeneration() {
   double prediction = 4.0/3.0*M_1_PI*M_1_PI*Qmax*Qmax*Qmax*MReal.det();
   Crystal::UpdateRef updateRef(this);
   QVector<Reflection> refs;
-  // TODO
   refs.reserve(int(1.1*predictionFactor*prediction));
   Spacegroup sg(spaceGroup);
   for (int h=-hMax; h<hMax; h++) {

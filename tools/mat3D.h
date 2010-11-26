@@ -44,6 +44,8 @@ public:
   T sqSum() const;
   T det() const;
   void zero();
+
+  template <typename U> TMat3D<U> toType();
   
   TMat3D<T> orthogonalize() const;
   TMat3D<T> inverse() const;

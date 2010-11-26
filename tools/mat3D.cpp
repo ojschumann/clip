@@ -390,6 +390,17 @@ template <typename T> void TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
   R.transpose();
 };    
 
+template <typename T> template <typename U> TMat3D<U> TMat3D<T>::toType() {
+  return TMat3D<U>(static_cast<U>((*this)(0,0)),
+              static_cast<U>((*this)(0,1)),
+              static_cast<U>((*this)(0,2)),
+              static_cast<U>((*this)(1,0)),
+              static_cast<U>((*this)(1,1)),
+              static_cast<U>((*this)(1,2)),
+              static_cast<U>((*this)(2,0)),
+              static_cast<U>((*this)(2,1)),
+              static_cast<U>((*this)(2,2)));
+}
 
 #endif
 #endif

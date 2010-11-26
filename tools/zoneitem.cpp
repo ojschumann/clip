@@ -267,7 +267,7 @@ void ZoneItem::updateOptimalZone() {
   Mat3D Q1, Q2;
   M.svd(Q1, Q2);
 
-  z = Q2.transposed()*Vec3D(0,0,1);
+  zoneNormal = Q2.transposed()*Vec3D(0,0,1);
 
   // Maximal scattering angle in this zone
   Vec3D n(-1,0,0);
@@ -278,7 +278,7 @@ void ZoneItem::updateOptimalZone() {
     n.normalize();
   }
 
-  zoneLines = generatePolygon(z, n);
+  zoneLines = generatePolygon(zoneNormal, n);
   update();
 
 }
@@ -349,6 +349,10 @@ QPointF ZoneItem::getStart() {
 
 QPointF ZoneItem::getEnd() {
   return endHandle->pos();
+}
+
+Vec3D ZoneItem::getZoneNormal() {
+  return zoneNormal;
 }
 
 void ZoneItem::highlight(bool h) {

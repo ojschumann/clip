@@ -2,6 +2,9 @@
 #define CRYSTALDISPLAY_H
 
 #include <QMainWindow>
+#include <QPointer>
+
+#include "ui/indexdisplay.h"
 
 class Crystal;
 
@@ -38,6 +41,7 @@ private:
   Ui::CrystalDisplay *ui;
   Crystal* crystal;
   bool allowRotationUpdate;
+  QPointer<IndexDisplay> indexDisplay;
 
 private slots:
     void on_actionDrag_hovered();

@@ -86,7 +86,8 @@ SOURCES += main.cpp\
     tools/circleitem.cpp \
 #    tools/projectionmapper.cpp \
     tools/spotindicatorgraphicsitem.cpp \
-    ui/indexing.cpp
+    ui/indexdisplay.cpp \
+    indexing/markermodel.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -139,7 +140,8 @@ HEADERS  += ui/clip.h \
     tools/circleitem.h \
 #    tools/projectionmapper.h \
     tools/spotindicatorgraphicsitem.h \
-    ui/indexing.h
+    ui/indexdisplay.h \
+    indexing/markermodel.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -150,7 +152,7 @@ FORMS    += ui/clip.ui \
     ui/imagetoolbox.ui \
     ui/contrastcurves.ui \
     ui/mouseinfodisplay.ui \
-    ui/indexing.ui
+    ui/indexdisplay.ui
 
 RESOURCES += \
     icons/icons.qrc

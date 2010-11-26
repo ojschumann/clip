@@ -66,15 +66,16 @@ private:
 
   QList<SpacegroupCheck> groups;
 
-  class PointgroupElement {
+  class GroupElement {
   public:
-    PointgroupElement(int m11, int m12, int m13, int m21, int m22, int m23, int m31, int m32, int m33, int t1, int t2, int t3);
-    PointgroupElement(const TMat3D<int>&, const TVec3D<int>&);
+    GroupElement(int m11, int m12, int m13, int m21, int m22, int m23, int m31, int m32, int m33, int t1, int t2, int t3);
+    GroupElement(const TMat3D<int>&, const TVec3D<int>&);
     void normalize();
-    PointgroupElement operator*(const PointgroupElement&);
-    bool operator==(const PointgroupElement&);
+    GroupElement operator*(const GroupElement&);
+    bool operator==(const GroupElement&);
     TMat3D<int> M;
     TVec3D<int> t;
+    static const int MOD = 12;
   };
 
   struct ExtinctionElement {
@@ -82,11 +83,12 @@ private:
     TVec3D<int> t;
   };
 
-  QList<PointgroupElement> pointgroup;
+  QList<GroupElement> group;
   QList<ExtinctionElement> extinctionChecks;
 
-  void generatePointgroup();
-  void addToPointgroup(const PointgroupElement&);
+  void generateGroup();
+  void addGenerator(QString s, const Vec3D& dir, const Mat3D& O);
+  template <class T> void addToGroup(QList<T>& group, const T&);
 
   /*struct PGElem{
         Mat3D R;

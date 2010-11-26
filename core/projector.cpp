@@ -291,6 +291,7 @@ void Projector::enableSpots(bool b) {
   emit projectionParamsChanged();
 }
 
+// ----------------------- Handling of Spot Markers -------------
 void Projector::addSpotMarker(const QPointF& p) {
   CircleItem* item = new CircleItem(getSpotSize(), imageItemsPlane);
   item->setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -317,6 +318,7 @@ QList<Vec3D> Projector::getSpotMarkerNormals() {
   return r;
 }
 
+
 // ---------------  Ruler handling ---------------------------
 ItemStore& Projector::rulers() {
   return rulerStore;
@@ -339,6 +341,7 @@ QPair<QPointF, QPointF> Projector::getRulerCoordinates(int n) {
 }
 
 
+
 // ----------------------- Handling of Zone Markers -------------
 
 void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
@@ -349,6 +352,13 @@ void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
   connect(&spotMarkers(), SIGNAL(itemRemoved(int)), zoneMarker, SLOT(updateOptimalZone()));
   // Todo connect for update of spotsize
   zoneMarkers().addItem(zoneMarker);
+}
+
+QList<Vec3D> Projector::getZoneMarkerNormals() {
+  QList<Vec3D> r;
+  for (int i=0; i<zoneMarkers().size(); i++)
+    r << dynamic_cast<ZoneItem*>(zoneMarkers().at(i))->getZoneNormal();
+  return r;
 }
 
 ItemStore& Projector::zoneMarkers() {

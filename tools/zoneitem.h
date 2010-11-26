@@ -26,6 +26,7 @@ public:
   QPointF getEnd();
   void highlight(bool);
   bool isHighlighted();
+  Vec3D getZoneNormal();
 private slots:
   void updatePolygon();
   void updateOptimalZone();
@@ -42,6 +43,7 @@ protected:
   Projector* projector;
   QList<QPolygonF> zoneLines;
   QList<QPolygonF> zonePolys;
+  Vec3D zoneNormal;
 };
 
 #endif // ZONEITEM_H
