@@ -20,4 +20,14 @@ static inline unsigned long long rdtsctime()
      return val;
 }
 
+static inline int ggt(int a, int b) {
+  while (b) {
+    int tb=b;
+    b=a%b;
+    a=tb;
+  }
+  if (a<0) return -a;
+  return a;
+}
+
 #endif // DEFS_H

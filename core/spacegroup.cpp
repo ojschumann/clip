@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <iomanip>
 
+#include "defs.h"
+
 Spacegroup::SpacegroupCheck::SpacegroupCheck(Spacegroup::System s, QString pg, QString re) {
   system = s;
   pointgroup = pg;
@@ -165,12 +167,63 @@ void Spacegroup::GroupElement::normalize() {
   }
 }
 
+void Spacegroup::GroupElement::print() const {
+  QStringList l;
+  TMat3D<int> O(M);
+  O.transpose();
+  l << "x" << "y" << "z";
+  for (int i=0; i<3; i++) {
+    bool first=true;
+    TVec3D<int> v;
+    v(i)=1;
+    v=O*v;
+    for (int j=0; j<3; j++) {
+      if (v(j)==1) {
+        if (!first) cout << "+";
+        cout << qPrintable(l[j]);
+        first = false;
+      } else if (v(j)==-1) {
+        cout << "-" << qPrintable(l[j]);
+        first=false;
+      }
+    }
+    if (t(i)!=0) {
+      int d = ggt(t(i), MOD);
+      cout << "+" << t(i)/d << "/" << MOD/d;
+    }
+    cout << ", ";
+  }
+  cout << endl;
+}
+
 Spacegroup::GroupElement Spacegroup::GroupElement::operator *(const Spacegroup::GroupElement& o) {
   return Spacegroup::GroupElement(M*o.M, M*o.t + t);
 }
 
 bool Spacegroup::GroupElement::operator==(const Spacegroup::GroupElement& o) {
-  return (M==o.M) && t==o.t;
+  if (!(M==o.M)) return false;
+  if (t==o.t) return true;
+  cout << "Test " ; print();
+  cout << "and  " ; o.print();
+  Mat3D T = M.toType<double>() - Mat3D();
+  Mat3D A, B;
+  T.svd(A,B);
+  B.transpose();
+  Vec3D tt(t.toType<double>());
+  Vec3D ot(o.t.toType<double>());
+  for (int i=0; i<3; i++) {
+    if (T(i,i)!=0.0) {
+      Vec3D n;
+      n(i)=1;
+      n=B*n;
+      tt -= n*(tt*n);
+      ot -= n*(ot*n);
+    }
+  }
+  for (int i=0; i<3; i++)
+    cout << tt(i) << " " << ot(i) << endl;
+  cout << endl;
+  return (tt-ot).norm_sq()<1e-5;
 }
 
 
@@ -189,14 +242,19 @@ bool Spacegroup::isExtinct(const TVec3D<int>& reflection) {
 template <class T> void Spacegroup::addToGroup(QList<T> &group, const T& e) {
   if (!group.contains(e)) {
     group << e;
+    cout << "Generator: ";
+    e.print();
     int lastGSize;
     do {
       lastGSize = group.size();
       for (int i=0; i<group.size(); i++) {
         for (int j=0; j<group.size(); j++) {
           GroupElement test = group[i]*group[j];
-          if (!group.contains(e)) {
-            group << e;
+          if (!group.contains(test)) {
+            group << test;
+            cout << "   "; group[i].print();
+            cout << " * "; group[j].print();
+            cout << " = "; test.print();
           }
         }
       }
@@ -212,6 +270,7 @@ void Spacegroup::addGenerator(QString s, const Vec3D &dir, const Mat3D &O) {
   } else {
     cout << "AddGen: " << qPrintable(s) << endl;
     QRegExp rotAxis("(-?)([12346])([12345]?)");
+    QRegExp mirrorPlane("[mabcdne]");
     if (rotAxis.exactMatch(s)) {
       QStringList sub = rotAxis.capturedTexts();
       if (!sub.at(1).isEmpty())
@@ -221,12 +280,61 @@ void Spacegroup::addGenerator(QString s, const Vec3D &dir, const Mat3D &O) {
       int trans = 0;
       if (!sub.at(3).isEmpty()) trans = sub.at(3).toInt();
 
-      Mat3D R(dir.normalized(), 2.0*M_PI/multi);
+      Mat3D R((O*dir).normalized(), 2.0*M_PI/multi);
       R = O.inverse()*R*O;
-      Vec3D n = dir * GroupElement::MOD * trans / multi;
+      Vec3D t = dir * GroupElement::MOD * trans / multi;
 
-      addToGroup(group, GroupElement(R.toType<int>(), n.toType<int>()));
+      TMat3D<int> Ri(qRound(R(0,0)),
+                     qRound(R(0,1)),
+                     qRound(R(0,2)),
+                     qRound(R(1,0)),
+                     qRound(R(1,1)),
+                     qRound(R(1,2)),
+                     qRound(R(2,0)),
+                     qRound(R(2,1)),
+                     qRound(R(2,2)));
+      TVec3D<int> ti(qRound(t(0)), qRound(t(1)), qRound(t(2)));
+      addToGroup(group, GroupElement(Ri, ti));
 
+    } else if (mirrorPlane.exactMatch(s)) {
+      Vec3D n = (O*dir).normalized();
+      Mat3D R;
+      QList<Vec3D> l;
+      for (int i=0; i<3; i++) {
+        l << R(i) - n*2*(n*R(i));
+      }
+      R = Mat3D(l[0], l[1],l[2]);
+      R.lmult(O.inverse());
+      TMat3D<int> Ri(qRound(R(0,0)),
+                     qRound(R(0,1)),
+                     qRound(R(0,2)),
+                     qRound(R(1,0)),
+                     qRound(R(1,1)),
+                     qRound(R(1,2)),
+                     qRound(R(2,0)),
+                     qRound(R(2,1)),
+                     qRound(R(2,2)));
+
+      TVec3D<int> t;
+      if (s=="a") {
+        t(0) = GroupElement::MOD/2;
+      } else if (s=="b") {
+        t(1) = GroupElement::MOD/2;
+      } else if (s=="c") {
+        t(2) = GroupElement::MOD/2;
+      } else if (s=="n") {
+      } else if (s=="d") {
+      } else if (s=="e") {
+        if (symbolElements.first()=="A") {
+          t(1) = GroupElement::MOD/2;
+        } else if (symbolElements.first()=="B") {
+          t(2) = GroupElement::MOD/2;
+        } else if (symbolElements.first()=="C") {
+          t(0) = GroupElement::MOD/2;
+        }
+      }
+
+      addToGroup(group, GroupElement(Ri, t));
     }
 
   }
@@ -256,49 +364,39 @@ void Spacegroup::generateGroup() {
     addToGroup(group, GroupElement(0,-1, 0, 1, -1, 0, 0, 0, 1, 0, 0, 0));
   }
 
-  for (int i=0; i<symbolElements.size(); i++) {
-    cout << qPrintable(symbolElements.at(i)) << " ";
-  }
-  cout << endl;
+  Mat3D O;
+  QList<Vec3D> dirs;
   if (crystalsystem==triclinic) {
     if (symbolElements.at(1) == "-1")
       addToGroup(group, GroupElement(-1, 0, 0, 0, -1, 0, 0, 0,-1, 0, 0, 0));
   } else if (crystalsystem==monoclinic) {
-    addGenerator(symbolElements.at(1), Vec3D(0,1,0), Mat3D());
+    dirs << Vec3D(0,1,0);
   } else if (crystalsystem==orthorhombic) {
-    addGenerator(symbolElements.at(1), Vec3D(1,0,0), Mat3D());
-    addGenerator(symbolElements.at(2), Vec3D(0,1,0), Mat3D());
-    addGenerator(symbolElements.at(3), Vec3D(0,0,1), Mat3D());
+    dirs << Vec3D(1,0,0) << Vec3D(0,1,0) << Vec3D(0,0,1);
   } else if (crystalsystem==tetragonal) {
-    addGenerator(symbolElements.at(1), Vec3D(0,0,1), Mat3D());
-    if (symbolElements.size()==4) {
-      addGenerator(symbolElements.at(2), Vec3D(1,0,0), Mat3D());
-      addGenerator(symbolElements.at(3), Vec3D(1,1,0), Mat3D());
-    }
+    dirs << Vec3D(0,0,1) << Vec3D(1,0,0) << Vec3D(1,1,0);
   } else if (crystalsystem==trigonal) {
     if (this->symbolElements[0]=="R") {
     } else {
       Mat3D O(1,-0.5, 0, 0, sqrt(0.75), 0, 0, 0, 1);
-      addGenerator(symbolElements.at(1), Vec3D(0,0,1), O);
+      dirs << Vec3D(0,0,1) << Vec3D(1,0,0) << Vec3D(2,1,0);
     }
   } else if (crystalsystem==hexagonal) {
     Mat3D O(1,-0.5, 0, 0, sqrt(0.75), 0, 0, 0, 1);
-    Vec3D v1 = O*Vec3D(1,0,0);
-    Vec3D v2 = O*Vec3D(0,1,0);
-    Vec3D v3 = O*Vec3D(0,0,1);
-
-    addGenerator(symbolElements.at(1), Vec3D(0,0,1), O);
-    if (symbolElements.size()==4) {
-      addGenerator(symbolElements.at(2), Vec3D(1,0,0), O);
-      addGenerator(symbolElements.at(3), Vec3D(1,1,0), O);
-    }
+    dirs << Vec3D(0,0,1) << Vec3D(1,0,0) << Vec3D(2,1,0);
   } else if (crystalsystem==cubic) {
-    addGenerator(symbolElements.at(1), Vec3D(1,0,0), Mat3D());
-    addGenerator(symbolElements.at(2), Vec3D(1,1,1), Mat3D());
-    if (symbolElements.size()==4) {
-      addGenerator(symbolElements.at(3), Vec3D(1,1,0), Mat3D());
-    }
+    dirs << Vec3D(1,0,0) << Vec3D(1,1,1) << Vec3D(1,1,0);
   }
+
+  for (int n=0; n<std::min(dirs.size(), symbolElements.size()-1); n++) {
+    addGenerator(symbolElements.at(n+1), dirs.at(n), O);
+  }
+
+  for (int n=0; n<group.size();n++) {
+    group.at(n).print();
+  }
+
+  cout << "Grousize: " << group.size() << endl;
 
   for (int i=0; i<group.size(); i++) {
     if (!group.at(i).t.isNull()) {

@@ -147,7 +147,7 @@ template <typename T> bool TVec3D<T>::isNull()  const {
   return ((*this)(0)==InitatorValues<T>::Zero()) && ((*this)(1)==InitatorValues<T>::Zero()) && ((*this)(2)==InitatorValues<T>::Zero());
 }
 
-template <typename T> template <typename U> TVec3D<U> TVec3D<T>::toType() {
+template <typename T> template <typename U> TVec3D<U> TVec3D<T>::toType() const {
   return TVec3D<U>(static_cast<U>((*this)(0)),
               static_cast<U>((*this)(1)),
               static_cast<U>((*this)(2)));

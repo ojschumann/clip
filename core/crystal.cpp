@@ -10,19 +10,13 @@
 #include <QTime>
 #include <QtConcurrentMap>
 #include <QMetaObject>
+#include "defs.h"
 
 using namespace std;
 
 
 
-int ggt(int a, int b) {
-  while (b) {
-    int tb=b;
-    b=a%b;
-    a=tb;
-  }
-  return abs(a);
-}
+
 
 class IntIterator {
 public:
@@ -162,9 +156,10 @@ void Crystal::internalSetCell(double _a, double _b, double _c, double _alpha, do
   // reciprocal orientation matrix is inverse transposed of real one!
   MReziprocal = MReal.inverse();
   MReziprocal.transpose();
-  astar=MReziprocal[0];
-  bstar=MReziprocal[1];
-  cstar=MReziprocal[2];
+  // Extract reciprocal basis vecors
+  astar=MReziprocal(0);
+  bstar=MReziprocal(1);
+  cstar=MReziprocal(2);
   emit cellChanged();
   generateReflections();
 }
@@ -174,6 +169,7 @@ void Crystal::addRotation(const Vec3D& axis, double angle) {
 }
 
 void Crystal::addRotation(const Mat3D& M) {
+  // Multiply from left and orthogonalize to suppress rounding errors
   MRot.lmult(M);
   MRot.orthogonalize();
   updateRotation();

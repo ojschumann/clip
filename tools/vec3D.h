@@ -45,7 +45,7 @@ public:
   TVec3D normalized() const;
 
   bool isNull() const;
-  template <typename U> TVec3D<U> toType();
+  template <typename U> TVec3D<U> toType() const;
 
 protected:
   struct KeyClass { };

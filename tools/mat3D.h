@@ -34,7 +34,7 @@ public:
 
   bool operator==(const TMat3D<T>& m);
 
-  TVec3D<T> operator[](int i) const;
+  TVec3D<T> operator()(int i) const;
   T& operator()(int i, int j) { return DATA[i+j+(j<<1)]; };
   const T& operator()(int i, int j) const { return DATA[i+j+(j<<1)]; }
   T at(int i, int j) const;

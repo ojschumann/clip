@@ -188,7 +188,7 @@ template <typename T> bool TMat3D<T>::operator==(const TMat3D<T>& m) {
   return true;
 }
 
-template <typename T> TVec3D<T> TMat3D<T>::operator[](int i) const {
+template <typename T> TVec3D<T> TMat3D<T>::operator()(int i) const {
   if (i<3) 
     return TVec3D<T>((*this)(i,0), (*this)(i,1), (*this)(i,2));
   return TVec3D<T>();
