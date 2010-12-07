@@ -48,23 +48,37 @@ signals:
 
 private:
 
-  class SpacegroupCheck {
+  class SpacegroupSymbolInfo {
   public:
-    SpacegroupCheck(Spacegroup::System, QString, QString);
+    SpacegroupSymbolInfo(int, QString, QString, QString, QString);
     bool match(QString);
-    QStringList elements();
 
-    Spacegroup::System system;
-    QString pointgroup;
-    QRegExp regexp;
+    Spacegroup::System system();
+    int SpacegroupNumber();
+    QString HerrmannMauguin();
+    QString Hall();
+  private:
+    // Number of Spacegroup in ITs
+    int spacegroupNumber;
+    // Gives additional info on Setting for Number in International Tables
+    QString spacegroupNumberModifier;
+    // Hermann-Mauguin Symbol with spaces
+    QString hermannMauguinSymbol;
+    // Hermann-Mauguin Symbol without spaces
+    QString compactHermannMauguinSymbol;
+    // Gives additional info on Setting for Number in International Tables
+    QString hermannMauguinModifier;
+    // Hall Symbol
+    QString hallSymbol;
   };
+  static QList<SpacegroupSymbolInfo> static_init();
 
 
   QString symbol;
   QStringList symbolElements;
   System crystalsystem;
 
-  QList<SpacegroupCheck> groups;
+  static QList<SpacegroupSymbolInfo> groupInfos;
 
   class GroupElement {
   public:
@@ -87,8 +101,7 @@ private:
   QList<GroupElement> group;
   QList<ExtinctionElement> extinctionChecks;
 
-  void generateGroup();
-  void addGenerator(QString s, const Vec3D& dir, const Mat3D& O);
+  bool generateGroup(QString);
   template <class T> void addToGroup(QList<T>& group, const T&);
 
   /*struct PGElem{

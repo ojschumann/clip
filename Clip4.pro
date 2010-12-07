@@ -30,10 +30,10 @@ DEFINES += __HG_REPRO_REV__="\\\"\$(shell hg -R \"$$PWD\" -q parent --template {
 DEFINES += __HG_REPRO_DATE__="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\\\"\""
 
 
-QMAKE_CXXFLAGS += -std=gnu++0x -g
+QMAKE_CXXFLAGS += -std=gnu++0x -g -pg
 
 QMAKE_CXXFLAGS_DEBUG += -pg
-QMAKE_LFLAGS_DEBUG += -pg
+QMAKE_LFLAGS += -pg
 QMAKE_LFLAGS_RELEASE -= -Wl,-s
 
 
@@ -87,7 +87,8 @@ SOURCES += main.cpp\
 #    tools/projectionmapper.cpp \
     tools/spotindicatorgraphicsitem.cpp \
     ui/indexdisplay.cpp \
-    indexing/markermodel.cpp
+    indexing/markermodel.cpp \
+    core/spacegroupdata.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
