@@ -53,10 +53,10 @@ private:
     SpacegroupSymbolInfo(int, QString, QString, QString, QString);
     bool match(QString);
 
-    Spacegroup::System system();
-    int SpacegroupNumber();
-    QString HerrmannMauguin();
-    QString Hall();
+    Spacegroup::System system() const;
+    int SpacegroupNumber() const;
+    QString HerrmannMauguin() const;
+    QString Hall() const;
   private:
     // Number of Spacegroup in ITs
     int spacegroupNumber;
@@ -86,8 +86,8 @@ private:
     GroupElement(const TMat3D<int>&, const TVec3D<int>&);
     void normalize();
     void print() const;
-    GroupElement operator*(const GroupElement&);
-    bool operator==(const GroupElement&);
+    GroupElement operator*(const GroupElement&) const;
+    bool operator==(const GroupElement&) const;
     TMat3D<int> M;
     TVec3D<int> t;
     static const int MOD = 12;

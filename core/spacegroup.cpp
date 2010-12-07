@@ -33,15 +33,15 @@ bool Spacegroup::SpacegroupSymbolInfo::match(QString s) {
   return false;
 }
 
-QString Spacegroup::SpacegroupSymbolInfo::HerrmannMauguin() {
+QString Spacegroup::SpacegroupSymbolInfo::HerrmannMauguin() const {
   return hermannMauguinSymbol;
 }
 
-QString Spacegroup::SpacegroupSymbolInfo::Hall() {
+QString Spacegroup::SpacegroupSymbolInfo::Hall() const {
   return hallSymbol;
 }
 
-Spacegroup::System Spacegroup::SpacegroupSymbolInfo::system() {
+Spacegroup::System Spacegroup::SpacegroupSymbolInfo::system() const {
   if (spacegroupNumber<=2) {
     return Spacegroup::triclinic;
   } else if (spacegroupNumber<=15) {
@@ -60,10 +60,11 @@ Spacegroup::System Spacegroup::SpacegroupSymbolInfo::system() {
 
 Spacegroup::Spacegroup(QObject* parent): QObject(parent) {
   setGroupSymbol("P1");
-  QList<SpacegroupSymbolInfo>::iterator iter;
-  for (iter=groupInfos.begin(); iter!=groupInfos.end(); ++iter) {
-    generateGroup(iter->Hall());
+  for (int i=0; i<groupInfos.size(); i++) {
+    //cout << i << "/" << groupInfos.size() << " " << qPrintable(groupInfos.at(i).HerrmannMauguin()) << "    " << qPrintable(groupInfos.at(i).Hall()) << endl;
+    if (!generateGroup(groupInfos.at(i).Hall())) cout << " " << qPrintable(groupInfos.at(i).HerrmannMauguin()) << "    " << qPrintable(groupInfos.at(i).Hall()) << endl;
   }
+  cout << "done" << endl;
 }
 
 Spacegroup::Spacegroup(const Spacegroup &o) {
@@ -80,6 +81,7 @@ bool Spacegroup::setGroupSymbol(QString s) {
     if (iter->match(s)) {
 
       if (!generateGroup(iter->Hall())) return false;
+      return false;
       bool SystemChg = crystalsystem!=iter->system();
       bool startup = false;
       QString CenterChg;
@@ -194,11 +196,11 @@ void Spacegroup::GroupElement::print() const {
   cout << endl;
 }
 
-Spacegroup::GroupElement Spacegroup::GroupElement::operator*(const Spacegroup::GroupElement& o) {
+Spacegroup::GroupElement Spacegroup::GroupElement::operator*(const Spacegroup::GroupElement& o) const {
   return Spacegroup::GroupElement(M*o.M, M*o.t + t);
 }
 
-bool Spacegroup::GroupElement::operator==(const Spacegroup::GroupElement& o) {
+bool Spacegroup::GroupElement::operator==(const Spacegroup::GroupElement& o) const {
   return ((M==o.M) && (t==o.t));
 }
 
@@ -220,23 +222,11 @@ template <class T> void Spacegroup::addToGroup(QList<T> &group, const T& e) {
     group << e;
     //cout << "Generator: ";
     //e.print();
-    int lastGSize;
-    do {
-      lastGSize = group.size();
-      for (int i=0; i<group.size(); i++) {
-        for (int j=0; j<group.size(); j++) {
-          GroupElement test = group[i]*group[j];
-          if (!group.contains(test)) {
-            group << test;
-            //cout << "   "; group[i].print();
-            //cout << " * "; group[j].print();
-            //cout << " = "; test.print();
-          }
-        }
-      }
-    } while(lastGSize!=group.size());
+    for (int i=0; i<group.size(); i++) {
+      addToGroup(group, e*group[i]);
+      addToGroup(group, group[i]*e);
+    }
   }
-
 }
 
 
@@ -260,10 +250,11 @@ bool Spacegroup::generateGroup(QString hall) {
 
   // Check for inversion
   if (!latticeCentering.capturedTexts().at(1).isEmpty())
-    addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0));
+    addToGroup(group, GroupElement(-1, 0, 0, 0,-1, 0, 0, 0,-1, 0, 0, 0));
 
   QString center = latticeCentering.capturedTexts().at(2);
   if (center=="P") {
+    // No centering vectors...
   } else if (center=="A") {
     addToGroup(group, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1,                     0,   GroupElement::MOD/2,   GroupElement::MOD/2));
   } else if (center=="B") {
@@ -290,10 +281,9 @@ bool Spacegroup::generateGroup(QString hall) {
     return false;
   }
 
-  TVec3D<int> precedingDirection;
-  int precedingN;
+  QString precedingDirection;
+  int precedingN=-1;
   for (int n=0; n<hallElements.size(); n++) {
-
     QRegExp seitz("(-?)([12346])([xyz\"\\*']?)([abcnuvwd]*)([12345]?)");
     if (!seitz.exactMatch(hallElements.at(n))) return false;
 
@@ -303,18 +293,116 @@ bool Spacegroup::generateGroup(QString hall) {
       if (n==0) {
         direction = "z";
       } else if (n==1) {
-        direction = "'";
+        if ((precedingN==2) || (precedingN==4)) {
+          direction = "x";
+        } else if ((precedingN==3) || (precedingN==6)) {
+          direction = "'";
+        }
       } else direction = "*";
     }
-    TMat3D<int> rotationPart;
-    if (N==1) {
-    } else if (N==2) {
 
+    TMat3D<int> rotationPart;
+    TVec3D<int> translationPart;
+    if (N==1) {
+      // Rotational part is already unit matix
+    } else if ((N==2) && (direction=="x")) {
+      rotationPart = TMat3D<int>( 1, 0, 0, 0,-1, 0, 0, 0,-1);
+      translationPart = TVec3D<int>(1, 0, 0);
+    } else if ((N==2) && (direction=="y")) {
+      rotationPart = TMat3D<int>(-1, 0, 0, 0, 1, 0, 0, 0,-1);
+      translationPart = TVec3D<int>(0, 1, 0);
+    } else if ((N==2) && (direction=="z")) {
+      rotationPart = TMat3D<int>(-1, 0, 0, 0,-1, 0, 0, 0, 1);
+      translationPart = TVec3D<int>(0, 0, 1);
+    } else if ((N==3) && (direction=="x")) {
+      rotationPart = TMat3D<int>( 1, 0, 0, 0, 0,-1, 0, 1,-1);
+      translationPart = TVec3D<int>(1, 0, 0);
+    } else if ((N==3) && (direction=="y")) {
+      rotationPart = TMat3D<int>(-1, 0, 1, 0, 1, 0,-1, 0, 0);
+      translationPart = TVec3D<int>(0, 1, 0);
+    } else if ((N==3) && (direction=="z")) {
+      rotationPart = TMat3D<int>( 0,-1, 0, 1,-1, 0, 0, 0, 1);
+      translationPart = TVec3D<int>(0, 0, 1);
+    } else if ((N==4) && (direction=="x")) {
+      rotationPart = TMat3D<int>( 1, 0, 0, 0, 0,-1, 0, 1, 0);
+      translationPart = TVec3D<int>(1, 0, 0);
+    } else if ((N==4) && (direction=="y")) {
+      rotationPart = TMat3D<int>( 0, 0, 1, 0, 1, 0,-1, 0, 0);
+      translationPart = TVec3D<int>(0, 1, 0);
+    } else if ((N==4) && (direction=="z")) {
+      rotationPart = TMat3D<int>( 0,-1, 0, 1, 0, 0, 0, 0, 1);
+      translationPart = TVec3D<int>(0, 0, 1);
+    } else if ((N==6) && (direction=="x")) {
+      rotationPart = TMat3D<int>( 1, 0, 0, 0, 1,-1, 0, 1, 0);
+      translationPart = TVec3D<int>(1, 0, 0);
+    } else if ((N==6) && (direction=="y")) {
+      rotationPart = TMat3D<int>( 0, 0, 1, 0, 1, 0,-1, 0, 1);
+      translationPart = TVec3D<int>(0, 1, 0);
+    } else if ((N==6) && (direction=="z")) {
+      rotationPart = TMat3D<int>( 1,-1, 0, 1, 0, 0, 0, 0, 1);
+      translationPart = TVec3D<int>(0, 0, 1);
+    } else if ((N==2) && (direction=="'") && (precedingDirection=="x")) {
+      rotationPart = TMat3D<int>(-1, 0, 0, 0, 0,-1, 0,-1, 0);
+      translationPart = TVec3D<int>(0, 1,-1);
+    } else if ((N==2) && (direction=="'") && (precedingDirection=="y")) {
+      rotationPart = TMat3D<int>( 0, 0,-1, 0,-1, 0,-1, 0, 0);
+      translationPart = TVec3D<int>(1, 0,-1);
+    } else if ((N==2) && (direction=="'") && (precedingDirection=="z")) {
+      rotationPart = TMat3D<int>( 0,-1, 0,-1, 0, 0, 0, 0,-1);
+      translationPart = TVec3D<int>(1,-1, 0);
+    } else if ((N==2) && (direction=="\"") && (precedingDirection=="x")) {
+      rotationPart = TMat3D<int>(-1, 0, 0, 0, 0, 1, 0, 1, 0);
+      translationPart = TVec3D<int>(0, 1, 1);
+    } else if ((N==2) && (direction=="\"") && (precedingDirection=="y")) {
+      rotationPart = TMat3D<int>( 0, 0, 1, 0,-1, 0, 1, 0, 0);
+      translationPart = TVec3D<int>(1, 0, 1);
+    } else if ((N==2) && (direction=="\"") && (precedingDirection=="z")) {
+      rotationPart = TMat3D<int>( 0, 1, 0, 1, 0, 0, 0, 0,-1);
+      translationPart = TVec3D<int>(1, 1, 0);
+    } else if ((N==3) && (direction=="*")) {
+      rotationPart = TMat3D<int>( 0, 0, 1, 1, 0, 0, 0, 1, 0);
+      translationPart = TVec3D<int>(1, 1, 1);
+    } else {
+      cout << "can't identify rotation part: " << qPrintable(direction) << " " << N << endl;
+      return false;
+    }
+
+    if (!seitz.capturedTexts().at(1).isEmpty())
+      rotationPart*=-1;
+
+    int S = 0;
+    if (!seitz.capturedTexts().at(5).isEmpty())
+      S = seitz.capturedTexts().at(5).toInt();
+    if (S>=N) return false;
+    translationPart *= GroupElement::MOD * S / N;
+    if (seitz.capturedTexts().at(4).contains("a"))
+      translationPart += TVec3D<int>(GroupElement::MOD/2, 0, 0);
+    if (seitz.capturedTexts().at(4).contains("b"))
+      translationPart += TVec3D<int>(0, GroupElement::MOD/2, 0);
+    if (seitz.capturedTexts().at(4).contains("c"))
+      translationPart += TVec3D<int>(0, 0, GroupElement::MOD/2);
+    if (seitz.capturedTexts().at(4).contains("n"))
+      translationPart += TVec3D<int>(GroupElement::MOD/2, GroupElement::MOD/2, GroupElement::MOD/2);
+    if (seitz.capturedTexts().at(4).contains("u"))
+      translationPart += TVec3D<int>(GroupElement::MOD/4, 0, 0);
+    if (seitz.capturedTexts().at(4).contains("v"))
+      translationPart += TVec3D<int>(0, GroupElement::MOD/4, 0);
+    if (seitz.capturedTexts().at(4).contains("w"))
+      translationPart += TVec3D<int>(0, 0, GroupElement::MOD/4);
+    if (seitz.capturedTexts().at(4).contains("d"))
+      translationPart += TVec3D<int>(GroupElement::MOD/4, GroupElement::MOD/4, GroupElement::MOD/4);
+
+
+    GroupElement e(rotationPart, translationPart);
+    //cout << "Generator ";
+    //e.print();
+    addToGroup(group, e);
     precedingN = N;
+    precedingDirection = direction;
   }
 
 
-  //cout << "Groupsize: " << group.size() << endl;
+  //cout <<  " Groupsize: " << group.size() << endl;
 
   for (int i=0; i<group.size(); i++) {
     if (!group.at(i).t.isNull()) {
@@ -324,7 +412,7 @@ bool Spacegroup::generateGroup(QString hall) {
       extinctionChecks << e;
     }
   }
-  return false;
+  return true;
 
 }
 

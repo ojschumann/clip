@@ -32,7 +32,7 @@ public:
   TMat3D<T>& operator-=(const TMat3D<T>& m);
   TMat3D<T>& lmult(const TMat3D<T>& m);
 
-  bool operator==(const TMat3D<T>& m);
+  bool operator==(const TMat3D<T>& m) const;
 
   TVec3D<T> operator()(int i) const;
   T& operator()(int i, int j) { return DATA[i+j+(j<<1)]; };

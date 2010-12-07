@@ -178,7 +178,7 @@ template <typename T> TMat3D<T>& TMat3D<T>::operator*=(T a) {
 }
 
 
-template <typename T> bool TMat3D<T>::operator==(const TMat3D<T>& m) {
+template <typename T> bool TMat3D<T>::operator==(const TMat3D<T>& m) const {
   for (int i=0; i<3; i++) {
     for (int j=0; j<3; j++) {
       if (!((*this)(i,j)==m(i,j)))
