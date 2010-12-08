@@ -87,7 +87,8 @@ SOURCES += main.cpp\
     tools/spotindicatorgraphicsitem.cpp \
     ui/indexdisplay.cpp \
     indexing/markermodel.cpp \
-    core/spacegroupdata.cpp
+    core/spacegroupdata.cpp \
+    indexing/candidategenerator.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -140,7 +141,8 @@ HEADERS  += ui/clip.h \
 #    tools/projectionmapper.h \
     tools/spotindicatorgraphicsitem.h \
     ui/indexdisplay.h \
-    indexing/markermodel.h
+    indexing/markermodel.h \
+    indexing/candidategenerator.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

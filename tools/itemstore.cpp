@@ -2,7 +2,6 @@
 
 #include <QGraphicsScene>
 
-#include "tools/signalingellipse.h"
 #include "tools/zoneitem.h"
 #include "tools/ruleritem.h"
 

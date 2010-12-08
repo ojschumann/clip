@@ -81,9 +81,7 @@ bool Spacegroup::setGroupSymbol(QString s) {
 
       symbol = s;
       crystalsystem = iter->system();
-      foreach (int n, getConstrains())
-        cout << n << " ";
-      cout << endl;
+
       if (oldSystem==crystalSystem() && oldSystem==trigonal && oldConstrains!=getConstrains()) {
         if (oldConstrains.at(3)==0) {
           emit triclinRtoH();
@@ -351,12 +349,13 @@ bool Spacegroup::generateGroup(QString hall) {
     if (seitz.capturedTexts().at(4).contains("d"))
       translationPart += TVec3D<int>(GroupElement::MOD/4, GroupElement::MOD/4, GroupElement::MOD/4);
 
-
-    addToGroup(tmpGroup, GroupElement (rotationPart, translationPart));
+    GroupElement e(rotationPart, translationPart);
+    cout << "Generator: ";
+    e.print();
+    addToGroup(tmpGroup, GroupElement(rotationPart, translationPart));
     precedingN = N;
     precedingDirection = direction;
   }
-
   group = tmpGroup;
   extinctionChecks.clear();
   pointgroup.clear();
@@ -372,6 +371,7 @@ bool Spacegroup::generateGroup(QString hall) {
       extinctionChecks << e;
     }
   }
+  cout << "Size: " << tmpGroup.size() << " " << extinctionChecks.size() << endl;
 
   constrains.clear();
   constrains << 0 << 0 << 0 << 0 << 0 << 0;

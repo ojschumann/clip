@@ -46,8 +46,9 @@ Allow to configure colors
 
 Allow to "print" to pdf/png/jpeg
 
-Get rid of SignalingEllipseItem
-
 Marked Spots and Zone info (call from Crystal) (new)
 
 Mark special reflection (like magnetic incomensurate one)
+
+Systematic extinctions
+  Check R3c:R and R3c:H, it's not working properly

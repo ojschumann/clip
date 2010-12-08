@@ -275,7 +275,6 @@ void Crystal::generateReflections() {
 
 void Crystal::reflectionGenerated() {
   reflections = reflectionFuture.result();
-  cout << "generation ended " << reflections.size() << endl;
   if (restartReflectionUpdate) {
     restartReflectionUpdate = false;
     generateReflections();
