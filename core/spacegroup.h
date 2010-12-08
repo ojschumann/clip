@@ -75,7 +75,6 @@ private:
 
 
   QString symbol;
-  QStringList symbolElements;
   System crystalsystem;
 
   static QList<SpacegroupSymbolInfo> groupInfos;
@@ -99,7 +98,9 @@ private:
   };
 
   QList<GroupElement> group;
+  QList<TMat3D<int> > pointgroup;
   QList<ExtinctionElement> extinctionChecks;
+  QList<int> constrains;
 
   bool generateGroup(QString);
   template <class T> void addToGroup(QList<T>& group, const T&);

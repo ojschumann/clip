@@ -185,8 +185,7 @@ void ContrastCurves::makeHScale() {
 
 
 
-ContrastCurves::BoundedEllipse::BoundedEllipse(QGraphicsItem *parent): SignalingEllipseItem(parent) {
-  setRect(-5,-5,10,10);
+ContrastCurves::BoundedEllipse::BoundedEllipse(QGraphicsItem *parent): CircleItem(5, parent) {
   setFlag(QGraphicsItem::ItemIsMovable);
   setFlag(QGraphicsItem::ItemIgnoresTransformations);
   setAcceptedMouseButtons(Qt::LeftButton);
@@ -211,9 +210,9 @@ QVariant ContrastCurves::BoundedEllipse::itemChange(GraphicsItemChange change, c
     } else if (p.y()>bbox.bottom()) {
       p.setY(bbox.bottom());
     }
-    return SignalingEllipseItem::itemChange(change, QVariant(p));
+    return CircleItem::itemChange(change, QVariant(p));
   }
-  return SignalingEllipseItem::itemChange(change, value);
+  return CircleItem::itemChange(change, value);
 }
 
 

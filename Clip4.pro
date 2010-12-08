@@ -54,7 +54,6 @@ SOURCES += main.cpp\
     ui/projectiongraphicsview.cpp \
     core/laueplaneprojector.cpp \
     core/stereoprojector.cpp \
-    tools/signalingellipse.cpp \
     ui/stereocfg.cpp \
     ui/laueplanecfg.cpp \
     tools/ruleritem.cpp \
@@ -107,7 +106,6 @@ HEADERS  += ui/clip.h \
     ui/projectiongraphicsview.h \
     core/laueplaneprojector.h \
     core/stereoprojector.h \
-    tools/signalingellipse.h \
     tools/init3D.h \
     ui/stereocfg.h \
     ui/laueplanecfg.h \

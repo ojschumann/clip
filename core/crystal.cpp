@@ -267,19 +267,16 @@ void Crystal::generateReflections() {
   if (not updateEnabled)
     return;
   if (reflectionFuture.isRunning()) {
-    cout << "generation still running " << a <<  endl;
     restartReflectionUpdate = true;
   } else {
-    cout << "started generation " << a << endl;
     reflectionFuture.setFuture(QtConcurrent::run(this, &Crystal::doGeneration));
   }
 }
 
 void Crystal::reflectionGenerated() {
-  cout << "generation ended " << a << endl;
   reflections = reflectionFuture.result();
+  cout << "generation ended " << reflections.size() << endl;
   if (restartReflectionUpdate) {
-    cout << "generation restarted " << a << endl;
     restartReflectionUpdate = false;
     generateReflections();
   }
@@ -568,28 +565,33 @@ void Crystal::slotSetSGConstrains() {
 
 
 void Crystal::convertRtoH() {
-  Vec3D a = uvw2Real(1, -1, 0);
-  // Vec3D b = uvw2Real(0, 1, -1);
-  Vec3D c = uvw2Real(1, 1, 1);
-  setCell(a.norm(), a.norm(), c.norm(), 90, 90, 120);
-  OptimalRotation r;
-  r.addVectorPair(a, uvw2Real(1,0,0));
-  r.addVectorPair(c, uvw2Real(0,0,1));
-  addRotation(r.getOptimalRotation());
+  Vec3D a = uvw2Real( 1,-1, 0);
+  //    b = uvw2Real( 0, 1,-1);
+  Vec3D c = uvw2Real( 1, 1, 1);
+  double a_norm = a.norm();
+  double c_norm = c.norm();
 
+  OptimalRotation r;
+  r.addVectorPair(a/a_norm, MRot*Vec3D(1,0,0));
+  r.addVectorPair(c/c_norm, MRot*Vec3D(0,0,1));
+  MRot.lmult(r.getOptimalRotation());
+
+  setCell(a_norm, a_norm, c_norm, 90, 90, 120);
 }
 
 void Crystal::convertHtoR() {
-  Vec3D a=uvw2Real(2,1,1)/3;
-  Vec3D b=uvw2Real(-1,1,1)/3;
+  Vec3D a = uvw2Real( 2, 1, 1)/3;
+  Vec3D b = uvw2Real(-1, 1, 1)/3;
+  //    c = uvw2Real(-1,-2, 1)/3;
   double l=a.norm();
   double ang=180*M_1_PI*acos(a*b/l/l);
-  setCell(l,l,l,ang,ang,ang);
 
   OptimalRotation r;
-  r.addVectorPair(a, uvw2Real(1,0,0));
-  r.addVectorPair(b, uvw2Real(0,1,0));
-  addRotation(r.getOptimalRotation());
+  r.addVectorPair(a/l, MRot*Vec3D(1,0,0));
+  r.addVectorPair(b/l, MRot*Vec3D(cos(M_PI/180*ang), sin(M_PI/180*ang), 0));
+  MRot.lmult(r.getOptimalRotation());
+
+  setCell(l,l,l,ang,ang,ang);
 }
 
 #include <QTimer>

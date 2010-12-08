@@ -6,7 +6,7 @@
 #include <QPointer>
 
 #include "image/laueimage.h"
-#include "tools/signalingellipse.h"
+#include "tools/circleitem.h"
 
 class LaueImage;
 class BezierCurve;
@@ -36,7 +36,7 @@ public:
     void makeHScale();
     void makeVScale();
   private:
-    class BoundedEllipse: public SignalingEllipseItem {
+    class BoundedEllipse: public CircleItem {
     public:
       BoundedEllipse(QGraphicsItem *parent=0);
       QVariant itemChange(GraphicsItemChange change, const QVariant & value);

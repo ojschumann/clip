@@ -19,6 +19,12 @@ template <typename T> TMat3D<T>::TMat3D() {
     (*this)(i,i)=InitatorValues<T>::One();
 }
 
+template <typename T> TMat3D<T>::TMat3D(const T& val) {
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+    (*this)(i,j)=val;
+}
+
 template <typename T> TMat3D<T>::TMat3D(const TVec3D<T>& v1,const TVec3D<T>& v2,const TVec3D<T>& v3) {
   for (int i=0; i<3; i++) {
     (*this)(i,0)=v1(i);

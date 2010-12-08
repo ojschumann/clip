@@ -15,6 +15,7 @@ template <typename T> class TMat3D {
   friend class TVec3D<T>;
 public:
   TMat3D();
+  TMat3D(const T&);
   TMat3D(const TVec3D<T>& v1, const TVec3D<T>& v2, const TVec3D<T>& v3);
   TMat3D(vector<T> M);
   TMat3D(TVec3D<T> axis, T angle);

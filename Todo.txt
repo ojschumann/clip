@@ -22,9 +22,6 @@ CropWidget
 RulerModel
   Handle deletes...
 
-Spacegroup
-  implement point group generators for all crystal systems
-
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
 
