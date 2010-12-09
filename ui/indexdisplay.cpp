@@ -29,12 +29,5 @@ void IndexDisplay::on_startButton_clicked()
     spotMarkerNormals += p->getSpotMarkerNormals();
     zoneMarkerNormals += p->getZoneMarkerNormals();
   }
-  cout << "Spot Marker" << endl;
-  foreach (Vec3D v, spotMarkerNormals) {
-    cout << v.x() << " " << v.y() << " " << v.z() << endl;
-  }
-  cout << "Zone Marker" << endl;
-  foreach (Vec3D v, zoneMarkerNormals) {
-    cout << v.x() << " " << v.y() << " " << v.z() << endl;
-  }
+
 }

@@ -11,167 +11,54 @@
 #include "tools/mat3D.h"
 #include "tools/optimalrotation.h"
 
-
-
 using namespace std;
 
-Indexer::Indexer(QObject* parent): QAbstractTableModel(parent) {
-}
-
-int Indexer::rowCount(const QModelIndex & parent) const {
-  return solution.count();
-}
-
-int Indexer::columnCount(const QModelIndex & parent) const {
-  return 3;
-}
-
-QVariant Indexer::data(const QModelIndex & index, int role) const {
-  if (role==Qt::DisplayRole) {
-    if (index.column()==0) {
-      return QVariant(solution.at(index.row()).spatialDeviationSum());
-    } else if (index.column()==1) {
-      return QVariant(solution.at(index.row()).angularDeviationSum());
-    } else if (index.column()==2) {
-      return QVariant(solution.at(index.row()).hklDeviationSum());
-    }
-  }
-  return QVariant();
-}
-
-QVariant Indexer::headerData(int section, Qt::Orientation orientation, int role) const {
-  if (role==Qt::DisplayRole) {
-    if (orientation==Qt::Horizontal) {
-      if (section==0) {
-        return QVariant("Spacial");
-      } else if (section==1) {
-        return QVariant("Angular");
-      } else if (section==2) {
-        return QVariant("HKL");
-      }
-    } else {
-      return QVariant(section+1);
-    }
-  }
-  return QVariant();
-}
 
 
-void Indexer::sort(int column, Qt::SortOrder order) {
-  sortColumn=column;
-  sortOrder=order;
-  qSort(solution.begin(), solution.end(), SolSort(sortColumn, sortOrder));
-  reset();
-}
-
-void Indexer::startIndexing(Indexer::IndexingParameter& _p) {
-  emit stopWorker();
-  p=_p;
-  cout << p.pointGroup.size() << endl;
-  solution.clear();
-  reset();
-  IndexWorker* worker=new IndexWorker(p);
-  qRegisterMetaType<Solution>();
-  connect(worker, SIGNAL(publishSolution(Solution)), this, SLOT(addSolution(Solution)));
-  connect(worker, SIGNAL(progressInfo(int, int)), this, SIGNAL(progressInfo(int,int)));
-  connect(worker, SIGNAL(destroyed()), this, SLOT(threadFinished()));
-  connect(this, SIGNAL(stopWorker()), worker, SLOT(stop()));
-  connect(this, SIGNAL(destroyed()), worker, SLOT(stop()));
-  QThreadPool::globalInstance()->start(worker);
-  emit runningStateChanged(true);
-}
-
-void Indexer::addSolution(Solution s) {
-  QList<Solution>::iterator iter=qLowerBound(solution.begin(), solution.end(), s, SolSort(sortColumn, sortOrder));
-  int n=iter-solution.begin();
-  beginInsertRows(QModelIndex(),n,n);
-  solution.insert(iter,s);
-  endInsertRows();
-}
-
-Solution Indexer::getSolution(unsigned int n) {
-  return solution[n];
-}
-
-void Indexer::threadFinished() {
-  emit runningStateChanged(false);
-}
-
-
-Indexer::SolSort::SolSort(int col, Qt::SortOrder order) {
-  sortColumn=col;
-  sortOrder=order;
-};
-
-bool Indexer::SolSort::operator()(const Solution& s1,const Solution& s2) {
-  bool b=true;
-  if (sortColumn==0) {
-    b=s1.angularDeviationSum()<s2.angularDeviationSum();
-  } else if (sortColumn==1) {
-    b=s1.spatialDeviationSum()<s2.spatialDeviationSum();
-  } else if (sortColumn==2) {
-    b=s1.hklDeviationSum()<s2.hklDeviationSum();
-  }
-  if (sortOrder==Qt::DescendingOrder)
-    b=not b;
-  return b;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-IndexWorker::IndexWorker(Indexer::IndexingParameter &_p): QObject(), QRunnable(), indexMutex(), angles(), solRotLock(), solutionRotations() {
-  indexI=1;
-  indexJ=0;
+Indexer::Indexer(QList<Vec3D> _spotMarkerNormals, QList<Vec3D> _zoneMarkerNormals, const Mat3D& _MReal, const Mat3D& _MReziprocal):
+    QObject(),
+    QRunnable(),
+    spotMarkerNormals(_spotMarkerNormals),
+    zoneMarkerNormals(_zoneMarkerNormals),
+    MReal(_MReal),
+    MReziprocal(_MReziprocal)
+{
   nextProgressSignal=0;
 
-  isInitiatingThread=true;
   shouldStop=false;
-  p=_p;
-  OMatInv=p.orientationMatrix.inverse();
 
-  for (unsigned int i=p.markerNormals.size(); i--; ) {
-    for (unsigned int j=i; j--; ) {
-      AngleInfo info;
-      info.index1=i;
-      info.index2=j;
-      info.cosAng=p.markerNormals.at(i)*p.markerNormals.at(j);
-      double c=acos(info.cosAng);
-      double c1=cos(c+p.maxAngularDeviation);
-      double c2=cos(c-p.maxAngularDeviation);
-      info.lowerBound=(c1<c2)?c1:c2;
-      info.upperBound=(c1>c2)?c1:c2;
-      angles.append(info);
+
+  for (int i=0; i<spotMarkerNormals.size(); i++) {
+    for (int j=0; j<i; j++) {
+      angles.append(AngleInfo(spotMarkerNormals.at(i), spotMarkerNormals.at(j), AngleInfo::Spot, AngleInfo::Spot));
+    }
+  }
+  for (int i=0; i<zoneMarkerNormals.size(); i++) {
+    for (int j=0; j<i; j++) {
+      angles.append(AngleInfo(zoneMarkerNormals.at(i), zoneMarkerNormals.at(j), AngleInfo::Zone, AngleInfo::Zone));
+    }
+  }
+  for (int i=0; i<spotMarkerNormals.size(); i++) {
+    for (int j=0; j<zoneMarkerNormals.size(); j++) {
+      angles.append(AngleInfo(spotMarkerNormals.at(i), zoneMarkerNormals.at(j), AngleInfo::Spot, AngleInfo::Zone));
     }
   }
   qSort(angles);
 }
 
-void IndexWorker::run() {
-  if (isInitiatingThread) {
-    isInitiatingThread=false;
-    unsigned int count=0;
-    while (QThreadPool::globalInstance()->tryStart(this)) {
-      count++;
-    }
-    cout << "Started " << count << " additional threads" << endl;
-  }
-  int i, j;
-  AngleInfo lower;
+void Indexer::run() {
+  QThreadPool::globalInstance()->tryStart(this);
 
-  while (nextWork(i,j)) {
+  forever {
+    int i = candidatePos.fetchAndAddOrdered(1);
+    for (int j=0; j<i; j++) {
+      if (shouldStop) return;
+      CandidateGenerator::Candidate c1 = candidates.getCandidate(i);
+      CandidateGenerator::Candidate c2 = candidates.getCandidate(j);
+
     double cosAng=p.refs.at(i).normalLocal*p.refs.at(j).normalLocal;
     lower.upperBound=cosAng;
-    QList<IndexWorker::AngleInfo>::iterator iter=qLowerBound(angles.begin(), angles.end(), lower, IndexWorker::AngleInfo::cmpAngleInfoUpperBound);
+    QList<Indexer::AngleInfo>::iterator iter=qLowerBound(angles.begin(), angles.end(), lower, Indexer::AngleInfo::cmpAngleInfoUpperBound);
     bool ok=false;
     while (iter!=angles.end() && cosAng>=iter->lowerBound) {
       if (iter->lowerBound<=cosAng && cosAng<iter->upperBound) {
@@ -185,7 +72,7 @@ void IndexWorker::run() {
 
 #define MAX(x,y) (((x)>(y))?(x):(y))
 
-void IndexWorker::checkGuess(const Reflection &c1, const Reflection &c2,  const AngleInfo &a) {
+void Indexer::checkGuess(const Reflection &c1, const Reflection &c2,  const AngleInfo &a) {
   OptimalRotation O;
   O.addVectorPair(c1.normalLocal, p.markerNormals[a.index1]);
   O.addVectorPair(c2.normalLocal, p.markerNormals[a.index2]);
@@ -272,7 +159,7 @@ void IndexWorker::checkGuess(const Reflection &c1, const Reflection &c2,  const 
 
 }
 
-void IndexWorker::otimizeScale(SolutionItem& si) {
+void Indexer::otimizeScale(SolutionItem& si) {
   Vec3D hkl(si.h,si.k,si.l);
   si.rationalHkl=OMatInv*si.rotatedMarker;
   si.rationalHkl*=hkl*si.rationalHkl/si.rationalHkl.norm_sq();
@@ -281,7 +168,7 @@ void IndexWorker::otimizeScale(SolutionItem& si) {
   // => s* sum( rhkl_i^2 ) = sum ( rhkl_i * hkl_i )
 }
 
-bool IndexWorker::newSolution(const Mat3D& M) {
+bool Indexer::newSolution(const Mat3D& M) {
   //TODO: This is possibly a performance lock. The threads might serialize here
   QMutexLocker lock(&solRotLock);
   Mat3D T1(M.transposed());
@@ -299,7 +186,7 @@ bool IndexWorker::newSolution(const Mat3D& M) {
 }
 
 
-bool IndexWorker::nextWork(int &i, int &j) {
+bool Indexer::nextWork(int &i, int &j) {
   QMutexLocker lock(&indexMutex);
   if (indexI>=p.refs.size() or shouldStop)
     return false;
@@ -320,20 +207,30 @@ bool IndexWorker::nextWork(int &i, int &j) {
     indexJ=0;
   }
   return true;
-}    
+}
 
-bool IndexWorker::AngleInfo::operator<(const AngleInfo& o) const {
+Indexer::AngleInfo::AngleInfo(const Vec3D &v1, const Vec3D &v2, NormalType t1, NormalType t2) {
+  cosAng=v1*v2;
+  double c=acos(info.cosAng);
+  double c1=cos(c+p.maxAngularDeviation);
+  double c2=cos(c-p.maxAngularDeviation);
+  lowerBound=(c1<c2)?c1:c2;
+  upperBound=(c1>c2)?c1:c2;
+}
+
+
+bool Indexer::AngleInfo::operator<(const AngleInfo& o) const {
   return cosAng<o.cosAng;
 }
 
-bool IndexWorker::AngleInfo::cmpAngleInfoLowerBound(const AngleInfo &a1, const AngleInfo &a2) {
+bool Indexer::AngleInfo::cmpAngleInfoLowerBound(const AngleInfo &a1, const AngleInfo &a2) {
   return a1.lowerBound<a2.lowerBound;
 }
-bool IndexWorker::AngleInfo::cmpAngleInfoUpperBound(const AngleInfo &a1, const AngleInfo &a2) {
+bool Indexer::AngleInfo::cmpAngleInfoUpperBound(const AngleInfo &a1, const AngleInfo &a2) {
   return a1.upperBound<a2.upperBound;
 }
 
-void IndexWorker::stop() {
+void Indexer::stop() {
   QMutexLocker lock(&indexMutex);
   shouldStop=true;
 }
