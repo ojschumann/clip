@@ -9,7 +9,7 @@ class OptimalRotation
 public:
   OptimalRotation();
   void reset();
-  void addVectorPair(const Vec3D&, const Vec3D&);
+  void addVectorPair(const Vec3D& from, const Vec3D& to);
   Mat3D getOptimalRotation();
 
 private:
@@ -17,5 +17,7 @@ private:
   Mat3D optRot;
   bool valid;
 };
+
+Mat3D VectorPairRotation(const Vec3D& from1, const Vec3D& from2, const Vec3D& to1, const Vec3D& to2);
 
 #endif // OPTIMALROTATION_H

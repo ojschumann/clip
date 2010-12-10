@@ -50,7 +50,7 @@ void SolutionModel::sort(int column, Qt::SortOrder order) {
 }
 
 void SolutionModel::startIndexing(SolutionModel::IndexingParameter& _p) {
-  emit stopWorker();
+/*  emit stopWorker();
   p=_p;
   cout << p.pointGroup.size() << endl;
   solution.clear();
@@ -64,6 +64,7 @@ void SolutionModel::startIndexing(SolutionModel::IndexingParameter& _p) {
   connect(this, SIGNAL(destroyed()), worker, SLOT(stop()));
   QThreadPool::globalInstance()->start(worker);
   emit runningStateChanged(true);
+  */
 }
 
 void SolutionModel::addSolution(Solution s) {

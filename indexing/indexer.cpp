@@ -18,6 +18,7 @@ using namespace std;
 Indexer::Indexer(QList<Vec3D> _spotMarkerNormals, QList<Vec3D> _zoneMarkerNormals, const Mat3D& _MReal, const Mat3D& _MReziprocal):
     QObject(),
     QRunnable(),
+    candidates(_MReal, _MReziprocal),
     spotMarkerNormals(_spotMarkerNormals),
     zoneMarkerNormals(_zoneMarkerNormals),
     MReal(_MReal),
@@ -30,24 +31,27 @@ Indexer::Indexer(QList<Vec3D> _spotMarkerNormals, QList<Vec3D> _zoneMarkerNormal
 
   for (int i=0; i<spotMarkerNormals.size(); i++) {
     for (int j=0; j<i; j++) {
-      angles.append(AngleInfo(spotMarkerNormals.at(i), spotMarkerNormals.at(j), AngleInfo::Spot, AngleInfo::Spot));
+      spotSpotAngles.append(AngleInfo(spotMarkerNormals.at(i), spotMarkerNormals.at(j), 0.017));
     }
   }
+  qSort(spotSpotAngles);
   for (int i=0; i<zoneMarkerNormals.size(); i++) {
     for (int j=0; j<i; j++) {
-      angles.append(AngleInfo(zoneMarkerNormals.at(i), zoneMarkerNormals.at(j), AngleInfo::Zone, AngleInfo::Zone));
+      zoneZoneAngles.append(AngleInfo(zoneMarkerNormals.at(i), zoneMarkerNormals.at(j), 0.017));
     }
   }
+  qSort(zoneZoneAngles);
   for (int i=0; i<spotMarkerNormals.size(); i++) {
     for (int j=0; j<zoneMarkerNormals.size(); j++) {
-      angles.append(AngleInfo(spotMarkerNormals.at(i), zoneMarkerNormals.at(j), AngleInfo::Spot, AngleInfo::Zone));
+      spotZoneAngles.append(AngleInfo(spotMarkerNormals.at(i), zoneMarkerNormals.at(j), 0.017));
     }
   }
-  qSort(angles);
+  qSort(spotZoneAngles);
 }
 
+
 void Indexer::run() {
-  QThreadPool::globalInstance()->tryStart(this);
+  //QThreadPool::globalInstance()->tryStart(this);
 
   forever {
     int i = candidatePos.fetchAndAddOrdered(1);
@@ -56,32 +60,59 @@ void Indexer::run() {
       CandidateGenerator::Candidate c1 = candidates.getCandidate(i);
       CandidateGenerator::Candidate c2 = candidates.getCandidate(j);
 
-    double cosAng=p.refs.at(i).normalLocal*p.refs.at(j).normalLocal;
-    lower.upperBound=cosAng;
-    QList<Indexer::AngleInfo>::iterator iter=qLowerBound(angles.begin(), angles.end(), lower, Indexer::AngleInfo::cmpAngleInfoUpperBound);
-    bool ok=false;
-    while (iter!=angles.end() && cosAng>=iter->lowerBound) {
-      if (iter->lowerBound<=cosAng && cosAng<iter->upperBound) {
-        checkGuess(p.refs.at(i), p.refs.at(j),  *iter);
-        checkGuess(p.refs.at(j), p.refs.at(i),  *iter);
-      }
-      iter++;
+      checkPossibleAngles(c1.reziprocalNormal, c2.reziprocalNormal, spotSpotAngles, c1, c2);
+      checkPossibleAngles(c1.realNormal, c2.realNormal, zoneZoneAngles, c1, c2);
+      checkPossibleAngles(c1.reziprocalNormal, c2.realNormal, spotZoneAngles, c1, c2);
     }
+    if (i>300) return;
   }
 }
 
-#define MAX(x,y) (((x)>(y))?(x):(y))
+void Indexer::checkPossibleAngles(const Vec3D& v1, const Vec3D& v2, QList<AngleInfo> angles, const CandidateGenerator::Candidate& c1, const CandidateGenerator::Candidate& c2) {
+  if (angles.empty()) return;
 
-void Indexer::checkGuess(const Reflection &c1, const Reflection &c2,  const AngleInfo &a) {
-  OptimalRotation O;
-  O.addVectorPair(c1.normalLocal, p.markerNormals[a.index1]);
-  O.addVectorPair(c2.normalLocal, p.markerNormals[a.index2]);
+  double cosAng = v1*v2;
+
+  int minIdx = 0;
+  int maxIdx = angles.size();
+  while (maxIdx!=minIdx) {
+    int chkIdx = (minIdx+maxIdx)/2;
+    if (cosAng>angles.at(chkIdx).upperBound) {
+      minIdx = chkIdx+1;
+    } else {
+      maxIdx = chkIdx;
+    }
+  }
+
+  for ( ; minIdx<angles.size() && cosAng>=angles.at(minIdx).lowerBound; minIdx++) {
+    checkGuess(v1, v2, angles.at(minIdx));
+    checkGuess(v2, v1, angles.at(minIdx));
+  }
+}
+
+
+void Indexer::checkGuess(const Vec3D &v1, const Vec3D &v2, const AngleInfo &a) {
+
   // Prepare Best Rotation Matrix from c1,c2 -> a(1) a(2)
 
-  Mat3D R(O.getOptimalRotation());
-
+  Mat3D R(VectorPairRotation(a.v1, a.v2, v1, v2));
 
   // Try Indexation of missing reflexions
+
+  foreach (Vec3D n, spotMarkerNormals) {
+    Vec3D v = MReal*R*n;
+  }
+
+  foreach (Vec3D n, zoneMarkerNormals) {
+    Vec3D v = MReziprocal*R*n;
+  }
+
+
+
+
+  /*
+
+
   Solution s;
   s.indexingRotation=R;
 
@@ -155,14 +186,15 @@ void Indexer::checkGuess(const Reflection &c1, const Reflection &c2,  const Angl
       }
       emit publishSolution(s);
     }
-  }
+  }*/
 
 }
 
 void Indexer::otimizeScale(SolutionItem& si) {
-  Vec3D hkl(si.h,si.k,si.l);
+  /*Vec3D hkl(si.h,si.k,si.l);
   si.rationalHkl=OMatInv*si.rotatedMarker;
   si.rationalHkl*=hkl*si.rationalHkl/si.rationalHkl.norm_sq();
+  */
   //sum (hkl-scale*rhkl)^2 = min
   // dsum/scale = 2sum (hkl_i-s*rhkl_i)*rhkl_i == 0!
   // => s* sum( rhkl_i^2 ) = sum ( rhkl_i * hkl_i )
@@ -170,7 +202,7 @@ void Indexer::otimizeScale(SolutionItem& si) {
 
 bool Indexer::newSolution(const Mat3D& M) {
   //TODO: This is possibly a performance lock. The threads might serialize here
-  QMutexLocker lock(&solRotLock);
+  /*QMutexLocker lock(&solRotLock);
   Mat3D T1(M.transposed());
   for (unsigned int n=solutionRotations.size(); n--; ) {
     Mat3D T2(solutionRotations.at(n)*T1);
@@ -181,41 +213,29 @@ bool Indexer::newSolution(const Mat3D& M) {
       }
     }
   }
-  solutionRotations.append(M);
+  solutionRotations.append(M);*/
   return true;
 }
 
 
-bool Indexer::nextWork(int &i, int &j) {
-  QMutexLocker lock(&indexMutex);
-  if (indexI>=p.refs.size() or shouldStop)
-    return false;
 
-  i=indexI;
-  j=indexJ;
-
-  if (nextProgressSignal==0) {
-    int maxN=p.refs.size()*(p.refs.size()-1)/2;
-    int actN=i*(i-1)/2+j;
-    nextProgressSignal=maxN/1000;
-    emit progressInfo(maxN, actN);
-  }
-  nextProgressSignal--;
-  indexJ++;
-  if (indexJ==indexI) {
-    indexI++;
-    indexJ=0;
-  }
-  return true;
-}
-
-Indexer::AngleInfo::AngleInfo(const Vec3D &v1, const Vec3D &v2, NormalType t1, NormalType t2) {
+Indexer::AngleInfo::AngleInfo(const Vec3D &_v1, const Vec3D &_v2, double maxDeviation):
+    v1(_v1),
+    v2(_v2)
+{
   cosAng=v1*v2;
-  double c=acos(info.cosAng);
-  double c1=cos(c+p.maxAngularDeviation);
-  double c2=cos(c-p.maxAngularDeviation);
-  lowerBound=(c1<c2)?c1:c2;
-  upperBound=(c1>c2)?c1:c2;
+  double c=acos(cosAng);
+  double c1=cos(c-maxDeviation);
+  double c2=cos(c+maxDeviation);
+  if (c1<c2) {
+    lowerBound = c1;
+    upperBound = c2;
+  } else {
+    lowerBound = c2;
+    upperBound = c1;
+  }
+  if (fabs(c)<maxDeviation) upperBound = 1.0;
+  if (fabs(c-M_PI)<maxDeviation) lowerBound = -1.0;
 }
 
 
@@ -231,6 +251,6 @@ bool Indexer::AngleInfo::cmpAngleInfoUpperBound(const AngleInfo &a1, const Angle
 }
 
 void Indexer::stop() {
-  QMutexLocker lock(&indexMutex);
+  //QMutexLocker lock(&indexMutex);
   shouldStop=true;
 }

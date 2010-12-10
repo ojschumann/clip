@@ -29,8 +29,8 @@ public:
   TVec3D<T>& operator-=(const TVec3D<T>& v);
   TVec3D<T>& operator*=(const T& a);
 
-  T& operator()(int i) {return XX[i]; }
-  const T& operator()(int i) const { return XX[i]; }
+  T& operator()(int i) {return DATA[i]; }
+  const T& operator()(int i) const { return DATA[i]; }
 
   T norm_sq() const;
 
@@ -54,7 +54,7 @@ protected:
   inline TVec3D(KeyClass v) {};
 
   // The REAL Data
-  T XX[3];
+  T DATA[3];
 
   //static T fault;
 };

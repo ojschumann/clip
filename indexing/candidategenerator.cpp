@@ -70,7 +70,7 @@ void CandidateGenerator::generateNextIndex() {
   foreach(TVec3D<int> idx, vectorGroup) {
     Candidate cand;
     cand.index = idx;
-    cand.index = idx.toType<double>().normalized();
+    cand.indexNormal = idx.toType<double>().normalized();
     cand.realNormal = (MReal*idx).normalized();
     cand.reziprocalNormal = (MReciprocal*idx).normalized();
 

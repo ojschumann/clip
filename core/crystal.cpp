@@ -570,10 +570,7 @@ void Crystal::convertRtoH() {
   double a_norm = a.norm();
   double c_norm = c.norm();
 
-  OptimalRotation r;
-  r.addVectorPair(a/a_norm, MRot*Vec3D(1,0,0));
-  r.addVectorPair(c/c_norm, MRot*Vec3D(0,0,1));
-  MRot.lmult(r.getOptimalRotation());
+  MRot.lmult(VectorPairRotation(MRot*Vec3D(1,0,0), MRot*Vec3D(0,0,1), a/a_norm, c/c_norm));
 
   setCell(a_norm, a_norm, c_norm, 90, 90, 120);
 }
@@ -585,11 +582,7 @@ void Crystal::convertHtoR() {
   double l=a.norm();
   double ang=180*M_1_PI*acos(a*b/l/l);
 
-  OptimalRotation r;
-  r.addVectorPair(a/l, MRot*Vec3D(1,0,0));
-  r.addVectorPair(b/l, MRot*Vec3D(cos(M_PI/180*ang), sin(M_PI/180*ang), 0));
-  MRot.lmult(r.getOptimalRotation());
-
+  MRot.lmult(VectorPairRotation(MRot*Vec3D(1,0,0), MRot*Vec3D(cos(M_PI/180*ang), sin(M_PI/180*ang), 0), a/l, b/l));
   setCell(l,l,l,ang,ang,ang);
 }
 

@@ -16,7 +16,7 @@ public:
 
   void run();
 
-  void checkGuess(const CandidateGenerator::Candidate &c1, const CandidateGenerator::Candidate &c2,  const IndexWorker::AngleInfo &a);
+
   void otimizeScale(SolutionItem& si);
 
 public slots:
@@ -27,25 +27,26 @@ signals:
   void progressInfo(int, int);
 
 protected:
+
   class AngleInfo {
   public:
     enum NormalType {
       Spot,
       Zone
     };
-    AngleInfo(const Vec3D& v1, const Vec3D& v2, NormalType t1, NormalType t2);
+    AngleInfo(const Vec3D &_v1, const Vec3D &_v2, double maxDeviation);
     bool operator<(const AngleInfo &o) const;
     static bool cmpAngleInfoLowerBound(const AngleInfo &a1, const AngleInfo &a2);
     static bool cmpAngleInfoUpperBound(const AngleInfo &a1, const AngleInfo &a2);
-    int index1;
-    int index2;
-    int type1;
-    int type2;
     double lowerBound;
     double cosAng;
     double upperBound;
+    Vec3D v1;
+    Vec3D v2;
   };
 
+  void checkGuess(const Vec3D &v1, const Vec3D &v2, const AngleInfo &a);
+  void checkPossibleAngles(const Vec3D&, const Vec3D&, QList<AngleInfo>, const CandidateGenerator::Candidate&, const CandidateGenerator::Candidate&);
   bool newSolution(const Mat3D& M);
 
   QAtomicInt candidatePos;
@@ -54,7 +55,9 @@ protected:
   int nextProgressSignal;
   bool shouldStop;
 
-  QList<AngleInfo> angles;
+  QList<AngleInfo> spotSpotAngles;
+  QList<AngleInfo> spotZoneAngles;
+  QList<AngleInfo> zoneZoneAngles;
 
   QList<Vec3D> spotMarkerNormals;
   QList<Vec3D> zoneMarkerNormals;

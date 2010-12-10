@@ -3,13 +3,17 @@
 
 #include <QAbstractTableModel>
 
+#include "tools/vec3D.h"
+#include "tools/mat3D.h"
+#include "indexing/solution.h"
+
 class SolutionModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
   struct IndexingParameter {
     QList<Vec3D> markerNormals;
-    QList<Reflection> refs;
+    //QList<Reflection> refs;
     QList<Mat3D> pointGroup;
     double maxAngularDeviation;
     double maxIntegerDeviation;

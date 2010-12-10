@@ -7,6 +7,7 @@
 #include <iostream>
 #include <image/dataproviderfactory.h>
 
+#include "tools/optimalrotation.h"
 
 using namespace std;
 

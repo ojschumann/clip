@@ -170,8 +170,9 @@ bool Spacegroup::GroupElement::operator==(const Spacegroup::GroupElement& o) con
 
 bool Spacegroup::isExtinct(const TVec3D<int>& reflection) {
   for (int i=0; i<extinctionChecks.size(); i++) {
-    int s = reflection*extinctionChecks.at(i).t;
-    if ((s%GroupElement::MOD)!=0) {
+    int s = (reflection*extinctionChecks.at(i).t)%GroupElement::MOD;
+    if (s<0) s += GroupElement::MOD;
+    if (s!=0) {
       if ((extinctionChecks.at(i).M*reflection).isNull()) {
         return true;
       }
@@ -366,7 +367,8 @@ bool Spacegroup::generateGroup(QString hall) {
       pointgroup << group.at(i).M;
     if (!group.at(i).t.isNull()) {
       ExtinctionElement e;
-      e.M=TMat3D<int>() - group.at(i).M;
+      e.M=group.at(i).M-TMat3D<int>();
+      e.M.transpose();
       e.t=group.at(i).t;
       extinctionChecks << e;
     }

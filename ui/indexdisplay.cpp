@@ -5,7 +5,7 @@
 
 #include "core/crystal.h"
 #include "core/projector.h"
-
+#include "indexing/indexer.h"
 using namespace std;
 
 IndexDisplay::IndexDisplay(Crystal* _c, QWidget *parent) :
@@ -29,5 +29,12 @@ void IndexDisplay::on_startButton_clicked()
     spotMarkerNormals += p->getSpotMarkerNormals();
     zoneMarkerNormals += p->getZoneMarkerNormals();
   }
+
+  Indexer indexer(spotMarkerNormals, zoneMarkerNormals, crystal->getRealOrientationMatrix(), crystal->getReziprocalOrientationMatrix());
+
+  cout << "Start indexing" << endl;
+  indexer.run();
+  cout << "Indexing ended" << endl;
+
 
 }
