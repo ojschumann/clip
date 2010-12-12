@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QReadWriteLock>
 
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
@@ -13,7 +14,6 @@ class CandidateGenerator: public QObject
 public:
   struct Candidate {
     TVec3D<int> index;
-    Vec3D indexNormal;
     Vec3D realNormal;
     Vec3D reziprocalNormal;
   };
@@ -24,6 +24,7 @@ public:
   void reset();
 signals:
   void nextMajorIndex(int);
+  void progessInfo(int);
 private:
   void generateNextIndex();
   void addToGroup(const TMat3D<int>&);
@@ -31,6 +32,7 @@ private:
   QList< TMat3D<int> > group;
   QList< Candidate > candidates;
   TVec3D<int> maxIndex;
+  QReadWriteLock locker;
 
   Mat3D MReal;
   Mat3D MReciprocal;

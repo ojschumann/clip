@@ -1,6 +1,8 @@
 #ifndef CROPMARKER_H
 #define CROPMARKER_H
 
+#include <QSignalMapper>
+
 #include "tools/propagatinggraphicsobject.h"
 
 class CircleItem;
@@ -15,6 +17,9 @@ signals:
 public slots:
   void promoteToRectangle() {};
   void setHandleSize(double);
+  void resizeMarkerMoved(int);
+  void rotateMarkerMoved();
+
 protected slots:
 
 protected:
@@ -24,6 +29,8 @@ protected:
   //void setOuterHandlesFromData();
 
   QList<CircleItem*> handles;
+  CircleItem* rotateMarker;
+  QSignalMapper handleMapper;
 };
 
 #endif // CROPMARKER_H

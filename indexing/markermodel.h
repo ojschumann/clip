@@ -4,15 +4,14 @@
 #include <QAbstractTableModel>
 #include <QList>
 
-#include "tools/vec3D.h"
+#include "indexing/solution.h"
 
-class Crystal;
 
 class MarkerModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
-  explicit MarkerModel(Crystal* _c, QObject *parent = 0);
+  explicit MarkerModel(QObject *parent = 0);
 
   virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
   virtual int columnCount(const QModelIndex & parent = QModelIndex()) const ;
@@ -20,16 +19,14 @@ public:
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
   virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
-  void loadMarkerNormals();
 signals:
 
 public slots:
-
+  void setSolution(Solution);
+  void clearDisplay();
 private:
-  Crystal* crystal;
-  QList<Vec3D> spotMarker;
-  QList<Vec3D> zoneMarker;
-
+  Solution solution;
+  bool solutionValid;
 };
 
 #endif // MARKERMODEL_H

@@ -113,6 +113,13 @@ QList<int> Spacegroup::getConstrains() const {
   return constrains;
 }
 
+QList< TMat3D<int> > Spacegroup::getPointgroup() const {
+  return pointgroup;
+}
+
+QList< TMat3D<int> > Spacegroup::getLauegroup() const {
+  return lauegroup;
+}
 
 Spacegroup::GroupElement::GroupElement(int m11, int m12, int m13, int m21, int m22, int m23, int m31, int m32, int m33, int t1, int t2, int t3): M(m11, m12, m13, m21, m22, m23, m31, m32, m33), t(t1, t2, t3) {
   normalize();
@@ -360,11 +367,14 @@ bool Spacegroup::generateGroup(QString hall) {
   group = tmpGroup;
   extinctionChecks.clear();
   pointgroup.clear();
+  lauegroup.clear();
 
 
   for (int i=0; i<group.size(); i++) {
     if (!pointgroup.contains(group.at(i).M))
       pointgroup << group.at(i).M;
+    if (!lauegroup.contains(group.at(i).M))
+      lauegroup << group.at(i).M;
     if (!group.at(i).t.isNull()) {
       ExtinctionElement e;
       e.M=group.at(i).M-TMat3D<int>();
@@ -373,7 +383,8 @@ bool Spacegroup::generateGroup(QString hall) {
       extinctionChecks << e;
     }
   }
-  cout << "Size: " << tmpGroup.size() << " " << extinctionChecks.size() << endl;
+
+  addToGroup(lauegroup, TMat3D<int>(-1,0,0,0,-1,0,0,0,-1));
 
   constrains.clear();
   constrains << 0 << 0 << 0 << 0 << 0 << 0;

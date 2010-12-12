@@ -15,6 +15,8 @@ CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _a
     item->setColor(Qt::black);
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
+    connect(item, SIGNAL(positionChanged()), &handleMapper, SLOT(map()));
+    handleMapper.setMapping(item, i);
     handles << item;
   }
 
@@ -22,6 +24,15 @@ CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _a
   handles[1]->setPos(0.9, 0.1);
   handles[2]->setPos(0.9, 0.9);
   handles[3]->setPos(0.1, 0.9);
+
+  connect(&handleMapper, SIGNAL(mapped(int)), this, SLOT(resizeMarkerMoved(int)));
+
+  rotateMarker = new CircleItem(handleSize, this);
+  rotateMarker->setColor(Qt::black);
+  rotateMarker->setFlag(QGraphicsItem::ItemIsMovable);
+  rotateMarker->setCursor(QCursor(Qt::ClosedHandCursor));
+  rotateMarker->setPos(0.5, 0.1);
+
 
 }
 

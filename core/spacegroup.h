@@ -35,6 +35,8 @@ public:
   QString groupSymbol() const;
   System crystalSystem() const;
   QList<int> getConstrains() const;
+  QList< TMat3D<int> > getPointgroup() const;
+  QList< TMat3D<int> > getLauegroup() const;
 
   bool isExtinct(const TVec3D<int>&);
 
@@ -99,6 +101,7 @@ private:
 
   QList<GroupElement> group;
   QList<TMat3D<int> > pointgroup;
+  QList<TMat3D<int> > lauegroup;
   QList<ExtinctionElement> extinctionChecks;
   QList<int> constrains;
 

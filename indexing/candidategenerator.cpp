@@ -3,6 +3,7 @@
 #include <set>
 
 #include "core/spacegroup.h"
+#include "defs.h"
 
 using namespace std;
 
@@ -29,15 +30,26 @@ void CandidateGenerator::addToGroup(const TMat3D<int> &e) {
 }
 
 CandidateGenerator::Candidate CandidateGenerator::getCandidate(int n) {
-  while (n>=candidates.size()) {
-    generateNextIndex();
+  locker.lockForRead();
+  if (n>=candidates.size()) {
+    locker.unlock();
+    locker.lockForWrite();
+    while (n>=candidates.size()) {
+      generateNextIndex();
+    }
+    locker.unlock();
+    locker.lockForRead();
   }
-  return candidates.at(n);
+  Candidate c = candidates.at(n);
+  locker.unlock();
+  return c;
 }
 
 void CandidateGenerator::reset() {
+  locker.lockForWrite();
   candidates.clear();
   maxIndex = TVec3D<int>(0,0,0);
+  locker.unlock();
 }
 
 class Vec3DOrder {
@@ -60,22 +72,23 @@ void CandidateGenerator::generateNextIndex() {
       if (i==0) emit nextMajorIndex(maxIndex(0));
     }
   }
+  emit progessInfo((maxIndex(1)+1)*maxIndex(1)/2+maxIndex(2));
 
-  set< TVec3D<int>, Vec3DOrder> vectorGroup;
+  if (ggt(maxIndex(0), ggt(maxIndex(1), maxIndex(2)))==1) {
+    set< TVec3D<int>, Vec3DOrder> vectorGroup;
 
-  foreach(TMat3D<int> M, group) {
-    vectorGroup.insert(M*maxIndex);
+    foreach(TMat3D<int> M, group) {
+      vectorGroup.insert(M*maxIndex);
+    }
+
+    foreach(TVec3D<int> idx, vectorGroup) {
+      Candidate cand;
+      cand.index = idx;
+      cand.realNormal = (MReal*idx).normalized();
+      cand.reziprocalNormal = (MReciprocal*idx).normalized();
+
+      candidates << cand;
+    }
   }
-
-  foreach(TVec3D<int> idx, vectorGroup) {
-    Candidate cand;
-    cand.index = idx;
-    cand.indexNormal = idx.toType<double>().normalized();
-    cand.realNormal = (MReal*idx).normalized();
-    cand.reziprocalNormal = (MReciprocal*idx).normalized();
-
-    candidates << cand;
-  }
-
 
 }

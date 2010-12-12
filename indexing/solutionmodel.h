@@ -11,16 +11,6 @@ class SolutionModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
-  struct IndexingParameter {
-    QList<Vec3D> markerNormals;
-    //QList<Reflection> refs;
-    QList<Mat3D> pointGroup;
-    double maxAngularDeviation;
-    double maxIntegerDeviation;
-    unsigned int maxOrder;
-    Mat3D orientationMatrix;
-  };
-
   SolutionModel(QObject* parent=0);
   virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
   virtual int columnCount(const QModelIndex & parent = QModelIndex()) const ;
@@ -29,17 +19,14 @@ public:
   virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) ;
 
 
-  void startIndexing(IndexingParameter& p);
   Solution getSolution(unsigned int n);
 
+signals:
+  void solutionNumberChanged(int);
 public slots:
   void addSolution(Solution s);
-  void threadFinished();
+  void clear();
 
-signals:
-  void stopWorker();
-  void runningStateChanged(bool);
-  void progressInfo(int, int);
 private:
   class SolSort {
   public:
@@ -51,10 +38,9 @@ private:
   };
 
 
-  QList<Solution> solution;
+  QList<Solution> solutions;
   int sortColumn;
   Qt::SortOrder sortOrder;
-  IndexingParameter p;
 };
 
 

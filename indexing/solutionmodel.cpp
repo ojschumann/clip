@@ -1,10 +1,14 @@
 #include "solutionmodel.h"
 
-SolutionModel::SolutionModel(QObject* parent): QAbstractTableModel(parent) {
+#include <QApplication>
+
+SolutionModel::SolutionModel(QObject *parent):
+  QAbstractTableModel(parent)
+{
 }
 
 int SolutionModel::rowCount(const QModelIndex & parent) const {
-  return solution.count();
+  return solutions.count();
 }
 
 int SolutionModel::columnCount(const QModelIndex & parent) const {
@@ -14,12 +18,14 @@ int SolutionModel::columnCount(const QModelIndex & parent) const {
 QVariant SolutionModel::data(const QModelIndex & index, int role) const {
   if (role==Qt::DisplayRole) {
     if (index.column()==0) {
-      return QVariant(solution.at(index.row()).spatialDeviationSum());
+      return QVariant(solutions.at(index.row()).spatialDeviationSum());
     } else if (index.column()==1) {
-      return QVariant(solution.at(index.row()).angularDeviationSum());
+      return QVariant(solutions.at(index.row()).angularDeviationSum());
     } else if (index.column()==2) {
-      return QVariant(solution.at(index.row()).hklDeviationSum());
+      return QVariant(solutions.at(index.row()).hklDeviationSum());
     }
+  } else if (role==Qt::TextAlignmentRole) {
+    return QVariant(Qt::AlignRight);
   }
   return QVariant();
 }
@@ -45,43 +51,30 @@ QVariant SolutionModel::headerData(int section, Qt::Orientation orientation, int
 void SolutionModel::sort(int column, Qt::SortOrder order) {
   sortColumn=column;
   sortOrder=order;
-  qSort(solution.begin(), solution.end(), SolSort(sortColumn, sortOrder));
+  qSort(solutions.begin(), solutions.end(), SolSort(sortColumn, sortOrder));
   reset();
 }
 
-void SolutionModel::startIndexing(SolutionModel::IndexingParameter& _p) {
-/*  emit stopWorker();
-  p=_p;
-  cout << p.pointGroup.size() << endl;
-  solution.clear();
-  reset();
-  IndexWorker* worker=new IndexWorker(p);
-  qRegisterMetaType<Solution>();
-  connect(worker, SIGNAL(publishSolution(Solution)), this, SLOT(addSolution(Solution)));
-  connect(worker, SIGNAL(progressInfo(int, int)), this, SIGNAL(progressInfo(int,int)));
-  connect(worker, SIGNAL(destroyed()), this, SLOT(threadFinished()));
-  connect(this, SIGNAL(stopWorker()), worker, SLOT(stop()));
-  connect(this, SIGNAL(destroyed()), worker, SLOT(stop()));
-  QThreadPool::globalInstance()->start(worker);
-  emit runningStateChanged(true);
-  */
-}
 
 void SolutionModel::addSolution(Solution s) {
-  QList<Solution>::iterator iter=qLowerBound(solution.begin(), solution.end(), s, SolSort(sortColumn, sortOrder));
-  int n=iter-solution.begin();
+  QList<Solution>::iterator iter=qLowerBound(solutions.begin(), solutions.end(), s, SolSort(sortColumn, sortOrder));
+  int n=iter-solutions.begin();
   beginInsertRows(QModelIndex(),n,n);
-  solution.insert(iter,s);
+  solutions.insert(iter,s);
   endInsertRows();
+  emit solutionNumberChanged(solutions.size());
+}
+
+void SolutionModel::clear() {
+  solutions.clear();
+  emit solutionNumberChanged(solutions.size());
+  reset();
 }
 
 Solution SolutionModel::getSolution(unsigned int n) {
-  return solution[n];
+  return solutions[n];
 }
 
-void SolutionModel::threadFinished() {
-  emit runningStateChanged(false);
-}
 
 
 SolutionModel::SolSort::SolSort(int col, Qt::SortOrder order) {
