@@ -374,6 +374,7 @@ void Projector::showCropMarker() {
 
     connect(this, SIGNAL(spotSizeChanged(double)), cropMarker, SLOT(setHandleSize(double)));
     connect(cropMarker.data(), SIGNAL(cancelCrop()), this, SLOT(delCropMarker()), Qt::QueuedConnection);
+    connect(cropMarker.data(), SIGNAL(publishCrop(QPolygonF)), this, SLOT(setCrop(QPolygonF)));
     //cropMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
   } else {
     cropMarker->show();
@@ -384,6 +385,13 @@ void Projector::delCropMarker() {
   if (!cropMarker.isNull()) {
     scene.removeItem(cropMarker);
     delete cropMarker;
+  }
+}
+
+void Projector::setCrop(QPolygonF rect) {
+  QTransform t;
+  if (QTransform::quadToSquare(det2img.map(rect), t)) {
+    doImgRotation(t);
   }
 }
 

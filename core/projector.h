@@ -106,6 +106,8 @@ public:
 
 public slots:
   void delCropMarker();
+  void setCrop(QPolygonF);
+
   void connectToCrystal(Crystal *);
 
   // Set Wavevectors. Note that the Value is 1/lambda, not 2*pi/lambda
