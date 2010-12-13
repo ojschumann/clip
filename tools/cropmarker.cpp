@@ -16,14 +16,13 @@ CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _a
   setCursor(QCursor(Qt::OpenHandCursor));
   setHandleSize(handleSize);
 
-  angle = 10.0;
   size.setWidth(20*_handleSize);
   size.setHeight(20*_handleSize);
 
-  setRotation(angle);
+  setRotation(0);
   handleSize = _handleSize;
 
-  QPen pen(Qt::green);
+  QPen pen(Qt::NoPen);
 
   for (int i=0; i<9; i++) {
     QGraphicsRectItem* handle = new QGraphicsRectItem(this);
@@ -118,39 +117,64 @@ void CropMarker::mousePressEvent(QGraphicsSceneMouseEvent *e) {
   pressedOnHandle=-1;
 
   if (e->buttons()==Qt::LeftButton) {
-    for (int i=0; i<handles.size(); i++) {
+    for (int i=handles.size(); i--; ) {
       if (handles.at(i)->contains(e->pos())) {
         pressedOnHandle = i;
         e->accept();
         return;
       }
     }
+  } else if (e->buttons()==Qt::RightButton) {
+    emit cancelCrop();
   }
   QGraphicsObject::mousePressEvent(e);
 }
 
+void CropMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e) {
+  QPolygonF rect;
+  double w = size.width();
+  double h = size.height();
+  rect << QPointF( w, h);
+  rect << QPointF( w,-h);
+  rect << QPointF(-w,-h);
+  rect << QPointF(-w, h);
+  emit publishCrop(mapToParent(rect));
+}
+
 void CropMarker::mouseMoveEvent(QGraphicsSceneMouseEvent *e) {
-  if (pressedOnHandle==0) {
-    double dy = e->pos().y()-e->lastPos().y();
-    size.rheight()+=dy;
-    prepareGeometryChange();
-    positionHandles();
-    double a = M_PI/180.0*rotation();
-    moveBy(-0.5*dy*sin(a), 0.5*dy*cos(a));
-  } else if (pressedOnHandle==1) {
-    double dy = e->pos().y()-e->lastPos().y();
-    size.rheight()-=dy;
-    prepareGeometryChange();
-    positionHandles();
-    double a = M_PI/180.0*rotation();
-    moveBy(-0.5*dy*sin(a), 0.5*dy*cos(a));
-  } else if (pressedOnHandle==2) {
+  if ((pressedOnHandle>=0) && (pressedOnHandle<8)) {
     double dx = e->pos().x()-e->lastPos().x();
-    size.rwidth()-=dx;
+    double dy = e->pos().y()-e->lastPos().y();
+    if (pressedOnHandle==0) {
+      size.rheight()+=dy;
+      dx = 0;
+    } else if (pressedOnHandle==1) {
+      size.rheight()-=dy;
+      dx = 0;
+    } else if (pressedOnHandle==2) {
+      size.rwidth()-=dx;
+      dy = 0;
+    } else if (pressedOnHandle==3) {
+      size.rwidth()+=dx;
+      dy = 0;
+    } else if (pressedOnHandle==4) {
+      size.rwidth()-=dx;
+      size.rheight()-=dy;
+    } else if (pressedOnHandle==5) {
+      size.rwidth()+=dx;
+      size.rheight()-=dy;
+    } else if (pressedOnHandle==6) {
+      size.rwidth()-=dx;
+      size.rheight()+=dy;
+    } else if (pressedOnHandle==7) {
+      size.rwidth()+=dx;
+      size.rheight()+=dy;
+    }
+    cout << pressedOnHandle << endl;
     prepareGeometryChange();
     positionHandles();
     double a = M_PI/180.0*rotation();
-    moveBy(0.5*dx*cos(a), 0.5*dx*sin(a));
+    moveBy(0.5*(dx*cos(a)-dy*sin(a)), 0.5*(dy*cos(a)+dx*sin(a)));
   } else if (pressedOnHandle==8) {
     double lastAngle = atan2(e->lastPos().y(), e->lastPos().x());
     double thisAngle = atan2(e->pos().y(), e->pos().x());

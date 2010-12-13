@@ -16,6 +16,8 @@ public:
   virtual void setImgTransform(const QTransform &);
 
 signals:
+  void cancelCrop();
+  void publishCrop(QPolygonF);
 public slots:
   void promoteToRectangle() {};
   void setHandleSize(double);
@@ -27,6 +29,7 @@ protected:
   QRectF boundingRect() const;
 
   void mousePressEvent(QGraphicsSceneMouseEvent *);
+  void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *);
   void mouseMoveEvent(QGraphicsSceneMouseEvent*);
 
   int pressedOnHandle;
@@ -34,7 +37,6 @@ protected:
   void positionHandles();
 
   QSizeF size;
-  double angle;
   double handleSize;
 
   QList<QGraphicsRectItem*> handles;

@@ -373,6 +373,7 @@ void Projector::showCropMarker() {
     scene.addItem(cropMarker);
 
     connect(this, SIGNAL(spotSizeChanged(double)), cropMarker, SLOT(setHandleSize(double)));
+    connect(cropMarker.data(), SIGNAL(cancelCrop()), this, SLOT(delCropMarker()), Qt::QueuedConnection);
     //cropMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
   } else {
     cropMarker->show();

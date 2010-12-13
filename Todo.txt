@@ -43,6 +43,6 @@ Allow to "print" to pdf/png/jpeg
 
 Marked Spots and Zone info (call from Crystal) (new)
 
-Mark special reflection (like magnetic incomensurate one)
+Mark user defined reflection (like magnetic incomensurate one)
 
 Show Spot/Zone at indexer

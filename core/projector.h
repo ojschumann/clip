@@ -102,10 +102,10 @@ public:
   void addInfoItem(const QString& text, const QPointF& p);
 
   void showCropMarker();
-  void delCropMarker();
   CropMarker* getCropMarker();
 
 public slots:
+  void delCropMarker();
   void connectToCrystal(Crystal *);
 
   // Set Wavevectors. Note that the Value is 1/lambda, not 2*pi/lambda
