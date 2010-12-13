@@ -9,6 +9,11 @@ class PropagatingGraphicsObject : public QGraphicsObject
 public:
     explicit PropagatingGraphicsObject(QGraphicsItem *parent = 0);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    virtual void setImgTransform(const QTransform&);
+protected:
+    bool propagatePositionChange;
+    bool propagateTransformChange;
+    QTransform propagatedTransform;
 
 signals:
 

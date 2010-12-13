@@ -355,3 +355,8 @@ void ProjectionPlane::on_imageToolboxAction_triggered()
 void ProjectionPlane::slotOpenResolutionCalc() {
   on_imageToolboxAction_triggered();
 }
+
+void ProjectionPlane::on_actionCrop_triggered()
+{
+    projector->showCropMarker();
+}

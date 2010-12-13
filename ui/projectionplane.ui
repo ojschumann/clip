@@ -86,6 +86,7 @@
    </attribute>
    <addaction name="rulerAction"/>
    <addaction name="imageToolboxAction"/>
+   <addaction name="actionCrop"/>
    <addaction name="rotCWAction"/>
    <addaction name="rotCCWAction"/>
    <addaction name="flipHAction"/>
@@ -251,6 +252,15 @@
    </property>
    <property name="text">
     <string>Mark Zones</string>
+   </property>
+  </action>
+  <action name="actionCrop">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/cut.png</normaloff>:/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Crop</string>
    </property>
   </action>
  </widget>

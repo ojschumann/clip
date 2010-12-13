@@ -368,9 +368,12 @@ ItemStore& Projector::zoneMarkers() {
 // ------------ Handling of Crop Marker ---------------
 void Projector::showCropMarker() {
   if (cropMarker.isNull()) {
-    cropMarker = new CropMarker(QPointF(0.1, 0.1), 0.8, 0.8, 0.0, getSpotSize(), imageItemsPlane);
+    //cropMarker = new CropMarker(QPointF(0.1, 0.1), 0.8, 0.8, 0.0, getSpotSize(), imageItemsPlane);
+    cropMarker = new CropMarker(QPointF(0.1, 0.1), 0.8, 0.8, 0.0, getSpotSize());
+    scene.addItem(cropMarker);
+
     connect(this, SIGNAL(spotSizeChanged(double)), cropMarker, SLOT(setHandleSize(double)));
-    cropMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
+    //cropMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
   } else {
     cropMarker->show();
   }
@@ -427,8 +430,7 @@ void Projector::closeImage() {
 void Projector::doImgRotation(const QTransform& t) {
   foreach (QGraphicsItem* item, imageItemsPlane->childItems()) {
     if (dynamic_cast<PropagatingGraphicsObject*>(item)) {
-      foreach (QGraphicsItem* subitem, item->childItems())
-        subitem->setPos(t.map(subitem->pos()));
+      dynamic_cast<PropagatingGraphicsObject*>(item)->setImgTransform(t);
     } else {
       item->setPos(t.map(item->pos()));
     }

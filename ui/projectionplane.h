@@ -65,6 +65,7 @@ protected:
   QString lastImageOpenDir;
 
 private slots:
+  void on_actionCrop_triggered();
   void on_imageToolboxAction_triggered();
   void on_flipVAction_triggered();
   void on_flipHAction_triggered();

@@ -7,18 +7,18 @@
 
 class CircleItem;
 
-class CropMarker : public PropagatingGraphicsObject
+class CropMarker : public QGraphicsObject
 {
   Q_OBJECT
 public:
   explicit CropMarker(const QPointF& pCenter, double _dx, double _dy, double _angle, double handleSize, QGraphicsItem  *parent = 0);
   QPolygonF getRect();
+  virtual void setImgTransform(const QTransform &);
+
 signals:
 public slots:
   void promoteToRectangle() {};
   void setHandleSize(double);
-  void resizeMarkerMoved(int);
-  void rotateMarkerMoved();
 
 protected slots:
 
@@ -26,11 +26,18 @@ protected:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
   QRectF boundingRect() const;
 
-  //void setOuterHandlesFromData();
+  void mousePressEvent(QGraphicsSceneMouseEvent *);
+  void mouseMoveEvent(QGraphicsSceneMouseEvent*);
 
-  QList<CircleItem*> handles;
-  CircleItem* rotateMarker;
-  QSignalMapper handleMapper;
+  int pressedOnHandle;
+
+  void positionHandles();
+
+  QSizeF size;
+  double angle;
+  double handleSize;
+
+  QList<QGraphicsRectItem*> handles;
 };
 
 #endif // CROPMARKER_H
