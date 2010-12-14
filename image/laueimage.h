@@ -26,6 +26,8 @@ public:
   bool hasAbsoluteSize();
   QSizeF absoluteSize(); // in mm
 
+  QString name();
+
 
 signals:
   void imageContentsChanged();

@@ -20,6 +20,7 @@
 #include "core/projector.h"
 #include "tools/mousepositioninfo.h"
 #include "tools/itemstore.h"
+#include "image/laueimage.h"
 
 // List of all projectors. Sort of a hack ;-)
 QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
@@ -33,19 +34,16 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   ui->setupUi(this);
   projector->setParent(this); // Ensures, that projector is deleted at end
   setWindowTitle(projector->displayName());
+
   connect(projector, SIGNAL(projectionRectSizeChanged()), this, SLOT(resizeView()));
   connect(projector, SIGNAL(imageLoaded(LaueImage*)), ui->view, SLOT(setImage(LaueImage*)));
+  connect(projector, SIGNAL(imageLoaded(LaueImage*)), this, SLOT(imageLoaded(LaueImage*)));
+  connect(projector, SIGNAL(imageClosed()), this, SLOT(imageClosed()));
   connect(ui->view, SIGNAL(mouseMoved(QPointF)), this, SLOT(generateMousePositionInfo(QPointF)));
   connect(ui->view, SIGNAL(mouseLeft()), this, SLOT(generateEmptyMousePositionInfo()));
 
   ui->view->setScene(projector->getScene());
   ui->view->setTransform(QTransform(1,0,0,-1,0,0));
-  //ui->view->setCacheMode(QGraphicsView::CacheBackground);
-  //ui->view->setCacheMode(QGraphicsView::CacheNone);
-
-  //ui->view->viewport()->setAttribute(Qt::WA_OpaquePaintEvent, true);
-  //ui->view->setBackgroundBrush(QBrush(Qt::black));
-  //ui->view->setViewport(new QGLWidget);
 
   setupToolbar();
 
@@ -359,4 +357,12 @@ void ProjectionPlane::slotOpenResolutionCalc() {
 void ProjectionPlane::on_actionCrop_triggered()
 {
     projector->showCropMarker();
+}
+
+void ProjectionPlane::imageLoaded(LaueImage *img) {
+  setWindowTitle(projector->displayName()+": "+img->name());
+}
+
+void ProjectionPlane::imageClosed() {
+  setWindowTitle(projector->displayName());
 }

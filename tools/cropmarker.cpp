@@ -4,6 +4,7 @@
 #include <QCursor>
 #include <cmath>
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsView>
 
 
 #include "tools/circleitem.h"
@@ -23,7 +24,6 @@ CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _a
   handleSize = _handleSize;
 
   QPen pen(Qt::NoPen);
-
   for (int i=0; i<9; i++) {
     QGraphicsRectItem* handle = new QGraphicsRectItem(this);
     handle->setPen(pen);
@@ -38,15 +38,16 @@ CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _a
   handles.at(5)->setCursor(QCursor(Qt::SizeAllCursor));
   handles.at(6)->setCursor(QCursor(Qt::SizeAllCursor));
   handles.at(7)->setCursor(QCursor(Qt::SizeAllCursor));
-  handles.at(8)->setCursor(QCursor(Qt::ClosedHandCursor));
+  handles.at(8)->setCursor(QCursor(QPixmap(":/cursor_rot.png")));
 
   positionHandles();
+  setCursors();
 }
 
 void CropMarker::positionHandles() {
   double w = size.width()/2;
   double h = size.height()/2;
-  double d = handleSize;
+  double d = 2.0*handleSize;
 
   handles.at(0)->setRect(-w+d, h-d, (w-d)*2, d);
   handles.at(1)->setRect(-w+d, -h, (w-d)*2, d);
@@ -61,6 +62,25 @@ void CropMarker::positionHandles() {
   handles.at(8)->setRect(-d, h-2*d, 2*d, 2*d);
 }
 
+void CropMarker::setCursors() {
+
+  QPixmap cursorPixmap(":/cursor_hor.png");
+
+  QTransform t;
+  t.rotate(-rotation());
+  cursorPixmap = cursorPixmap.transformed(t, Qt::SmoothTransformation);
+
+  QCursor cursor(cursorPixmap);
+  handles.at(2)->setCursor(cursor);
+  handles.at(3)->setCursor(cursor);
+
+  t.reset();
+  t.rotate(90);
+  cursor=QCursor(cursorPixmap.transformed(t));
+  handles.at(0)->setCursor(cursor);
+  handles.at(1)->setCursor(cursor);
+}
+
 QPolygonF CropMarker::getRect() {
   QPolygonF rect;
 
@@ -68,33 +88,45 @@ QPolygonF CropMarker::getRect() {
 }
 
 void CropMarker::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+  double w = size.width()/2;
+  double h = size.height()/2;
+  double d = 2.0*handleSize;
 
   QPen pen = painter->pen();
   pen.setStyle(Qt::DashLine);
   pen.setColor(Qt::red);
   painter->setPen(pen);
 
-
   QPolygonF p;
-  p << QPointF( -size.width()/2, -size.height()/2);
-  p << QPointF(  size.width()/2, -size.height()/2);
-  p << QPointF(  size.width()/2,  size.height()/2);
-  p << QPointF( -size.width()/2,  size.height()/2);
+  p << QPointF( -w, -h);
+  p << QPointF(  w, -h);
+  p << QPointF(  w,  h);
+  p << QPointF( -w,  h);
   painter->drawPolygon(p);
 
   p.clear();
-  p << QPointF( -handleSize, size.height()/2);
-  p << QPointF( -handleSize, size.height()/2-2*handleSize);
-  p << QPointF(  handleSize, size.height()/2-2*handleSize);
-  p << QPointF(  handleSize, size.height()/2);
-
+  p << handles.at(8)->rect().bottomLeft();
+  p << handles.at(8)->rect().topLeft();
+  p << handles.at(8)->rect().topRight();
+  p << handles.at(8)->rect().bottomRight();
   painter->drawPolyline(p);
 
-
+  pen.setColor(Qt::gray);
+  painter->setPen(pen);
+  painter->drawLine(QPointF( -w, h-d), QPointF(  w,  h-d));
+  painter->drawLine(QPointF( -w, d-h), QPointF(  w,  d-h));
+  painter->drawLine(QPointF(d-w,  -h), QPointF(d-w,    h));
+  painter->drawLine(QPointF(w-d,  -h), QPointF(w-d,    h));
 }
 
 QRectF CropMarker::boundingRect() const {
-  return QRectF (-size.width()/2, -size.height()/2, size.width(), size.height());
+  return QRectF (-size.width()/2, -size.height()/2, size.width(), size.height()).normalized();
+}
+
+QPainterPath CropMarker::shape() const {
+  QPainterPath path;
+  path.addRect(boundingRect());
+  return path;
 }
 
 
@@ -115,10 +147,22 @@ void CropMarker::setImgTransform(const QTransform &t) {
 
 void CropMarker::mousePressEvent(QGraphicsSceneMouseEvent *e) {
   pressedOnHandle=-1;
-
   if (e->buttons()==Qt::LeftButton) {
+    setCursor(QCursor(Qt::ClosedHandCursor));
+    // From qgraphicsscene.cpp
+    QGraphicsView* view = e->widget() ? qobject_cast<QGraphicsView *>(e->widget()->parentWidget()) : 0;
+    QList<QGraphicsItem*> items;
+    if (!view) {
+      items = scene()->items(e->scenePos(), Qt::IntersectsItemShape, Qt::DescendingOrder, QTransform());
+    } else {
+      const QRectF pointRect(QPointF(e->widget()->mapFromGlobal(e->screenPos())), QSizeF(1, 1));
+      const QTransform viewTransform = view->viewportTransform();
+      items = scene()->items(viewTransform.inverted().map(pointRect), Qt::IntersectsItemShape,
+                             Qt::DescendingOrder, viewTransform);
+    }
     for (int i=handles.size(); i--; ) {
-      if (handles.at(i)->contains(e->pos())) {
+      if (items.contains(handles.at(i))) {
+        cout << "i=" << i << endl;
         pressedOnHandle = i;
         e->accept();
         return;
@@ -129,6 +173,12 @@ void CropMarker::mousePressEvent(QGraphicsSceneMouseEvent *e) {
   }
   QGraphicsObject::mousePressEvent(e);
 }
+
+void CropMarker::mouseReleaseEvent(QGraphicsSceneMouseEvent *e) {
+  setCursor(QCursor(Qt::OpenHandCursor));
+  QGraphicsObject::mouseReleaseEvent(e);
+}
+
 
 void CropMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e) {
   QPolygonF rect;
@@ -145,41 +195,43 @@ void CropMarker::mouseMoveEvent(QGraphicsSceneMouseEvent *e) {
   if ((pressedOnHandle>=0) && (pressedOnHandle<8)) {
     double dx = e->pos().x()-e->lastPos().x();
     double dy = e->pos().y()-e->lastPos().y();
+    double mx = 0.0;
+    double my = 0.0;
     if (pressedOnHandle==0) {
-      size.rheight()+=dy;
-      dx = 0;
+      my = 1.0;
     } else if (pressedOnHandle==1) {
-      size.rheight()-=dy;
-      dx = 0;
+      my = -1.0;
     } else if (pressedOnHandle==2) {
-      size.rwidth()-=dx;
-      dy = 0;
+      mx = -1.0;
     } else if (pressedOnHandle==3) {
-      size.rwidth()+=dx;
-      dy = 0;
+      mx = 1.0;
     } else if (pressedOnHandle==4) {
-      size.rwidth()-=dx;
-      size.rheight()-=dy;
+      mx = -1.0;
+      my = -1.0;
     } else if (pressedOnHandle==5) {
-      size.rwidth()+=dx;
-      size.rheight()-=dy;
+      mx = 1.0;
+      my = -1.0;
     } else if (pressedOnHandle==6) {
-      size.rwidth()-=dx;
-      size.rheight()+=dy;
+      mx = -1.0;
+      my = 1.0;
     } else if (pressedOnHandle==7) {
-      size.rwidth()+=dx;
-      size.rheight()+=dy;
+      mx = 1.0;
+      my = 1.0;
     }
-    cout << pressedOnHandle << endl;
+    dx = std::max(dx*mx, 5*handleSize-size.width());
+    dy = std::max(dy*my, 5*handleSize-size.height());
+    size.rwidth() += dx;
+    size.rheight() += dy;
     prepareGeometryChange();
     positionHandles();
     double a = M_PI/180.0*rotation();
-    moveBy(0.5*(dx*cos(a)-dy*sin(a)), 0.5*(dy*cos(a)+dx*sin(a)));
+    moveBy(0.5*(mx*dx*cos(a)-my*dy*sin(a)), 0.5*(my*dy*cos(a)+mx*dx*sin(a)));
   } else if (pressedOnHandle==8) {
     double lastAngle = atan2(e->lastPos().y(), e->lastPos().x());
     double thisAngle = atan2(e->pos().y(), e->pos().x());
     cout << 180.0*M_1_PI*(thisAngle-lastAngle) << endl;
     setRotation(rotation()+180.0*M_1_PI*(thisAngle-lastAngle));
+    setCursors();
   } else {
     QGraphicsObject::mouseMoveEvent(e);
   }

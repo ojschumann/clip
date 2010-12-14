@@ -140,6 +140,7 @@ signals:
   void projectionRectSizeChanged();
   void imgTransformUpdated();
   void imageLoaded(LaueImage*);
+  void imageClosed();
   void spotSizeChanged(double);
   void textSizeChanged(double);
 protected:

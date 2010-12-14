@@ -9,9 +9,7 @@ LaueImage
   Display Filename
   Display More info from file
   Display of Images from Bruker Apex (reduced Wavelength band)
-
-CropWidget
-  Nicer than now...
+  Display images from INT IP Scanner
 
 Nearest Reflection (possibly, if conventional method not fast enougth)
   Quicker search (partitioning)
@@ -45,4 +43,4 @@ Marked Spots and Zone info (call from Crystal) (new)
 
 Mark user defined reflection (like magnetic incomensurate one)
 
-Show Spot/Zone at indexer
+Show if Spot/Zone at indexer

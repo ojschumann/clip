@@ -63,11 +63,11 @@ DataProvider* BasDataProvider::loadImage(const QString& filename, QObject* paren
   if (inf.readLine()!="BAS_IMAGE_FILE") return NULL;
 
   QStringList keyValues;
-  keyValues << "OriginalFilename" << "IP-Size" << "X-PixelPerMM" << "Y-PixelPerMM"
+  keyValues << "OriginalFilename" << "IP-Size" << "X-PixelSizeUM" << "Y-PixelSizeUM"
       << "BitsPerPixel" << "Width" << "Height" << "Sensitivity" << "Latitude" << "Exposure Date"
       << "UnixTime" << "OverflowPixels" << "" << "Comment";
   QStringList intKeyValues;
-  intKeyValues << "X-PixelPerMM" << "Y-PixelPerMM"
+  intKeyValues << "X-PixelSizeUM" << "Y-PixelSizeUM"
       << "BitsPerPixel" << "Width" << "Height" << "Sensitivity" << "Latitude"
       << "UnixTime" << "OverflowPixels";
 
@@ -87,6 +87,13 @@ DataProvider* BasDataProvider::loadImage(const QString& filename, QObject* paren
     }
   }
 
+  info.setFile(infFile.fileName());
+  headerData.insert("InfFilename", QVariant(info.fileName()));
+  headerData.insert("InfFullFilename", QVariant(info.canonicalFilePath()));
+  info.setFile(imgFile.fileName());
+  headerData.insert("ImgFilename", QVariant(info.fileName()));
+  headerData.insert("ImgFullFilename", QVariant(info.canonicalFilePath()));
+
   int pixelCount = headerData["Width"].toInt()*headerData["Height"].toInt();
   int bytesPerPixel = (headerData["BitsPerPixel"].toInt()>8)?2:1;
   int dataSize = pixelCount * bytesPerPixel;
@@ -96,8 +103,8 @@ DataProvider* BasDataProvider::loadImage(const QString& filename, QObject* paren
   QVector<float> pixelData(pixelCount);
 
   double linscale = 4000.0/headerData["Sensitivity"].toDouble();
-  linscale *= headerData["X-PixelPerMM"].toDouble()/100.0;
-  linscale *= headerData["Y-PixelPerMM"].toDouble()/100.0;
+  linscale *= headerData["X-PixelSizeUM"].toDouble()/100.0;
+  linscale *= headerData["Y-PixelSizeUM"].toDouble()/100.0;
 
   double logscale = M_LN10*headerData["Latitude"].toDouble();
   linscale *= exp(-0.5*logscale);
@@ -157,7 +164,11 @@ DataProvider::Format BasDataProvider::format() {
 }
 
 QSizeF BasDataProvider::absoluteSize() {
-  return QSizeF(width()/headerData["X-PixelPerMM"].toDouble(), height()/headerData["Y-PixelPerMM"].toDouble());
+  return QSizeF(0.001*width()*headerData["X-PixelSizeUM"].toDouble(), 0.001*height()*headerData["Y-PixelSizeUM"].toDouble());
+}
+
+QString BasDataProvider::name() {
+  return headerData["ImgFilename"].toString();
 }
 
 bool BasRegisterOK = DataProviderFactory::registerImageLoader(0, &BasDataProvider::loadImage);

@@ -51,3 +51,7 @@ bool LaueImage::hasAbsoluteSize() {
 QSizeF LaueImage::absoluteSize() {
   return provider->absoluteSize();
 }
+
+QString LaueImage::name() {
+  return provider->name();
+}

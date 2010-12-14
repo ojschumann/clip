@@ -433,6 +433,7 @@ void Projector::loadImage(QString s) {
 void Projector::closeImage() {
   if (imageData) delete imageData;
   imageData = 0;
+  emit imageClosed();
 }
 
 // Rotates and flips the Decorations, which are bound to the Image

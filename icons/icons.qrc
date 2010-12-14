@@ -20,5 +20,7 @@
         <file>ruler.png</file>
         <file>cut.png</file>
         <file>color_curve.png</file>
+        <file>cursor_hor.png</file>
+        <file>cursor_rot.png</file>
     </qresource>
 </RCC>

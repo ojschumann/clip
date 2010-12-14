@@ -27,14 +27,17 @@ protected slots:
 protected:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
   QRectF boundingRect() const;
+  QPainterPath shape() const;
 
   void mousePressEvent(QGraphicsSceneMouseEvent *);
   void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *);
   void mouseMoveEvent(QGraphicsSceneMouseEvent*);
+  void mouseReleaseEvent(QGraphicsSceneMouseEvent *);
 
   int pressedOnHandle;
 
   void positionHandles();
+  void setCursors();
 
   QSizeF size;
   double handleSize;

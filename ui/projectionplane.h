@@ -10,6 +10,7 @@
 #include "tools/mousepositioninfo.h"
 
 class Projector;
+class LaueImage;
 
 namespace Ui {
   class ProjectionPlane;
@@ -44,6 +45,8 @@ protected slots:
   void slotOpenResolutionCalc();
   void generateMousePositionInfo(QPointF);
   void generateEmptyMousePositionInfo();
+  void imageLoaded(LaueImage*);
+  void imageClosed();
 protected:
   void setupToolbar();
   QRectF zoomSceneRect();

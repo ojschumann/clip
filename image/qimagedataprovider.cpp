@@ -1,6 +1,7 @@
 #include "qimagedataprovider.h"
 #include <image/dataproviderfactory.h>
 #include <ui/clip.h>
+#include <QFileInfo>
 
 #include <iostream>
 
@@ -25,7 +26,9 @@ QImageDataProvider::DataProvider* QImageDataProvider::loadImage(const QString& f
     foreach (QString key, img.textKeys()) {
       cout << qPrintable(key) << " -> " << qPrintable(img.text(key)) << endl;
     }
-
+    QFileInfo info(filename);
+    img.setText("ImgFilename", info.fileName());
+    img.setText("ImgFullFilename", info.canonicalFilePath());
     return new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied), parent);
   }
   return NULL;
@@ -55,6 +58,10 @@ int QImageDataProvider::pixelCount() {
 
 DataProvider::Format QImageDataProvider::format() {
   return RGB8Bit;
+}
+
+QString QImageDataProvider::name() {
+  return data.text("ImgFilename");
 }
 
 bool registerOK = DataProviderFactory::registerImageLoader(128, &QImageDataProvider::loadImage);

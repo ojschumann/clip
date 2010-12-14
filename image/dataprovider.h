@@ -29,6 +29,7 @@ public:
   virtual int bytesCount()=0;
   virtual int pixelCount()=0;
   virtual Format format()=0;
+  virtual QString name()=0;
   virtual QSizeF absoluteSize() { return QSizeF(); }
 
 protected:
