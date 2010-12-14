@@ -62,7 +62,6 @@ ProjectionPlane::~ProjectionPlane() {
 }
 
 void ProjectionPlane::setupToolbar() {
-
   // Handling for MouseDrags
   QActionGroup* actionGroup = new QActionGroup(this);
   actionGroup->setExclusive(true);

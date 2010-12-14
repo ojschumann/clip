@@ -6,14 +6,13 @@ ProjectionPlane
 LaueImage
   Image Handling (new, multithreaded)
   Background loading of image
-  Display Filename
   Display More info from file
   Display of Images from Bruker Apex (reduced Wavelength band)
   Display images from INT IP Scanner
 
-Nearest Reflection (possibly, if conventional method not fast enougth)
-  Quicker search (partitioning)
+Nearest Reflection
   Only projected reflections
+  Quicker search (possibly partitioning, only if conventional method not fast enougth)
 
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
