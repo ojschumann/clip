@@ -19,6 +19,7 @@ public:
   virtual int bytesCount();
   virtual int pixelCount();
   virtual Format format();
+  virtual QSizeF absoluteSize();
 private:
   explicit BasDataProvider(QObject *parent = 0);
   ~BasDataProvider();

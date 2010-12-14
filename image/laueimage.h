@@ -22,6 +22,11 @@ public:
   bool isValid() { return valid; }
   QList<BezierCurve*> getTransferCurves();
   DataScaler* getScaler() { return scaler; }
+
+  bool hasAbsoluteSize();
+  QSizeF absoluteSize(); // in mm
+
+
 signals:
   void imageContentsChanged();
 public slots:

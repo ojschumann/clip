@@ -30,7 +30,6 @@ public:
   double phi() const;
   double xOffset() const;
   double yOffset() const;
-  virtual void doImgRotation(const QTransform& t);
 
   virtual double TTmin() const;
   virtual double TTmax() const;
@@ -57,6 +56,8 @@ public slots:
   void resizePBMarker();
   void movedPBMarker();
   void updatePBPos();
+  virtual void doImgRotation(const QTransform& t);
+  virtual void loadParmetersFromImage(LaueImage*);
 protected:
   double maxCos(Vec3D n) const;
 

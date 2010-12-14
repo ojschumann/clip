@@ -2,6 +2,7 @@
 #define DATAPROVIDER_H
 
 #include <QObject>
+#include <QSizeF>
 
 class DataScaler;
 
@@ -21,13 +22,14 @@ public:
   static DataProvider* loadImage(const QString&);
   static DataProvider* openDevice();
 
-  virtual void loadNewData() {};
+  virtual void loadNewData() {}
   virtual const void* getData()=0;
   virtual int width()=0;
   virtual int height()=0;
   virtual int bytesCount()=0;
   virtual int pixelCount()=0;
   virtual Format format()=0;
+  virtual QSizeF absoluteSize() { return QSizeF(); }
 
 protected:
   explicit DataProvider(QObject *parent = 0);

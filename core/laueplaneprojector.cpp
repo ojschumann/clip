@@ -7,6 +7,8 @@
 #include <ui/laueplanecfg.h>
 #include <core/reflection.h>
 
+#include "image/laueimage.h"
+
 using namespace std;
 
 LauePlaneProjector::LauePlaneProjector(QObject* parent): Projector(parent), localCoordinates() {
@@ -20,6 +22,7 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent): Projector(parent), loca
   QList<QString> fitParameterNames;
   fitParameterNames << "Distance" << "X-Offset" << "Y-Offset" << "Omega" << "Chi";
   setFitParameterNames(fitParameterNames);
+  connect(this, SIGNAL(imageLoaded(LaueImage*)), this, SLOT(loadParmetersFromImage(LaueImage*)));
 };
 
 QPointF LauePlaneProjector::scattered2det(const Vec3D &v) const{
@@ -314,6 +317,13 @@ double LauePlaneProjector::yOffset() const {
 void LauePlaneProjector::doImgRotation(const QTransform& t) {
   Projector::doImgRotation(t);
   // TODO: change detector size
+  QTransform Tinv = t.inverted();
+  QPointF c = Tinv.map(QPointF(0,0));
+  QPointF x = Tinv.map(QPointF(1,0));
+  double dw = hypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
+  x = Tinv.map(QPointF(0,1));
+  double dh = hypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
+  setDetSize(dist(), dw, dh);
 }
 
 
@@ -443,4 +453,15 @@ double LauePlaneProjector::maxCos(Vec3D n) const {
   }
 
   return maxCosTT;
+}
+
+void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
+  QSizeF imgSize;
+  if (img->hasAbsoluteSize()) {
+    imgSize = img->absoluteSize();
+  } else {
+    double scale = sqrt(width()*height()/img->width()/img->height());
+    imgSize = QSizeF(scale*img->width(), scale*img->height());
+  }
+  setDetSize(dist(), imgSize.width(), imgSize.height());
 }

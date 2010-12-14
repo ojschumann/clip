@@ -156,5 +156,8 @@ DataProvider::Format BasDataProvider::format() {
   return Float32;
 }
 
+QSizeF BasDataProvider::absoluteSize() {
+  return QSizeF(width()/headerData["X-PixelPerMM"].toDouble(), height()/headerData["Y-PixelPerMM"].toDouble());
+}
 
 bool BasRegisterOK = DataProviderFactory::registerImageLoader(0, &BasDataProvider::loadImage);

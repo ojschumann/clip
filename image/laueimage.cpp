@@ -43,3 +43,11 @@ void LaueImage::addTransform(const QTransform &t) {
 void LaueImage::resetAllTransforms() {
   scaler->resetAllTransforms();
 }
+
+bool LaueImage::hasAbsoluteSize() {
+  return !provider->absoluteSize().isEmpty();
+}
+
+QSizeF LaueImage::absoluteSize() {
+  return provider->absoluteSize();
+}

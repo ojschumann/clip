@@ -132,11 +132,11 @@ void CropMarker::mousePressEvent(QGraphicsSceneMouseEvent *e) {
 
 void CropMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e) {
   QPolygonF rect;
-  double w = size.width();
-  double h = size.height();
-  rect << QPointF( w, h);
-  rect << QPointF( w,-h);
+  double w = size.width()/2;
+  double h = size.height()/2;
   rect << QPointF(-w,-h);
+  rect << QPointF( w,-h);
+  rect << QPointF( w, h);
   rect << QPointF(-w, h);
   emit publishCrop(mapToParent(rect));
 }
