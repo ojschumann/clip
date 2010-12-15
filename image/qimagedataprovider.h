@@ -16,7 +16,6 @@ public:
   virtual int bytesCount();
   virtual int pixelCount();
   virtual Format format();
-  QString name();
 private:
   explicit QImageDataProvider(const QImage& img, QObject *parent = 0);
   ~QImageDataProvider();

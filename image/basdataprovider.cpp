@@ -89,10 +89,10 @@ DataProvider* BasDataProvider::loadImage(const QString& filename, QObject* paren
 
   info.setFile(infFile.fileName());
   headerData.insert("InfFilename", QVariant(info.fileName()));
-  headerData.insert("InfFullFilename", QVariant(info.canonicalFilePath()));
+  headerData.insert("Complete Inf-Path", QVariant(info.canonicalFilePath()));
   info.setFile(imgFile.fileName());
   headerData.insert("ImgFilename", QVariant(info.fileName()));
-  headerData.insert("ImgFullFilename", QVariant(info.canonicalFilePath()));
+  headerData.insert("Complete Path", QVariant(info.canonicalFilePath()));
 
   int pixelCount = headerData["Width"].toInt()*headerData["Height"].toInt();
   int bytesPerPixel = (headerData["BitsPerPixel"].toInt()>8)?2:1;
@@ -133,7 +133,7 @@ DataProvider* BasDataProvider::loadImage(const QString& filename, QObject* paren
 
   cout << "Open OK" << endl;
   BasDataProvider* provider = new BasDataProvider(parent);
-  provider->headerData = headerData;
+  provider->providerInformation = headerData;
   provider->pixelData = pixelData;
 
   return provider;
@@ -144,11 +144,11 @@ const void* BasDataProvider::getData() {
 }
 
 int BasDataProvider::width() {
-  return headerData["Width"].toInt();
+  return providerInformation["Width"].toInt();
 }
 
 int BasDataProvider::height() {
-  return headerData["Height"].toInt();
+  return providerInformation["Height"].toInt();
 }
 
 int BasDataProvider::bytesCount() {
@@ -164,11 +164,7 @@ DataProvider::Format BasDataProvider::format() {
 }
 
 QSizeF BasDataProvider::absoluteSize() {
-  return QSizeF(0.001*width()*headerData["X-PixelSizeUM"].toDouble(), 0.001*height()*headerData["Y-PixelSizeUM"].toDouble());
-}
-
-QString BasDataProvider::name() {
-  return headerData["ImgFilename"].toString();
+  return QSizeF(0.001*width()*providerInformation["X-PixelSizeUM"].toDouble(), 0.001*height()*providerInformation["Y-PixelSizeUM"].toDouble());
 }
 
 bool BasRegisterOK = DataProviderFactory::registerImageLoader(0, &BasDataProvider::loadImage);

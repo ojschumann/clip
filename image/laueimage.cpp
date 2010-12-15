@@ -55,3 +55,9 @@ QSizeF LaueImage::absoluteSize() {
 QString LaueImage::name() {
   return provider->name();
 }
+
+QList<QWidget*> LaueImage::toolboxPages() {
+  QList<QWidget*> pages;
+  pages << provider->toolboxPages();
+  return pages;
+}

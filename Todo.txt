@@ -1,12 +1,13 @@
+Rotation (port)
+
+Reorientation (port)
+
 ProjectionPlane
   Context Menu
-  Propagate Change of image transformation to Projector (90 deg rotation, cropping...)
-  Load detector data from image
+    * Rotation Axis
 
 LaueImage
-  Image Handling (new, multithreaded)
   Background loading of image
-  Display More info from file
   Display of Images from Bruker Apex (reduced Wavelength band)
   Display images from INT IP Scanner
 
@@ -26,10 +27,6 @@ Live info from Mousecursor (new)
 Refinement (basically new)
   Optional show state after each iteration
 
-Rotation (port)
-
-Reorientation (port)
-
 Save Default Values for Projector Variables (Distance, Height, Width, ...)
   * Load/Save Workspace on startup
   * Load Default Projector/Crystal on creation
@@ -40,6 +37,6 @@ Allow to "print" to pdf/png/jpeg
 
 Marked Spots and Zone info (call from Crystal) (new)
 
-Mark user defined reflection (like magnetic incomensurate one)
+Mark user defined reflection (like magnetic/incomensurate one)
 
-Show if Spot/Zone at indexer
+Show if Spot/Zone in indexdisplay

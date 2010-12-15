@@ -2,6 +2,7 @@
 #include <image/dataproviderfactory.h>
 #include <ui/clip.h>
 #include <QFileInfo>
+#include <QDateTime>
 
 #include <iostream>
 
@@ -23,18 +24,21 @@ QImageDataProvider::DataProvider* QImageDataProvider::loadImage(const QString& f
   cout << "QImageDP tries to load " << qPrintable(filename) << endl;
   QImage img(filename);
   if (!img.isNull()) {
+    QMap<QString, QVariant> headerData;
     foreach (QString key, img.textKeys()) {
-      cout << qPrintable(key) << " -> " << qPrintable(img.text(key)) << endl;
+      headerData.insert(key, QVariant(img.text(key)));
     }
     QFileInfo info(filename);
-    img.setText("ImgFilename", info.fileName());
-    img.setText("ImgFullFilename", info.canonicalFilePath());
-    return new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied), parent);
+
+    headerData.insert("ImgFilename", info.fileName());
+    headerData.insert("Complete Path", info.canonicalFilePath());
+    headerData.insert("Creation Date", info.created().toString());
+    QImageDataProvider* provider = new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied), parent);
+    provider->providerInformation = headerData;
+    return provider;
   }
   return NULL;
 }
-
-
 
 const void* QImageDataProvider::getData() {
   return data.bits();
@@ -58,10 +62,6 @@ int QImageDataProvider::pixelCount() {
 
 DataProvider::Format QImageDataProvider::format() {
   return RGB8Bit;
-}
-
-QString QImageDataProvider::name() {
-  return data.text("ImgFilename");
 }
 
 bool registerOK = DataProviderFactory::registerImageLoader(128, &QImageDataProvider::loadImage);

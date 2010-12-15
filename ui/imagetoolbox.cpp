@@ -17,8 +17,15 @@ ImageToolbox::ImageToolbox(Projector* p, QWidget *parent):
   if (projector && projector->getLaueImage()) {
     connect(projector->getLaueImage(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
-    ui->tabWidget->addTab(new ResolutionCalculator(projector->rulers()), "Resolution");
     ui->tabWidget->addTab(new ContrastCurves(projector->getLaueImage()), "Contrast");
+
+    if (!projector->getLaueImage()->hasAbsoluteSize()) {
+      ui->tabWidget->addTab(new ResolutionCalculator(projector->rulers()), "Resolution");
+    }
+
+    foreach (QWidget* page, projector->getLaueImage()->toolboxPages()) {
+      ui->tabWidget->addTab(page, page->objectName());
+    }
   } else {
     deleteLater();
   }
@@ -33,31 +40,3 @@ ImageToolbox::~ImageToolbox()
 
 
 #include <tools/debug.h>
-
-void ImageToolbox::on_doCrop_clicked()
-{
-  QPolygonF poly = projector->getCropMarker()->getRect();
-  foreach (QPointF p, poly)
-    printPoint("lala", p);
-  QTransform t;
-  if (QTransform::quadToSquare(poly, t)) {
-    projector->doImgRotation(t);
-  }
-}
-
-void ImageToolbox::on_pushButton_clicked()
-{
-  if (projector && projector->getLaueImage())
-    projector->getLaueImage()->resetAllTransforms();
-}
-
-void ImageToolbox::on_pushButton_2_clicked()
-{
-  if (projector )
-    projector->delCropMarker();
-
-}
-
-void ImageToolbox::on_actionCrop_triggered() {
-  projector->showCropMarker();
-}

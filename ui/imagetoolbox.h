@@ -19,11 +19,7 @@ public:
    Ui::ImageToolbox *ui;
 protected:
    Projector* projector;
-private slots:
-    void on_pushButton_2_clicked();
-    void on_pushButton_clicked();
-    void on_doCrop_clicked();
-    void on_actionCrop_triggered();
+
 };
 
 #endif // IMAGETOOLBOX_H

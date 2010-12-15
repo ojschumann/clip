@@ -34,7 +34,7 @@ QMAKE_CXXFLAGS += -std=gnu++0x -g -pg
 
 QMAKE_CXXFLAGS_DEBUG += -pg
 QMAKE_LFLAGS += -pg
-QMAKE_LFLAGS_RELEASE -= -Wl,-s
+#QMAKE_LFLAGS_RELEASE -= -Wl,-s
 
 
 SOURCES += main.cpp\

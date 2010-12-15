@@ -27,6 +27,7 @@ public:
   QSizeF absoluteSize(); // in mm
 
   QString name();
+  QList<QWidget*> toolboxPages();
 
 
 signals:

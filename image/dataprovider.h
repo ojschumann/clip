@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QSizeF>
+#include <QMap>
+#include <QVariant>
 
 class DataScaler;
 
@@ -29,12 +31,15 @@ public:
   virtual int bytesCount()=0;
   virtual int pixelCount()=0;
   virtual Format format()=0;
-  virtual QString name()=0;
+  virtual QString name();
   virtual QSizeF absoluteSize() { return QSizeF(); }
+  virtual QList<QWidget*> toolboxPages();
 
 protected:
   explicit DataProvider(QObject *parent = 0);
   ~DataProvider();
+  QMap<QString, QVariant> providerInformation;
+
 private:
 
 signals:
