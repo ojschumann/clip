@@ -14,8 +14,8 @@
    <string>Clip</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../icons/icons.qrc">
-    <normaloff>:/Clip.png</normaloff>:/Clip.png</iconset>
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/icons/icons/Clip.png</normaloff>:/icons/icons/Clip.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>556</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -104,7 +104,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../icons/icons.qrc"/>
+  <include location="../resources/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

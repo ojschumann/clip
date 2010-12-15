@@ -14,8 +14,8 @@
    <string>Indexing</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../icons/icons.qrc">
-    <normaloff>:/Index.png</normaloff>:/Index.png</iconset>
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/icons/icons/Index.png</normaloff>:/icons/icons/Index.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <property name="margin">
@@ -234,7 +234,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icons/icons.qrc"/>
+  <include location="../resources/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

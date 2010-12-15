@@ -26,8 +26,8 @@
    <string>Crystal</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../icons/icons.qrc">
-    <normaloff>:/Crystal.png</normaloff>:/Crystal.png</iconset>
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/icons/icons/Crystal.png</normaloff>:/icons/icons/Crystal.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout">
@@ -532,8 +532,8 @@
   </widget>
   <action name="actionLoad">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/fileopen.png</normaloff>:/fileopen.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fileopen.png</normaloff>:/icons/icons/fileopen.png</iconset>
    </property>
    <property name="text">
     <string>Load</string>
@@ -541,8 +541,8 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/filesave.png</normaloff>:/filesave.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/filesave.png</normaloff>:/icons/icons/filesave.png</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -550,8 +550,8 @@
   </action>
   <action name="actionIndex">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/Index.png</normaloff>:/Index.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/Index.png</normaloff>:/icons/icons/Index.png</iconset>
    </property>
    <property name="text">
     <string>Index</string>
@@ -565,8 +565,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/Crystal.png</normaloff>:/Crystal.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/Crystal.png</normaloff>:/icons/icons/Crystal.png</iconset>
    </property>
    <property name="text">
     <string>Drag</string>
@@ -594,7 +594,7 @@
   <tabstop>rotationPhi</tabstop>
  </tabstops>
  <resources>
-  <include location="../icons/icons.qrc"/>
+  <include location="../resources/resources.qrc"/>
  </resources>
  <connections>
   <connection>

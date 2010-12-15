@@ -88,6 +88,7 @@ Projector* Clip::connectToLastCrystal(Projector *p) {
 void Clip::addMdiWindow(QWidget* w) {
   QMdiSubWindow* m = ui->mdiArea->addSubWindow(w);
   m->setAttribute(Qt::WA_DeleteOnClose);
+  m->setWindowIcon(w->windowIcon());
   m->show();
   connect(w, SIGNAL(destroyed()), m, SLOT(deleteLater()));
 }

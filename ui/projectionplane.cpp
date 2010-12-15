@@ -259,6 +259,7 @@ void ProjectionPlane::slotChangeMouseDragMode() {
 
 
 void ProjectionPlane::slotUpdateFPS() {
+
   //int frames = ui->view->getFrames();
   //ui->fpsDisplay->setText(QString::number(frames/2));
   //QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
@@ -280,6 +281,7 @@ void ProjectionPlane::on_openImgAction_triggered() {
   }
 
   ui->imgToolBar->setVisible(true);
+  ui->rulerAction->setVisible(!projector->getLaueImage()->hasAbsoluteSize());
   resizeView();
 }
 

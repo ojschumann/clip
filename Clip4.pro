@@ -160,10 +160,10 @@ FORMS    += ui/clip.ui \
     ui/indexdisplay.ui
 
 RESOURCES += \
-    icons/icons.qrc
+    resources/resources.qrc
 
 win32 {
-    RC_FILE = icons/clip.rc
+    RC_FILE = resources/icons/clip.rc
 }
 
 OTHER_FILES += \

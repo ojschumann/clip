@@ -5,6 +5,7 @@
 #include <QtXml/QDomDocument>
 #include <QTextStream>
 #include <QMouseEvent>
+#include <QFileDialog>
 
 #include "image/BezierCurve.h"
 #include "image/laueimage.h"
@@ -19,40 +20,39 @@ ContrastCurves::ContrastCurves(LaueImage* img, QWidget *parent) :
     handleMarkers(),
     curves()
 {
-    ui->setupUi(this);
-    scene.setSceneRect(0,0,1,1);
-    ui->gv->setScene(&scene);
-    ui->gv->scale(1, -1);
+  ui->setupUi(this);
+  scene.setSceneRect(0,0,1,1);
+  ui->gv->setScene(&scene);
+  ui->gv->scale(1, -1);
 
-    histogram = new HistogramItem();
-    scene.addItem(histogram);
-    connect(laueImage->getScaler(), SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), histogram, SLOT(setHistogram(QVector<int>,QVector<int>,QVector<int>)));
-    connect(ui->spinBox, SIGNAL(valueChanged(int)), histogram, SLOT(setCompMode(int)));
+  histogram = new HistogramItem();
+  scene.addItem(histogram);
+  connect(laueImage->getScaler(), SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), histogram, SLOT(setHistogram(QVector<int>,QVector<int>,QVector<int>)));
 
-    QPen decoPen(Qt::gray, 0, Qt::DotLine);
-    QList<double> l;
-    l << 0.0 << 0.25 << 0.5 << 0.75 << 1.0;
-    foreach (double d, l) {
-      scene.addLine(0, d, 1, d);
-      scene.addLine(d, 0, d, 1);
-    }
-
-    QList<QColor> cl;
-    cl << Qt::black << Qt::red << Qt::green << Qt::blue;
-    for (int n=0; n<cl.size(); n++) {
-      curves << scene.addPath(QPainterPath(), QPen(cl[n], 0));
-      curves.last()->setZValue(4.0-n);
-      updateCurveLines(n);
-    }
-    activeCurve = ui->ColorSelector->currentIndex()+1;
-    changeToCurve(ui->ColorSelector->currentIndex());
-    connect(ui->ColorSelector, SIGNAL(activated(int)), this, SLOT(changeToCurve(int)));
-
+  QPen decoPen(Qt::gray, 0, Qt::DotLine);
+  QList<double> l;
+  l << 0.0 << 0.25 << 0.5 << 0.75 << 1.0;
+  foreach (double d, l) {
+    scene.addLine(0, d, 1, d);
+    scene.addLine(d, 0, d, 1);
   }
+
+  QList<QColor> cl;
+  cl << Qt::black << Qt::red << Qt::green << Qt::blue;
+  for (int n=0; n<cl.size(); n++) {
+    curves << scene.addPath(QPainterPath(), QPen(cl[n], 0));
+    curves.last()->setZValue(4.0-n);
+    updateCurveLines(n);
+  }
+  activeCurve = ui->ColorSelector->currentIndex()+1;
+  changeToCurve(ui->ColorSelector->currentIndex());
+  connect(ui->ColorSelector, SIGNAL(activated(int)), this, SLOT(changeToCurve(int)));
+
+}
 
 ContrastCurves::~ContrastCurves()
 {
-    delete ui;
+  delete ui;
 }
 
 void ContrastCurves::changeToCurve(int n) {
@@ -108,6 +108,7 @@ void ContrastCurves::markerChanged() {
   curve->setPoints(points.values());
   updateCurveLines(activeCurve);
   makeScales();
+  ui->defaultCurveSelector->setCurrentIndex(0);
 }
 
 void ContrastCurves::mousePressEvent(QMouseEvent *e) {
@@ -220,10 +221,10 @@ void ContrastCurves::loadFromFile(const QString& filename) {
   QDomDocument doc("curves");
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly))
-      return;
+    return;
   if (!doc.setContent(&file)) {
-      file.close();
-      return;
+    file.close();
+    return;
   }
   file.close();
 
@@ -280,5 +281,41 @@ void ContrastCurves::saveToFile(const QString& filename) {
     QTextStream ts(&file);
     doc.save(ts, 0);
     file.close();
+  }
+}
+
+
+
+void ContrastCurves::on_loadButton_clicked() {
+  QString filename = QFileDialog::getOpenFileName(this, "Load Contrast Curve", "",
+                                                  "Contrast Curves (*.curve);;All Files (*)");
+  loadFromFile(filename);
+}
+
+void ContrastCurves::on_saveButton_clicked() {
+  QString filename = QFileDialog::getSaveFileName(this, "Save Contrast Curve", "",
+                                                  "Contrast Curves (*.curve);;All Files (*)");
+  saveToFile(filename);
+
+}
+
+#include <iostream>
+using namespace std;
+
+void ContrastCurves::on_defaultCurveSelector_activated(int index) {
+  if (index>0) {
+    QStringList resourcesNames;
+    resourcesNames << ":/curves/curves/gray.curve";
+    resourcesNames << ":/curves/curves/red.curve";
+    resourcesNames << ":/curves/curves/green.curve";
+    resourcesNames << ":/curves/curves/blue.curve";
+    resourcesNames << ":/curves/curves/red2.curve";
+    resourcesNames << ":/curves/curves/green2.curve";
+    resourcesNames << ":/curves/curves/blue2.curve";
+    resourcesNames << ":/curves/curves/rainbow.curve";
+    QString fn = resourcesNames[--index];
+    cout << "open: " << qPrintable(fn) << endl;
+    loadFromFile(fn);
+    ui->defaultCurveSelector->setCurrentIndex(index+1);
   }
 }

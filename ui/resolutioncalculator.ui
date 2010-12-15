@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Calculate Image Resolution</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/icons/icons/ruler.png</normaloff>:/icons/icons/ruler.png</iconset>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="6">
     <widget class="QTableView" name="rulerView">
@@ -95,6 +99,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources/resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

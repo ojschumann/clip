@@ -7,15 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>334</width>
-    <height>340</height>
+    <height>346</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>ReflexInfo</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../icons/icons.qrc">
-    <normaloff>:/info.png</normaloff>:/info.png</iconset>
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/icons/icons/info.png</normaloff>:/icons/icons/info.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_6">
    <item row="4" column="0" colspan="2">
@@ -369,7 +369,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icons/icons.qrc"/>
+  <include location="../resources/resources.qrc"/>
  </resources>
  <connections/>
  <slots>

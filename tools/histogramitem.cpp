@@ -11,18 +11,11 @@ HistogramItem::HistogramItem(QGraphicsItem *parent) :
     QGraphicsObject(parent)
 {
   maxValue = 0;
-  compMode = 0;
 }
 
 
 QRectF HistogramItem::boundingRect() const {
   return QRectF(0,0,1,1);
-}
-
-void HistogramItem::setCompMode(int c) {
-  compMode=(c)%(33*8);
-  cout << "compMode: " << compMode << endl;
-  update();
 }
 
 void HistogramItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {

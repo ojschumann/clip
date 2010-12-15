@@ -14,11 +14,9 @@ signals:
 
 public slots:
     void setHistogram(QVector<int>, QVector<int>, QVector<int>);
-    void setCompMode(int);
 protected:
     QList<QPainterPath> pathes;
     double maxValue;
-    int compMode;
 };
 
 #endif // HISTOGRAMITEM_H

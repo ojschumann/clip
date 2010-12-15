@@ -16,6 +16,10 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/icons/icons/Projector.png</normaloff>:/icons/icons/Projector.png</iconset>
+  </property>
   <widget class="QWidget" name="viewFrame">
    <property name="minimumSize">
     <size>
@@ -97,8 +101,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/zoom.png</normaloff>:/zoom.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/zoom.png</normaloff>:/icons/icons/zoom.png</iconset>
    </property>
    <property name="text">
     <string>Zoom</string>
@@ -112,8 +116,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/pan.png</normaloff>:/pan.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/pan.png</normaloff>:/icons/icons/pan.png</iconset>
    </property>
    <property name="text">
     <string>Pan</string>
@@ -124,8 +128,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/rotate_cw.png</normaloff>:/rotate_cw.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/rotate_cw.png</normaloff>:/icons/icons/rotate_cw.png</iconset>
    </property>
    <property name="text">
     <string>Rotation</string>
@@ -136,8 +140,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/flag.png</normaloff>:/flag.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/flag.png</normaloff>:/icons/icons/flag.png</iconset>
    </property>
    <property name="text">
     <string>Mark</string>
@@ -148,8 +152,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/info.png</normaloff>:/info.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/info.png</normaloff>:/icons/icons/info.png</iconset>
    </property>
    <property name="text">
     <string>Info</string>
@@ -157,8 +161,8 @@
   </action>
   <action name="configAction">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/configure.png</normaloff>:/icons/icons/configure.png</iconset>
    </property>
    <property name="text">
     <string>Configure</string>
@@ -166,8 +170,8 @@
   </action>
   <action name="openImgAction">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/fileopen.png</normaloff>:/fileopen.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fileopen.png</normaloff>:/icons/icons/fileopen.png</iconset>
    </property>
    <property name="text">
     <string>Open Image</string>
@@ -175,8 +179,8 @@
   </action>
   <action name="closeImgAction">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/fileclose.png</normaloff>:/fileclose.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fileclose.png</normaloff>:/icons/icons/fileclose.png</iconset>
    </property>
    <property name="text">
     <string>Close Image</string>
@@ -187,8 +191,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/ruler.png</normaloff>:/ruler.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/ruler.png</normaloff>:/icons/icons/ruler.png</iconset>
    </property>
    <property name="text">
     <string>Measure Resolution</string>
@@ -196,8 +200,8 @@
   </action>
   <action name="rotCWAction">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/rotate_cw.png</normaloff>:/rotate_cw.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/rotate_cw.png</normaloff>:/icons/icons/rotate_cw.png</iconset>
    </property>
    <property name="text">
     <string>Clockwise Rotation</string>
@@ -205,8 +209,8 @@
   </action>
   <action name="rotCCWAction">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/rotate_ccw.png</normaloff>:/rotate_ccw.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/rotate_ccw.png</normaloff>:/icons/icons/rotate_ccw.png</iconset>
    </property>
    <property name="text">
     <string>Counter Clockwise Rotation</string>
@@ -214,8 +218,8 @@
   </action>
   <action name="flipHAction">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/flip_horizontal.png</normaloff>:/flip_horizontal.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/flip_horizontal.png</normaloff>:/icons/icons/flip_horizontal.png</iconset>
    </property>
    <property name="text">
     <string>Flip Horizontally</string>
@@ -223,8 +227,8 @@
   </action>
   <action name="flipVAction">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/flip_vertical.png</normaloff>:/flip_vertical.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/flip_vertical.png</normaloff>:/icons/icons/flip_vertical.png</iconset>
    </property>
    <property name="text">
     <string>Flip Vertically</string>
@@ -232,8 +236,8 @@
   </action>
   <action name="imageToolboxAction">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/color_curve.png</normaloff>:/color_curve.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/color_curve.png</normaloff>:/icons/icons/color_curve.png</iconset>
    </property>
    <property name="text">
     <string>Image Toolbox</string>
@@ -247,8 +251,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/Projector.png</normaloff>:/Projector.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/Projector.png</normaloff>:/icons/icons/Projector.png</iconset>
    </property>
    <property name="text">
     <string>Mark Zones</string>
@@ -256,8 +260,8 @@
   </action>
   <action name="actionCrop">
    <property name="icon">
-    <iconset resource="../icons/icons.qrc">
-     <normaloff>:/cut.png</normaloff>:/cut.png</iconset>
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/cut.png</normaloff>:/icons/icons/cut.png</iconset>
    </property>
    <property name="text">
     <string>Crop</string>
@@ -272,7 +276,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../icons/icons.qrc"/>
+  <include location="../resources/resources.qrc"/>
  </resources>
  <connections>
   <connection>

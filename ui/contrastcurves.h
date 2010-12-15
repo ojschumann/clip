@@ -40,7 +40,7 @@ public:
     public:
       BoundedEllipse(QGraphicsItem *parent=0);
       QVariant itemChange(GraphicsItemChange change, const QVariant & value);
-      void setBBox(const QRectF& b) { bbox = b; };
+      void setBBox(const QRectF& b) { bbox = b; }
       bool operator<(const BoundedEllipse& o);
     private:
       QRectF bbox;
@@ -53,6 +53,12 @@ public:
     QList<QGraphicsPathItem*> curves;
     int activeCurve;
     HistogramItem* histogram;
+
+
+private slots:
+    void on_defaultCurveSelector_activated(int index);
+    void on_saveButton_clicked();
+    void on_loadButton_clicked();
 };
 
 #endif // CONTRASTCURVES_H
