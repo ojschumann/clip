@@ -9,13 +9,13 @@ template <typename T> class SimpleMonochromScaler : public DataScaler
 {
 public:
   static DataScaler* getScaler(DataProvider*, QObject*);
+  ~SimpleMonochromScaler();
   virtual void updateContrastMapping();
 protected:
   virtual QRgb getRGB(const QPointF &);
 private:
   explicit SimpleMonochromScaler(DataProvider* dp, QObject *parent = 0);
   SimpleMonochromScaler(const SimpleMonochromScaler&);
-  ~SimpleMonochromScaler();
   void makeValueIndex();
 
   class UniqueHelper {

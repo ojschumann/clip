@@ -1,18 +1,17 @@
-#ifndef BASDATAPROVIDER_H
-#define BASDATAPROVIDER_H
+#ifndef XYZDATAPROVIDER_H
+#define XYZDATAPROVIDER_H
 
-#include <QMap>
-#include <QVariant>
-#include <QVector>
 #include "image/dataprovider.h"
 
+#include <QVector>
 
-class BasDataProvider : public DataProvider
+
+class XYZDataProvider : public DataProvider
 {
   Q_OBJECT
 public:
   static DataProvider* loadImage(const QString&, QObject*);
-  ~BasDataProvider();
+  ~XYZDataProvider();
 
   virtual const void* getData();
   virtual int width();
@@ -20,14 +19,17 @@ public:
   virtual int bytesCount();
   virtual int pixelCount();
   virtual Format format();
-  virtual QSizeF absoluteSize();
+  virtual QString name();
 private:
-  explicit BasDataProvider(QObject *parent = 0);
+  explicit XYZDataProvider(QObject *parent = 0);
 signals:
 
-public slots:
+    public slots:
 private:
   QVector<float> pixelData;
+  int imgWidth;
+  int imgHeight;
 };
 
-#endif // BASDATAPROVIDER_H
+
+#endif // XYZDATAPROVIDER_H

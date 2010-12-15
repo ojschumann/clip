@@ -24,6 +24,8 @@ LaueImage::LaueImage(QString s, QObject *parent) :
 }
 
 LaueImage::~LaueImage() {
+  delete scaler;
+  delete provider;
   cout << "delete LaueImage" << endl;
 }
 

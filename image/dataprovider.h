@@ -23,6 +23,7 @@ public:
 
   static DataProvider* loadImage(const QString&);
   static DataProvider* openDevice();
+  ~DataProvider();
 
   virtual void loadNewData() {}
   virtual const void* getData()=0;
@@ -37,7 +38,6 @@ public:
 
 protected:
   explicit DataProvider(QObject *parent = 0);
-  ~DataProvider();
   QMap<QString, QVariant> providerInformation;
 
 private:

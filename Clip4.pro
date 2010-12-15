@@ -89,7 +89,8 @@ SOURCES += main.cpp\
     indexing/markermodel.cpp \
     core/spacegroupdata.cpp \
     indexing/candidategenerator.cpp \
-    indexing/solutionmodel.cpp
+    indexing/solutionmodel.cpp \
+    image/xyzdataprovider.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -144,7 +145,8 @@ HEADERS  += ui/clip.h \
     ui/indexdisplay.h \
     indexing/markermodel.h \
     indexing/candidategenerator.h \
-    indexing/solutionmodel.h
+    indexing/solutionmodel.h \
+    image/xyzdataprovider.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
