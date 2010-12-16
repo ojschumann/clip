@@ -1,14 +1,15 @@
 #include "clip.h"
 #include "ui_clip.h"
-#include <ui/crystaldisplay.h>
 #include <QMdiSubWindow>
-#include <core/projector.h>
-#include <ui/projectionplane.h>
-#include <core/laueplaneprojector.h>
-#include <core/stereoprojector.h>
 #include <QMessageBox>
-#include <defs.h>
+#include "defs.h"
+#include "core/projector.h"
+#include "ui/projectionplane.h"
+#include "core/laueplaneprojector.h"
+#include "core/stereoprojector.h"
+#include "ui/crystaldisplay.h"
 #include "ui/mouseinfodisplay.h"
+#include "ui/rotatecrystal.h"
 
 
 
@@ -69,20 +70,30 @@ void Clip::on_newStereo_triggered() {
 
 void Clip::addProjector(Projector* p) {
   ProjectionPlane* pp = new ProjectionPlane(connectToLastCrystal(p), this);
+  connect(pp, SIGNAL(rotationFromProjector(double)), this, SIGNAL(projectorRotation(double)));
   addMdiWindow(pp);
 }
 
 Projector* Clip::connectToLastCrystal(Projector *p) {
+  Crystal* c = getMostRecentCrystal(false);
+  if (c) p->connectToCrystal(c);
+  return p;
+}
+
+Crystal* Clip::getMostRecentCrystal(bool checkProjectors) {
   QList<QMdiSubWindow*> mdiWindows = ui->mdiArea->subWindowList(QMdiArea::StackingOrder);
   while (!mdiWindows.empty()) {
     QMdiSubWindow* window = mdiWindows.takeLast();
-    CrystalDisplay* cd = dynamic_cast<CrystalDisplay*>(window->widget());
-    if (cd) {
-      p->connectToCrystal(cd->getCrystal());
-      break;
+    CrystalDisplay* cd;
+    ProjectionPlane* pp;
+    if ((cd=dynamic_cast<CrystalDisplay*>(window->widget()))!=NULL) {
+      return cd->getCrystal();
+    } else if (checkProjectors && ((pp=dynamic_cast<ProjectionPlane*>(window->widget()))!=NULL)) {
+      Crystal* c = pp->getProjector()->getCrystal();
+      if (c) return c;
     }
   }
-  return p;
+  return NULL;
 }
 
 void Clip::addMdiWindow(QWidget* w) {
@@ -206,4 +217,11 @@ void Clip::on_actionReflection_Info_triggered() {
     }
   }
   addMdiWindow(info);
+}
+
+void Clip::on_actionRotation_triggered()
+{
+  RotateCrystal* rotate = new RotateCrystal();
+  connect(this, SIGNAL(projectorRotation(double)), rotate, SLOT(addRotationAngle(double)));
+  addMdiWindow(rotate);
 }

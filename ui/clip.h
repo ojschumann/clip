@@ -6,6 +6,7 @@
 
 
 class Projector;
+class Crystal;
 
 namespace Ui {
   class Clip;
@@ -17,11 +18,15 @@ class Clip : public QMainWindow {
 public:
   static Clip* getInstance();
   static void clearInstance();
+
+  Crystal* getMostRecentCrystal(bool checkProjectors=false);
 private:
   explicit Clip(QWidget *parent = 0);
   Clip(const Clip&);
   ~Clip();
   static Clip* instance;
+signals:
+  void projectorRotation(double);
 public slots:
   // Menu Slots
   void on_newCrystal_triggered();
@@ -52,6 +57,7 @@ private:
   QSignalMapper *windowMapper;
 
 private slots:
+    void on_actionRotation_triggered();
     void on_actionReflection_Info_triggered();
 };
 

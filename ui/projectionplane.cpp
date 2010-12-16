@@ -192,6 +192,7 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
         if (Mat3D(ax, v1, v2).det()<0)
           a*=-1;
         projector->addRotation(ax, a);
+        emit rotationFromProjector(180.0*M_1_PI*a);
         //self.emit(QtCore.SIGNAL('projectorAddedRotation(double)'), a)
         //if self.doProcessEvent:
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);

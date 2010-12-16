@@ -30,4 +30,9 @@ static inline int ggt(int a, int b) {
   return a;
 }
 
+#include <QString>
+#include "tools/vec3D.h"
+
+Vec3D parseHKLString(const QString& s, bool* ok=NULL);
+
 #endif // DEFS_H

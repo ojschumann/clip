@@ -90,7 +90,8 @@ SOURCES += main.cpp\
     core/spacegroupdata.cpp \
     indexing/candidategenerator.cpp \
     indexing/solutionmodel.cpp \
-    image/xyzdataprovider.cpp
+    image/xyzdataprovider.cpp \
+    ui/rotatecrystal.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -146,7 +147,8 @@ HEADERS  += ui/clip.h \
     indexing/markermodel.h \
     indexing/candidategenerator.h \
     indexing/solutionmodel.h \
-    image/xyzdataprovider.h
+    image/xyzdataprovider.h \
+    ui/rotatecrystal.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -157,7 +159,8 @@ FORMS    += ui/clip.ui \
     ui/imagetoolbox.ui \
     ui/contrastcurves.ui \
     ui/mouseinfodisplay.ui \
-    ui/indexdisplay.ui
+    ui/indexdisplay.ui \
+    ui/rotatecrystal.ui
 
 RESOURCES += \
     resources/resources.qrc

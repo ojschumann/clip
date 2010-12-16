@@ -37,6 +37,7 @@ signals:
   void info(QString, int);
   void reflexInfo(int,int,int);
   void mousePositionInfo(MousePositionInfo);
+  void rotationFromProjector(double);
 protected slots:
   void slotChangeMouseDragMode();
   void slotUpdateFPS();
