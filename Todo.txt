@@ -1,0 +1,42 @@
+Rotation (port)
+
+Reorientation (port)
+
+ProjectionPlane
+  Context Menu
+    * Rotation Axis
+
+LaueImage
+  Background loading of image
+  Display of Images from Bruker Apex (reduced Wavelength band)
+  Display images from INT IP Scanner
+
+Nearest Reflection
+  Only projected reflections
+  Quicker search (possibly partitioning, only if conventional method not fast enougth)
+
+ReflectionInfo (port and enhance)
+  including Direction of normal and scattered beam
+
+Live info from Mousecursor (new)
+  Position on detector (x, y)
+  Direction of scatter and direction of normal
+  2Theta
+  Image Positon (Pixel x,y) and Image Value (at point, mapped to RGB)
+
+Refinement (basically new)
+  Optional show state after each iteration
+
+Save Default Values for Projector Variables (Distance, Height, Width, ...)
+  * Load/Save Workspace on startup
+  * Load Default Projector/Crystal on creation
+
+Allow to configure colors
+
+Allow to "print" to pdf/png/jpeg
+
+Marked Spots and Zone info (call from Crystal) (new)
+
+Mark user defined reflection (like magnetic/incomensurate one)
+
+Show if Spot/Zone in indexdisplay
