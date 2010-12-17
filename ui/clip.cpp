@@ -10,7 +10,7 @@
 #include "ui/crystaldisplay.h"
 #include "ui/mouseinfodisplay.h"
 #include "ui/rotatecrystal.h"
-
+#include "ui/reorient.h"
 
 
 Clip::Clip(QWidget *parent) :
@@ -225,4 +225,10 @@ void Clip::on_actionRotation_triggered()
   RotateCrystal* rotate = new RotateCrystal();
   connect(this, SIGNAL(projectorRotation(double)), rotate, SLOT(addRotationAngle(double)));
   addMdiWindow(rotate);
+}
+
+void Clip::on_actionReorientation_triggered()
+{
+  Reorient* reorient = new Reorient();
+  addMdiWindow(reorient);
 }

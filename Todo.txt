@@ -1,10 +1,4 @@
-Rotation (port)
-
 Reorientation (port)
-
-ProjectionPlane
-  Context Menu
-    * Rotation Axis
 
 LaueImage
   Background loading of image

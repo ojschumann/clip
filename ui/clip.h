@@ -58,6 +58,7 @@ private:
   QSignalMapper *windowMapper;
 
 private slots:
+    void on_actionReorientation_triggered();
     void on_actionRotation_triggered();
     void on_actionReflection_Info_triggered();
 };

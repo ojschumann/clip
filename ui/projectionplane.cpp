@@ -400,7 +400,7 @@ void ProjectionPlane::slotContextSetRotationAxisOnSpot() {
   if (crystal) {
     bool ok;
     Vec3D normal = projector->det2normal(lastMousePosition, ok);
-    // TODO: really get closest connection
+    // TODO: really get closest Reflection
     if (ok) crystal->setRotationAxis(crystal->getClosestReflection(normal).hkl().toType<double>(), Crystal::ReziprocalSpace);
   }
 }

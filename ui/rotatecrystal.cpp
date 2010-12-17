@@ -4,6 +4,7 @@
 #include "core/crystal.h"
 #include "ui/clip.h"
 #include "tools/indexparser.h"
+#include "tools/tools.h"
 
 RotateCrystal::RotateCrystal(QWidget *parent) :
     QWidget(parent),
@@ -123,18 +124,12 @@ void RotateCrystal::on_axisChooser_currentIndexChanged(int index) {
 
 
 
-void RotateCrystal::on_axisEdit_textChanged(QString text)
-{
+void RotateCrystal::on_axisEdit_textChanged(QString text) {
   IndexParser parser(text);
-  QPalette p = ui->axisEdit->palette();
-  if (parser.isValid()) {
-    p.setColor(QPalette::Base, Qt::white);
-    if (Crystal* c = Clip::getInstance()->getMostRecentCrystal(true)) {
-      c->setRotationAxis(parser.index(), c->getRotationAxisType());
-    }
-  } else {
-    p.setColor(QPalette::Base, QColor(255, 200, 200));
+  setPaletteForStatus(ui->axisEdit, parser.isValid());
+  Crystal* c;
+  if (parser.isValid() && (c = Clip::getInstance()->getMostRecentCrystal(true))) {
+    c->setRotationAxis(parser.index(), c->getRotationAxisType());
   }
-  ui->axisEdit->setPalette(p);
 }
 

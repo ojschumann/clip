@@ -12,6 +12,7 @@
 #include "core/spacegroup.h"
 #include "ui/indexdisplay.h"
 #include "ui/clip.h"
+#include "tools/tools.h"
 
 CrystalDisplay::CrystalDisplay(QWidget *parent) :
     QMainWindow(parent),
@@ -141,13 +142,8 @@ void CrystalDisplay::slotCellChanged() {
 }
 
 void CrystalDisplay::slotSpacegroupChanged(QString s) {
+  setPaletteForStatus(ui->Spacegroup, crystal->getSpacegroup()->setGroupSymbol(s));
   QPalette p = ui->Spacegroup->palette();
-  if (crystal->getSpacegroup()->setGroupSymbol(s)) {
-    p.setColor(QPalette::Base, Qt::white);
-  } else {
-    p.setColor(QPalette::Base, QColor(255, 200, 200));
-  }
-  ui->Spacegroup->setPalette(p);
 }
 
 

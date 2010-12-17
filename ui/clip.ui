@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>556</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -50,6 +50,7 @@
     </property>
     <addaction name="actionReflection_Info"/>
     <addaction name="actionRotation"/>
+    <addaction name="actionReorientation"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -105,6 +106,11 @@
   <action name="actionRotation">
    <property name="text">
     <string>Rotation</string>
+   </property>
+  </action>
+  <action name="actionReorientation">
+   <property name="text">
+    <string>Reorientation</string>
    </property>
   </action>
  </widget>

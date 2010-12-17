@@ -1,9 +1,12 @@
-#include <core/stereoprojector.h>
+#include "core/stereoprojector.h"
+
 #include <cmath>
 #include <QtGui/QGraphicsEllipseItem>
 #include <iostream>
-#include <ui/stereocfg.h>
-#include <core/reflection.h>
+
+#include "ui/stereocfg.h"
+#include "tools/vec3D.h"
+#include "core/reflection.h"
 
 using namespace std;
 
@@ -19,7 +22,7 @@ QPointF StereoProjector::scattered2det(const Vec3D &v) const {
   return normal2det(scattered2normal(v));
 }
 
-QPointF StereoProjector::scattered2det(const Vec3D &v, bool& b) const {
+QPointF StereoProjector::scattered2det(const Vec3D& v, bool& b) const {
   Vec3D t(scattered2normal(v,b));
   if (b) {
     return normal2det(t,b);
