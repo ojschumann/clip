@@ -92,7 +92,7 @@ SOURCES += main.cpp\
     indexing/solutionmodel.cpp \
     image/xyzdataprovider.cpp \
     ui/rotatecrystal.cpp \
-    tools/indexparser.cpp
+    ui/reorient.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -150,7 +150,7 @@ HEADERS  += ui/clip.h \
     indexing/solutionmodel.h \
     image/xyzdataprovider.h \
     ui/rotatecrystal.h \
-    tools/indexparser.h
+    ui/reorient.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -162,7 +162,8 @@ FORMS    += ui/clip.ui \
     ui/contrastcurves.ui \
     ui/mouseinfodisplay.ui \
     ui/indexdisplay.ui \
-    ui/rotatecrystal.ui
+    ui/rotatecrystal.ui \
+    ui/reorient.ui
 
 RESOURCES += \
     resources/resources.qrc

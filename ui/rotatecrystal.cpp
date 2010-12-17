@@ -48,6 +48,7 @@ void RotateCrystal::addRotationAngle(double delta) {
   angleSum+=delta;
   // limit to 0...360
   angleSum -= 360.0*static_cast<int>(angleSum/360.0);
+
   if (angleSum<0.0) angleSum+=360;
   ui->angSumDisplay->setText(QString::number(angleSum, 'f', 2));
 }
