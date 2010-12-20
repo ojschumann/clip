@@ -1,0 +1,76 @@
+
+<ClipWorkspace>
+  <CrystalConnection>
+    <Crystal>
+      <Spacegroup symbol="Pm3m"/>
+      <Cell a="5.0" b="5.0" c="5.0" alpha="90.0" beta="90.0" gamma="90.0"/>
+      <Orientation omega="-13.7591546599" chi="1.40096693806" phi="-4.85439201322"/>
+    </Crystal>
+    <ProjectionPlane projectorType="LauePlaneProjector">
+      <Geometry width="210" height="475" x="0" y="0"/>
+      <Projector>
+        <DetSize width="30" height="60" dist="26"/>
+        <DetOrientation Omega="240" Chi="0" Phi="0"/>
+        <DetOffset xOffset="-5.77316e-15" yOffset="0"/>
+        <QRange Qmin="0" Qmax="1.30507"/>
+        <Display maxHKLSum="9" textSize="4" spotSize="4" spotsEnabled="1"/>
+        <SpotMarkers></SpotMarkers>
+      </Projector>
+    </ProjectionPlane>
+    <ProjectionPlane projectorType="LauePlaneProjector">
+      <Geometry width="210" height="475" x="210" y="0"/>
+      <Projector>
+        <DetSize width="30" height="60" dist="26"/>
+        <DetOrientation Omega="180" Chi="0" Phi="0"/>
+        <DetOffset xOffset="0" yOffset="0"/>
+        <QRange Qmin="0" Qmax="1.27324"/>
+        <Display maxHKLSum="9" textSize="4" spotSize="4" spotsEnabled="1"/>
+        <SpotMarkers></SpotMarkers>
+      </Projector>
+    </ProjectionPlane>
+    <ProjectionPlane projectorType="LauePlaneProjector">
+      <Geometry width="210" height="475" x="420" y="0"/>
+      <Projector>
+        <DetSize width="30" height="60" dist="26"/>
+        <DetOrientation Omega="120" Chi="0" Phi="0"/>
+        <DetOffset xOffset="0" yOffset="0"/>
+        <QRange Qmin="0" Qmax="1.30507"/>
+        <Display maxHKLSum="9" textSize="4" spotSize="4" spotsEnabled="1"/>
+        <SpotMarkers></SpotMarkers>
+      </Projector>
+    </ProjectionPlane>
+    <ProjectionPlane projectorType="LauePlaneProjector">
+      <Geometry width="210" height="475" x="630" y="0"/>
+      <Projector>
+        <DetSize width="30" height="60" dist="26"/>
+        <DetOrientation Omega="60" Chi="0" Phi="0"/>
+        <DetOffset xOffset="-5.77316e-15" yOffset="0"/>
+        <QRange Qmin="0" Qmax="1.79845"/>
+        <Display maxHKLSum="9" textSize="4" spotSize="4" spotsEnabled="1"/>
+        <SpotMarkers></SpotMarkers>
+      </Projector>
+    </ProjectionPlane>
+    <ProjectionPlane projectorType="LauePlaneProjector">
+      <Geometry width="210" height="475" x="840" y="0"/>
+      <Projector>
+        <DetSize width="30" height="60" dist="26"/>
+        <DetOrientation Omega="0" Chi="0" Phi="0"/>
+        <DetOffset xOffset="-3.18398e-15" yOffset="0"/>
+        <QRange Qmin="0" Qmax="2.86479"/>
+        <Display maxHKLSum="9" textSize="4" spotSize="4" spotsEnabled="1"/>
+        <SpotMarkers></SpotMarkers>
+      </Projector>
+    </ProjectionPlane>
+    <ProjectionPlane projectorType="LauePlaneProjector">
+      <Geometry width="210" height="475" x="1050" y="0"/>
+      <Projector>
+        <DetSize width="30" height="60" dist="26"/>
+        <DetOrientation Omega="-60" Chi="0" Phi="0"/>
+        <DetOffset xOffset="0" yOffset="0"/>
+        <QRange Qmin="0" Qmax="1.79845"/>
+        <Display maxHKLSum="9" textSize="4" spotSize="4" spotsEnabled="1"/>
+        <SpotMarkers></SpotMarkers>
+      </Projector>
+    </ProjectionPlane>
+  </CrystalConnection>
+</ClipWorkspace>

@@ -1,0 +1,20 @@
+<!DOCTYPE ClipWorkspace>
+<ClipWorkspace>
+ <CrystalConnection>
+  <Crystal>
+   <Spacegroup symbol="P1" />
+   <Cell beta="90.0" gamma="90.0" alpha="90.0" a="5.0" b="5.0" c="5.0" />
+   <Orientation phi="0.0" omega="0.0" chi="0.0" />
+  </Crystal>
+  <ProjectionPlane projectorType="LauePlaneProjector">
+   <Geometry width="350" height="470" />
+   <Projector>
+    <QRange Qmax="1.273239544735163" Qmin="0" />
+    <Display textSize="4" spotSize="4" maxHKLSum="0" spotsEnabled="1"/>
+    <DetSize width="110" dist="30" height="140" />
+    <DetOrientation Chi="0" Phi="0" Omega="180" />
+    <DetOffset xOffset="0" yOffset="0" />
+   </Projector>
+  </ProjectionPlane>
+ </CrystalConnection>
+</ClipWorkspace>
