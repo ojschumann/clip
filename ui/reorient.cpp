@@ -7,6 +7,7 @@
 #include "tools/tools.h"
 
 
+
 Reorient::Reorient(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Reorient)
@@ -16,6 +17,13 @@ Reorient::Reorient(QWidget *parent) :
   gonioAxis << Vec3D() << Vec3D();
   gonioEdits << ui->axis1Edit << ui->axis2Edit;
   gonioCombos << ui->axis1Combo << ui->axis2Combo;
+
+  gonioAxisSelection(0, ui->axis1Combo->currentIndex());
+  gonioAxisSelection(1, ui->axis2Combo->currentIndex());
+
+  connect(Clip::getInstance(), SIGNAL(windowChanged()), this, SLOT(windowChanged()));
+
+  windowChanged();
 }
 
 Reorient::~Reorient()
@@ -23,6 +31,12 @@ Reorient::~Reorient()
   delete ui;
 }
 
+void Reorient::windowChanged() {
+  if (Crystal* c = Clip::getInstance()->getMostRecentCrystal(true)) {
+    connect(c, SIGNAL(orientationChanged()), this, SLOT(updateDisplay()), Qt::UniqueConnection);
+  }
+  updateDisplay();
+}
 
 Vec3D Reorient::fromNormal() {
   Crystal* c;
@@ -57,16 +71,16 @@ Vec3D Reorient::toNormal() {
 
 void Reorient::updateDisplay() {
   double aPhi, aChi;
-  if (calcRotationAngles(aPhi, aChi)) {
-    ui->axis1Display->setText(QString::number(aPhi, 'f', 2));
-    ui->axis2Display->setText(QString::number(aChi, 'f', 2));
+  if (calcRotationAngles(aChi, aPhi)) {
+    ui->axis1Display->setText(QString::number(180.0*M_1_PI*aChi, 'f', 2));
+    ui->axis2Display->setText(QString::number(180.0*M_1_PI*aPhi, 'f', 2));
   } else {
     ui->axis1Display->setText("-----");
     ui->axis2Display->setText("-----");
   }
 }
 
-
+// For the description of the algorithm, see manual.tex
 bool Reorient::calcRotationAngles(double &angle1, double &angle2) {
   if (gonioAxis.at(0).isNull() || gonioAxis.at(1).isNull()) return false;
   Vec3D nfrom = fromNormal();
@@ -74,14 +88,25 @@ bool Reorient::calcRotationAngles(double &angle1, double &angle2) {
   Vec3D nto = toNormal();
   if (nto.isNull()) return false;
 
-  Vec3D v1, v2;
-  if (!calcLine(nfrom, nto, v1, v2)) return false;
+  cout << "rotate (" << nfrom(0) <<"," << nfrom(1) << "," << nfrom(2) << ") to (";
+  cout << nto(0) <<"," << nto(1) << "," << nto(2) << ") via x1=(";
+  cout << gonioAxis.at(0)(0) <<"," << gonioAxis.at(0)(1) << "," << gonioAxis.at(0)(2) << ") and x2=(";
+  cout << gonioAxis.at(1)(0) <<"," << gonioAxis.at(1)(1) << "," << gonioAxis.at(1)(2) << ")" << endl;
 
+  // Calculates a line u1+lambda*u2 in 3d-space, that is the intersection of the
+  // two planes with normal Vector
+  // gonioAxis[0] and gonioAxis[1] and that contain nFrom and nTo, respectively
+  Vec3D u1, u2;
+  if (!calcLine(nfrom, nto, u1, u2)) return false;
+
+  cout << "Line: (" << u1(0) << "," << u1(1) << "," << u1(2) << ") + l*(" << u2(0) << "," << u2(1) << "," << u2(2) << ")" << endl;
 
   double score = -1;
-  foreach (Vec3D v, calcPossibleIntermediatePositions(v1, v2)) {
+  // check the up to two points of intersection of the line with the unit sphere
+  foreach (Vec3D v, calcPossibleIntermediatePositions(u1, u2)) {
     double aChi=calcRotationAngle(nfrom, v, gonioAxis.at(0));
     double aPhi=calcRotationAngle(v, nto, gonioAxis.at(1));
+    cout << "inter: (" << v(0) << "," << v(1) << "," << v(2) << ") " << 180.0*M_1_PI*aChi << " " << 180.0*M_1_PI*aPhi << endl;
     if ((score<0) || (score > (aChi*aChi+aPhi*aPhi))) {
       angle1 = aChi;
       angle2 = aPhi;
@@ -93,8 +118,8 @@ bool Reorient::calcRotationAngles(double &angle1, double &angle2) {
 }
 
 
-bool Reorient::calcLine(const Vec3D& nfrom, const Vec3D& nto, Vec3D& r1, Vec3D& r2) {
-  Vec3D u2 = gonioAxis.at(0) % gonioAxis.at(1);
+bool Reorient::calcLine(const Vec3D& nfrom, const Vec3D& nto, Vec3D& u1, Vec3D& u2) {
+  u2 = gonioAxis.at(0) % gonioAxis.at(1);
   if (u2.norm()<1e-6) return false;
   u2.normalize();
 
@@ -108,8 +133,8 @@ bool Reorient::calcLine(const Vec3D& nfrom, const Vec3D& nto, Vec3D& r1, Vec3D& 
   double lambda = (t2-pc*t1)/denom;
   double mu     = (t1-pc*t2)/denom;
 
-  r1 = gonioAxis.at(0)*lambda + gonioAxis.at(1)*mu;
-  r2 = u2;
+  u1 = gonioAxis.at(1)*lambda + gonioAxis.at(0)*mu;
+
   return true;
 }
 
@@ -120,7 +145,7 @@ QList<Vec3D> Reorient::calcPossibleIntermediatePositions(const Vec3D& u1, const 
     r << u1;
   } else if (l<1.0) {
     l = sqrt(1.0-l);
-    r << u1+u1*l << u1-u2*l;
+    r << u1+u2*l << u1-u2*l;
   }
   return r;
 }
@@ -141,32 +166,23 @@ double Reorient::calcRotationAngle(const Vec3D& from, const Vec3D& to, const Vec
 
 }
 
-void Reorient::on_doFirstRatation_clicked()
-{
-  /*        c=self.searchCrystal()
-        if c and self.axisVectors[0] and self.axisVectors[1]:
-            fv=self.fromVect()
-            tv=self.toVect()
-            if fv and tv:
-                res=calcAngles(fv, tv, self.axisVectors[1], self.axisVectors[0])
-                if len(res)>0:
-                    c.addRotation(Mat3D(self.axisVectors[0], res[0][1]))
-                    self.updateDisplay()*/
+void Reorient::on_doFirstRatation_clicked() {
+  double aPhi, aChi;
+  if (calcRotationAngles(aChi, aPhi)) {
+    if (Crystal* c=Clip::getInstance()->getMostRecentCrystal(true)) {
+      c->addRotation(Mat3D(gonioAxis.at(0), aChi));
+    }
+  }
 }
 
-void Reorient::on_doBothRotation_clicked()
-{
-  /*    def doRotationSlot(self):
-        c=self.searchCrystal()
-        if c and self.axisVectors[0] and self.axisVectors[1]:
-            fv=self.fromVect()
-            tv=self.toVect()
-            if fv and tv:
-                res=calcAngles(fv, tv, self.axisVectors[1], self.axisVectors[0])
-                if len(res)>0:
-                    for i in range(2):
-                        c.addRotation(Mat3D(self.axisVectors[i], res[0][1-i]))
-                    self.updateDisplay()*/
+void Reorient::on_doBothRotation_clicked() {
+  double aPhi, aChi;
+  if (calcRotationAngles(aChi, aPhi)) {
+    if (Crystal* c=Clip::getInstance()->getMostRecentCrystal(true)) {
+      c->addRotation(Mat3D(gonioAxis.at(0), aChi));
+      c->addRotation(Mat3D(gonioAxis.at(1), aPhi));
+    }
+  }
 }
 
 void Reorient::on_toCombo_currentIndexChanged(int index) {
@@ -201,8 +217,8 @@ void Reorient::gonioAxisSelection(int axis, int index) {
   gonioEdits.at(axis)->setEnabled(index>2);
   gonioEdits.at(axis)->setVisible(index>2);
   if (index<3) {
-    if (gonioCombos.at(axis)->currentIndex()==index)
-      gonioCombos.at(axis)->setCurrentIndex((index+1)%3);
+    if (gonioCombos.at(1-axis)->currentIndex()==index)
+      gonioCombos.at(1-axis)->setCurrentIndex((index+1)%3);
     gonioAxis[axis] = Vec3D();
     gonioAxis[axis](index)=1;
     updateDisplay();
@@ -222,7 +238,7 @@ void Reorient::on_axis2Edit_textChanged(QString text) {
 
 void Reorient::gonioAxisTextChanged(int axis, QString text) {
   IndexParser parser(text);
-  gonioAxis[axis] = parser.index();
+  gonioAxis[axis] = parser.index().normalized();
   setPaletteForStatus(gonioEdits[axis], parser.isValid() && !parser.index().isNull());
   updateDisplay();
 }

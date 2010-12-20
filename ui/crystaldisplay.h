@@ -44,6 +44,8 @@ private:
   QPointer<IndexDisplay> indexDisplay;
 
 private slots:
+    void on_actionSave_triggered();
+    void on_actionLoad_triggered();
     void on_actionDrag_hovered();
     void slotResizeOrientationMatrix();
 };

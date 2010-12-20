@@ -208,7 +208,7 @@ void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
     }
     if (!largeMove) {
       if (ui->infoAction->isChecked() && projector->getCrystal()) {
-        Reflection r = projector->getCrystal()->getClosestReflection(projector->det2normal(mousePressOrigin));
+        Reflection r = projector->getClosestReflection(projector->det2normal(mousePressOrigin));
         if (r.normal(0)>=0.0) {
           double TT=180.0-360.0*M_1_PI*acos(max(-1.0, min(1.0, r.normal(0))));
           QString s = r.toHtml();
@@ -300,7 +300,7 @@ void ProjectionPlane::generateMousePositionInfo(QPointF p) {
   info.scattered = projector->det2scattered(p, info.scatteredOk);
   if (projector->getCrystal()) {
     info.nearestOk = true;
-    info.nearestReflection = projector->getCrystal()->getClosestReflection(info.normal);
+    info.nearestReflection = projector->getClosestReflection(info.normal);
   }
   emit mousePositionInfo(info);
 }
@@ -387,8 +387,7 @@ void ProjectionPlane::slotContextMenu() {
 }
 
 void ProjectionPlane::slotContextSetRotationAxis() {
-  Crystal* crystal = projector->getCrystal();
-  if (crystal) {
+  if (Crystal* crystal = projector->getCrystal()) {
     bool ok;
     Vec3D normal = projector->det2normal(lastMousePosition, ok);
     if (ok) crystal->setRotationAxis(normal, Crystal::LabSystem);
@@ -396,12 +395,10 @@ void ProjectionPlane::slotContextSetRotationAxis() {
 }
 
 void ProjectionPlane::slotContextSetRotationAxisOnSpot() {
-  Crystal* crystal = projector->getCrystal();
-  if (crystal) {
+  if (Crystal* crystal=projector->getCrystal()) {
     bool ok;
     Vec3D normal = projector->det2normal(lastMousePosition, ok);
-    // TODO: really get closest Reflection
-    if (ok) crystal->setRotationAxis(crystal->getClosestReflection(normal).hkl().toType<double>(), Crystal::ReziprocalSpace);
+    if (ok) crystal->setRotationAxis(projector->getClosestReflection(normal).hkl().toType<double>(), Crystal::ReziprocalSpace);
   }
 }
 

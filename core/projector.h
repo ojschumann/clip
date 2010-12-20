@@ -61,6 +61,8 @@ public:
   virtual Vec3D det2normal(const QPointF&) const = 0;
   virtual Vec3D det2normal(const QPointF&, bool& b) const = 0;
 
+  Reflection getClosestReflection(const Vec3D& normal);
+
   QGraphicsScene* getScene();
   Crystal* getCrystal();
   virtual QWidget* configWidget()=0;
@@ -83,7 +85,7 @@ public:
   bool spotsEnabled() const;
 
   virtual void projector2xml(QXmlStreamWriter&);
-  virtual void loadFromXML(QXmlStreamReader&);
+  void loadFromXML(QXmlStreamReader&);
 
   ItemStore& spotMarkers();
   void addSpotMarker(const QPointF&);
@@ -145,8 +147,7 @@ signals:
   void textSizeChanged(double);
 protected:
   virtual bool project(const Reflection &r, QPointF &point)=0;
-  virtual bool parseXMLElement(QXmlStreamReader&);
-
+  virtual bool parseXMLElelemt(QDomElement e);
 
   // Stuff like Primary beam marker, Coordinate lines
   QList<QGraphicsItem*> decorationItems;
@@ -174,6 +175,7 @@ protected:
   double spotSizeFraction;
   bool showSpots;
   bool projectionEnabled;
+  QVector<bool> reflectionIsProjected;
 
   QGraphicsScene scene;
   QGraphicsPixmapItem* imageItemsPlane;
@@ -190,8 +192,6 @@ private:
   Projector(const Projector&);
 };
 
-double getDoubleAttrib(QXmlStreamReader &r, QString name, double def);
-int getIntAttrib(QXmlStreamReader &r, QString name, double def);
 
 Q_DECLARE_METATYPE(QVector<QPointF>);
 Q_DECLARE_METATYPE(QList<QGraphicsItem*>);

@@ -60,9 +60,9 @@ public slots:
   virtual void loadParmetersFromImage(LaueImage*);
 protected:
   double maxCos(Vec3D n) const;
+  virtual bool parseXMLElelemt(QDomElement e);
 
   virtual bool project(const Reflection &r, QPointF& p);
-  virtual bool parseXMLElement(QXmlStreamReader&);
 
   Mat3D localCoordinates;
   double detDist;

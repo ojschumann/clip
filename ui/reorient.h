@@ -20,15 +20,15 @@ public:
   explicit Reorient(QWidget *parent = 0);
   ~Reorient();
 
-  Vec3D fromNormal();
-  Vec3D toNormal();
-
 public slots:
   void updateDisplay();
 
-
 private:
+  static Reorient* instance;
   void gonioAxisChanged();
+
+  Vec3D fromNormal();
+  Vec3D toNormal();
 
   bool calcRotationAngles(double& angle1, double& angle2);
   bool calcLine(const Vec3D& nfrom, const Vec3D& nto, Vec3D& r1, Vec3D& r2);
@@ -56,6 +56,7 @@ private slots:
 
   void gonioAxisSelection(int axis, int index);
   void gonioAxisTextChanged(int axis, QString text);
+  void windowChanged();
 
 };
 

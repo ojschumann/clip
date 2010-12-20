@@ -3,15 +3,16 @@
 
 #include <QObject>
 #include <QMetaType>
-#include <tools/vec3D.h>
-#include <tools/mat3D.h>
-#include <tools/objectstore.h>
-#include <core/fitobject.h>
+#include <QFutureWatcher>
+#include <QDomElement>
+#include <QXmlStreamWriter>
+
+#include "tools/vec3D.h"
+#include "tools/mat3D.h"
+#include "tools/objectstore.h"
+#include "core/fitobject.h"
 #include "core/spacegroup.h"
 #include "core/reflection.h"
-#include <QFuture>
-#include <QFutureWatcher>
-#include <QMutex>
 
 class Projector;
 
@@ -29,7 +30,9 @@ public:
   Crystal(const Crystal &);
   ~Crystal();
 
-  void updateRotation();
+  void saveToXML(QXmlStreamWriter& w);
+  bool loadFromXML(QDomElement base);
+
 
   int reflectionCount();
   Reflection getReflection(int i);
@@ -69,6 +72,7 @@ public slots:
   void addRotation(const Vec3D& axis, double angle);
   void addRotation(const Mat3D& M);
   void setRotation(const Mat3D& M);
+  void updateRotation();
   void setCell(double a, double b, double c, double alpha, double beta, double gamma);
   void setCell(QList<double>);
   void setWavevectors(double Qmin, double Qmax);
@@ -83,7 +87,6 @@ private slots:
   void convertHtoR();
   void convertRtoH();
   void reflectionGenerated();
-  void debugSlot();
 signals:
   void cellChanged();
   void orientationChanged();

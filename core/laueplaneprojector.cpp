@@ -384,18 +384,25 @@ void LauePlaneProjector::projector2xml(QXmlStreamWriter& w) {
   w.writeEndElement();
 }
 
-bool LauePlaneProjector::parseXMLElement(QXmlStreamReader &r) {
-  if (r.name()=="DetSize") {
-    setDetSize(getDoubleAttrib(r, "dist", dist()), getDoubleAttrib(r, "width", width()), getDoubleAttrib(r, "height", height()));
-    return true;
-  } else if (r.name()=="DetOrientation") {
-    setDetOrientation(getDoubleAttrib(r, "Omega", omega()), getDoubleAttrib(r, "Chi", chi()), getDoubleAttrib(r, "Phi", phi()));
-    return true;
-  } else if (r.name()=="DetOffset") {
-    setDetOffset(getDoubleAttrib(r, "xOffset", xOffset()), getDoubleAttrib(r, "yOffset", yOffset()));
-    return true;
+bool LauePlaneProjector::parseXMLElelemt(QDomElement e) {
+  bool ok;
+  if (e.tagName()=="DetSize") {
+    double detW = e.attribute("width").toDouble(&ok); if (!ok) return false;
+    double detH = e.attribute("height").toDouble(&ok); if (!ok) return false;
+    double detD = e.attribute("dist").toDouble(&ok); if (!ok) return false;
+    setDetSize(detD, detW, detH);
+  } else if (e.tagName()=="DetOrientation") {
+    double detC = e.attribute("Chi").toDouble(&ok); if (!ok) return false;
+    double detP = e.attribute("Phi").toDouble(&ok); if (!ok) return false;
+    double detO = e.attribute("Omega").toDouble(&ok); if (!ok) return false;
+    setDetOrientation(detO, detC, detP);
+  } else if (e.tagName()=="DetOffset") {
+    double detX = e.attribute("xOffset").toDouble(&ok); if (!ok) return false;
+    double detY = e.attribute("yOffset").toDouble(&ok); if (!ok) return false;
+    setDetOffset(detX, detY);
+  } else {
+    return Projector::parseXMLElelemt(e);
   }
-  return Projector::parseXMLElement(r);
 }
 
 double LauePlaneProjector::TTmax() const {

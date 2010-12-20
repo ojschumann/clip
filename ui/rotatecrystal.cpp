@@ -8,7 +8,8 @@
 
 RotateCrystal::RotateCrystal(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::RotateCrystal)
+    ui(new Ui::RotateCrystal),
+    axisChangeFromEdit(false)
 {
   ui->setupUi(this);
 
@@ -70,8 +71,7 @@ void RotateCrystal::addRotation(int id) {
 }
 
 void RotateCrystal::loadAxisFromCrystal() {
-  Crystal* c = Clip::getInstance()->getMostRecentCrystal(true);
-  if (c) {
+  if (Crystal* c = Clip::getInstance()->getMostRecentCrystal(true)) {
     paramsLoadedFromCrystal = c;
     if (c->getRotationAxisType()==Crystal::LabSystem) {
       Vec3D v(c->getRotationAxis());
@@ -89,8 +89,12 @@ void RotateCrystal::loadAxisFromCrystal() {
     } else if (c->getRotationAxisType()==Crystal::DirectSpace) {
       ui->axisChooser->setCurrentIndex(5);
     }
-    Vec3D v(c->getRotationAxis());
-    ui->axisEdit->setText(IndexParser::formatIndex(v));
+    if (axisChangeFromEdit) {
+      axisChangeFromEdit=false;
+    } else {
+      Vec3D v(c->getRotationAxis());
+      ui->axisEdit->setText(IndexParser::formatIndex(v));
+    }
   }
 }
 
@@ -117,18 +121,18 @@ void RotateCrystal::on_axisChooser_currentIndexChanged(int index) {
       Vec3D axis;
       axis(index)=1;
       c->setRotationAxis(axis, Crystal::LabSystem);
-      ui->axisEdit->setText(IndexParser::formatIndex(axis));
     }
   }
 }
 
 
 
-void RotateCrystal::on_axisEdit_textChanged(QString text) {
+void RotateCrystal::on_axisEdit_textEdited(QString text) {
   IndexParser parser(text);
   setPaletteForStatus(ui->axisEdit, parser.isValid());
   Crystal* c;
   if (parser.isValid() && (c = Clip::getInstance()->getMostRecentCrystal(true))) {
+    axisChangeFromEdit = true;
     c->setRotationAxis(parser.index(), c->getRotationAxisType());
   }
 }

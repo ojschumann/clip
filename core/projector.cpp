@@ -147,9 +147,11 @@ void Projector::reflectionsUpdated() {
 
   spotIndicator->coordinates.clear();
   QVector<Reflection> refs = crystal->getReflectionList();
+  reflectionIsProjected.resize(refs.size());
+
   for (int i=0; i<refs.size(); i++) {
     QPointF p;
-    if (project(refs[i], p)) {
+    if ((reflectionIsProjected[i] = project(refs[i], p))) {
       spotIndicator->coordinates << p;
       if (refs.at(i).hklSqSum<=maxHklSqSum) {
         QGraphicsTextItem* t = new QGraphicsTextItem();
@@ -217,6 +219,31 @@ Vec3D Projector::scattered2normal(const Vec3D& v, bool& b) {
   b=true;
   return Vec3D(x, 0.5*y/x, 0.5*z/x);
 }
+
+Reflection Projector::getClosestReflection(const Vec3D& normal) {
+  if (crystal.isNull())
+    return Reflection();
+  QVector<Reflection> r = crystal->getReflectionList();
+  if (r.size()!=reflectionIsProjected.size()) cout << "Somthing horrible is going on..." << endl;
+  int minIdx=-1;
+  double minDist=0;
+  for (int n=0; n<r.size(); n++) {
+    if (reflectionIsProjected.at(n)) {
+      double dist=(r[n].normal-normal).norm_sq();
+      if (dist<minDist or minIdx<0) {
+        minDist=dist;
+        minIdx=n;
+      }
+    }
+  }
+  if (minIdx<0) {
+    return Reflection();
+  } else {
+    return r[minIdx];
+  }
+}
+
+
 
 void Projector::addRotation(const Vec3D& axis, double angle) {
   if (not crystal.isNull())
@@ -478,72 +505,34 @@ void Projector::projector2xml(QXmlStreamWriter& w) {
 
 }
 
-void Projector::loadFromXML(QXmlStreamReader &r) {
-  if (not (r.name()=="Projector" and r.isStartElement()))
-    return;
-  while (not (r.atEnd() or (r.name()=="Projector" and r.isEndElement()))) {
-    r.readNext();
-    if (r.isStartElement())
-      if (not parseXMLElement(r)) {
-      cout << "Could not parse: " << qPrintable(r.name().toString()) << endl;
-    }
+bool Projector::loadFromXML(QDomElement base) {
+  if (base.tagName()!="Projector") return false;
+  for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+    if (!parseXMLEmelemt(e)) return false;
   }
+  return true;
 }
 
-
-double getDoubleAttrib(QXmlStreamReader &r, QString name, double def) {
-  bool b;
-  QStringRef sr = r.attributes().value(name);
-  if (not sr.isNull()) {
-    double v = sr.toString().toDouble(&b);
-    if (b)
-      return v;
+bool Projector::parseXMLEmelemt(QDomElement e) {
+  bool ok;
+  if (e.tagName()=="QRange") {
+    double Qmin = e.attribute("Qmin").toDouble(&ok); if (!ok) return false;
+    double Qmax = e.attribute("Qmax").toDouble(&ok); if (!ok) return false;
+    setWavevectors(Qmin, Qmax);
+  } else if (e.tagName()=="Display") {
+    double tsize = e.attribute("textSize").toDouble(&ok); if (!ok) return false;
+    double ssize = e.attribute("spotSize").toDouble(&ok); if (!ok) return false;
+    int maxHKLS = e.attribute("maxHKLSum").toInt(&ok); if (!ok) return false;
+    int senabled = e.attribute("spotsEnabled").toInt(&ok); if (!ok) return false;
+    setTextSizeFraction(tsize);
+    setSpotSizeFraction(ssize);
+    setMaxHklSqSum(maxHKLS);
+    enableSpots(senabled!=0);
+  } else {
+    return false;
   }
-  return def;
+  return true;
 }
-
-int getIntAttrib(QXmlStreamReader &r, QString name, int def) {
-  bool b;
-  QStringRef sr = r.attributes().value(name);
-  if (not sr.isNull()) {
-    int v =sr.toString().toInt(&b);
-    if (b)
-      return v;
-  }
-  return def;
-}
-
-bool Projector::parseXMLElement(QXmlStreamReader &r) {
-  if (r.name()=="QRange") {
-    double qMin=getDoubleAttrib(r, "Qmin", Qmin());
-    double qMax=getDoubleAttrib(r, "Qmax", Qmax());
-    setWavevectors(qMin, qMax);
-    return true;
-  } else if (r.name()=="Display") {
-    setMaxHklSqSum(getIntAttrib(r, "maxHKLSum", (int)getMaxHklSqSum()));
-    setSpotSizeFraction(getDoubleAttrib(r, "spotSize", getSpotSize()));
-    setTextSizeFraction(getDoubleAttrib(r, "textSize", getTextSize()));
-    QStringRef sr = r.attributes().value("spotsEnabled");
-    enableSpots(not sr.isNull());
-    return true;
-  } else if (r.name()=="SpotMarkers") {
-    while (not (r.atEnd() or (r.name()=="crkers" and r.isEndElement()))) {
-      r.readNext();
-      if (r.isStartElement() and r.name()=="Spot") {
-        bool b1, b2;
-        double x = r.attributes().value("x").toString().toDouble(&b1);
-        double y = r.attributes().value("y").toString().toDouble(&b2);
-        if (b1 and b2) {
-          addSpotMarker(QPointF(x,y));
-        }
-      }
-    }
-    return true;
-  }
-  return false;
-}
-
-
 
 
 int QPointFVector_ID = qRegisterMetaType<QVector<QPointF> >("QVector<QPointF>");

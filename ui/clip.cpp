@@ -222,6 +222,13 @@ void Clip::on_actionReflection_Info_triggered() {
 
 void Clip::on_actionRotation_triggered()
 {
+  foreach (QMdiSubWindow* mdi, ui->mdiArea->subWindowList()) {
+    if (dynamic_cast<RotateCrystal*>(mdi->widget())) {
+      mdi->raise();
+      ui->mdiArea->setActiveSubWindow(mdi);
+      return;
+    }
+  }
   RotateCrystal* rotate = new RotateCrystal();
   connect(this, SIGNAL(projectorRotation(double)), rotate, SLOT(addRotationAngle(double)));
   addMdiWindow(rotate);
@@ -229,6 +236,13 @@ void Clip::on_actionRotation_triggered()
 
 void Clip::on_actionReorientation_triggered()
 {
+  foreach (QMdiSubWindow* mdi, ui->mdiArea->subWindowList()) {
+    if (dynamic_cast<Reorient*>(mdi->widget())) {
+      mdi->raise();
+      ui->mdiArea->setActiveSubWindow(mdi);
+      return;
+    }
+  }
   Reorient* reorient = new Reorient();
   addMdiWindow(reorient);
 }

@@ -25,14 +25,14 @@ IndexParser::IndexParser(QString s) {
 
 QString IndexParser::formatIndex(const Vec3D &index, int precision) {
   if (precision>0) {
-    int maxPrec=0;
+    int minPrec=precision;
     for (int i=0; i<3; i++) {
       QString s = QString::number(index(i), 'f', precision);
       int j=0;
       while (j<s.size() && s.at(s.size()-1-j)=='0') j++;
-      if (j>maxPrec) maxPrec = j;
+      if (j<minPrec) minPrec = j;
     }
-    precision -= maxPrec;
+    precision -= minPrec;
   }
   QStringList l;
   for (int i=0; i<3; i++) {

@@ -78,7 +78,6 @@ Crystal::Crystal(QObject* parent=NULL):
   enableUpdate();
   restartReflectionUpdate = false;
   generateReflections();
-  //debugSlot();
 }
 
 Crystal::Crystal(const Crystal& c) {
@@ -425,9 +424,7 @@ QList<Projector*> Crystal::getConnectedProjectors() {
 }
 
 void Crystal::setRotationAxis(const Vec3D& axis, RotationAxisType type) {
-  cout << "setRA (" << axis(0) << " " << axis(1) << " " << axis(2) << ") " << type << endl;
   if ((axis!=rotationAxis) or (axisType!=type)) {
-    cout << "accept" << endl;
     rotationAxis=axis;
     axisType=type;
     emit rotationAxisChanged();
@@ -588,36 +585,68 @@ void Crystal::convertHtoR() {
   setCell(l,l,l,ang,ang,ang);
 }
 
-#include <QTimer>
-#include <QFile>
-#include <QTextStream>
-#include <defs.h>
-void Crystal::debugSlot() {
-  static int count = 0;
-  static int rotCount = 0;
-  static long long turnTime = 0;
-  rotCount = (rotCount+1)%37;
+bool Crystal::loadFromXML(QDomElement base) {
+  // Load a,b,c,alpha,beta,gamma
+  // rotationaxis and type
+  // spacegroup
+  // XML:
+  //  <Crystal>
+  //   <Spacegroup symbol="P1" />
+  //   <Cell beta="90.0" gamma="90.0" alpha="90.0" a="5.0" b="5.0" c="5.0" />
+  //   <Orientation omega="0.0" chi="0.0" phi="0.0" />
+  //  </Crystal>
 
-  if (turnTime != 0) {
-    QFile f("turntime3.dat");
-    f.open(QFile::Append|QFile::ReadOnly);
-    QTextStream fs(&f);
-    if (count==0) fs << endl;
-    fs << count << " " << a << " " << (rdtsctime()-turnTime)/3190000000.0 << endl;
-    count++;
-  }
-  turnTime = rdtsctime();
-
-  if (rotCount==0) {
-    if (a<9) {
-      setCell(a*1.2, b, c, alpha, beta, gamma);
-    } else {
-      count = 0;
-      setCell(2.0, b, c, alpha, beta, gamma);
+  if (base.tagName()!="Crystal") return false;
+  for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+    if (e.tagName()=="Spacegroup") {
+      if (!spaceGroup.setGroupSymbol(e.attribute("symbol"))) return false;
+    } else if (e.tagName()=="Cell") {
+      if (!e.hasAttribute("a") || !e.hasAttribute("b") || !e.hasAttribute("c") || !e.hasAttribute("alpha") || !e.hasAttribute("beta") || !e.hasAttribute("gamma")) return false;
+      bool ok;
+      double a = e.attribute("a").toDouble(&ok); if (!ok) return false;
+      double b = e.attribute("b").toDouble(&ok); if (!ok) return false;
+      double c = e.attribute("c").toDouble(&ok); if (!ok) return false;
+      double alpha = e.attribute("alpha").toDouble(&ok); if (!ok) return false;
+      double beta = e.attribute("beta").toDouble(&ok); if (!ok) return false;
+      double gamma = e.attribute("gamma").toDouble(&ok); if (!ok) return false;
+      internalSetCell(a,b,c,alpha, beta, gamma);
+    } else if (e.tagName()=="Orientation") {
+      if (!e.hasAttribute("phi") || !e.hasAttribute("omega") || !e.hasAttribute("chi")) return false;
+      bool ok;
+      double omega = M_PI/180.0*e.attribute("omega").toDouble(&ok); if (!ok) return false;
+      double chi = M_PI/180.0*e.attribute("chi").toDouble(&ok); if (!ok) return false;
+      double phi = M_PI/180.0*e.attribute("phi").toDouble(&ok); if (!ok) return false;
+      setEulerAngles(omega, chi, phi);
     }
-  } else {
-    addRotation(Vec3D(1,1,0).normalized(), M_PI/18.0);
-  }
 
-  QTimer::singleShot(0, this, SLOT(debugSlot()));
+  }
+  return true;
 }
+
+void Crystal::saveToXML(QXmlStreamWriter& w) {
+  w.writeStartElement("Crystal");
+
+  w.writeStartElement("Spacegroup");
+  w.writeAttribute("symbol", spaceGroup.groupSymbol());
+  w.writeEndElement();
+
+  w.writeStartElement("Cell");
+  w.writeAttribute("a", QString::number(a, 'f', 5));
+  w.writeAttribute("b", QString::number(b, 'f', 5));
+  w.writeAttribute("c", QString::number(c, 'f', 5));
+  w.writeAttribute("alpha", QString::number(alpha, 'f', 5));
+  w.writeAttribute("beta", QString::number(beta, 'f', 5));
+  w.writeAttribute("gamma", QString::number(gamma, 'f', 5));
+  w.writeEndElement();
+
+  w.writeStartElement("Orientation");
+  double omega, chi, phi;
+  calcEulerAngles(omega, chi, phi);
+  w.writeAttribute("omega", QString::number(180.0*M_1_PI*omega, 'f', 5));
+  w.writeAttribute("chi", QString::number(180.0*M_1_PI*chi, 'f', 5));
+  w.writeAttribute("phi", QString::number(180.0*M_1_PI*phi, 'f', 5));
+  w.writeEndElement();
+
+  w.writeEndElement();
+}
+

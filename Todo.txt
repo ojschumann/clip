@@ -1,22 +1,18 @@
-Reorientation (port)
-
 LaueImage
   Background loading of image
   Display of Images from Bruker Apex (reduced Wavelength band)
-  Display images from INT IP Scanner
 
-Nearest Reflection
-  Only projected reflections
-  Quicker search (possibly partitioning, only if conventional method not fast enougth)
+Highlighting of markers...
+
+configurable width of Zonemarker (including zero)
 
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
-
-Live info from Mousecursor (new)
-  Position on detector (x, y)
-  Direction of scatter and direction of normal
-  2Theta
-  Image Positon (Pixel x,y) and Image Value (at point, mapped to RGB)
+  Live info from Mousecursor (new)
+    Position on detector (x, y)
+    Direction of scatter and direction of normal
+    2Theta
+    Image Positon (Pixel x,y) and Image Value (at point, mapped to RGB)
 
 Refinement (basically new)
   Optional show state after each iteration
@@ -28,6 +24,7 @@ Save Default Values for Projector Variables (Distance, Height, Width, ...)
 Allow to configure colors
 
 Allow to "print" to pdf/png/jpeg
+Implement printing (to paper :-))
 
 Marked Spots and Zone info (call from Crystal) (new)
 

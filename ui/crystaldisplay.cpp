@@ -6,6 +6,10 @@
 #include <QMimeData>
 #include <QMouseEvent>
 #include <QTimer>
+#include <QFileDialog>
+#include <QFile>
+#include <QXmlStreamWriter>
+
 
 #include "tools/mat3D.h"
 #include "core/crystal.h"
@@ -267,8 +271,7 @@ void CrystalDisplay::slotStartIndexing() {
 */
 
 
-void CrystalDisplay::on_actionDrag_hovered()
-{
+void CrystalDisplay::on_actionDrag_hovered() {
   QDrag* drag = new QDrag(this);
   QMimeData* mime = new QMimeData;
   mime->setData("application/CrystalPointer", "");
@@ -276,4 +279,37 @@ void CrystalDisplay::on_actionDrag_hovered()
   drag->setMimeData(mime);
   drag->exec(Qt::LinkAction);
 
+}
+
+void CrystalDisplay::on_actionLoad_triggered() {
+    QString filename = QFileDialog::getOpenFileName(this, "Load Cell Data", "",
+                                                    "Contrast Curves (*.cell);;All Files (*)");
+
+    QDomDocument doc("Crystal");
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly))
+      return;
+    if (!doc.setContent(&file)) {
+      file.close();
+      return;
+    }
+    file.close();
+    crystal->loadFromXML(doc.documentElement());
+
+}
+
+void CrystalDisplay::on_actionSave_triggered() {
+  QString filename = QFileDialog::getSaveFileName(this, "Choose File to save Cell", "", "Clip Cell files (*.cell);;All Files (*)");
+  if (!filename.isEmpty()) {
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly|QIODevice::Truncate)) return;
+    QXmlStreamWriter w(&file);
+    w.setAutoFormatting(true);
+    w.setAutoFormattingIndent(2);
+
+    w.writeStartDocument();
+    crystal->saveToXML(w);
+    w.writeEndDocument();
+    file.close();
+  }
 }

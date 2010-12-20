@@ -22,7 +22,7 @@ public slots:
   void addRotationAngle(double);
   void resetSum();
 private slots:
-  void on_axisEdit_textChanged(QString );
+  void on_axisEdit_textEdited(QString );
   void on_axisChooser_currentIndexChanged(int index);
   void loadAxisFromCrystal();
   void addRotation(int);
@@ -33,6 +33,7 @@ private:
   double angleSum;
   QSignalMapper buttonMapper;
   Crystal* paramsLoadedFromCrystal;
+  bool axisChangeFromEdit;
 };
 
 #endif // ROTATECRYSTAL_H
