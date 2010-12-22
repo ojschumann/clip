@@ -4,7 +4,7 @@
 #include "tools/propagatinggraphicsobject.h"
 
 #include <QPen>
-
+#include <QDomElement>
 #include "tools/vec3D.h"
 
 class Projector;
@@ -27,6 +27,9 @@ public:
   void highlight(bool);
   bool isHighlighted();
   Vec3D getZoneNormal();
+
+  void saveToXML(QDomElement base);
+  void loadFromXML(QDomElement base);
 private slots:
   void updatePolygon();
   void updateOptimalZone();

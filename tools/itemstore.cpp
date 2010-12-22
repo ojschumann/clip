@@ -14,6 +14,18 @@ ItemStore::ItemStore(QObject* parent) :
 
 }
 
+ItemStore::ItemStore(const ItemStore &o) {
+  items = o.items;
+}
+
+ItemStore::const_iterator ItemStore::begin() const {
+  return items.begin();
+}
+
+ItemStore::const_iterator ItemStore::end() const {
+  return items.end();
+}
+
 int ItemStore::size() {
   return items.size();
 }
@@ -21,6 +33,11 @@ int ItemStore::size() {
 QGraphicsItem* ItemStore::at(int n) {
   if (n<size()) return items.at(n);
   return NULL;
+}
+
+QGraphicsItem* ItemStore::last() {
+  if (items.isEmpty()) return NULL;
+  return items.last();
 }
 
 bool ItemStore::delAt(const QPointF& p) {

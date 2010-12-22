@@ -18,7 +18,6 @@ Refinement (basically new)
   Optional show state after each iteration
 
 Save Default Values for Projector Variables (Distance, Height, Width, ...)
-  * Load/Save Workspace on startup
   * Load Default Projector/Crystal on creation
 
 Allow to configure colors
@@ -31,3 +30,5 @@ Marked Spots and Zone info (call from Crystal) (new)
 Mark user defined reflection (like magnetic/incomensurate one)
 
 Show if Spot/Zone in indexdisplay
+
+Populate all ToolTips with usefull help...

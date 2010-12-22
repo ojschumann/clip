@@ -7,6 +7,8 @@ class StereoProjector: public Projector {
   Q_OBJECT
 public:
   StereoProjector(QObject* parent=0);
+  static Projector* getInstance();
+
   virtual QPointF scattered2det(const Vec3D&) const;
   virtual QPointF scattered2det(const Vec3D&, bool& b) const;
 
@@ -22,16 +24,16 @@ public:
   virtual QString projectorName();
   virtual QString displayName();
   //virtual double TTmax() const;
-  virtual void projector2xml(QXmlStreamWriter&);
-  //        virtual void loadFromXML(QXmlStreamReader&);
-    public slots:
+
+  virtual void saveToXML(QDomElement base);
+public slots:
   virtual QWidget* configWidget();
   virtual void decorateScene();
   void setDetOrientation(const Mat3D& M);
   Mat3D getDetOrientation();
 protected:
   virtual bool project(const Reflection &r, QPointF &);
-  virtual bool parseXMLElement(QXmlStreamReader&);
+  virtual bool parseXMLElement(QDomElement);
 
   Mat3D localCoordinates;
 };

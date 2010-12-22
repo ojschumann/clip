@@ -8,6 +8,7 @@
 #include <core/reflection.h>
 
 #include "image/laueimage.h"
+#include "core/projectorfactory.h"
 
 using namespace std;
 
@@ -24,6 +25,10 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent): Projector(parent), loca
   setFitParameterNames(fitParameterNames);
   connect(this, SIGNAL(imageLoaded(LaueImage*)), this, SLOT(loadParmetersFromImage(LaueImage*)));
 };
+
+Projector* LauePlaneProjector::getInstance() {
+  return new LauePlaneProjector();
+}
 
 QPointF LauePlaneProjector::scattered2det(const Vec3D &v) const{
   Vec3D w=localCoordinates*v;
@@ -362,29 +367,28 @@ void LauePlaneProjector::fitParameterSetValue(unsigned int n, double val) {
 }
 
 
-void LauePlaneProjector::projector2xml(QXmlStreamWriter& w) {
-  w.writeStartElement("Projector");
+void LauePlaneProjector::saveToXML(QDomElement base) {
+  QDomDocument doc = base.ownerDocument();
+  QDomElement projector = (base.tagName()=="Projector") ? base : base.appendChild(doc.createElement("Projector")).toElement();
 
-  w.writeEmptyElement("DetSize");
-  w.writeAttribute("width", QString::number(width()));
-  w.writeAttribute("height", QString::number(height()));
-  w.writeAttribute("dist", QString::number(dist()));
+  QDomElement e = projector.appendChild(doc.createElement("DetSize")).toElement();
+  e.setAttribute("width", width());
+  e.setAttribute("height", height());
+  e.setAttribute("dist", dist());
 
-  w.writeEmptyElement("DetOrientation");
-  w.writeAttribute("Omega", QString::number(omega()));
-  w.writeAttribute("Chi", QString::number(chi()));
-  w.writeAttribute("Phi", QString::number(phi()));
+  e = projector.appendChild(doc.createElement("DetOrientation")).toElement();
+  e.setAttribute("Omega", omega());
+  e.setAttribute("Chi", chi());
+  e.setAttribute("Phi", phi());
 
-  w.writeEmptyElement("DetOffset");
-  w.writeAttribute("xOffset", QString::number(xOffset()));
-  w.writeAttribute("yOffset", QString::number(yOffset()));
+  e = projector.appendChild(doc.createElement("DetOffset")).toElement();
+  e.setAttribute("xOffset", xOffset());
+  e.setAttribute("yOffset", yOffset());
 
-  Projector::projector2xml(w);
-
-  w.writeEndElement();
+  Projector::saveToXML(projector);
 }
 
-bool LauePlaneProjector::parseXMLElelemt(QDomElement e) {
+bool LauePlaneProjector::parseXMLElement(QDomElement e) {
   bool ok;
   if (e.tagName()=="DetSize") {
     double detW = e.attribute("width").toDouble(&ok); if (!ok) return false;
@@ -401,8 +405,9 @@ bool LauePlaneProjector::parseXMLElelemt(QDomElement e) {
     double detY = e.attribute("yOffset").toDouble(&ok); if (!ok) return false;
     setDetOffset(detX, detY);
   } else {
-    return Projector::parseXMLElelemt(e);
+    return Projector::parseXMLElement(e);
   }
+  return true;
 }
 
 double LauePlaneProjector::TTmax() const {
@@ -472,3 +477,7 @@ void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
   }
   setDetSize(dist(), imgSize.width(), imgSize.height());
 }
+
+
+
+bool LauePlaneProjector_registered = ProjectorFactory::registerProjector("LauePlaneProjector", &LauePlaneProjector::getInstance);

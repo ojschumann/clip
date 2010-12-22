@@ -43,6 +43,9 @@
     <addaction name="newCrystal"/>
     <addaction name="newLaue"/>
     <addaction name="newStereo"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_Workspace"/>
+    <addaction name="actionSave_Workspace"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -111,6 +114,16 @@
   <action name="actionReorientation">
    <property name="text">
     <string>Reorientation</string>
+   </property>
+  </action>
+  <action name="actionOpen_Workspace">
+   <property name="text">
+    <string>Open Workspace</string>
+   </property>
+  </action>
+  <action name="actionSave_Workspace">
+   <property name="text">
+    <string>Save Workspace</string>
    </property>
   </action>
  </widget>

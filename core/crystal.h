@@ -30,7 +30,7 @@ public:
   Crystal(const Crystal &);
   ~Crystal();
 
-  void saveToXML(QXmlStreamWriter& w);
+  void saveToXML(QDomElement base);
   bool loadFromXML(QDomElement base);
 
 

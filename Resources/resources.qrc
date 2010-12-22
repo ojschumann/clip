@@ -43,4 +43,7 @@
         <file>icons/viewmagfit.png</file>
         <file>icons/zoom.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>DefaultWorkspace.cws</file>
+    </qresource>
 </RCC>

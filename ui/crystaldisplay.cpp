@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include <QFile>
 #include <QXmlStreamWriter>
+#include <QSettings>
 
 
 #include "tools/mat3D.h"
@@ -17,6 +18,7 @@
 #include "ui/indexdisplay.h"
 #include "ui/clip.h"
 #include "tools/tools.h"
+#include "tools/xmltools.h"
 
 CrystalDisplay::CrystalDisplay(QWidget *parent) :
     QMainWindow(parent),
@@ -187,90 +189,6 @@ void CrystalDisplay::slotStartIndexing() {
   }
 }
 
-
-
-/*
-    TODO: Port
-
-    def crystaldata2xml(self, w):
-        w.writeStartElement('Crystal')
-
-        w.writeEmptyElement('Spacegroup')
-        w.writeAttribute('symbol', str(self.crystal.getSpacegroupSymbol()))
-
-        w.writeEmptyElement('Cell')
-        for val, name in zip(self.crystal.getCell(), ('a', 'b', 'c', 'alpha', 'beta', 'gamma')):
-            w.writeAttribute(name, str(val))
-
-        w.writeEmptyElement('Orientation')
-        for val, name in zip(self.crystal.calcEulerAngles()[:3], ('omega', 'chi','phi')):
-            w.writeAttribute(name, str(math.degrees(val)))
-
-        w.writeEndElement()
-
-    def loadFromXML(self, r):
-        if r.name()!="Crystal" or not r.isStartElement():
-            return
-        while not r.atEnd() and not (r.isEndElement() and r.name()=="Crystal"):
-            if r.readNext()==QtCore.QXmlStreamReader.StartElement:
-                if r.name()=="Spacegroup":
-                    s=r.attributes().value('symbol')
-                    if not s.isNull():
-                        self.crystal.setSpacegroupSymbol(str(s.toString()))
-                elif r.name()=="Cell":
-                    cell=[]
-                    for name in ('a', 'b', 'c', 'alpha', 'beta', 'gamma'):
-                        s=r.attributes().value(name)
-                        v, b=s.toString().toDouble()
-                        if not s.isNull() and b:
-                            cell.append(v)
-                    if len(cell)==6:
-                        self.crystal.setCell(*cell)
-                elif r.name()=="Orientation":
-                    angles=[]
-                    for name in ('omega', 'chi', 'phi'):
-                        s=r.attributes().value(name)
-                        v, b=s.toString().toDouble()
-                        if not s.isNull() and b:
-                            angles.append(math.radians(v))
-                    if len(angles)==3:
-                        self.crystal.setEulerAngles(*angles)
-
-    def slotSaveCrystalData(self):
-        xmlString=QtCore.QString()
-        w=QtCore.QXmlStreamWriter(xmlString)
-        w.setAutoFormatting(True)
-        w.setAutoFormattingIndent(2)
-
-        self.crystaldata2xml(w)
-        w.writeEndDocument()
-        print xmlString
-
-        fileName = QtGui.QFileDialog.getSaveFileName(self, 'Choose File to save Cell', '', 'Clip Cell files (*.cell);;All Files (*)')
-        if fileName!="":
-            f=open(str(fileName),  'w')
-            f.write(str(xmlString))
-            f.close()
-
-
-    def slotOpenCrystalData(self):
-        fileName = str(QtGui.QFileDialog.getOpenFileName(self, 'Choose Cell to load from File', '', 'Clip Cell files (*.cell);;All Files (*)'))
-        try:
-            f=open(str(fileName))
-            s=''.join(f.readlines())
-        except:
-            return
-        else:
-            r=QtCore.QXmlStreamReader(s)
-            while not r.atEnd():
-                r.readNext()
-                if r.name()=='Crystal' and r.isStartElement():
-                    self.loadFromXML(r)
-
-
-*/
-
-
 void CrystalDisplay::on_actionDrag_hovered() {
   QDrag* drag = new QDrag(this);
   QMimeData* mime = new QMimeData;
@@ -281,35 +199,62 @@ void CrystalDisplay::on_actionDrag_hovered() {
 
 }
 
-void CrystalDisplay::on_actionLoad_triggered() {
-    QString filename = QFileDialog::getOpenFileName(this, "Load Cell Data", "",
-                                                    "Contrast Curves (*.cell);;All Files (*)");
-
-    QDomDocument doc("Crystal");
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly))
-      return;
-    if (!doc.setContent(&file)) {
-      file.close();
-      return;
+void CrystalDisplay::loadFromXML(QDomElement base) {
+  if (base.tagName()!="CrystalDisplay") return;
+  for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+    if (e.tagName()=="Geometry") {
+      if (QWidget* p = dynamic_cast<QWidget*>(parent()))
+        p->setGeometry(TagToRect(e, p->geometry()));
+    } else if (e.tagName()=="Crystal") {
+      crystal->loadFromXML(e);
     }
+  }
+}
+
+void CrystalDisplay::saveToXML(QDomElement base) {
+  QDomElement cp = ensureElement(base, "CrystalDisplay");
+  if (QWidget* p = dynamic_cast<QWidget*>(parent())) {
+    RectToTag(cp, "Geometry", p->geometry());
+  }
+  crystal->saveToXML(cp);
+}
+
+void CrystalDisplay::on_actionLoad_triggered() {
+  QSettings settings;
+  QString filename = QFileDialog::getOpenFileName(this, "Load Cell Data", settings.value("LastDirectory").toString(),
+                                                  "Contrast Curves (*.cell);;All Files (*)");
+
+  QDomDocument doc("Crystal");
+  QFile file(filename);
+  if (!file.open(QIODevice::ReadOnly))
+    return;
+  if (!doc.setContent(&file)) {
     file.close();
-    crystal->loadFromXML(doc.documentElement());
+    return;
+  }
+  settings.setValue("LastDirectory", QFileInfo(filename).canonicalFilePath());
+
+  file.close();
+  crystal->loadFromXML(doc.documentElement());
 
 }
 
 void CrystalDisplay::on_actionSave_triggered() {
-  QString filename = QFileDialog::getSaveFileName(this, "Choose File to save Cell", "", "Clip Cell files (*.cell);;All Files (*)");
+  QSettings settings;
+  QString filename = QFileDialog::getSaveFileName(this, "Choose File to save Cell", settings.value("LastDirectory").toString(), "Clip Cell files (*.cell);;All Files (*)");
   if (!filename.isEmpty()) {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly|QIODevice::Truncate)) return;
-    QXmlStreamWriter w(&file);
-    w.setAutoFormatting(true);
-    w.setAutoFormattingIndent(2);
 
-    w.writeStartDocument();
-    crystal->saveToXML(w);
-    w.writeEndDocument();
+    settings.setValue("LastDirectory", QFileInfo(filename).canonicalFilePath());
+
+
+    QDomDocument doc("Crystal");
+    QDomElement docElement = doc.appendChild(doc.createElement("Crystal")).toElement();
+    saveToXML(docElement);
+
+    QTextStream ts(&file);
+    doc.save(ts, 2);
     file.close();
   }
 }

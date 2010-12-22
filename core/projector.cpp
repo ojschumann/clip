@@ -135,24 +135,32 @@ ItemStore& Projector::infoItems() {
 }
 
 
-void Projector::reflectionsUpdated() {
+void Projector::reflectionsUpdated() {  
   if (crystal.isNull() or not projectionEnabled)
     return;
 
+  // Remove the textmarkeritems from the scene
   foreach (QGraphicsItem* item, textMarkerItems) {
     scene.removeItem(item);
     delete item;
   }
   textMarkerItems.clear();
 
+  // Clear the coordinates of the old projected spots
   spotIndicator->coordinates.clear();
+  // Load Reflection List
   QVector<Reflection> refs = crystal->getReflectionList();
+  // Resize the array, that caches the Information if a reflection is actually projected
   reflectionIsProjected.resize(refs.size());
 
+  QPointF p;
+  // Loop over all reflections
   for (int i=0; i<refs.size(); i++) {
-    QPointF p;
+    // Do the actual projection
     if ((reflectionIsProjected[i] = project(refs[i], p))) {
+      // Save the projected coordinate
       spotIndicator->coordinates << p;
+      // If hklSum is below limit, add a textitem to the scene
       if (refs.at(i).hklSqSum<=maxHklSqSum) {
         QGraphicsTextItem* t = new QGraphicsTextItem();
         t->setTransform(QTransform(1,0,0,-1,0,0));
@@ -166,8 +174,9 @@ void Projector::reflectionsUpdated() {
       }
     }
   }
+  // set the spotsize (just in case)
   spotIndicator->setSpotsize(getSpotSize());
-  spotIndicator->paintUntil = spotIndicator->coordinates.size();
+  // indicate that the coordinates have changed.
   spotIndicator->pointsUpdated();
   emit projectedPointsUpdated();
 }
@@ -308,7 +317,6 @@ void Projector::setTextSizeFraction(double d) {
 
 void Projector::setSpotSizeFraction(double d) {
   spotSizeFraction=0.01*d;
-  cout << "new spotsize " << d <<endl;
   emit spotSizeChanged(getSpotSize());
 }
 
@@ -481,39 +489,52 @@ void Projector::enableProjection(bool b) {
   projectionEnabled=b;
 }
 
-void Projector::projector2xml(QXmlStreamWriter& w) {
-  w.writeEmptyElement("QRange");
-  w.writeAttribute("Qmin", QString::number(Qmin()));
-  w.writeAttribute("Qmax", QString::number(Qmax()));
+void Projector::saveToXML(QDomElement base) {
+  QDomDocument doc = base.ownerDocument();
+  QDomElement projector = (base.tagName()=="Projector") ? base : base.appendChild(doc.createElement("Projector")).toElement();
 
-  w.writeEmptyElement("Display");
-  w.writeAttribute("maxHKLSum", QString::number(getMaxHklSqSum()));
-  w.writeAttribute("textSize", QString::number(getTextSize()));
-  w.writeAttribute("spotSize", QString::number(getSpotSize()));
-  if (spotsEnabled())
-    w.writeAttribute("spotsEnabled", "1");
+  QDomElement e = projector.appendChild(doc.createElement("QRange")).toElement();
+  e.setAttribute("Qmin", Qmin());
+  e.setAttribute("Qmax", Qmax());
 
-  w.writeStartElement("SpotMarkers");
-  for (int n=0; n<spotMarkers().size(); n++) {
-    QPointF p=getSpotMarkerDetPos(n);
-    w.writeEmptyElement("Spot");
-    w.writeAttribute("x", QString::number(p.x()));
-    w.writeAttribute("y", QString::number(p.y()));
+  e = projector.appendChild(doc.createElement("Display")).toElement();
+  e.setAttribute("maxHKLSum", getMaxHklSqSum());
+  e.setAttribute("textSize", getTextSizeFraction());
+  e.setAttribute("spotSize", getSpotSizeFraction());
+  e.setAttribute("spotsEnabled", spotsEnabled());
+
+  if (spotMarkerStore.size()>0) {
+    e = projector.appendChild(doc.createElement("SpotMarkers")).toElement();
+    for (int n=0; n<spotMarkerStore.size(); n++) {
+      QDomElement m = e.appendChild(doc.createElement("Marker")).toElement();
+      m.setAttribute("x", spotMarkerStore.at(n)->x());
+      m.setAttribute("y", spotMarkerStore.at(n)->y());
+    }
   }
-  w.writeEndElement();
 
+  if (zoneMarkerStore.size()>0) {
+    e = projector.appendChild(doc.createElement("ZoneMarkers")).toElement();
+    foreach (QGraphicsItem* gi, zoneMarkerStore) {
+      dynamic_cast<ZoneItem*>(gi)->saveToXML(e);
+    }
+  }
 
 }
 
 bool Projector::loadFromXML(QDomElement base) {
-  if (base.tagName()!="Projector") return false;
+  if (base.tagName()!="Projector") {
+    cout << "Tag: Projector != " << qPrintable(base.tagName()) << endl;
+    return false;
+  }
   for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
-    if (!parseXMLEmelemt(e)) return false;
+    if (!parseXMLElement(e)) {
+      cout << "Could not parse: " << qPrintable(e.tagName()) << endl;
+    }
   }
   return true;
 }
 
-bool Projector::parseXMLEmelemt(QDomElement e) {
+bool Projector::parseXMLElement(QDomElement e) {
   bool ok;
   if (e.tagName()=="QRange") {
     double Qmin = e.attribute("Qmin").toDouble(&ok); if (!ok) return false;
@@ -528,6 +549,11 @@ bool Projector::parseXMLEmelemt(QDomElement e) {
     setSpotSizeFraction(ssize);
     setMaxHklSqSum(maxHKLS);
     enableSpots(senabled!=0);
+  } else if (e.tagName()=="ZoneMarkers") {
+    for (QDomElement m=e.firstChildElement(); !m.isNull(); m=m.nextSiblingElement()) {
+      addZoneMarker(QPointF(), QPointF());
+      dynamic_cast<ZoneItem*>(zoneMarkerStore.last())->loadFromXML(m);
+    }
   } else {
     return false;
   }

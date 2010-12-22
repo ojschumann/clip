@@ -6,6 +6,8 @@
 #include <QCustomEvent>
 #include <QActionGroup>
 #include <QPointer>
+#include <QDomElement>
+
 #include "tools/objectstore.h"
 #include "tools/mousepositioninfo.h"
 
@@ -33,6 +35,11 @@ public:
 
   Projector* getProjector() { return projector; }
 
+public slots:
+  void saveToXML(QDomElement base);
+  bool loadFromXML(QDomElement base);
+
+
 signals:
   void info(QString, int);
   void reflexInfo(int,int,int);
@@ -40,9 +47,7 @@ signals:
   void rotationFromProjector(double);
 protected slots:
   void slotChangeMouseDragMode();
-  void slotUpdateFPS();
   void resizeView();
-  void slotLoadCrystalData();
   void slotOpenResolutionCalc();
   void generateMousePositionInfo(QPointF);
   void generateEmptyMousePositionInfo();
@@ -56,6 +61,7 @@ protected slots:
   void imageLoaded(LaueImage*);
   void imageClosed();
 protected:
+
   void setupToolbar();
   QRectF zoomSceneRect();
 
@@ -72,7 +78,6 @@ protected:
   QRubberBand* zoomRubber;
   QList<QRectF> zoomSteps;
   static QList<ProjectionPlane*> allPlanes;
-  QString lastImageOpenDir;
 
 private slots:
   void on_actionCrop_triggered();

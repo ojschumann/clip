@@ -73,7 +73,7 @@ void SpotIndicatorGraphicsItem::pointsUpdated() {
 QRectF SpotIndicatorGraphicsItem::boundingRect() const {
   if (coordinates.size()>0) {
     QRectF r(coordinates.at(0), QSizeF(0,0));
-    for (int i=1; i<paintUntil; i++) {
+    for (int i=1; i<coordinates.size(); i++) {
       QPointF p(coordinates.at(i));
       r.setLeft(qMin(p.x(), r.left()));
       r.setRight(qMax(p.x(), r.right()));
@@ -113,7 +113,8 @@ void SpotIndicatorGraphicsItem::Worker::run() {
       painter.setRenderHints(l.at(0)->renderHints());
     painter.setPen(Qt::green);
     int i;
-    while ((i=spotIndicator->workN.fetchAndAddOrdered(1))<spotIndicator->paintUntil) {
+    int maxCoo = spotIndicator->coordinates.size();
+    while ((i=spotIndicator->workN.fetchAndAddOrdered(1))<maxCoo) {
       painter.drawEllipse(spotIndicator->transform.map(spotIndicator->coordinates.at(i)), rx, ry);
 
     }

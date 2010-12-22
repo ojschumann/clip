@@ -2,7 +2,7 @@
 <ClipWorkspace>
   <CrystalConnection>
     <CrystalDisplay>
-      <Geometry width="208" x="0" y="0" height="256"/>
+      <Geometry width="208" height="256"/>
       <Crystal>
         <Spacegroup symbol="P1"/>
         <Cell beta="90" gamma="90" alpha="90" a="4" b="4" c="4"/>
@@ -11,14 +11,14 @@
       </Crystal>
     </CrystalDisplay>
     <ProjectionPlane projectorType="LauePlaneProjector">
-      <Geometry width="313" x="208" y="0" height="366"/>
+      <Geometry width="313" height="366"/>
       <ZoomSteps/>
       <Projector>
         <DetSize width="150" dist="30" height="150"/>
         <DetOrientation Chi="0" Phi="0" Omega="180"/>
         <DetOffset xOffset="0" yOffset="0"/>
         <QRange Qmax="6.283" Qmin="0"/>
-        <Display textSize="0.5" spotSize="1" spotsEnabled="1" maxHKLSum="3"/>
+        <Display textSize="7" spotSize="1" spotsEnabled="1" maxHKLSum="3"/>
       </Projector>
     </ProjectionPlane>
   </CrystalConnection>

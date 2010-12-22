@@ -20,7 +20,6 @@ public:
   void setSpotsize(double s) { spotSize = s; cacheNeedsUpdate=true; }
   void pointsUpdated();
   QVector<QPointF> coordinates;
-  int paintUntil;
 protected:
   bool cacheNeedsUpdate;
   void updateCache();

@@ -10,7 +10,9 @@
 #include <QTime>
 #include <QtConcurrentMap>
 #include <QMetaObject>
+
 #include "defs.h"
+#include "tools/xmltools.h"
 
 using namespace std;
 
@@ -62,8 +64,8 @@ Crystal::Crystal(QObject* parent=NULL):
     spaceGroup(this),
     reflections()
 {
-  spaceGroup.setGroupSymbol("Pm3m");
-  internalSetCell(2.0, 2.0, 2.0, 90.0, 90.0, 90.0);
+  spaceGroup.setGroupSymbol("P1");
+  internalSetCell(4.0, 4.0, 4.0, 90.0, 90.0, 90.0);
   Qmin=0.0;
   Qmax=1.0;
   predictionFactor = 1.0;
@@ -598,11 +600,11 @@ bool Crystal::loadFromXML(QDomElement base) {
 
   if (base.tagName()!="Crystal") return false;
   for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+    bool ok = true;
     if (e.tagName()=="Spacegroup") {
       if (!spaceGroup.setGroupSymbol(e.attribute("symbol"))) return false;
     } else if (e.tagName()=="Cell") {
       if (!e.hasAttribute("a") || !e.hasAttribute("b") || !e.hasAttribute("c") || !e.hasAttribute("alpha") || !e.hasAttribute("beta") || !e.hasAttribute("gamma")) return false;
-      bool ok;
       double a = e.attribute("a").toDouble(&ok); if (!ok) return false;
       double b = e.attribute("b").toDouble(&ok); if (!ok) return false;
       double c = e.attribute("c").toDouble(&ok); if (!ok) return false;
@@ -612,41 +614,49 @@ bool Crystal::loadFromXML(QDomElement base) {
       internalSetCell(a,b,c,alpha, beta, gamma);
     } else if (e.tagName()=="Orientation") {
       if (!e.hasAttribute("phi") || !e.hasAttribute("omega") || !e.hasAttribute("chi")) return false;
-      bool ok;
       double omega = M_PI/180.0*e.attribute("omega").toDouble(&ok); if (!ok) return false;
       double chi = M_PI/180.0*e.attribute("chi").toDouble(&ok); if (!ok) return false;
       double phi = M_PI/180.0*e.attribute("phi").toDouble(&ok); if (!ok) return false;
       setEulerAngles(omega, chi, phi);
+    } else if (e.tagName()=="RotationAxis") {
+      double x = readDouble(e, "x", ok);
+      double y = readDouble(e, "y", ok);
+      double z = readDouble(e, "z", ok);
+      int type = readInt(e, "type", ok);
+      if (ok) setRotationAxis(Vec3D(x,y,z), static_cast<RotationAxisType>(type));
     }
 
   }
   return true;
 }
 
-void Crystal::saveToXML(QXmlStreamWriter& w) {
-  w.writeStartElement("Crystal");
+void Crystal::saveToXML(QDomElement base) {
+  QDomDocument doc = base.ownerDocument();
+  QDomElement crystal = ensureElement(base, "Crystal");
 
-  w.writeStartElement("Spacegroup");
-  w.writeAttribute("symbol", spaceGroup.groupSymbol());
-  w.writeEndElement();
+  QDomElement e = crystal.appendChild(doc.createElement("Spacegroup")).toElement();
+  e.setAttribute("symbol", spaceGroup.groupSymbol());
 
-  w.writeStartElement("Cell");
-  w.writeAttribute("a", QString::number(a, 'f', 5));
-  w.writeAttribute("b", QString::number(b, 'f', 5));
-  w.writeAttribute("c", QString::number(c, 'f', 5));
-  w.writeAttribute("alpha", QString::number(alpha, 'f', 5));
-  w.writeAttribute("beta", QString::number(beta, 'f', 5));
-  w.writeAttribute("gamma", QString::number(gamma, 'f', 5));
-  w.writeEndElement();
+  e = crystal.appendChild(doc.createElement("Cell")).toElement();
+  e.setAttribute("a", a);
+  e.setAttribute("b", b);
+  e.setAttribute("c", c);
+  e.setAttribute("alpha", alpha);
+  e.setAttribute("beta", beta);
+  e.setAttribute("gamma", gamma);
 
-  w.writeStartElement("Orientation");
   double omega, chi, phi;
   calcEulerAngles(omega, chi, phi);
-  w.writeAttribute("omega", QString::number(180.0*M_1_PI*omega, 'f', 5));
-  w.writeAttribute("chi", QString::number(180.0*M_1_PI*chi, 'f', 5));
-  w.writeAttribute("phi", QString::number(180.0*M_1_PI*phi, 'f', 5));
-  w.writeEndElement();
+  e = crystal.appendChild(doc.createElement("Orientation")).toElement();
+  e.setAttribute("omega", 180.0*M_1_PI*omega);
+  e.setAttribute("phi", 180.0*M_1_PI*phi);
+  e.setAttribute("chi", 180.0*M_1_PI*chi);
 
-  w.writeEndElement();
+  e = crystal.appendChild(doc.createElement("RotationAxis")).toElement();
+  e.setAttribute("x", rotationAxis.x());
+  e.setAttribute("y", rotationAxis.y());
+  e.setAttribute("z", rotationAxis.z());
+  e.setAttribute("type", getRotationAxisType());
+
 }
 

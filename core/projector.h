@@ -9,8 +9,6 @@
 #include <QGraphicsItem>
 #include <QGraphicsRectItem>
 #include <QString>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 #include <QWaitCondition>
 #include <QSemaphore>
 #include <QThread>
@@ -18,6 +16,7 @@
 #include <QSignalMapper>
 #include <QRunnable>
 #include <QMutex>
+#include <QDomElement>
 
 #include <core/fitobject.h>
 #include <tools/vec3D.h>
@@ -84,8 +83,8 @@ public:
   double getSpotSizeFraction() const;
   bool spotsEnabled() const;
 
-  virtual void projector2xml(QXmlStreamWriter&);
-  void loadFromXML(QXmlStreamReader&);
+  virtual void saveToXML(QDomElement base);
+  bool loadFromXML(QDomElement base);
 
   ItemStore& spotMarkers();
   void addSpotMarker(const QPointF&);
@@ -147,7 +146,7 @@ signals:
   void textSizeChanged(double);
 protected:
   virtual bool project(const Reflection &r, QPointF &point)=0;
-  virtual bool parseXMLElelemt(QDomElement e);
+  virtual bool parseXMLElement(QDomElement e);
 
   // Stuff like Primary beam marker, Coordinate lines
   QList<QGraphicsItem*> decorationItems;

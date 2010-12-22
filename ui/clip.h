@@ -6,6 +6,7 @@
 
 
 class Projector;
+class ProjectionPlane;
 class Crystal;
 
 namespace Ui {
@@ -36,6 +37,10 @@ public slots:
   void on_actionAbout_triggered(bool);
   void on_actionAbout_Qt_triggered(bool);
 
+  // Loads the initial Workspace (DefaultWorkspace.cws from ressource)
+  void loadInitialWorkspace();
+  bool loadWorkspaceFile(QString filename);
+
   // Slot for update of the Window-Submenu
   void slotUpdateWindowMenu();
   // Used by the Windows-Submenu
@@ -43,7 +48,7 @@ public slots:
   void addMdiWindow(QWidget*);
 protected:
   Projector* connectToLastCrystal(Projector*);
-  void addProjector(Projector*);
+  ProjectionPlane* addProjector(Projector*);
   void addActions();
 private:
   Ui::Clip *ui;
@@ -58,6 +63,8 @@ private:
   QSignalMapper *windowMapper;
 
 private slots:
+    void on_actionSave_Workspace_triggered();
+    void on_actionOpen_Workspace_triggered();
     void on_actionReorientation_triggered();
     void on_actionRotation_triggered();
     void on_actionReflection_Info_triggered();

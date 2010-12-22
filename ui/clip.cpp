@@ -1,7 +1,12 @@
 #include "clip.h"
 #include "ui_clip.h"
+
 #include <QMdiSubWindow>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QSettings>
+#include <QTimer>
+
 #include "defs.h"
 #include "core/projector.h"
 #include "ui/projectionplane.h"
@@ -11,6 +16,9 @@
 #include "ui/mouseinfodisplay.h"
 #include "ui/rotatecrystal.h"
 #include "ui/reorient.h"
+#include "core/crystal.h"
+#include "core/projectorfactory.h"
+#include "tools/xmllistiterators.h"
 
 
 Clip::Clip(QWidget *parent) :
@@ -27,11 +35,10 @@ Clip::Clip(QWidget *parent) :
   connect(ui->menuWindows, SIGNAL(aboutToShow()), this, SLOT(slotUpdateWindowMenu()));
   connect(ui->mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SIGNAL(windowChanged()));
 
-  on_newCrystal_triggered();
-  on_newLaue_triggered();
-  //on_newStereo_triggered();
 
+  QTimer::singleShot(0, this, SLOT(loadInitialWorkspace()));
 }
+
 
 Clip::Clip(const Clip &) {
 }
@@ -56,6 +63,8 @@ void Clip::clearInstance() {
   }
 }
 
+
+
 void Clip::on_newCrystal_triggered() {
   addMdiWindow(new CrystalDisplay(this));
 }
@@ -69,10 +78,12 @@ void Clip::on_newStereo_triggered() {
   addProjector(new StereoProjector(this));
 }
 
-void Clip::addProjector(Projector* p) {
+ProjectionPlane* Clip::addProjector(Projector* p) {
+  if (!p) return 0;
   ProjectionPlane* pp = new ProjectionPlane(connectToLastCrystal(p), this);
   connect(pp, SIGNAL(rotationFromProjector(double)), this, SIGNAL(projectorRotation(double)));
   addMdiWindow(pp);
+  return pp;
 }
 
 Projector* Clip::connectToLastCrystal(Projector *p) {
@@ -246,3 +257,77 @@ void Clip::on_actionReorientation_triggered()
   Reorient* reorient = new Reorient();
   addMdiWindow(reorient);
 }
+
+void Clip::on_actionOpen_Workspace_triggered() {
+  QSettings settings;
+  QString filename = QFileDialog::getOpenFileName(this, "Load Workspace", settings.value("LastDirectory").toString(),
+                                                  "Clip Workspace Data (*.cws);;All Files (*)");
+  if (loadWorkspaceFile(filename))
+    settings.setValue("LastDirectory", QFileInfo(filename).canonicalFilePath());
+}
+
+void Clip::loadInitialWorkspace() {
+  // Needs to be a slot, because the windows are not placed correctly otherwise
+  loadWorkspaceFile(":/DefaultWorkspace.cws");
+}
+
+bool Clip::loadWorkspaceFile(QString filename) {
+  QDomDocument doc("ClipWorkspace");
+  QFile file(filename);
+  if (!file.open(QIODevice::ReadOnly))
+    return false;
+  if (!doc.setContent(&file)) {
+    file.close();
+    return false;
+  }
+
+  file.close();
+
+  foreach (QDomElement crystalConnection, QDNLelements(doc.elementsByTagName("CrystalConnection"))) {
+    if (crystalConnection.elementsByTagName("CrystalDisplay").size()==1) {
+      CrystalDisplay* crystalDisplay = new CrystalDisplay(this);
+      addMdiWindow(crystalDisplay);
+      crystalDisplay->loadFromXML(crystalConnection.elementsByTagName("CrystalDisplay").at(0).toElement());
+      foreach (QDomElement e, QDNLelements(crystalConnection.elementsByTagName("ProjectionPlane"))) {
+        ProjectionPlane* pp = addProjector(ProjectorFactory::getInstance().getProjector(e.attribute("projectorType")));
+        if (pp) {
+          pp->loadFromXML(e);
+          pp->getProjector()->connectToCrystal(crystalDisplay->getCrystal());
+        }
+      }
+    }
+  }
+  return true;
+}
+
+void Clip::on_actionSave_Workspace_triggered() {
+  QDomDocument doc("ClipWorkspace");
+  QDomElement docElement = doc.appendChild(doc.createElement("ClipWorkspace")).toElement();
+  foreach (QMdiSubWindow* mdi, ui->mdiArea->subWindowList()) {
+    if (CrystalDisplay* cd = dynamic_cast<CrystalDisplay*>(mdi->widget())) {
+      QDomElement connection = docElement.appendChild(doc.createElement("CrystalConnection")).toElement();
+      cd->saveToXML(connection);
+      foreach (Projector* p, cd->getCrystal()->getConnectedProjectors()) {
+        if (ProjectionPlane* pp = dynamic_cast<ProjectionPlane*>(p->parent())) {
+          pp->saveToXML(connection);
+        }
+      }
+
+    }
+  }
+
+  QSettings settings;
+  QString filename = QFileDialog::getSaveFileName(this, "Save Workspace", settings.value("LastDirectory").toString(),
+                                                  "Clip Workspace Data (*.cws);;All Files (*)");
+
+  QFile file(filename);
+  if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    QTextStream ts(&file);
+    doc.save(ts, 2);
+    file.close();
+
+    settings.setValue("LastDirectory", QFileInfo(filename).canonicalFilePath());
+  }
+}
+
+

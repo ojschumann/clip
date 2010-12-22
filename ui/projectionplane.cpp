@@ -1,6 +1,7 @@
 #include "projectionplane.h"
 #include "ui_projectionplane.h"
 
+#include <QWidget>
 #include <QMouseEvent>
 #include <QApplication>
 #include <QtOpenGL/QGLWidget>
@@ -13,6 +14,7 @@
 #include <QLabel>
 #include <QMenu>
 #include <QCursor>
+#include <QSettings>
 
 #include "ui/clip.h"
 #include "ui/imagetoolbox.h"
@@ -23,6 +25,7 @@
 #include "tools/mousepositioninfo.h"
 #include "tools/itemstore.h"
 #include "image/laueimage.h"
+#include "tools/xmltools.h"
 
 // List of all projectors. Sort of a hack ;-)
 QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
@@ -53,8 +56,7 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
 
   // Call as soon as we are displayed
   QTimer::singleShot(0, this, SLOT(resizeView()));
-  QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
-  //QTimer::singleShot(0, this, SLOT(slotRandomRotation()));
+
   allPlanes << this;
 }
 
@@ -262,31 +264,23 @@ void ProjectionPlane::slotChangeMouseDragMode() {
 }
 
 
-void ProjectionPlane::slotUpdateFPS() {
-
-  //int frames = ui->view->getFrames();
-  //ui->fpsDisplay->setText(QString::number(frames/2));
-  //QTimer::singleShot(2000, this, SLOT(slotUpdateFPS()));
-}
-
-void ProjectionPlane::slotLoadCrystalData() {
-}
-
-
 void ProjectionPlane::on_openImgAction_triggered() {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load Laue pattern", lastImageOpenDir,
+  QSettings settings;
+  QString fileName = QFileDialog::getOpenFileName(this, "Load Laue pattern", settings.value("LastDirectory").toString(),
                                                   "Images (*.jpg *.jpeg *.bmp *.png *.tif *.tiff *.gif *.img);;All Files (*)");
   QFileInfo fInfo(fileName);
 
   if (fInfo.exists()) {
-    lastImageOpenDir = fInfo.canonicalFilePath();
+    settings.setValue("LastDirectory", fInfo.canonicalFilePath());
     projector->loadImage(fileName);
-    connect(projector->getLaueImage(), SIGNAL(imageContentsChanged()), projector->getScene(), SLOT(update()));
+    if (projector->getLaueImage()) {
+      connect(projector->getLaueImage(), SIGNAL(imageContentsChanged()), projector->getScene(), SLOT(update()));
+      ui->imgToolBar->setVisible(true);
+      ui->rulerAction->setVisible(!projector->getLaueImage()->hasAbsoluteSize());
+      resizeView();
+    }
   }
 
-  ui->imgToolBar->setVisible(true);
-  ui->rulerAction->setVisible(!projector->getLaueImage()->hasAbsoluteSize());
-  resizeView();
 }
 
 void ProjectionPlane::generateMousePositionInfo(QPointF p) {
@@ -359,9 +353,8 @@ void ProjectionPlane::slotOpenResolutionCalc() {
   on_imageToolboxAction_triggered();
 }
 
-void ProjectionPlane::on_actionCrop_triggered()
-{
-    projector->showCropMarker();
+void ProjectionPlane::on_actionCrop_triggered() {
+  projector->showCropMarker();
 }
 
 void ProjectionPlane::imageLoaded(LaueImage *img) {
@@ -420,3 +413,45 @@ void ProjectionPlane::slotContextClearAll() {
   slotContextClearRulers();
 }
 
+
+void ProjectionPlane::saveToXML(QDomElement base) {
+  QDomElement plane = ensureElement(base, "ProjectionPlane");
+
+  plane.setAttribute("projectorType", projector->projectorName());
+
+  if (QWidget* p = dynamic_cast<QWidget*>(parent())) {
+    RectToTag(plane, "Geometry", p->geometry());
+  }
+
+  QDomElement steps = plane.appendChild(plane.ownerDocument().createElement("ZoomSteps")).toElement();
+  foreach (QRectF r, zoomSteps) {
+    RectToTag(steps, "Step", r);
+  }
+
+  projector->saveToXML(plane);
+}
+
+bool ProjectionPlane::loadFromXML(QDomElement base) {
+  bool ok;
+  zoomSteps.clear();
+  if (base.tagName()!="ProjectionPlane") return false;
+  if (base.attribute("projectorType") != projector->projectorName()) return false;
+  for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+    if (e.tagName()=="Geometry") {
+      if (QWidget* p = dynamic_cast<QWidget*>(parent())) {
+        p->setGeometry(TagToRect(e, p->geometry()));
+      }
+    } else if (e.tagName()=="ZoomSteps") {
+      QList<QRectF> steps;
+      for (QDomElement step=e.firstChildElement(); !step.isNull(); step=step.nextSiblingElement()) {
+        if (step.tagName()!="Step") return false;
+        QRectF r = TagToRect(step, QRectF(), &ok);
+        if (ok) steps << r;
+      }
+      zoomSteps = steps;
+    } else if (e.tagName()=="Projector") {
+      projector->loadFromXML(e);
+    }
+  }
+  return true;
+}

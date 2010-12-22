@@ -7,6 +7,7 @@
 
 #include "core/projector.h"
 #include "tools/circleitem.h"
+#include "tools/xmltools.h"
 
 using namespace std;
 
@@ -378,3 +379,18 @@ bool ZoneItem::isHighlighted() {
 }
 
 
+void ZoneItem::saveToXML(QDomElement base) {
+  QDomElement marker = ensureElement(base, "Marker");
+  PointToTag(marker, "StartHandle", getStart());
+  PointToTag(marker, "EndHandle", getEnd());
+}
+
+void ZoneItem::loadFromXML(QDomElement base) {
+  if (base.tagName()!="Marker") return;
+  for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+    if (e.tagName()=="StartHandle") {
+      setStart(TagToPoint(e, getStart()));
+      setEnd(TagToPoint(e, getEnd()));
+    }
+  }
+}

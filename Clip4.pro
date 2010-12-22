@@ -94,7 +94,10 @@ SOURCES += main.cpp\
     ui/rotatecrystal.cpp \
     ui/reorient.cpp \
     tools/indexparser.cpp \
-    tools/tools.cpp
+    tools/tools.cpp \
+    core/projectorfactory.cpp \
+    tools/xmllistiterators.cpp \
+    tools/xmltools.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -154,7 +157,10 @@ HEADERS  += ui/clip.h \
     ui/rotatecrystal.h \
     ui/reorient.h \
     tools/indexparser.h \
-    tools/tools.h
+    tools/tools.h \
+    core/projectorfactory.h \
+    tools/xmllistiterators.h \
+    tools/xmltools.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

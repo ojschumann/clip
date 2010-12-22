@@ -7,6 +7,8 @@ class LauePlaneProjector: public Projector {
   Q_OBJECT
 public:
   LauePlaneProjector(QObject* parent=0);
+  static Projector* getInstance();
+
   virtual QPointF scattered2det(const Vec3D&) const;
   virtual QPointF scattered2det(const Vec3D&, bool& b) const;
 
@@ -38,7 +40,7 @@ public:
   virtual double fitParameterValue(unsigned int n);
   virtual void fitParameterSetValue(unsigned int n, double val);
 
-  virtual void projector2xml(QXmlStreamWriter&);
+  virtual void saveToXML(QDomElement base);
   //        virtual void loadFromXML(QXmlStreamReader&);
 public slots:
   void setDetSize(double dist, double width, double height);
@@ -60,7 +62,7 @@ public slots:
   virtual void loadParmetersFromImage(LaueImage*);
 protected:
   double maxCos(Vec3D n) const;
-  virtual bool parseXMLElelemt(QDomElement e);
+  virtual bool parseXMLElement(QDomElement e);
 
   virtual bool project(const Reflection &r, QPointF& p);
 
