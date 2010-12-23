@@ -27,7 +27,7 @@ ContrastCurves::ContrastCurves(LaueImage* img, QWidget *parent) :
 
   histogram = new HistogramItem();
   scene.addItem(histogram);
-  connect(laueImage->getScaler(), SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), histogram, SLOT(setHistogram(QVector<int>,QVector<int>,QVector<int>)));
+  connect(laueImage, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), histogram, SLOT(setHistogram(QVector<int>,QVector<int>,QVector<int>)));
 
   QPen decoPen(Qt::gray, 0, Qt::DotLine);
   QList<double> l;

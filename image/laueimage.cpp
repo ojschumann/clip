@@ -12,16 +12,26 @@
 
 using namespace std;
 
+LaueImage::LaueImage(QObject *parent) :
+    QObject(parent), provider(0), scaler(0)
+{
+}
+
 LaueImage::LaueImage(QString s, QObject *parent) :
     QObject(parent), provider(0), scaler(0)
 {
-  provider = DataProviderFactory::getInstance().loadImage(s, this);
+  openFile(s);
+}
+
+void LaueImage::openFile(QString filename) {
+  provider = DataProviderFactory::getInstance().loadImage(filename, this);
   if (provider) {
     scaler = DataScalerFactory::getInstance().getScaler(provider, this);
-    if (scaler)
+    if (scaler) {
       connect(scaler, SIGNAL(imageContentsChanged()), this, SIGNAL(imageContentsChanged()));
+      connect(scaler, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), this, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)));
+    }
   }
-  valid = (provider!=0) && (scaler!=0);
   cout << "init LaueImage" << endl;
 }
 
@@ -63,14 +73,27 @@ QString LaueImage::name() {
 QList<QWidget*> LaueImage::toolboxPages() {
   QList<QWidget*> pages;
   pages << provider->toolboxPages();
+  pages << scaler->toolboxPages();
   return pages;
 }
 
 void LaueImage::saveToXML(QDomElement base) {
-  ensureElement(base, "Image");
+  QDomElement image = ensureElement(base, "Image");
+  image.setAttribute("Filename", provider->getProviderInfo("Complete Path").toString());
+  provider->saveToXML(image);
+  scaler->saveToXML(image);
 }
 
-void LaueImage::loadFromXML(QDomElement) {
+void LaueImage::loadFromXML(QDomElement base) {
+  if (base.tagName()!="Image") return;
+  QString filename = base.attribute("Filename");
+  if (scaler) delete scaler;
+  if (provider) delete provider;
 
+  openFile(filename);
+  if (isValid()) {
+    provider->loadFromXML(base);
+    scaler->loadFromXML(base);
+  }
+  cout << "loaded LaueImage" << endl;
 }
-

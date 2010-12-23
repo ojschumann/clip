@@ -26,8 +26,9 @@ public:
   static DataProvider* openDevice();
   ~DataProvider();
 
-  virtual void saveToXML(QDomElement)=0;
-  virtual void loadFromXML(QDomElement)=0;
+  void insertFileInformation(const QString&);
+  virtual void saveToXML(QDomElement);
+  virtual void loadFromXML(QDomElement);
   virtual void loadNewData() {}
   virtual const void* getData()=0;
   virtual int width()=0;
@@ -38,6 +39,7 @@ public:
   virtual QString name();
   virtual QSizeF absoluteSize() { return QSizeF(); }
   virtual QList<QWidget*> toolboxPages();
+  virtual QVariant getProviderInfo(QString key) { return providerInformation[key]; }
 
 protected:
   explicit DataProvider(QObject *parent = 0);

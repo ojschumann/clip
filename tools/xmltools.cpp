@@ -30,7 +30,7 @@ int readInt(QDomElement element, QString name, bool &ok, int defaultValue) {
 
 
 
-template <class R> void RectToTag(QDomElement base, QString name, const R& rect) {
+template <class R> void RectToTag(QDomElement base, QString name, R rect) {
   QDomElement e = base.ownerDocument().createElement(name);
   base.appendChild(e);
   e.setAttribute("x", rect.x());
@@ -38,12 +38,12 @@ template <class R> void RectToTag(QDomElement base, QString name, const R& rect)
   e.setAttribute("width", rect.width());
   e.setAttribute("height", rect.height());
 }
-template void RectToTag(QDomElement base, QString name, const QRect& rect);
-template void RectToTag(QDomElement base, QString name, const QRectF& rect);
+template void RectToTag(QDomElement base, QString name, QRect rect);
+template void RectToTag(QDomElement base, QString name, QRectF rect);
 
 
 
-QRectF TagToRect(QDomElement element, const QRectF& defaultValue, bool* _ok) {
+QRectF TagToRect(QDomElement element, QRectF defaultValue, bool* _ok) {
   bool ok = true;
   double x = readDouble(element, "x", ok, defaultValue.x());
   double y = readDouble(element, "y", ok, defaultValue.y());
@@ -53,7 +53,7 @@ QRectF TagToRect(QDomElement element, const QRectF& defaultValue, bool* _ok) {
   return QRectF(x,y,w,h);
 }
 
-QRect TagToRect(QDomElement element, const QRect& defaultValue, bool* _ok) {
+QRect TagToRect(QDomElement element, QRect defaultValue, bool* _ok) {
   bool ok = true;
   int x = readInt(element, "x", ok, defaultValue.x());
   int y = readInt(element, "y", ok, defaultValue.y());

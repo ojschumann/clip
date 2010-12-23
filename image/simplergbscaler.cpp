@@ -22,10 +22,10 @@ SimpleRGBScaler::~SimpleRGBScaler() {
 DataScaler* SimpleRGBScaler::getScaler(DataProvider *dp, QObject* parent) {
   return new SimpleRGBScaler(dp, parent);
 }
-
+#include <cmath>
 QRgb SimpleRGBScaler::getRGB(const QPointF &p) {
-  int x = static_cast<int>(p.x());
-  int y = static_cast<int>(p.y());
+  int x = static_cast<int>(std::floor(p.x()));
+  int y = static_cast<int>(std::floor(p.y()));
   if (x<0 || x>=datawidth || y<0 || y>=dataheight) {
     return 0xFFFF0000;
   } else {

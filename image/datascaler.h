@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QImage>
 #include <QColor>
+#include <QDomElement>
 
 
 class DataProvider;
@@ -16,6 +17,10 @@ class DataScaler : public QObject
 public:
   explicit DataScaler(DataProvider* dp, QObject *parent = 0);
   ~DataScaler();
+
+  void saveToXML(QDomElement);
+  void loadFromXML(QDomElement);
+
   QImage getImage(const QSize& size, const QRectF& from);
   QList<BezierCurve*> getTransferCurves() { return transferCurves; }
 signals:
@@ -25,6 +30,7 @@ public slots:
   void addTransform(const QTransform&);
   void resetAllTransforms();
   virtual void updateContrastMapping();
+  virtual QList<QWidget*> toolboxPages();
 protected:
   virtual void redrawCache();
   virtual QRgb getRGB(const QPointF&)=0;

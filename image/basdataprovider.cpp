@@ -1,17 +1,14 @@
 #include "basdataprovider.h"
-#include <image/dataproviderfactory.h>
+#include "image/dataproviderfactory.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
 #include <QTextStream>
+#include <QDateTime>
 #include <iostream>
 #include <cmath>
 
-#ifdef WIN32
-#include <winsock2.h>
-#else
-#include <netinet/in.h>
-#endif
+#include "tools/xmltools.h"
 
 using namespace std;
 
@@ -87,12 +84,15 @@ DataProvider* BasDataProvider::loadImage(const QString& filename, QObject* paren
     }
   }
 
+  quint64 unixtime = headerData["UnixTime"].toULongLong();
+  QDateTime date;
+  date.setTime_t(unixtime);
+  headerData["UnixTime"] = QVariant(QString("%1 (%2)").arg(unixtime).arg(date.toString(Qt::DefaultLocaleLongDate)));
+
   info.setFile(infFile.fileName());
   headerData.insert("InfFilename", QVariant(info.fileName()));
   headerData.insert("Complete Inf-Path", QVariant(info.canonicalFilePath()));
-  info.setFile(imgFile.fileName());
-  headerData.insert("ImgFilename", QVariant(info.fileName()));
-  headerData.insert("Complete Path", QVariant(info.canonicalFilePath()));
+
 
   int pixelCount = headerData["Width"].toInt()*headerData["Height"].toInt();
   int bytesPerPixel = (headerData["BitsPerPixel"].toInt()>8)?2:1;
@@ -133,9 +133,9 @@ DataProvider* BasDataProvider::loadImage(const QString& filename, QObject* paren
 
   cout << "Open OK" << endl;
   BasDataProvider* provider = new BasDataProvider(parent);
-  provider->providerInformation = headerData;
+  provider->insertFileInformation(filename);
+  provider->providerInformation.unite(headerData);
   provider->pixelData = pixelData;
-
   return provider;
 }
 
@@ -166,5 +166,6 @@ DataProvider::Format BasDataProvider::format() {
 QSizeF BasDataProvider::absoluteSize() {
   return QSizeF(0.001*width()*providerInformation["X-PixelSizeUM"].toDouble(), 0.001*height()*providerInformation["Y-PixelSizeUM"].toDouble());
 }
+
 
 bool BasRegisterOK = DataProviderFactory::registerImageLoader(0, &BasDataProvider::loadImage);

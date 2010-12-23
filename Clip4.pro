@@ -61,7 +61,6 @@ SOURCES += main.cpp\
     tools/rulermodel.cpp \
     tools/zoneitem.cpp \
     image/laueimage.cpp \
-#    image/ImageTools.cpp \
     image/BezierCurve.cpp \
     ui/imagetoolbox.cpp \
     tools/diagramgv.cpp \
@@ -83,7 +82,6 @@ SOURCES += main.cpp\
     indexing/solution.cpp \
     tools/itemstore.cpp \
     tools/circleitem.cpp \
-#    tools/projectionmapper.cpp \
     tools/spotindicatorgraphicsitem.cpp \
     ui/indexdisplay.cpp \
     indexing/markermodel.cpp \
@@ -147,7 +145,6 @@ HEADERS  += ui/clip.h \
     indexing/solution.h \
     tools/itemstore.h \
     tools/circleitem.h \
-#    tools/projectionmapper.h \
     tools/spotindicatorgraphicsitem.h \
     ui/indexdisplay.h \
     indexing/markermodel.h \

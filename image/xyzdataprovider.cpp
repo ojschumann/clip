@@ -49,6 +49,8 @@ DataProvider* XYZDataProvider::loadImage(const QString& filename, QObject* paren
   provider->pixelData = pixelData;
   provider->imgWidth = width;
   provider->imgHeight = height;
+  provider->insertFileInformation(filename);
+  provider->providerInformation.insert("Size", QString("%1x%2").arg(width).arg(height));
 
   return provider;
 }
@@ -78,9 +80,12 @@ DataProvider::Format XYZDataProvider::format() {
   return Float32;
 }
 
+void XYZDataProvider::saveToXML(QDomElement) {
 
-QString XYZDataProvider::name() {
-  return QString("unknown");
+}
+
+void XYZDataProvider::loadFromXML(QDomElement) {
+
 }
 
 bool XYZRegisterOK = DataProviderFactory::registerImageLoader(192, &XYZDataProvider::loadImage);

@@ -14,6 +14,7 @@ class LaueImage : public QObject
 {
   Q_OBJECT
 public:
+  explicit LaueImage(QObject *parent = 0);
   explicit LaueImage(QString, QObject *parent = 0);
   ~LaueImage();
 
@@ -24,9 +25,9 @@ public:
   int width() { return provider->width(); }
   int height() { return provider->height(); }
   QSize size() { return QSize(provider->width(), provider->height()); }
-  bool isValid() { return valid; }
+  bool isValid() { return (provider!=0) && (scaler!=0); }
   QList<BezierCurve*> getTransferCurves();
-  DataScaler* getScaler() { return scaler; }
+  //DataScaler* getScaler() { return scaler; }
 
   bool hasAbsoluteSize();
   QSizeF absoluteSize(); // in mm
@@ -37,11 +38,12 @@ public:
 
 signals:
   void imageContentsChanged();
+  void histogramChanged(QVector<int>, QVector<int>, QVector<int>);
 public slots:
   void addTransform(const QTransform&);
   void resetAllTransforms();
 private:
-  bool valid;
+  void openFile(QString filename);
   DataProvider* provider;
   DataScaler* scaler;
 };

@@ -458,18 +458,21 @@ void Projector::updateImgTransformations() {
 void Projector::loadImage(QString s) {
   LaueImage* tmpImage = new LaueImage(s, this);
   if (tmpImage->isValid()) {
-    if (imageData) delete imageData;
+    closeImage();
     imageData = tmpImage;
     emit imageLoaded(imageData);
+    connect(imageData, SIGNAL(imageContentsChanged()), getScene(), SLOT(update()));
   } else {
     delete tmpImage;
   }
 }
 
 void Projector::closeImage() {
-  if (imageData) delete imageData;
-  imageData = 0;
-  emit imageClosed();
+  if (imageData) {
+    delete imageData;
+    imageData = 0;
+    emit imageClosed();
+  }
 }
 
 // Rotates and flips the Decorations, which are bound to the Image
@@ -483,7 +486,6 @@ void Projector::doImgRotation(const QTransform& t) {
   }
   if (imageData)
     imageData->addTransform(t.inverted());
-  //TODO: change detector size
 }
 
 void Projector::enableProjection(bool b) {
@@ -562,6 +564,18 @@ bool Projector::parseXMLElement(QDomElement e) {
       addZoneMarker(QPointF(), QPointF());
       dynamic_cast<ZoneItem*>(zoneMarkerStore.last())->loadFromXML(m);
     }
+  } else if (e.tagName()=="Image") {
+    LaueImage* tmpImage = new LaueImage();
+    tmpImage->loadFromXML(e);
+    if (tmpImage->isValid()) {
+      closeImage();
+      imageData = tmpImage;
+      emit imageLoaded(imageData);
+      connect(imageData, SIGNAL(imageContentsChanged()), getScene(), SLOT(update()));
+    } else {
+      delete tmpImage;
+    }
+
   } else {
     return false;
   }

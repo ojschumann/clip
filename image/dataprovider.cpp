@@ -2,6 +2,8 @@
 #include <iostream>
 #include <QTableWidget>
 #include <QHeaderView>
+#include <QFileInfo>
+#include <QDateTime>
 
 #include "ui/resolutioncalculator.h"
 #include "ui/contrastcurves.h"
@@ -24,6 +26,13 @@ DataProvider* DataProvider::openDevice() {
 
 DataProvider* DataProvider::loadImage(const QString &) {
   return NULL;
+}
+
+void DataProvider::insertFileInformation(const QString &filename) {
+  QFileInfo info(filename);
+  providerInformation.insert("ImgFilename", info.fileName());
+  providerInformation.insert("Complete Path", info.canonicalFilePath());
+  providerInformation.insert("File Creation Date", info.created().toString(Qt::DefaultLocaleLongDate));
 }
 
 QString DataProvider::name() {
@@ -54,3 +63,7 @@ QList<QWidget*> DataProvider::toolboxPages() {
   // ---------------------------------------------------------
   return l;
 }
+
+
+void DataProvider::saveToXML(QDomElement) {}
+void DataProvider::loadFromXML(QDomElement) {}

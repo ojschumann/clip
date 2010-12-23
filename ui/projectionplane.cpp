@@ -273,12 +273,6 @@ void ProjectionPlane::on_openImgAction_triggered() {
   if (fInfo.exists()) {
     settings.setValue("LastDirectory", fInfo.canonicalFilePath());
     projector->loadImage(fileName);
-    if (projector->getLaueImage()) {
-      connect(projector->getLaueImage(), SIGNAL(imageContentsChanged()), projector->getScene(), SLOT(update()));
-      ui->imgToolBar->setVisible(true);
-      ui->rulerAction->setVisible(!projector->getLaueImage()->hasAbsoluteSize());
-      resizeView();
-    }
   }
 
 }
@@ -359,10 +353,15 @@ void ProjectionPlane::on_actionCrop_triggered() {
 
 void ProjectionPlane::imageLoaded(LaueImage *img) {
   setWindowTitle(projector->displayName()+": "+img->name());
+  ui->imgToolBar->setVisible(true);
+  ui->rulerAction->setVisible(!projector->getLaueImage()->hasAbsoluteSize());
+  resizeView();
 }
 
 void ProjectionPlane::imageClosed() {
   setWindowTitle(projector->displayName());
+  ui->imgToolBar->setVisible(false);
+  resizeView();
 }
 
 void ProjectionPlane::slotContextMenu() {

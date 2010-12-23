@@ -3,6 +3,7 @@
 
 #include "image/dataprovider.h"
 #include "image/BezierCurve.h"
+#include "tools/xmltools.h"
 
 using namespace std;
 
@@ -30,15 +31,7 @@ DataScaler::~DataScaler() {
 #include "tools/debug.h"
 
 void DataScaler::addTransform(const QTransform & t) {
-  QList<QPointF> l;
-  l << QPointF(0,0) << QPointF(0,1) << QPointF(1,1) << QPointF(1,0) << QPointF(0.5,0.5);
-  foreach (QPointF p, l) {
-    printPoint("Before", sqareToRaw.map(p));
-  }
   sqareToRaw = t * sqareToRaw;
-  foreach (QPointF p, l) {
-    printPoint("After", sqareToRaw.map(p));
-  }
   if (cache)
     redrawCache();
   emit imageContentsChanged();
@@ -64,7 +57,6 @@ QImage DataScaler::getImage(const QSize &size, const QRectF &_sourceRect) {
     sourceRect = _sourceRect;
     redrawCache();
   }
-  cout << "getImage" << endl;
   return *cache;
 }
 
@@ -95,3 +87,41 @@ void DataScaler::redrawCache() {
   }
 }
 
+QList<QWidget*> DataScaler::toolboxPages() {
+  return QList<QWidget*>();
+}
+
+
+void DataScaler::saveToXML(QDomElement base) {
+  QDomElement scaler = ensureElement(base, "Scaler");
+  QDomElement t = scaler.appendChild(base.ownerDocument().createElement("Transform")).toElement();
+  t.setAttribute("m11", sqareToRaw.m11());
+  t.setAttribute("m12", sqareToRaw.m12());
+  t.setAttribute("m13", sqareToRaw.m13());
+  t.setAttribute("m21", sqareToRaw.m21());
+  t.setAttribute("m22", sqareToRaw.m22());
+  t.setAttribute("m23", sqareToRaw.m23());
+  t.setAttribute("m31", sqareToRaw.m31());
+  t.setAttribute("m32", sqareToRaw.m32());
+  t.setAttribute("m33", sqareToRaw.m33());
+}
+
+void DataScaler::loadFromXML(QDomElement base) {
+  QDomElement t = base.firstChildElement("Scaler").firstChildElement("Transform");
+  if (t.isElement()) {
+    bool ok=true;
+    QTransform transform(readDouble(t, "m11", ok),
+                         readDouble(t, "m12", ok),
+                         readDouble(t, "m13", ok),
+                         readDouble(t, "m21", ok),
+                         readDouble(t, "m22", ok),
+                         readDouble(t, "m23", ok),
+                         readDouble(t, "m31", ok),
+                         readDouble(t, "m32", ok),
+                         readDouble(t, "m33", ok));
+    if (ok) {
+      sqareToRaw = transform;
+      emit imageContentsChanged();
+    }
+  }
+}

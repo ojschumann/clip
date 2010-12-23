@@ -1,10 +1,10 @@
 #include "qimagedataprovider.h"
-#include <image/dataproviderfactory.h>
-#include <ui/clip.h>
-#include <QFileInfo>
-#include <QDateTime>
 
+#include <QStringList>
+#include <QMap>
 #include <iostream>
+
+#include "image/dataproviderfactory.h"
 
 using namespace std;
 
@@ -26,15 +26,14 @@ QImageDataProvider::DataProvider* QImageDataProvider::loadImage(const QString& f
   if (!img.isNull()) {
     QMap<QString, QVariant> headerData;
     foreach (QString key, img.textKeys()) {
-      headerData.insert(key, QVariant(img.text(key)));
+      if (key!="")
+        headerData.insert(key, QVariant(img.text(key)));
     }
-    QFileInfo info(filename);
-
-    headerData.insert("ImgFilename", info.fileName());
-    headerData.insert("Complete Path", info.canonicalFilePath());
-    headerData.insert("Creation Date", info.created().toString());
+    headerData.insert("Size", QString("%1x%2").arg(img.width()).arg(img.height()));
+    cout << "Image headers: " << qPrintable(img.text()) << endl;
     QImageDataProvider* provider = new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied), parent);
-    provider->providerInformation = headerData;
+    provider->insertFileInformation(filename);
+    provider->providerInformation.unite(headerData);
     return provider;
   }
   return NULL;
@@ -62,6 +61,14 @@ int QImageDataProvider::pixelCount() {
 
 DataProvider::Format QImageDataProvider::format() {
   return RGB8Bit;
+}
+
+void QImageDataProvider::saveToXML(QDomElement) {
+
+}
+
+void QImageDataProvider::loadFromXML(QDomElement) {
+
 }
 
 bool registerOK = DataProviderFactory::registerImageLoader(128, &QImageDataProvider::loadImage);

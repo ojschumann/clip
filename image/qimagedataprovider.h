@@ -10,6 +10,8 @@ class QImageDataProvider : public DataProvider
 public:
   static DataProvider* loadImage(const QString&, QObject*);
 
+  virtual void saveToXML(QDomElement);
+  virtual void loadFromXML(QDomElement);
   virtual const void* getData();
   virtual int width();
   virtual int height();
