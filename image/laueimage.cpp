@@ -1,12 +1,14 @@
 #include "laueimage.h"
 #include <QImage>
 #include <QPixmap>
-#include <ui/imagetoolbox.h>
-#include <ui/clip.h>
 #include <QApplication>
-#include <image/dataproviderfactory.h>
-#include <image/datascalerfactory.h>
 #include <iostream>
+
+#include "ui/clip.h"
+#include "image/dataproviderfactory.h"
+#include "ui/imagetoolbox.h"
+#include "image/datascalerfactory.h"
+#include "tools/xmltools.h"
 
 using namespace std;
 
@@ -63,3 +65,12 @@ QList<QWidget*> LaueImage::toolboxPages() {
   pages << provider->toolboxPages();
   return pages;
 }
+
+void LaueImage::saveToXML(QDomElement base) {
+  ensureElement(base, "Image");
+}
+
+void LaueImage::loadFromXML(QDomElement) {
+
+}
+

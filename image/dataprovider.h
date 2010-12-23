@@ -5,6 +5,7 @@
 #include <QSizeF>
 #include <QMap>
 #include <QVariant>
+#include <QDomElement>
 
 class DataScaler;
 
@@ -25,6 +26,8 @@ public:
   static DataProvider* openDevice();
   ~DataProvider();
 
+  virtual void saveToXML(QDomElement)=0;
+  virtual void loadFromXML(QDomElement)=0;
   virtual void loadNewData() {}
   virtual const void* getData()=0;
   virtual int width()=0;

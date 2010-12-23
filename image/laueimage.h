@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QImage>
 #include <QPointer>
+#include <QDomElement>
 #include <image/dataprovider.h>
 #include <image/datascaler.h>
 
@@ -15,10 +16,14 @@ class LaueImage : public QObject
 public:
   explicit LaueImage(QString, QObject *parent = 0);
   ~LaueImage();
+
+  void saveToXML(QDomElement);
+  void loadFromXML(QDomElement);
+
   QImage getScaledImage(const QSize& , const QRectF&);
-  int width() { return provider->width(); };
-  int height() { return provider->height(); };
-  QSize size() { return QSize(provider->width(), provider->height()); };
+  int width() { return provider->width(); }
+  int height() { return provider->height(); }
+  QSize size() { return QSize(provider->width(), provider->height()); }
   bool isValid() { return valid; }
   QList<BezierCurve*> getTransferCurves();
   DataScaler* getScaler() { return scaler; }

@@ -390,6 +390,7 @@ void ZoneItem::loadFromXML(QDomElement base) {
   for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
     if (e.tagName()=="StartHandle") {
       setStart(TagToPoint(e, getStart()));
+    } else if (e.tagName()=="EndHandle") {
       setEnd(TagToPoint(e, getEnd()));
     }
   }

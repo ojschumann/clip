@@ -21,6 +21,7 @@
 #include "core/crystal.h"
 #include "image/laueimage.h"
 #include "tools/spotindicatorgraphicsitem.h"
+#include "tools/xmltools.h"
 
 using namespace std;
 
@@ -489,6 +490,7 @@ void Projector::enableProjection(bool b) {
   projectionEnabled=b;
 }
 
+
 void Projector::saveToXML(QDomElement base) {
   QDomDocument doc = base.ownerDocument();
   QDomElement projector = (base.tagName()=="Projector") ? base : base.appendChild(doc.createElement("Projector")).toElement();
@@ -505,10 +507,8 @@ void Projector::saveToXML(QDomElement base) {
 
   if (spotMarkerStore.size()>0) {
     e = projector.appendChild(doc.createElement("SpotMarkers")).toElement();
-    for (int n=0; n<spotMarkerStore.size(); n++) {
-      QDomElement m = e.appendChild(doc.createElement("Marker")).toElement();
-      m.setAttribute("x", spotMarkerStore.at(n)->x());
-      m.setAttribute("y", spotMarkerStore.at(n)->y());
+    foreach (QGraphicsItem* item, spotMarkerStore) {
+      PointToTag(e, "Marker", item->pos());
     }
   }
 
@@ -517,6 +517,10 @@ void Projector::saveToXML(QDomElement base) {
     foreach (QGraphicsItem* gi, zoneMarkerStore) {
       dynamic_cast<ZoneItem*>(gi)->saveToXML(e);
     }
+  }
+
+  if (getLaueImage()) {
+    getLaueImage()->saveToXML(projector);
   }
 
 }
@@ -549,6 +553,10 @@ bool Projector::parseXMLElement(QDomElement e) {
     setSpotSizeFraction(ssize);
     setMaxHklSqSum(maxHKLS);
     enableSpots(senabled!=0);
+  } else if (e.tagName()=="SpotMarkers") {
+    for (QDomElement m=e.firstChildElement(); !m.isNull(); m=m.nextSiblingElement()) {
+      addSpotMarker(img2det.map(TagToPoint(m, QPointF())));
+    }
   } else if (e.tagName()=="ZoneMarkers") {
     for (QDomElement m=e.firstChildElement(); !m.isNull(); m=m.nextSiblingElement()) {
       addZoneMarker(QPointF(), QPointF());

@@ -83,4 +83,4 @@ QString XYZDataProvider::name() {
   return QString("unknown");
 }
 
-bool XYZRegisterOK = DataProviderFactory::registerImageLoader(0, &XYZDataProvider::loadImage);
+bool XYZRegisterOK = DataProviderFactory::registerImageLoader(192, &XYZDataProvider::loadImage);
