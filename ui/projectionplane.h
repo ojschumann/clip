@@ -38,6 +38,7 @@ public:
 public slots:
   void saveToXML(QDomElement base);
   bool loadFromXML(QDomElement base);
+  void loadDefault();
 
 
 signals:

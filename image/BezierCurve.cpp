@@ -1,6 +1,9 @@
-#include <image/BezierCurve.h>
+#include "image/BezierCurve.h"
+
 #include <iostream>
 #include <cmath>
+
+#include "tools/xmltools.h"
 
 using namespace std;
 
@@ -178,4 +181,25 @@ BezierCurve::CurveParams BezierCurve::getCurveParam(float x) {
   return params[p];
 }
 
+const char* CurvePointName = "Point";
+
+
+void BezierCurve::saveToXML(QDomElement base, QString name) {
+  QDomElement curve = base.appendChild(base.ownerDocument().createElement(name)).toElement();
+  foreach (QPointF p, getPoints()) {
+    PointToTag(curve, CurvePointName, p);
+  }
+}
+
+void BezierCurve::loadFromXML(QDomElement base, QString name) {
+  QDomElement curve = base.elementsByTagName(name).at(0).toElement();
+  if (curve.isNull()) return;
+  QList<QPointF> pointlist;
+  bool ok = true;
+  for (QDomElement e=curve.firstChildElement(CurvePointName); !e.isNull(); e=e.nextSiblingElement(CurvePointName)) {
+    pointlist << TagToPoint(e, QPointF(), &ok);
+  }
+  if (ok && pointlist.size()>=2)
+    setPoints(pointlist);
+}
 

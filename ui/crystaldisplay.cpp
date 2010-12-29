@@ -41,6 +41,7 @@ CrystalDisplay::CrystalDisplay(QWidget *parent) :
 
   connect(crystal->getSpacegroup(), SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
 
+
   // Init Orientation Matrix Elements
   for (int i=0; i<3; i++)
     for (int j=0; j<3; j++)
@@ -68,6 +69,11 @@ CrystalDisplay::~CrystalDisplay()
 
 void CrystalDisplay::resizeEvent(QResizeEvent *) {
   slotResizeOrientationMatrix();
+  cout << "Size: " << width() << "x" << height() << " / " ;
+  if (QWidget* p = dynamic_cast<QWidget*>(parent())) {
+    cout << p->width() << "x" << p->height();
+  }
+  cout << endl;
 }
 
 void CrystalDisplay::slotResizeOrientationMatrix() {
@@ -199,24 +205,39 @@ void CrystalDisplay::on_actionDrag_hovered() {
 
 }
 
+const char XML_CrystalDisplay_Element[] = "CrystalDisplay";
+const char XML_CrystalDisplay_Geometry[] = "Geometry";
+
 void CrystalDisplay::loadFromXML(QDomElement base) {
-  if (base.tagName()!="CrystalDisplay") return;
-  for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
-    if (e.tagName()=="Geometry") {
+  QDomElement element = base;
+  if (element.tagName()!=XML_CrystalDisplay_Element)
+    element = base.elementsByTagName(XML_CrystalDisplay_Element).at(0).toElement();
+  if (element.isNull()) return;
+  for (QDomElement e=element.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+    if (e.tagName()==XML_CrystalDisplay_Geometry) {
+      QTextStream ts(stdout);
+      e.save(ts, 1);
       if (QWidget* p = dynamic_cast<QWidget*>(parent()))
         p->setGeometry(TagToRect(e, p->geometry()));
-    } else if (e.tagName()=="Crystal") {
-      crystal->loadFromXML(e);
     }
   }
+  crystal->loadFromXML(element);
 }
 
 void CrystalDisplay::saveToXML(QDomElement base) {
-  QDomElement cp = ensureElement(base, "CrystalDisplay");
+  QDomElement cp = ensureElement(base, XML_CrystalDisplay_Element);
   if (QWidget* p = dynamic_cast<QWidget*>(parent())) {
-    RectToTag(cp, "Geometry", p->geometry());
+    RectToTag(cp, XML_CrystalDisplay_Geometry, p->geometry());
   }
   crystal->saveToXML(cp);
+}
+
+void CrystalDisplay::loadDefault() {
+  QDomDocument doc = readXMLFile(QString(":/DefaultCrystal.xml"));
+  if (!doc.isNull()) {
+    loadFromXML(doc.documentElement());
+    slotLoadCellFromCrystal();
+  }
 }
 
 void CrystalDisplay::on_actionLoad_triggered() {
@@ -224,19 +245,11 @@ void CrystalDisplay::on_actionLoad_triggered() {
   QString filename = QFileDialog::getOpenFileName(this, "Load Cell Data", settings.value("LastDirectory").toString(),
                                                   "Contrast Curves (*.cell);;All Files (*)");
 
-  QDomDocument doc("Crystal");
-  QFile file(filename);
-  if (!file.open(QIODevice::ReadOnly))
-    return;
-  if (!doc.setContent(&file)) {
-    file.close();
-    return;
+  QDomDocument doc = readXMLFile(filename);
+  if (!doc.isNull()) {
+    settings.setValue("LastDirectory", QFileInfo(filename).canonicalFilePath());
+    crystal->loadFromXML(doc.documentElement());
   }
-  settings.setValue("LastDirectory", QFileInfo(filename).canonicalFilePath());
-
-  file.close();
-  crystal->loadFromXML(doc.documentElement());
-
 }
 
 void CrystalDisplay::on_actionSave_triggered() {
@@ -251,10 +264,10 @@ void CrystalDisplay::on_actionSave_triggered() {
 
     QDomDocument doc("Crystal");
     QDomElement docElement = doc.appendChild(doc.createElement("Crystal")).toElement();
-    saveToXML(docElement);
+    crystal->saveToXML(docElement);
 
     QTextStream ts(&file);
-    doc.save(ts, 2);
+    doc.save(ts, 1);
     file.close();
   }
 }

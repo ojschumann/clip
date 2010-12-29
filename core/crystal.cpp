@@ -22,7 +22,7 @@ using namespace std;
 
 class IntIterator {
 public:
-  IntIterator(int _pos): pos(_pos) {};
+  IntIterator(int _pos): pos(_pos) {}
   int pos;
   typedef std::random_access_iterator_tag iterator_category;
   typedef int value_type;
@@ -587,76 +587,87 @@ void Crystal::convertHtoR() {
   setCell(l,l,l,ang,ang,ang);
 }
 
-bool Crystal::loadFromXML(QDomElement base) {
-  // Load a,b,c,alpha,beta,gamma
-  // rotationaxis and type
-  // spacegroup
-  // XML:
-  //  <Crystal>
-  //   <Spacegroup symbol="P1" />
-  //   <Cell beta="90.0" gamma="90.0" alpha="90.0" a="5.0" b="5.0" c="5.0" />
-  //   <Orientation omega="0.0" chi="0.0" phi="0.0" />
-  //  </Crystal>
 
-  if (base.tagName()!="Crystal") return false;
-  for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+const char XML_Crystal_Element[] = "Crystal";
+const char XML_Crystal_Spacegroup[] = "Spacegroup";
+const char XML_Crystal_Spacegroup_symbol[] = "symbol";
+const char XML_Crystal_Cell[] = "Cell";
+const char XML_Crystal_Cell_a[] = "a";
+const char XML_Crystal_Cell_b[] = "b";
+const char XML_Crystal_Cell_c[] = "c";
+const char XML_Crystal_Cell_alpha[] = "alpha";
+const char XML_Crystal_Cell_beta[] = "beta";
+const char XML_Crystal_Cell_gamma[] = "gamma";
+const char XML_Crystal_Orientation[] = "Orientation";
+const char XML_Crystal_Orientation_omega[] = "omega";
+const char XML_Crystal_Orientation_phi[] = "phi";
+const char XML_Crystal_Orientation_chi[] = "chi";
+const char XML_Crystal_Rotation[] = "RotationAxis";
+const char XML_Crystal_Rotation_x[] = "x";
+const char XML_Crystal_Rotation_y[] = "y";
+const char XML_Crystal_Rotation_z[] = "z";
+const char XML_Crystal_Rotation_type[] = "type";
+
+void Crystal::saveToXML(QDomElement base) {
+  QDomDocument doc = base.ownerDocument();
+  QDomElement crystalElement = ensureElement(base, XML_Crystal_Element);
+
+  QDomElement e = crystalElement.appendChild(doc.createElement(XML_Crystal_Spacegroup)).toElement();
+  e.setAttribute(XML_Crystal_Spacegroup_symbol, spaceGroup.groupSymbol());
+
+  e = crystalElement.appendChild(doc.createElement(XML_Crystal_Cell)).toElement();
+  e.setAttribute(XML_Crystal_Cell_a, a);
+  e.setAttribute(XML_Crystal_Cell_b, b);
+  e.setAttribute(XML_Crystal_Cell_c, c);
+  e.setAttribute(XML_Crystal_Cell_alpha, alpha);
+  e.setAttribute(XML_Crystal_Cell_beta, beta);
+  e.setAttribute(XML_Crystal_Cell_gamma, gamma);
+
+  double omega, chi, phi;
+  calcEulerAngles(omega, chi, phi);
+  e = crystalElement.appendChild(doc.createElement(XML_Crystal_Orientation)).toElement();
+  e.setAttribute(XML_Crystal_Orientation_omega, 180.0*M_1_PI*omega);
+  e.setAttribute(XML_Crystal_Orientation_phi, 180.0*M_1_PI*phi);
+  e.setAttribute(XML_Crystal_Orientation_chi, 180.0*M_1_PI*chi);
+
+  e = crystalElement.appendChild(doc.createElement(XML_Crystal_Rotation)).toElement();
+  e.setAttribute(XML_Crystal_Rotation_x, rotationAxis.x());
+  e.setAttribute(XML_Crystal_Rotation_y, rotationAxis.y());
+  e.setAttribute(XML_Crystal_Rotation_z, rotationAxis.z());
+  e.setAttribute(XML_Crystal_Rotation_type, getRotationAxisType());
+
+}
+
+bool Crystal::loadFromXML(QDomElement base) {
+  QDomElement crystalElement = base;
+  if (crystalElement.tagName()!=XML_Crystal_Element)
+    crystalElement = base.elementsByTagName(XML_Crystal_Element).at(0).toElement();
+  if (crystalElement.isNull()) return false;
+  for (QDomElement e=crystalElement.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
     bool ok = true;
-    if (e.tagName()=="Spacegroup") {
-      if (!spaceGroup.setGroupSymbol(e.attribute("symbol"))) return false;
-    } else if (e.tagName()=="Cell") {
-      if (!e.hasAttribute("a") || !e.hasAttribute("b") || !e.hasAttribute("c") || !e.hasAttribute("alpha") || !e.hasAttribute("beta") || !e.hasAttribute("gamma")) return false;
-      double a = e.attribute("a").toDouble(&ok); if (!ok) return false;
-      double b = e.attribute("b").toDouble(&ok); if (!ok) return false;
-      double c = e.attribute("c").toDouble(&ok); if (!ok) return false;
-      double alpha = e.attribute("alpha").toDouble(&ok); if (!ok) return false;
-      double beta = e.attribute("beta").toDouble(&ok); if (!ok) return false;
-      double gamma = e.attribute("gamma").toDouble(&ok); if (!ok) return false;
-      internalSetCell(a,b,c,alpha, beta, gamma);
-    } else if (e.tagName()=="Orientation") {
-      if (!e.hasAttribute("phi") || !e.hasAttribute("omega") || !e.hasAttribute("chi")) return false;
-      double omega = M_PI/180.0*e.attribute("omega").toDouble(&ok); if (!ok) return false;
-      double chi = M_PI/180.0*e.attribute("chi").toDouble(&ok); if (!ok) return false;
-      double phi = M_PI/180.0*e.attribute("phi").toDouble(&ok); if (!ok) return false;
-      setEulerAngles(omega, chi, phi);
-    } else if (e.tagName()=="RotationAxis") {
-      double x = readDouble(e, "x", ok);
-      double y = readDouble(e, "y", ok);
-      double z = readDouble(e, "z", ok);
-      int type = readInt(e, "type", ok);
+    if (e.tagName()==XML_Crystal_Spacegroup) {
+      if (!spaceGroup.setGroupSymbol(e.attribute(XML_Crystal_Spacegroup_symbol))) return false;
+    } else if (e.tagName()==XML_Crystal_Cell) {
+      double a = readDouble(e, XML_Crystal_Cell_a, ok);
+      double b = readDouble(e, XML_Crystal_Cell_b, ok);
+      double c = readDouble(e, XML_Crystal_Cell_c, ok);
+      double alpha = readDouble(e, XML_Crystal_Cell_alpha, ok);
+      double beta = readDouble(e, XML_Crystal_Cell_beta, ok);
+      double gamma = readDouble(e, XML_Crystal_Cell_gamma, ok);
+      if (ok) internalSetCell(a,b,c,alpha, beta, gamma);
+    } else if (e.tagName()==XML_Crystal_Orientation) {
+      double omega = M_PI/180.0*readDouble(e, XML_Crystal_Orientation_omega, ok);
+      double chi = M_PI/180.0*readDouble(e, XML_Crystal_Orientation_chi, ok);
+      double phi = M_PI/180.0*readDouble(e, XML_Crystal_Orientation_phi, ok);
+      if (ok) setEulerAngles(omega, chi, phi);
+    } else if (e.tagName()==XML_Crystal_Rotation) {
+      double x = readDouble(e, XML_Crystal_Rotation_x, ok);
+      double y = readDouble(e, XML_Crystal_Rotation_y, ok);
+      double z = readDouble(e, XML_Crystal_Rotation_z, ok);
+      int type = readInt(e, XML_Crystal_Rotation_type, ok);
       if (ok) setRotationAxis(Vec3D(x,y,z), static_cast<RotationAxisType>(type));
     }
 
   }
   return true;
 }
-
-void Crystal::saveToXML(QDomElement base) {
-  QDomDocument doc = base.ownerDocument();
-  QDomElement crystal = ensureElement(base, "Crystal");
-
-  QDomElement e = crystal.appendChild(doc.createElement("Spacegroup")).toElement();
-  e.setAttribute("symbol", spaceGroup.groupSymbol());
-
-  e = crystal.appendChild(doc.createElement("Cell")).toElement();
-  e.setAttribute("a", a);
-  e.setAttribute("b", b);
-  e.setAttribute("c", c);
-  e.setAttribute("alpha", alpha);
-  e.setAttribute("beta", beta);
-  e.setAttribute("gamma", gamma);
-
-  double omega, chi, phi;
-  calcEulerAngles(omega, chi, phi);
-  e = crystal.appendChild(doc.createElement("Orientation")).toElement();
-  e.setAttribute("omega", 180.0*M_1_PI*omega);
-  e.setAttribute("phi", 180.0*M_1_PI*phi);
-  e.setAttribute("chi", 180.0*M_1_PI*chi);
-
-  e = crystal.appendChild(doc.createElement("RotationAxis")).toElement();
-  e.setAttribute("x", rotationAxis.x());
-  e.setAttribute("y", rotationAxis.y());
-  e.setAttribute("z", rotationAxis.z());
-  e.setAttribute("type", getRotationAxisType());
-
-}
-

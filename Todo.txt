@@ -1,10 +1,6 @@
-LaueImage
-  Background loading of image
-  Display of Images from Bruker Apex (reduced Wavelength band)
-
 Highlighting of markers...
-
-configurable width of Zonemarker (including zero)
+Marked Spots and Zone info (call from Crystal) (new)
+Show if Spot/Zone in indexdisplay
 
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
@@ -14,21 +10,20 @@ ReflectionInfo (port and enhance)
     2Theta
     Image Positon (Pixel x,y) and Image Value (at point, mapped to RGB)
 
+Prevent mulptiple Zonemarkers on one mousemove
+
 Refinement (basically new)
   Optional show state after each iteration
-
-Save Default Values for Projector Variables (Distance, Height, Width, ...)
-  * Load Default Projector/Crystal on creation
-
-Allow to configure colors
 
 Allow to "print" to pdf/png/jpeg
 Implement printing (to paper :-))
 
-Marked Spots and Zone info (call from Crystal) (new)
+Allow to configure colors
+configurable width of Zonemarker (including zero)
+
+LaueImage
+  Display of Images from Bruker Apex (reduced Wavelength band)
 
 Mark user defined reflection (like magnetic/incomensurate one)
-
-Show if Spot/Zone in indexdisplay
 
 Populate all ToolTips with usefull help...

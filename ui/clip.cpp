@@ -66,16 +66,18 @@ void Clip::clearInstance() {
 
 
 void Clip::on_newCrystal_triggered() {
-  addMdiWindow(new CrystalDisplay(this));
+  CrystalDisplay* crystalDisplay = new CrystalDisplay();
+  addMdiWindow(crystalDisplay);
+  crystalDisplay->loadDefault();
 }
 
 
 void Clip::on_newLaue_triggered() {
-  addProjector(new LauePlaneProjector(this));
+  addProjector(new LauePlaneProjector())->loadDefault();
 }
 
 void Clip::on_newStereo_triggered() {
-  addProjector(new StereoProjector(this));
+  addProjector(new StereoProjector())->loadDefault();
 }
 
 ProjectionPlane* Clip::addProjector(Projector* p) {
@@ -271,6 +273,12 @@ void Clip::loadInitialWorkspace() {
   loadWorkspaceFile(":/DefaultWorkspace.cws");
 }
 
+
+const char XML_Clip_Workspace[] = "ClipWorkspace";
+const char XML_Clip_CrystalConnection[] = "CrystalConnection";
+const char XML_Clip_ConnectedCrystal[] = "ConnectedCrystal";
+const char XML_Clip_ConnectedProjectors[] = "ConnectedProjectors";
+
 bool Clip::loadWorkspaceFile(QString filename) {
   QDomDocument doc("ClipWorkspace");
   QFile file(filename);
@@ -283,33 +291,37 @@ bool Clip::loadWorkspaceFile(QString filename) {
 
   file.close();
 
-  foreach (QDomElement crystalConnection, QDNLelements(doc.elementsByTagName("CrystalConnection"))) {
-    if (crystalConnection.elementsByTagName("CrystalDisplay").size()==1) {
-      CrystalDisplay* crystalDisplay = new CrystalDisplay(this);
-      addMdiWindow(crystalDisplay);
-      crystalDisplay->loadFromXML(crystalConnection.elementsByTagName("CrystalDisplay").at(0).toElement());
-      foreach (QDomElement e, QDNLelements(crystalConnection.elementsByTagName("ProjectionPlane"))) {
-        ProjectionPlane* pp = addProjector(ProjectorFactory::getInstance().getProjector(e.attribute("projectorType")));
-        if (pp) {
-          pp->loadFromXML(e);
-          pp->getProjector()->connectToCrystal(crystalDisplay->getCrystal());
-        }
+  foreach (QDomElement crystalConnection, QDNLelements(doc.elementsByTagName(XML_Clip_CrystalConnection))) {
+    QDomElement e = crystalConnection.elementsByTagName(XML_Clip_ConnectedCrystal).at(0).toElement();
+    if (e.isNull()) continue;
+    CrystalDisplay* crystalDisplay = new CrystalDisplay();
+    addMdiWindow(crystalDisplay);
+    crystalDisplay->loadFromXML(e);
+    e = crystalConnection.elementsByTagName(XML_Clip_ConnectedProjectors).at(0).toElement();
+    for (e=e.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+      ProjectionPlane* pp = addProjector(ProjectorFactory::getInstance().getProjector(e.attribute("projectortype")));
+      if (pp) {
+        pp->loadFromXML(e);
+        pp->getProjector()->connectToCrystal(crystalDisplay->getCrystal());
       }
     }
   }
   return true;
 }
 
+
+
 void Clip::on_actionSave_Workspace_triggered() {
-  QDomDocument doc("ClipWorkspace");
-  QDomElement docElement = doc.appendChild(doc.createElement("ClipWorkspace")).toElement();
+  QDomDocument doc(XML_Clip_Workspace);
+  QDomElement docElement = doc.appendChild(doc.createElement(XML_Clip_Workspace)).toElement();
   foreach (QMdiSubWindow* mdi, ui->mdiArea->subWindowList()) {
     if (CrystalDisplay* cd = dynamic_cast<CrystalDisplay*>(mdi->widget())) {
-      QDomElement connection = docElement.appendChild(doc.createElement("CrystalConnection")).toElement();
-      cd->saveToXML(connection);
+      QDomElement connection = docElement.appendChild(doc.createElement(XML_Clip_CrystalConnection)).toElement();
+      cd->saveToXML(connection.appendChild(doc.createElement(XML_Clip_ConnectedCrystal)).toElement());
+      QDomElement connectedProjectors = connection.appendChild(doc.createElement(XML_Clip_ConnectedProjectors)).toElement();
       foreach (Projector* p, cd->getCrystal()->getConnectedProjectors()) {
         if (ProjectionPlane* pp = dynamic_cast<ProjectionPlane*>(p->parent())) {
-          pp->saveToXML(connection);
+          pp->saveToXML(connectedProjectors);
         }
       }
 

@@ -3,6 +3,7 @@
 #include <QStringList>
 #include <QMap>
 #include <iostream>
+#include <QImageReader>
 
 #include "image/dataproviderfactory.h"
 
@@ -20,7 +21,15 @@ QImageDataProvider::~QImageDataProvider() {
   cout << "delete QImageDataProvider" << endl;
 }
 
-QImageDataProvider::DataProvider* QImageDataProvider::loadImage(const QString& filename, QObject* parent) {
+QStringList QImageDataProvider::Factory::fileFormatFilters() {
+  QStringList formats;
+  foreach (QByteArray format, QImageReader::supportedImageFormats()) {
+    formats += QString(format);
+  }
+  return formats;
+}
+
+DataProvider* QImageDataProvider::Factory::getProvider(QString filename, QObject* parent) {
   cout << "QImageDP tries to load " << qPrintable(filename) << endl;
   QImage img(filename);
   if (!img.isNull()) {
@@ -43,12 +52,8 @@ const void* QImageDataProvider::getData() {
   return data.bits();
 }
 
-int QImageDataProvider::width() {
-  return data.width();
-}
-
-int QImageDataProvider::height() {
-  return data.height();
+QSize QImageDataProvider::size() {
+  return data.size();
 }
 
 int QImageDataProvider::bytesCount() {
@@ -71,4 +76,4 @@ void QImageDataProvider::loadFromXML(QDomElement) {
 
 }
 
-bool registerOK = DataProviderFactory::registerImageLoader(128, &QImageDataProvider::loadImage);
+bool registerOK = DataProviderFactory::registerImageLoader(128, new QImageDataProvider::Factory());

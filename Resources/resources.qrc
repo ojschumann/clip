@@ -1,13 +1,13 @@
 <RCC>
     <qresource prefix="/curves">
-        <file>curves/red.curve</file>
-        <file>curves/blue2.curve</file>
-        <file>curves/blue.curve</file>
-        <file>curves/gray.curve</file>
-        <file>curves/green2.curve</file>
-        <file>curves/green.curve</file>
-        <file>curves/rainbow.curve</file>
-        <file>curves/red2.curve</file>
+        <file>curves/00-greyscale.curve</file>
+        <file>curves/01-red-yellow.curve</file>
+        <file>curves/02-red-magenta.curve</file>
+        <file>curves/03-green-cyan.curve</file>
+        <file>curves/04-green-yellow.curve</file>
+        <file>curves/05-blue-cyan.curve</file>
+        <file>curves/06-blue-magenta.curve</file>
+        <file>curves/07-rainbow.curve</file>
     </qresource>
     <qresource prefix="/icons">
         <file>icons/Clip.ico</file>
@@ -45,5 +45,8 @@
     </qresource>
     <qresource prefix="/">
         <file>DefaultWorkspace.cws</file>
+        <file>DefaultCrystal.xml</file>
+        <file>Default_LauePlaneProjector.xml</file>
+        <file>Default_StereoProjector.xml</file>
     </qresource>
 </RCC>

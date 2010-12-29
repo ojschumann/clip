@@ -10,14 +10,18 @@ class XYZDataProvider : public DataProvider
 {
   Q_OBJECT
 public:
-  static DataProvider* loadImage(const QString&, QObject*);
+  class Factory: public DataProvider::ImageFactoryClass {
+  public:
+    Factory() {}
+    QStringList fileFormatFilters();
+    DataProvider* getProvider(QString, QObject* = 0);
+  };
   ~XYZDataProvider();
 
   virtual void saveToXML(QDomElement);
   virtual void loadFromXML(QDomElement);
   virtual const void* getData();
-  virtual int width();
-  virtual int height();
+  virtual QSize size();
   virtual int bytesCount();
   virtual int pixelCount();
   virtual Format format();

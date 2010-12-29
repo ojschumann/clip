@@ -1,15 +1,19 @@
 #ifndef __BEZIERCURVE_H__
 #define __BEZIERCURVE_H__
 
-#include <QtCore/QPointF>
-#include <QtCore/QList>
+#include <QPointF>
+#include <QList>
 #include <QObject>
+#include <QDomElement>
 
 
 class BezierCurve: public QObject {
   Q_OBJECT
 public:
   BezierCurve();
+  void saveToXML(QDomElement base, QString name);
+  void loadFromXML(QDomElement base, QString name);
+
   bool setPoints(const QList<QPointF>& p);
   QList<QPointF> getPoints();
 

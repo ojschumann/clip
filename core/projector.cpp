@@ -456,14 +456,19 @@ void Projector::updateImgTransformations() {
 }
 
 void Projector::loadImage(QString s) {
-  LaueImage* tmpImage = new LaueImage(s, this);
+  LaueImage* tmpImage = new LaueImage(this);
+  connect(tmpImage, SIGNAL(openFinished(LaueImage*)), this, SLOT(setImage(LaueImage*)));
+  tmpImage->startOpenFile(s);
+}
+
+void Projector::setImage(LaueImage *tmpImage) {
   if (tmpImage->isValid()) {
     closeImage();
     imageData = tmpImage;
     emit imageLoaded(imageData);
     connect(imageData, SIGNAL(imageContentsChanged()), getScene(), SLOT(update()));
   } else {
-    delete tmpImage;
+    tmpImage->deleteLater();
   }
 }
 
@@ -493,29 +498,43 @@ void Projector::enableProjection(bool b) {
 }
 
 
-void Projector::saveToXML(QDomElement base) {
+
+const char XML_Projector_element[] = "Projector";
+const char XML_Projector_QRange[] = "QRange";
+const char XML_Projector_QRange_min[] = "Qmin";
+const char XML_Projector_QRange_max[] = "Qmax";
+const char XML_Projector_Display[] = "Display";
+const char XML_Projector_Display_maxHKL[] = "maxHKLSum";
+const char XML_Projector_Display_spotSize[] = "spotSize";
+const char XML_Projector_Display_textSize[] = "textSize";
+const char XML_Projector_Display_spotsEnables[] = "spotsEnabled";
+const char XML_Projector_SpotMarkers[] = "SpotMarkers";
+const char XML_Projector_SpotMarkers_marker[] = "Marker";
+const char XML_Projector_ZoneMarkers[] = "ZoneMarkers";
+
+QDomElement Projector::saveToXML(QDomElement base) {
   QDomDocument doc = base.ownerDocument();
-  QDomElement projector = (base.tagName()=="Projector") ? base : base.appendChild(doc.createElement("Projector")).toElement();
+  QDomElement projector = ensureElement(base, XML_Projector_element);
 
-  QDomElement e = projector.appendChild(doc.createElement("QRange")).toElement();
-  e.setAttribute("Qmin", Qmin());
-  e.setAttribute("Qmax", Qmax());
+  QDomElement e = projector.appendChild(doc.createElement(XML_Projector_QRange)).toElement();
+  e.setAttribute(XML_Projector_QRange_min, Qmin());
+  e.setAttribute(XML_Projector_QRange_max, Qmax());
 
-  e = projector.appendChild(doc.createElement("Display")).toElement();
-  e.setAttribute("maxHKLSum", getMaxHklSqSum());
-  e.setAttribute("textSize", getTextSizeFraction());
-  e.setAttribute("spotSize", getSpotSizeFraction());
-  e.setAttribute("spotsEnabled", spotsEnabled());
+  e = projector.appendChild(doc.createElement(XML_Projector_Display)).toElement();
+  e.setAttribute(XML_Projector_Display_maxHKL, getMaxHklSqSum());
+  e.setAttribute(XML_Projector_Display_textSize, getTextSizeFraction());
+  e.setAttribute(XML_Projector_Display_spotSize, getSpotSizeFraction());
+  e.setAttribute(XML_Projector_Display_spotsEnables, spotsEnabled());
 
   if (spotMarkerStore.size()>0) {
-    e = projector.appendChild(doc.createElement("SpotMarkers")).toElement();
+    e = projector.appendChild(doc.createElement(XML_Projector_SpotMarkers)).toElement();
     foreach (QGraphicsItem* item, spotMarkerStore) {
-      PointToTag(e, "Marker", item->pos());
+      PointToTag(e, XML_Projector_SpotMarkers_marker, item->pos());
     }
   }
 
   if (zoneMarkerStore.size()>0) {
-    e = projector.appendChild(doc.createElement("ZoneMarkers")).toElement();
+    e = projector.appendChild(doc.createElement(XML_Projector_ZoneMarkers)).toElement();
     foreach (QGraphicsItem* gi, zoneMarkerStore) {
       dynamic_cast<ZoneItem*>(gi)->saveToXML(e);
     }
@@ -525,61 +544,56 @@ void Projector::saveToXML(QDomElement base) {
     getLaueImage()->saveToXML(projector);
   }
 
+  return projector;
 }
 
 bool Projector::loadFromXML(QDomElement base) {
-  if (base.tagName()!="Projector") {
-    cout << "Tag: Projector != " << qPrintable(base.tagName()) << endl;
-    return false;
-  }
-  for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+  QDomElement element = base.elementsByTagName(XML_Projector_element).at(0).toElement();
+  if (element.isNull()) return false;
+  for (QDomElement e=element.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
     if (!parseXMLElement(e)) {
       cout << "Could not parse: " << qPrintable(e.tagName()) << endl;
     }
   }
+
+  LaueImage* tmpImageData = new LaueImage();
+  connect(tmpImageData, SIGNAL(openFinished(LaueImage*)), this, SLOT(setImage(LaueImage*)));
+  connect(tmpImageData, SIGNAL(openFailed(LaueImage*)), tmpImageData, SLOT(deleteLater()));
+  tmpImageData->loadFromXML(base);
+
   return true;
 }
 
 bool Projector::parseXMLElement(QDomElement e) {
-  bool ok;
-  if (e.tagName()=="QRange") {
-    double Qmin = e.attribute("Qmin").toDouble(&ok); if (!ok) return false;
-    double Qmax = e.attribute("Qmax").toDouble(&ok); if (!ok) return false;
-    setWavevectors(Qmin, Qmax);
+  bool ok=true;
+  if (e.tagName()==XML_Projector_QRange) {
+    double Qmin = readDouble(e, XML_Projector_QRange_min, ok);
+    double Qmax = readDouble(e, XML_Projector_QRange_max, ok);
+    if (ok) setWavevectors(Qmin, Qmax);
   } else if (e.tagName()=="Display") {
-    double tsize = e.attribute("textSize").toDouble(&ok); if (!ok) return false;
-    double ssize = e.attribute("spotSize").toDouble(&ok); if (!ok) return false;
-    int maxHKLS = e.attribute("maxHKLSum").toInt(&ok); if (!ok) return false;
-    int senabled = e.attribute("spotsEnabled").toInt(&ok); if (!ok) return false;
-    setTextSizeFraction(tsize);
-    setSpotSizeFraction(ssize);
-    setMaxHklSqSum(maxHKLS);
-    enableSpots(senabled!=0);
-  } else if (e.tagName()=="SpotMarkers") {
-    for (QDomElement m=e.firstChildElement(); !m.isNull(); m=m.nextSiblingElement()) {
-      addSpotMarker(img2det.map(TagToPoint(m, QPointF())));
+    double tsize = readDouble(e, XML_Projector_Display_textSize, ok);
+    double ssize = readDouble(e, XML_Projector_Display_spotSize, ok);
+    int maxHKLS = readInt(e, XML_Projector_Display_maxHKL, ok);
+    int senabled = readInt(e, XML_Projector_Display_spotsEnables, ok);
+    if (ok) {
+      setTextSizeFraction(tsize);
+      setSpotSizeFraction(ssize);
+      setMaxHklSqSum(maxHKLS);
+      enableSpots(senabled!=0);
     }
-  } else if (e.tagName()=="ZoneMarkers") {
+  } else if (e.tagName()==XML_Projector_SpotMarkers) {
+    for (QDomElement m=e.firstChildElement(); !m.isNull(); m=m.nextSiblingElement()) {
+      addSpotMarker(img2det.map(TagToPoint(m, QPointF(), &ok)));
+    }
+  } else if (e.tagName()==XML_Projector_ZoneMarkers) {
     for (QDomElement m=e.firstChildElement(); !m.isNull(); m=m.nextSiblingElement()) {
       addZoneMarker(QPointF(), QPointF());
       dynamic_cast<ZoneItem*>(zoneMarkerStore.last())->loadFromXML(m);
     }
-  } else if (e.tagName()=="Image") {
-    LaueImage* tmpImage = new LaueImage();
-    tmpImage->loadFromXML(e);
-    if (tmpImage->isValid()) {
-      closeImage();
-      imageData = tmpImage;
-      emit imageLoaded(imageData);
-      connect(imageData, SIGNAL(imageContentsChanged()), getScene(), SLOT(update()));
-    } else {
-      delete tmpImage;
-    }
-
   } else {
     return false;
   }
-  return true;
+  return ok;
 }
 
 

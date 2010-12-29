@@ -2,6 +2,9 @@
 
 #include <QPainter>
 #include <QGraphicsView>
+#include <iostream>
+
+using namespace std;
 
 SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem(): QGraphicsItem(), workerSync(0) {
   setCacheMode(NoCache);
@@ -21,6 +24,10 @@ SpotIndicatorGraphicsItem::~SpotIndicatorGraphicsItem() {
   workerStart.wakeAll();
   workerSync.acquire(workers.size());
   for (int i=0; i<workers.size(); i++) {
+    for (int loop=0; !workers[i]->wait(250); loop++) {
+      cout << "Worker " << i << " still running since " << loop << " loops" << endl;
+      if (loop>5) workers[i]->terminate();
+    }
     delete workers[i];
   }
   workers.clear();

@@ -78,46 +78,6 @@
          <string/>
         </property>
        </item>
-       <item>
-        <property name="text">
-         <string>Default</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Red</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Green</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Blue</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>inverted Red</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>inverted Green</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>inverted Blue</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Rainbow</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>

@@ -15,8 +15,8 @@ template <typename T> SimpleMonochromScaler<T>::SimpleMonochromScaler(DataProvid
     AbstractMonoScaler(dp, parent)
 {
   histogramEqualisation = false;
-  datawidth = dp->width();
-  dataheight = dp->height();
+  datawidth = dp->size().width();
+  dataheight = dp->size().height();
   makeValueIndex();
   cout << "init SimpleMonochromeScaler" << endl;
 }
@@ -46,19 +46,15 @@ template <typename T> QRgb SimpleMonochromScaler<T>::getRGB(const QPointF &p) {
 
 
 
-typedef std::tr1::unordered_map<float, QList<int> >::value_type ValuePair;
 
 template <typename T> void SimpleMonochromScaler<T>::makeValueIndex() {
-  struct myhash {
-    std::size_t operator()(const UniqueHelper& v) const { return (std::size_t)v.key; }
-  };
 
   T const* mydata = static_cast<T const*>(provider->getData());
 
   // Generates a hashed Tree with the distinct pixel values in the image.
   // store the index of each pixel for every pixel value
   set<UniqueHelper> indexSet;
-  std::tr1::unordered_set<UniqueHelper, myhash> uniqueSet;
+  std::tr1::unordered_set<UniqueHelper, hash> uniqueSet;
   QTime time=QTime::currentTime();
   // loop over all pixel
   for (int i=0; i<provider->pixelCount(); i++) {

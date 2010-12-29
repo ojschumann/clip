@@ -1,6 +1,7 @@
 #include "xyzdataprovider.h"
 
 #include <QFile>
+#include <QStringList>
 #include <QDataStream>
 #include <iostream>
 
@@ -18,7 +19,12 @@ XYZDataProvider::~XYZDataProvider() {
   cout << "delete XYZDataProvider" << endl;
 }
 
-DataProvider* XYZDataProvider::loadImage(const QString& filename, QObject* parent) {
+
+QStringList XYZDataProvider::Factory::fileFormatFilters() {
+  return QStringList() << "raw" << "xyz";
+}
+
+DataProvider* XYZDataProvider::Factory::getProvider(QString filename, QObject *parent) {
   cout << "XyzDP tries to load " << qPrintable(filename) << endl;
 
   QFile imgFile(filename);
@@ -60,12 +66,8 @@ const void* XYZDataProvider::getData() {
   return (void*)pixelData.data();
 }
 
-int XYZDataProvider::width() {
-  return imgWidth;
-}
-
-int XYZDataProvider::height() {
-  return imgHeight;
+QSize XYZDataProvider::size() {
+  return QSize(imgWidth, imgHeight);
 }
 
 int XYZDataProvider::bytesCount() {
@@ -88,4 +90,4 @@ void XYZDataProvider::loadFromXML(QDomElement) {
 
 }
 
-bool XYZRegisterOK = DataProviderFactory::registerImageLoader(192, &XYZDataProvider::loadImage);
+bool XYZRegisterOK = DataProviderFactory::registerImageLoader(192, new XYZDataProvider::Factory());

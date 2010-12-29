@@ -9,6 +9,7 @@
 
 #include "image/laueimage.h"
 #include "core/projectorfactory.h"
+#include "tools/xmltools.h"
 
 using namespace std;
 
@@ -88,6 +89,7 @@ Vec3D LauePlaneProjector::det2normal(const QPointF& p, bool& b)  const {
 }
 
 void LauePlaneProjector::setDetSize(double dist, double width, double height) {
+  cout << "SetDetSize" << dist << " " << width << " " << height << endl;
   if ((detDist!=dist) or (detWidth!=width) or (detHeight!=height)) {
     detDist=dist;
     detWidth=width;
@@ -321,19 +323,19 @@ double LauePlaneProjector::yOffset() const {
 
 void LauePlaneProjector::doImgRotation(const QTransform& t) {
   Projector::doImgRotation(t);
-  // TODO: change detector size
-  QTransform Tinv = t.inverted();
-  QPointF c = Tinv.map(QPointF(0,0));
-  QPointF x = Tinv.map(QPointF(1,0));
-  double dw = hypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
-  x = Tinv.map(QPointF(0,1));
-  double dh = hypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
-  setDetSize(dist(), dw, dh);
+  if (getLaueImage()) {
+    QSizeF s = getLaueImage()->transformedAbsoluteSize();
+    setDetSize(dist(), s.width(), s.height());
+  } else {
+    QTransform Tinv = t.inverted();
+    QPointF c = Tinv.map(QPointF(0,0));
+    QPointF x = Tinv.map(QPointF(1,0));
+    double dw = hypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
+    x = Tinv.map(QPointF(0,1));
+    double dh = hypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
+    setDetSize(dist(), dw, dh);
+  }
 }
-
-
-
-
 
 double LauePlaneProjector::fitParameterValue(unsigned int n) {
   switch (n)  {
@@ -366,48 +368,58 @@ void LauePlaneProjector::fitParameterSetValue(unsigned int n, double val) {
   }
 }
 
+const char XML_LPP_DetSize[] = "DetSize";
+const char XML_LPP_DetSize_dist[] = "dist";
+const char XML_LPP_DetSize_width[] = "width";
+const char XML_LPP_DetSize_height[] = "height";
+const char XML_LPP_DetOrientation[] = "DetOrientation";
+const char XML_LPP_DetOrientation_omega[] = "Omega";
+const char XML_LPP_DetOrientation_chi[] = "Chi";
+const char XML_LPP_DetOrientation_phi[] = "Phi";
+const char XML_LPP_DetOffset[] = "DetOffset";
+const char XML_LPP_DetOffset_x[] = "xOffset";
+const char XML_LPP_DetOffset_y[] = "yOffset";
 
-void LauePlaneProjector::saveToXML(QDomElement base) {
+QDomElement LauePlaneProjector::saveToXML(QDomElement base) {
   QDomDocument doc = base.ownerDocument();
-  QDomElement projector = (base.tagName()=="Projector") ? base : base.appendChild(doc.createElement("Projector")).toElement();
+  QDomElement projector = Projector::saveToXML(base);
 
-  QDomElement e = projector.appendChild(doc.createElement("DetSize")).toElement();
-  e.setAttribute("width", width());
-  e.setAttribute("height", height());
-  e.setAttribute("dist", dist());
+  QDomElement e = projector.appendChild(doc.createElement(XML_LPP_DetSize)).toElement();
+  e.setAttribute(XML_LPP_DetSize_dist, dist());
+  e.setAttribute(XML_LPP_DetSize_width, width());
+  e.setAttribute(XML_LPP_DetSize_height, height());
 
-  e = projector.appendChild(doc.createElement("DetOrientation")).toElement();
-  e.setAttribute("Omega", omega());
-  e.setAttribute("Chi", chi());
-  e.setAttribute("Phi", phi());
+  e = projector.appendChild(doc.createElement(XML_LPP_DetOrientation)).toElement();
+  e.setAttribute(XML_LPP_DetOrientation_omega, omega());
+  e.setAttribute(XML_LPP_DetOrientation_chi, chi());
+  e.setAttribute(XML_LPP_DetOrientation_phi, phi());
 
-  e = projector.appendChild(doc.createElement("DetOffset")).toElement();
-  e.setAttribute("xOffset", xOffset());
-  e.setAttribute("yOffset", yOffset());
-
-  Projector::saveToXML(projector);
+  e = projector.appendChild(doc.createElement(XML_LPP_DetOffset)).toElement();
+  e.setAttribute(XML_LPP_DetOffset_x, xOffset());
+  e.setAttribute(XML_LPP_DetOffset_y, yOffset());
+  return projector;
 }
 
 bool LauePlaneProjector::parseXMLElement(QDomElement e) {
-  bool ok;
-  if (e.tagName()=="DetSize") {
-    double detW = e.attribute("width").toDouble(&ok); if (!ok) return false;
-    double detH = e.attribute("height").toDouble(&ok); if (!ok) return false;
-    double detD = e.attribute("dist").toDouble(&ok); if (!ok) return false;
-    setDetSize(detD, detW, detH);
-  } else if (e.tagName()=="DetOrientation") {
-    double detC = e.attribute("Chi").toDouble(&ok); if (!ok) return false;
-    double detP = e.attribute("Phi").toDouble(&ok); if (!ok) return false;
-    double detO = e.attribute("Omega").toDouble(&ok); if (!ok) return false;
-    setDetOrientation(detO, detC, detP);
-  } else if (e.tagName()=="DetOffset") {
-    double detX = e.attribute("xOffset").toDouble(&ok); if (!ok) return false;
-    double detY = e.attribute("yOffset").toDouble(&ok); if (!ok) return false;
-    setDetOffset(detX, detY);
+  bool ok=true;
+  if (e.tagName()==XML_LPP_DetSize) {
+    double detD = readDouble(e, XML_LPP_DetSize_dist, ok);
+    double detW = readDouble(e, XML_LPP_DetSize_width, ok);
+    double detH = readDouble(e, XML_LPP_DetSize_height, ok);
+    if (ok) setDetSize(detD, detW, detH);
+  } else if (e.tagName()==XML_LPP_DetOrientation) {
+    double detC = readDouble(e, XML_LPP_DetOrientation_chi, ok);
+    double detP = readDouble(e, XML_LPP_DetOrientation_phi, ok);
+    double detO = readDouble(e, XML_LPP_DetOrientation_omega, ok);
+    if (ok) setDetOrientation(detO, detC, detP);
+  } else if (e.tagName()==XML_LPP_DetOffset) {
+    double detX = readDouble(e, XML_LPP_DetOffset_x, ok);
+    double detY = readDouble(e, XML_LPP_DetOffset_y, ok);
+    if (ok) setDetOffset(detX, detY);
   } else {
     return Projector::parseXMLElement(e);
   }
-  return true;
+  return ok;
 }
 
 double LauePlaneProjector::TTmax() const {
@@ -470,10 +482,10 @@ double LauePlaneProjector::maxCos(Vec3D n) const {
 void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
   QSizeF imgSize;
   if (img->hasAbsoluteSize()) {
-    imgSize = img->absoluteSize();
+    imgSize = img->transformedAbsoluteSize();
   } else {
-    double scale = sqrt(width()*height()/img->width()/img->height());
-    imgSize = QSizeF(scale*img->width(), scale*img->height());
+    imgSize = img->transformedSize();
+    imgSize *= sqrt(width()*height()/(imgSize.width()*imgSize.height()));
   }
   setDetSize(dist(), imgSize.width(), imgSize.height());
 }

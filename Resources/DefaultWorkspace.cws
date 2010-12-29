@@ -1,8 +1,9 @@
 <!DOCTYPE ClipWorkspace>
 <ClipWorkspace>
   <CrystalConnection>
+   <ConnectedCrystal>
     <CrystalDisplay>
-      <Geometry width="208" height="256"/>
+      <Geometry width="214" height="275"/>
       <Crystal>
         <Spacegroup symbol="P1"/>
         <Cell beta="90" gamma="90" alpha="90" a="4" b="4" c="4"/>
@@ -10,8 +11,10 @@
         <RotationAxis x="1" y="0" z="0" type="0"/>
       </Crystal>
     </CrystalDisplay>
-    <ProjectionPlane projectorType="LauePlaneProjector">
-      <Geometry width="313" height="366"/>
+   </ConnectedCrystal>
+   <ConnectedProjectors>
+    <ProjectionPlane projectortype="LauePlaneProjector">
+      <Geometry width="331" height="384"/>
       <ZoomSteps/>
       <Projector>
         <DetSize width="150" dist="30" height="150"/>
@@ -21,5 +24,6 @@
         <Display textSize="7" spotSize="1" spotsEnabled="1" maxHKLSum="3"/>
       </Projector>
     </ProjectionPlane>
+   </ConnectedProjectors>
   </CrystalConnection>
 </ClipWorkspace>

@@ -23,6 +23,7 @@ public:
 
   void loadFromXML(QDomElement base);
   void saveToXML(QDomElement base);
+  void loadDefault();
 
   void resizeEvent(QResizeEvent *);
 

@@ -8,6 +8,7 @@
 #include "tools/vec3D.h"
 #include "core/reflection.h"
 #include "core/projectorfactory.h"
+#include "tools/xmltools.h"
 
 using namespace std;
 
@@ -182,41 +183,36 @@ Mat3D StereoProjector::getDetOrientation() {
   return localCoordinates;
 }
 
-void StereoProjector::saveToXML(QDomElement base) {
-  QDomDocument doc = base.ownerDocument();
-  QDomElement projector = (base.tagName()=="Projector") ? base : base.appendChild(doc.createElement("Projector")).toElement();
-  QDomElement e = projector.appendChild(doc.createElement("Frame")).toElement();
-  e.setAttribute("M00", localCoordinates(0,0));
-  e.setAttribute("M01", localCoordinates(0,1));
-  e.setAttribute("M02", localCoordinates(0,2));
-  e.setAttribute("M10", localCoordinates(1,0));
-  e.setAttribute("M11", localCoordinates(1,1));
-  e.setAttribute("M12", localCoordinates(1,2));
-  e.setAttribute("M20", localCoordinates(2,0));
-  e.setAttribute("M21", localCoordinates(2,1));
-  e.setAttribute("M22", localCoordinates(2,2));
 
-  Projector::saveToXML(projector);
+const char XML_Stereo_Frame[] = "Frame";
+const char XML_Stereo_Frame_Mxx[] = "M%1%2";
+
+
+QDomElement StereoProjector::saveToXML(QDomElement base) {
+  QDomElement projector = Projector::saveToXML(base);
+  QDomElement e = projector.appendChild(projector.ownerDocument().createElement(XML_Stereo_Frame)).toElement();
+  for (int i=0; i<3;  i++) {
+    for (int j=0; j<3;  j++) {
+      e.setAttribute(QString(XML_Stereo_Frame_Mxx).arg(i).arg(j), localCoordinates(i,j));
+    }
+  }
+  return projector;
 }
 
 bool StereoProjector::parseXMLElement(QDomElement e) {
-  bool ok;
-  if (e.tagName()=="Frame") {
+  bool ok=true;
+  if (e.tagName()==XML_Stereo_Frame) {
     Mat3D M;
-    M(0,0) = e.attribute("M00").toDouble(&ok); if (!ok) return false;
-    M(0,1) = e.attribute("M01").toDouble(&ok); if (!ok) return false;
-    M(0,2) = e.attribute("M02").toDouble(&ok); if (!ok) return false;
-    M(1,0) = e.attribute("M10").toDouble(&ok); if (!ok) return false;
-    M(1,1) = e.attribute("M11").toDouble(&ok); if (!ok) return false;
-    M(1,2) = e.attribute("M12").toDouble(&ok); if (!ok) return false;
-    M(2,0) = e.attribute("M20").toDouble(&ok); if (!ok) return false;
-    M(2,1) = e.attribute("M21").toDouble(&ok); if (!ok) return false;
-    M(2,2) = e.attribute("M22").toDouble(&ok); if (!ok) return false;
-    setDetOrientation(M);
+    for (int i=0; i<3;  i++) {
+      for (int j=0; j<3;  j++) {
+        M(i,j)=readDouble(e, QString(XML_Stereo_Frame_Mxx).arg(i).arg(j), ok);
+      }
+    }
+    if (ok) setDetOrientation(M);
   } else {
     return Projector::parseXMLElement(e);
   }
-  return true;
+  return ok;
 }
 
 bool StereoProjector_registered = ProjectorFactory::registerProjector("StereoProjector", &StereoProjector::getInstance);

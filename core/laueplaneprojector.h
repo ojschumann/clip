@@ -40,8 +40,7 @@ public:
   virtual double fitParameterValue(unsigned int n);
   virtual void fitParameterSetValue(unsigned int n, double val);
 
-  virtual void saveToXML(QDomElement base);
-  //        virtual void loadFromXML(QXmlStreamReader&);
+  virtual QDomElement saveToXML(QDomElement base);
 public slots:
   void setDetSize(double dist, double width, double height);
   void setDetOrientation(double omega, double chi, double phi);

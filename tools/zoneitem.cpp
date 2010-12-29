@@ -378,19 +378,22 @@ bool ZoneItem::isHighlighted() {
   return highlighted;
 }
 
+const char XML_ZoneMarker_element[] = "Marker";
+const char XML_ZoneMarker_start[] = "StartHandle";
+const char XML_ZoneMarker_end[] = "EndHandle";
 
 void ZoneItem::saveToXML(QDomElement base) {
-  QDomElement marker = ensureElement(base, "Marker");
-  PointToTag(marker, "StartHandle", getStart());
-  PointToTag(marker, "EndHandle", getEnd());
+  QDomElement marker = ensureElement(base, XML_ZoneMarker_element);
+  PointToTag(marker, XML_ZoneMarker_start, getStart());
+  PointToTag(marker, XML_ZoneMarker_end, getEnd());
 }
 
 void ZoneItem::loadFromXML(QDomElement base) {
-  if (base.tagName()!="Marker") return;
+  if (base.tagName()!=XML_ZoneMarker_element) return;
   for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
-    if (e.tagName()=="StartHandle") {
+    if (e.tagName()==XML_ZoneMarker_start) {
       setStart(TagToPoint(e, getStart()));
-    } else if (e.tagName()=="EndHandle") {
+    } else if (e.tagName()==XML_ZoneMarker_end) {
       setEnd(TagToPoint(e, getEnd()));
     }
   }

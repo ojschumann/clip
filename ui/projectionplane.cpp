@@ -25,6 +25,7 @@
 #include "tools/mousepositioninfo.h"
 #include "tools/itemstore.h"
 #include "image/laueimage.h"
+#include "image/dataproviderfactory.h"
 #include "tools/xmltools.h"
 
 // List of all projectors. Sort of a hack ;-)
@@ -266,8 +267,12 @@ void ProjectionPlane::slotChangeMouseDragMode() {
 
 void ProjectionPlane::on_openImgAction_triggered() {
   QSettings settings;
-  QString fileName = QFileDialog::getOpenFileName(this, "Load Laue pattern", settings.value("LastDirectory").toString(),
-                                                  "Images (*.jpg *.jpeg *.bmp *.png *.tif *.tiff *.gif *.img);;All Files (*)");
+  QString formatfilters = "Images ("+DataProviderFactory::getInstance().registeredImageFormats().replaceInStrings(QRegExp("^"), "*.").join(" ")+");;All Files (*)";
+  cout << qPrintable(formatfilters) << endl;
+  QString fileName = QFileDialog::getOpenFileName(this,
+                                                  "Load Laue pattern",
+                                                  settings.value("LastDirectory").toString(),
+                                                  formatfilters);
   QFileInfo fInfo(fileName);
 
   if (fInfo.exists()) {
@@ -412,19 +417,24 @@ void ProjectionPlane::slotContextClearAll() {
   slotContextClearRulers();
 }
 
+const char XML_ProjectionPlane_Element[] = "ProjectionPlane";
+const char XML_ProjectionPlane_type[] = "projectortype";
+const char XML_ProjectionPlane_Geometry[] = "Geometry";
+const char XML_ProjectionPlane_ZoomSteps[] = "ZoomSteps";
+const char XML_ProjectionPlane_ZoomSteps_step[] = "Step";
 
 void ProjectionPlane::saveToXML(QDomElement base) {
-  QDomElement plane = ensureElement(base, "ProjectionPlane");
+  QDomElement plane = ensureElement(base, XML_ProjectionPlane_Element);
 
-  plane.setAttribute("projectorType", projector->projectorName());
+  plane.setAttribute(XML_ProjectionPlane_type, projector->projectorName());
 
   if (QWidget* p = dynamic_cast<QWidget*>(parent())) {
-    RectToTag(plane, "Geometry", p->geometry());
+    RectToTag(plane, XML_ProjectionPlane_Geometry, p->geometry());
   }
 
-  QDomElement steps = plane.appendChild(plane.ownerDocument().createElement("ZoomSteps")).toElement();
+  QDomElement steps = plane.appendChild(plane.ownerDocument().createElement(XML_ProjectionPlane_ZoomSteps)).toElement();
   foreach (QRectF r, zoomSteps) {
-    RectToTag(steps, "Step", r);
+    RectToTag(steps, XML_ProjectionPlane_ZoomSteps_step, r);
   }
 
   projector->saveToXML(plane);
@@ -433,24 +443,33 @@ void ProjectionPlane::saveToXML(QDomElement base) {
 bool ProjectionPlane::loadFromXML(QDomElement base) {
   bool ok;
   zoomSteps.clear();
-  if (base.tagName()!="ProjectionPlane") return false;
-  if (base.attribute("projectorType") != projector->projectorName()) return false;
-  for (QDomElement e=base.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
-    if (e.tagName()=="Geometry") {
+  QDomElement element = base;
+  if (element.tagName()!=XML_ProjectionPlane_Element)
+    element = element.elementsByTagName(XML_ProjectionPlane_Element).at(0).toElement();
+  if (element.isNull()) return false;
+  if (element.attribute(XML_ProjectionPlane_type) != projector->projectorName()) return false;
+  for (QDomElement e=element.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
+    if (e.tagName()==XML_ProjectionPlane_Geometry) {
       if (QWidget* p = dynamic_cast<QWidget*>(parent())) {
         p->setGeometry(TagToRect(e, p->geometry()));
       }
-    } else if (e.tagName()=="ZoomSteps") {
+    } else if (e.tagName()==XML_ProjectionPlane_ZoomSteps) {
       QList<QRectF> steps;
       for (QDomElement step=e.firstChildElement(); !step.isNull(); step=step.nextSiblingElement()) {
-        if (step.tagName()!="Step") return false;
+        if (step.tagName()!=XML_ProjectionPlane_ZoomSteps_step) return false;
         QRectF r = TagToRect(step, QRectF(), &ok);
         if (ok) steps << r;
       }
       zoomSteps = steps;
-    } else if (e.tagName()=="Projector") {
-      projector->loadFromXML(e);
     }
   }
+  projector->loadFromXML(element);
   return true;
+}
+
+void ProjectionPlane::loadDefault() {
+  QDomDocument doc = readXMLFile(QString(":/Default_%1.xml").arg(projector->projectorName()));
+  if (!doc.isNull()) {
+    loadFromXML(doc.documentElement());
+  }
 }

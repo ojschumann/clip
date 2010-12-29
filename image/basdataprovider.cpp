@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QTextStream>
 #include <QDateTime>
+#include <QStringList>
 #include <iostream>
 #include <cmath>
 
@@ -22,7 +23,12 @@ BasDataProvider::~BasDataProvider() {
   cout << "delete BasDataProvider" << endl;
 }
 
-DataProvider* BasDataProvider::loadImage(const QString& filename, QObject* parent) {
+
+QStringList BasDataProvider::Factory::fileFormatFilters() {
+  return QStringList() << "img" << "inf";
+}
+
+DataProvider* BasDataProvider::Factory::getProvider(QString filename, QObject *parent) {
   cout << "BasDP tries to load " << qPrintable(filename) << endl;
 
   QFileInfo info(filename);
@@ -143,12 +149,8 @@ const void* BasDataProvider::getData() {
   return (void*)pixelData.data();
 }
 
-int BasDataProvider::width() {
-  return providerInformation["Width"].toInt();
-}
-
-int BasDataProvider::height() {
-  return providerInformation["Height"].toInt();
+QSize BasDataProvider::size() {
+  return QSize(providerInformation["Width"].toInt(), providerInformation["Height"].toInt());
 }
 
 int BasDataProvider::bytesCount() {
@@ -164,8 +166,9 @@ DataProvider::Format BasDataProvider::format() {
 }
 
 QSizeF BasDataProvider::absoluteSize() {
-  return QSizeF(0.001*width()*providerInformation["X-PixelSizeUM"].toDouble(), 0.001*height()*providerInformation["Y-PixelSizeUM"].toDouble());
+  QSize s(size());
+  return QSizeF(0.001*s.width()*providerInformation["X-PixelSizeUM"].toDouble(), 0.001*s.height()*providerInformation["Y-PixelSizeUM"].toDouble());
 }
 
 
-bool BasRegisterOK = DataProviderFactory::registerImageLoader(0, &BasDataProvider::loadImage);
+bool BasRegisterOK = DataProviderFactory::registerImageLoader(0, new BasDataProvider::Factory());

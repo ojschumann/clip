@@ -15,7 +15,7 @@ public:
   static DataScalerFactory& getInstance();
   static bool registerDataScaler(DataProvider::Format, ScalerGenerator);
 
-  DataScaler* getScaler(DataProvider* dp, QObject*);
+  DataScaler* getScaler(DataProvider* dp, QObject* = 0);
 
 private:
   explicit DataScalerFactory(QObject *parent = 0);

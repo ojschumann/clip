@@ -22,6 +22,13 @@ public:
     UInt32
   };
 
+  class ImageFactoryClass {
+  public:
+    ImageFactoryClass() {}
+    virtual QStringList fileFormatFilters()=0;
+    virtual DataProvider* getProvider(QString, QObject* = 0)=0;
+  };
+
   static DataProvider* loadImage(const QString&);
   static DataProvider* openDevice();
   ~DataProvider();
@@ -31,13 +38,12 @@ public:
   virtual void loadFromXML(QDomElement);
   virtual void loadNewData() {}
   virtual const void* getData()=0;
-  virtual int width()=0;
-  virtual int height()=0;
   virtual int bytesCount()=0;
   virtual int pixelCount()=0;
+  virtual QSize size()=0;
+  virtual QSizeF absoluteSize() { return QSizeF(); }
   virtual Format format()=0;
   virtual QString name();
-  virtual QSizeF absoluteSize() { return QSizeF(); }
   virtual QList<QWidget*> toolboxPages();
   virtual QVariant getProviderInfo(QString key) { return providerInformation[key]; }
 

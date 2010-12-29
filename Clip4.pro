@@ -95,7 +95,8 @@ SOURCES += main.cpp\
     tools/tools.cpp \
     core/projectorfactory.cpp \
     tools/xmllistiterators.cpp \
-    tools/xmltools.cpp
+    tools/xmltools.cpp \
+    tools/zipiterator.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -157,7 +158,8 @@ HEADERS  += ui/clip.h \
     tools/tools.h \
     core/projectorfactory.h \
     tools/xmllistiterators.h \
-    tools/xmltools.h
+    tools/xmltools.h \
+    tools/zipiterator.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

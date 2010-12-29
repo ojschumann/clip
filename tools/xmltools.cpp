@@ -3,7 +3,21 @@
 #include <QDomDocument>
 #include <QRectF>
 #include <QRect>
+#include <QFile>
 
+QDomDocument readXMLFile(QString filename) {
+  QDomDocument doc;
+  QFile file(filename);
+  if (!file.open(QIODevice::ReadOnly))
+    return QDomDocument();
+  if (!doc.setContent(&file)) {
+    file.close();
+    return QDomDocument();
+  }
+
+  file.close();
+  return doc;
+}
 
 double readDouble(QDomElement element, QString name, bool& ok, double defaultValue) {
   if (element.hasAttribute(name)) {
@@ -53,12 +67,15 @@ QRectF TagToRect(QDomElement element, QRectF defaultValue, bool* _ok) {
   return QRectF(x,y,w,h);
 }
 
+#include <iostream>
+using namespace std;
 QRect TagToRect(QDomElement element, QRect defaultValue, bool* _ok) {
   bool ok = true;
   int x = readInt(element, "x", ok, defaultValue.x());
   int y = readInt(element, "y", ok, defaultValue.y());
   int w = readInt(element, "width", ok, defaultValue.width());
   int h = readInt(element, "height", ok, defaultValue.height());
+  cout << "TtR " << x << " " << y << " " << w << " " << h << endl;
   if (_ok) *_ok = ok;
   return QRect(x,y,w,h);
 }

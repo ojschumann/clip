@@ -43,6 +43,9 @@ private:
   int datawidth;
   int dataheight;
 
+  struct hash {
+    std::size_t operator()(const UniqueHelper& v) const { return (std::size_t)v.key; }
+  };
 
   bool histogramEqualisation;
 

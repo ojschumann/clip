@@ -25,7 +25,7 @@ public:
   virtual QString displayName();
   //virtual double TTmax() const;
 
-  virtual void saveToXML(QDomElement base);
+  virtual QDomElement saveToXML(QDomElement base);
 public slots:
   virtual QWidget* configWidget();
   virtual void decorateScene();

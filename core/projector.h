@@ -83,7 +83,7 @@ public:
   double getSpotSizeFraction() const;
   bool spotsEnabled() const;
 
-  virtual void saveToXML(QDomElement base);
+  virtual QDomElement saveToXML(QDomElement base);
   bool loadFromXML(QDomElement base);
 
   ItemStore& spotMarkers();
@@ -185,6 +185,7 @@ protected:
 
 protected slots:
   virtual void updateImgTransformations();
+  void setImage(LaueImage*);
 protected:
   void internalSetWavevectors(double, double);
 private:

@@ -23,6 +23,9 @@ public:
 
   QImage getImage(const QSize& size, const QRectF& from);
   QList<BezierCurve*> getTransferCurves() { return transferCurves; }
+
+  QSizeF transformedSize();
+  QSizeF transformedAbsoluteSize();
 signals:
   void imageContentsChanged();
   void histogramChanged(QVector<int>, QVector<int>, QVector<int>);
@@ -32,8 +35,11 @@ public slots:
   virtual void updateContrastMapping();
   virtual QList<QWidget*> toolboxPages();
 protected:
+  QTransform initialTransform();
+  QSizeF transformSize(const QSizeF&);
   virtual void redrawCache();
   virtual QRgb getRGB(const QPointF&)=0;
+
   DataProvider* provider;
   QImage* cache;
   QRectF sourceRect;

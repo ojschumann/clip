@@ -2,7 +2,7 @@
 #include "ui_contrastcurves.h"
 
 #include <QFile>
-#include <QtXml/QDomDocument>
+#include <QDomDocument>
 #include <QTextStream>
 #include <QMouseEvent>
 #include <QFileDialog>
@@ -10,7 +10,7 @@
 #include "image/BezierCurve.h"
 #include "image/laueimage.h"
 #include "tools/histogramitem.h"
-
+#include "tools/zipiterator.h"
 
 
 ContrastCurves::ContrastCurves(LaueImage* img, QWidget *parent) :
@@ -21,6 +21,17 @@ ContrastCurves::ContrastCurves(LaueImage* img, QWidget *parent) :
     curves()
 {
   ui->setupUi(this);
+  QDir dir(":/curves/curves/", "*.curve", QDir::Name|QDir::IgnoreCase, QDir::Files|QDir::Readable);
+  QFileInfoList curveFiles = dir.entryInfoList();
+  foreach (QFileInfo info, curveFiles) {
+    QFile f (info.canonicalFilePath());
+    f.open(QFile::ReadOnly);
+    QDomDocument doc;
+    doc.setContent(&f);
+    ui->defaultCurveSelector->addItem(doc.doctype().name(), QVariant(info.canonicalFilePath()));
+  }
+
+
   scene.setSceneRect(0,0,1,1);
   ui->gv->setScene(&scene);
   ui->gv->scale(1, -1);
@@ -30,15 +41,12 @@ ContrastCurves::ContrastCurves(LaueImage* img, QWidget *parent) :
   connect(laueImage, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), histogram, SLOT(setHistogram(QVector<int>,QVector<int>,QVector<int>)));
 
   QPen decoPen(Qt::gray, 0, Qt::DotLine);
-  QList<double> l;
-  l << 0.0 << 0.25 << 0.5 << 0.75 << 1.0;
-  foreach (double d, l) {
+  foreach (double d, QList<double>() << 0.0 << 0.25 << 0.5 << 0.75 << 1.0) {
     scene.addLine(0, d, 1, d);
     scene.addLine(d, 0, d, 1);
   }
 
-  QList<QColor> cl;
-  cl << Qt::black << Qt::red << Qt::green << Qt::blue;
+  QList<QColor> cl = QList<QColor>() << Qt::black << Qt::red << Qt::green << Qt::blue;
   for (int n=0; n<cl.size(); n++) {
     curves << scene.addPath(QPainterPath(), QPen(cl[n], 0));
     curves.last()->setZValue(4.0-n);
@@ -86,7 +94,7 @@ void ContrastCurves::newMarker(const QPointF& p) {
 }
 
 void ContrastCurves::updateCurveLines(int n) {
-  if (laueImage.isNull()) return;
+  if (n<0 || laueImage.isNull() || n>=laueImage->getTransferCurves().size()) return;
   BezierCurve* curve = laueImage->getTransferCurves()[n];
   QList<QPointF> pathPoints = curve->pointRange(0.0, 0.01, 101);
   QPainterPath path(pathPoints[0]);
@@ -218,7 +226,9 @@ QVariant ContrastCurves::BoundedEllipse::itemChange(GraphicsItemChange change, c
 
 
 void ContrastCurves::loadFromFile(const QString& filename) {
-  QDomDocument doc("curves");
+  if (laueImage.isNull()) return;
+
+  QDomDocument doc("curve");
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly))
     return;
@@ -228,30 +238,10 @@ void ContrastCurves::loadFromFile(const QString& filename) {
   }
   file.close();
 
-  QStringList curveNames;
-  curveNames << "Value" << "Red" << "Green" << "Blue";
-  QList< QList<QPointF> > allCurvePoints;
-  foreach (QString name, curveNames) {
-    QDomElement curve = doc.elementsByTagName(name).at(0).toElement();
-    if (curve.isNull()) return;
-    QList<QPointF> points;
-    QDomNodeList curvePointElements = curve.elementsByTagName("Point");
-    for (int i=0; i<curvePointElements.size(); i++) {
-      bool okx, oky;
-      double x = curvePointElements.at(i).toElement().attribute("x").toDouble(&okx);
-      double y = curvePointElements.at(i).toElement().attribute("y").toDouble(&oky);
-      if (!okx || !oky || x<0.0 || x>1.0 || y<0.0 || y>1.0) return;
-      points << QPointF(x,y);
-    }
-    if (points.size()<2) return;
-    allCurvePoints << points;
-  }
-  if (laueImage.isNull()) return;
-  QList<BezierCurve*> bezierCurves = laueImage->getTransferCurves();
-  for (int i=0; i<4; i++) {
-    bezierCurves[i]->setPoints(allCurvePoints[i]);
-    updateCurveLines(i);
-  }
+  QDomElement base = doc.elementsByTagName("Curve").at(0).toElement();
+  if (base.isNull()) return;
+  laueImage->loadCurvesFromXML(base);
+  for (int n=0; n<4; n++) updateCurveLines(n);
   changeToCurve(activeCurve);
 }
 
@@ -259,27 +249,14 @@ void ContrastCurves::loadFromFile(const QString& filename) {
 
 void ContrastCurves::saveToFile(const QString& filename) {
   if (laueImage.isNull()) return;
-  QList<BezierCurve*> bezierCurves = laueImage->getTransferCurves();
 
-  QDomDocument doc("curves");
-  QDomNode base = doc.appendChild(doc.createElement("Transfercurves"));
-  QStringList curveNames;
-  curveNames << "Value" << "Red" << "Green" << "Blue";
-  QList<BezierCurve*>::Iterator it = bezierCurves.begin();
-  foreach (QString name, curveNames) {
-    QDomNode curve = base.appendChild(doc.createElement(name));
-    foreach (QPointF p, (*it)->getPoints()) {
-      QDomElement point = curve.appendChild(doc.createElement("Point")).toElement();
-      point.setAttribute("x", p.x());
-      point.setAttribute("y", p.y());
-    }
-    it++;
-  }
+  QDomDocument doc("curve");
+  laueImage->saveCurvesToXML(doc.appendChild(doc.createElement("Curve")).toElement());
   QFile file(filename);
 
   if (file.open(QIODevice::ReadWrite | QIODevice::Truncate)) {
     QTextStream ts(&file);
-    doc.save(ts, 0);
+    doc.save(ts, 1);
     file.close();
   }
 }
@@ -299,23 +276,11 @@ void ContrastCurves::on_saveButton_clicked() {
 
 }
 
-#include <iostream>
-using namespace std;
-
 void ContrastCurves::on_defaultCurveSelector_activated(int index) {
-  if (index>0) {
-    QStringList resourcesNames;
-    resourcesNames << ":/curves/curves/gray.curve";
-    resourcesNames << ":/curves/curves/red.curve";
-    resourcesNames << ":/curves/curves/green.curve";
-    resourcesNames << ":/curves/curves/blue.curve";
-    resourcesNames << ":/curves/curves/red2.curve";
-    resourcesNames << ":/curves/curves/green2.curve";
-    resourcesNames << ":/curves/curves/blue2.curve";
-    resourcesNames << ":/curves/curves/rainbow.curve";
-    QString fn = resourcesNames[--index];
-    cout << "open: " << qPrintable(fn) << endl;
+  QString fn = ui->defaultCurveSelector->itemData(index).toString();
+  if (!fn.isEmpty()) {
     loadFromFile(fn);
-    ui->defaultCurveSelector->setCurrentIndex(index+1);
+    // Load from file sets this to the default index
+    ui->defaultCurveSelector->setCurrentIndex(index);
   }
 }
