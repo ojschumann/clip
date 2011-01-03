@@ -10,6 +10,7 @@
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
 #include "tools/optimalrotation.h"
+#include "indexing/marker.h"
 
 
 using namespace std;
@@ -63,6 +64,12 @@ Indexer::Indexer(QList<Vec3D> _spotMarkerNormals, QList<Vec3D> _zoneMarkerNormal
 
 void Indexer::run() {
   QThreadPool::globalInstance()->tryStart(this);
+  QList<Marker> markers;
+  foreach (Vec3D n, spotMarkerNormals)
+    markers << Marker(n, Marker::SpotMarker);
+  foreach (Vec3D n, zoneMarkerNormals)
+    markers << Marker(n, Marker::ZoneMarker);
+
 
   forever {
     int i = candidatePos.fetchAndAddOrdered(1);
@@ -124,7 +131,9 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
   if (!solution.addMarkers(spotMarkerNormals, Spot, a, c1.index, c2.index)) return;
   if (!solution.addMarkers(zoneMarkerNormals, Zone, a, c1.index, c2.index)) return;
 
+  cout << "Solutioninfo " << solution.hklDeviationSum();
   solution.calcBestRotation();
+  cout << "  " << solution.hklDeviationSum() << endl;
 
   Mat3D bestinv(solution.bestRotation.transposed());
   int n=0;
@@ -140,6 +149,7 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
     info.R=solution.bestRotation;
     info.score = solution.hklDeviationSum();
     uniqSolutions << info;
+
     emit publishSolution(solution);
   }
   uniqLock.unlock();

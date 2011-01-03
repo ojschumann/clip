@@ -33,7 +33,7 @@ bool Solution::addMarkers(QList<Vec3D> markers, Indexer::MarkerType markerType, 
 }
 
 bool Solution::tryToIndex(const Vec3D &marker, Indexer::MarkerType markerType) {
-  Vec3D v = markerNormalToIndex(marker, markerType);
+  Vec3D v = markerNormalToIndex(marker, markerType, indexingRotation);
   v.normalize();
   double preliminaryScale = 1.0/std::max(fabs(v.x()), std::max(fabs(v.y()), fabs(v.z())));
 
@@ -54,7 +54,7 @@ bool Solution::tryToIndex(const Vec3D &marker, Indexer::MarkerType markerType) {
 }
 
 bool Solution::addWithIndex(const Vec3D &marker, Indexer::MarkerType markerType, const TVec3D<int> &index) {
-  Vec3D v = markerNormalToIndex(marker, markerType);
+  Vec3D v = markerNormalToIndex(marker, markerType, indexingRotation);
   double scale = v*index.toType<double>()/v.norm_sq();
   double hklDeviation = (v*scale-index.toType<double>()).norm();
   if (hklDeviation>maxHklDeviation) return false;
@@ -64,12 +64,12 @@ bool Solution::addWithIndex(const Vec3D &marker, Indexer::MarkerType markerType,
   return true;
 }
 
-Vec3D Solution::markerNormalToIndex(const Vec3D &marker, Indexer::MarkerType markerType) {
+Vec3D Solution::markerNormalToIndex(const Vec3D &marker, Indexer::MarkerType markerType, const Mat3D& rotation) {
   if (markerType==Indexer::Spot) {
     // marker = Rot*MReziprocal*hkl
-    return MReziprocalInv*indexingRotation*marker;
+    return MReziprocalInv*rotation*marker;
   } else {
-    return MRealInv*indexingRotation*marker;
+    return MRealInv*rotation*marker;
   }
 }
 
@@ -85,6 +85,13 @@ void Solution::calcBestRotation() {
     opt.addVectorPair(v, item.markerNormal);
   }
   bestRotation = opt.getOptimalRotation();
+
+  for (int n=0; n<items.size(); n++) {
+    Vec3D v = markerNormalToIndex(items.at(n).markerNormal, items.at(n).markerType, bestRotation.transposed());
+    v.normalize();
+    items[n].rationalHkl = v * (v*items.at(n).hkl.toType<double>());
+  }
+
 }
 
 double Solution::angularDeviationSum() const {
@@ -96,8 +103,8 @@ double Solution::angularDeviationSum() const {
 
 double Solution::spatialDeviationSum() const {
   double s=0.0;
-  for (int n=0; n<items.size(); n++)
-    s+=items.at(n).spatialDeviation();
+  foreach (SolutionItem item, items)
+    s+=item.spatialDeviation();
   return s;
 }
 
@@ -105,8 +112,8 @@ double Solution::spatialDeviationSum() const {
 
 double Solution::hklDeviationSum() const {
   double s=0.0;
-  for (int n=0; n<items.size(); n++)
-    s+=items.at(n).hklDeviation();
+  foreach (SolutionItem item, items)
+    s+=item.hklDeviation();
   return s;
 }
 

@@ -10,7 +10,7 @@
 #include "tools/mat3D.h"
 #include "tools/vec3D.h"
 
-ResolutionCalculator::ResolutionCalculator(ItemStore& r, QWidget *parent) :
+ResolutionCalculator::ResolutionCalculator(ItemStore<RulerItem>& r, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ResolutionCalculator),
     rulers(r)

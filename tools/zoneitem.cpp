@@ -13,16 +13,15 @@ using namespace std;
 
 ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* parent):
     PropagatingGraphicsObject(parent),
+    AbstractProjectorMarkerItem(p, AbstractMarkerItem::ZoneMarker),
     imgRect(0.01, 0.01, 0.98, 0.98),
     startHandle(new CircleItem(0.1, this)),
-    endHandle(new CircleItem(0.1, this)),
-    projector(p)    
+    endHandle(new CircleItem(0.1, this))
 {
   highlighted=true;
   highlight(false);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
-  QList<CircleItem*> l;
-  l << startHandle << endHandle;
+  QList<CircleItem*> l = QList<CircleItem*>() << startHandle << endHandle;
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updatePolygon()));
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updateOptimalZone()));
   foreach (CircleItem* item, l) {
@@ -30,7 +29,7 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
     item->setColor(Qt::red);
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
-    connect(item, SIGNAL(positionChanged()), this, SIGNAL(zoneChanged()));
+    connect(item, SIGNAL(positionChanged()), this, SIGNAL(positionChanged()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updatePolygon()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updateOptimalZone()));
     connect(projector, SIGNAL(spotSizeChanged(double)), item, SLOT(setRadius(double)));
@@ -268,7 +267,11 @@ void ZoneItem::updateOptimalZone() {
   Mat3D Q1, Q2;
   M.svd(Q1, Q2);
 
-  zoneNormal = Q2.transposed()*Vec3D(0,0,1);
+  z = Q2.transposed()*Vec3D(0,0,1);
+  if (z!=zoneNormal) {
+    zoneNormal = z;
+    emit positionChanged();
+  }
 
   // Maximal scattering angle in this zone
   Vec3D n(-1,0,0);
@@ -352,7 +355,7 @@ QPointF ZoneItem::getEnd() {
   return endHandle->pos();
 }
 
-Vec3D ZoneItem::getZoneNormal() {
+Vec3D ZoneItem::getMarkerNormal() {
   return zoneNormal;
 }
 

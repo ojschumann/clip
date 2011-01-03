@@ -43,13 +43,13 @@ QVariant MarkerModel::data(const QModelIndex &index, int role) const {
     case 3:
     case 4:
     case 5:
-      return QVariant(QString::number(item.rationalHkl(col-3), 'f', 2));
+      return QVariant(QString::number(item.rationalHkl(col-3), 'f', 3));
     case 6:
       return QVariant(QString::number(item.angularDeviation(), 'f', 2));
     case 7:
       return QVariant(QString::number(item.spatialDeviation(), 'f', 2));
     case 8:
-      return QVariant(QString::number(item.hklDeviation(), 'f', 2));
+      return QVariant(QString::number(100.0*item.hklDeviation(), 'f', 2));
     }
   } else if (role==Qt::BackgroundRole && item.initialIndexed) {
     return QVariant(QBrush(QColor(225, 255, 225)));

@@ -26,10 +26,12 @@
 class Crystal;
 class Reflection;
 class RulerItem;
+class SpotItem;
 class ZoneItem;
 class CropMarker;
 class LaueImage;
 class SpotIndicatorGraphicsItem;
+class CircleItem;
 
 
 class Projector: public QObject, public FitObject {
@@ -86,20 +88,20 @@ public:
   virtual QDomElement saveToXML(QDomElement base);
   bool loadFromXML(QDomElement base);
 
-  ItemStore& spotMarkers();
+  ItemStore<SpotItem>& spotMarkers();
   void addSpotMarker(const QPointF&);
   QPointF getSpotMarkerDetPos(int n);
   QList<Vec3D> getSpotMarkerNormals();
 
-  ItemStore& rulers();
-  void addRuler(const QPointF& p1, const QPointF& p2);
-  QPair<QPointF, QPointF> getRulerCoordinates(int);
-
-  ItemStore& zoneMarkers();
+  ItemStore<ZoneItem>& zoneMarkers();
   void addZoneMarker(const QPointF& p1, const QPointF& p2);
   QList<Vec3D> getZoneMarkerNormals();
 
-  ItemStore& infoItems();
+  ItemStore<RulerItem>& rulers();
+  void addRuler(const QPointF& p1, const QPointF& p2);
+  QPair<QPointF, QPointF> getRulerCoordinates(int);
+
+  ItemStore<QGraphicsRectItem>& infoItems();
   void addInfoItem(const QString& text, const QPointF& p);
 
   void showCropMarker();
@@ -153,13 +155,13 @@ protected:
   // written indexes in the scene
   QList<QGraphicsItem*> textMarkerItems;
   // Markers for indexation and fit
-  ItemStore spotMarkerStore;
+  ItemStore<SpotItem> spotMarkerStore;
   // Zone markers
-  ItemStore zoneMarkerStore;
+  ItemStore<ZoneItem> zoneMarkerStore;
   // Info Items. These will be set on Mousepress from Python and be deleted on orientation change or slot!
-  ItemStore infoStore;
+  ItemStore<QGraphicsRectItem> infoStore;
   // Ruler Item
-  ItemStore rulerStore;
+  ItemStore<RulerItem> rulerStore;
   // The Crop Marker
   QPointer<CropMarker> cropMarker;
 

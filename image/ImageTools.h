@@ -7,6 +7,7 @@
 #include <tools/vec3D.h>
 #include <image/BezierCurve.h>
 
+//TODO: Remove this class
 
 class ImageTransfer {
 public:

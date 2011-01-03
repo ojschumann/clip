@@ -7,6 +7,7 @@
 #include "core/crystal.h"
 #include "core/projector.h"
 #include "indexing/indexer.h"
+#include "indexing/livemarkermodel.h"
 using namespace std;
 
 IndexDisplay::IndexDisplay(Crystal* _c, QWidget *parent) :
@@ -20,16 +21,20 @@ IndexDisplay::IndexDisplay(Crystal* _c, QWidget *parent) :
 
     ui->SolutionSelector->setModel(&solutions);
     ui->SolutionDisplay->setModel(&marker);
+    ui->markerDisplay->setModel(new LiveMarkerModel(crystal));
 
 
     ui->SolutionSelector ->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing());
     ui->SolutionDisplay->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing());
+    ui->markerDisplay->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing());
 
     ui->SolutionSelector->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     ui->SolutionDisplay->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    for (int n=6; n<9; n++)
+    ui->markerDisplay->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    for (int n=6; n<9; n++) {
       ui->SolutionDisplay->horizontalHeader()->setResizeMode(n, QHeaderView::Stretch);
-
+      ui->markerDisplay->horizontalHeader()->setResizeMode(n, QHeaderView::Stretch);
+    }
 
     connect(ui->SolutionSelector->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(updateSolutionDisplay(QModelIndex,QModelIndex)));
     connect(&solutions, SIGNAL(solutionNumberChanged(int)), this, SLOT(showNumberOfSolutions(int)));

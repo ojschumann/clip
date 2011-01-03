@@ -397,11 +397,13 @@ Mat3D Crystal::getRotationMatrix() const {
 void Crystal::addProjector(Projector* p) {
   connectedProjectors.addObject(p);
   connect(p, SIGNAL(wavevectorsUpdated()), this, SLOT(updateWavevectorsFromProjectors()));
+  emit projectorAdded(p);
 }
 
 void Crystal::removeProjector(Projector* p) {
   connectedProjectors.removeObject(p);
   disconnect(p, 0, this, 0);
+  emit projectorRemoved(p);
 }
 
 

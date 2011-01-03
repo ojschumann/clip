@@ -8,20 +8,21 @@ namespace Ui {
 }
 
 class RulerModel;
+class RulerItem;
 
 class ResolutionCalculator : public QWidget
 {
   Q_OBJECT
 
 public:
-  explicit ResolutionCalculator(ItemStore& r, QWidget *parent = 0);
+  explicit ResolutionCalculator(ItemStore<RulerItem>& r, QWidget *parent = 0);
   ~ResolutionCalculator();
 public slots:
   void slotSelectionChanged();
   void slotCalcResolution();
 private:
   Ui::ResolutionCalculator *ui;
-  ItemStore& rulers;
+  ItemStore<RulerItem>& rulers;
   RulerModel* model;
 
 private slots:

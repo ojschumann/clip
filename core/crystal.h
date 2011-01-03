@@ -93,6 +93,8 @@ signals:
   void reflectionsUpdate();
   void rotationAxisChanged();
   void info(QString, int);
+  void projectorAdded(Projector*);
+  void projectorRemoved(Projector*);
 private:
   // Do the real work. Does not use possible uninitial values of objects variables
   void internalSetCell(double a, double b, double c, double alpha, double beta, double gamma);

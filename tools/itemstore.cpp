@@ -1,4 +1,4 @@
-#include "itemstore.h"
+#ifdef ITEMSTORE_H
 
 #include <QGraphicsScene>
 
@@ -7,73 +7,76 @@
 
 
 
-ItemStore::ItemStore(QObject* parent) :
-    QObject(parent),
+template <class T> ItemStore<T>::ItemStore(QObject* parent) :
+    AbstractItemStore(parent),
     items()
 {
 
 }
 
-ItemStore::ItemStore(const ItemStore &o) {
+template <class T> ItemStore<T>::ItemStore(const ItemStore &o) {
   items = o.items;
 }
 
-ItemStore::const_iterator ItemStore::begin() const {
+template <class T> typename ItemStore<T>::const_iterator ItemStore<T>::begin() const {
   return items.begin();
 }
 
-ItemStore::const_iterator ItemStore::end() const {
+template <class T> typename ItemStore<T>::const_iterator ItemStore<T>::end() const {
   return items.end();
 }
 
-int ItemStore::size() {
+template <class T> int ItemStore<T>::size() {
   return items.size();
 }
 
-QGraphicsItem* ItemStore::at(int n) {
+template <class T> T* ItemStore<T>::at(int n) {
   if (n<size()) return items.at(n);
   return NULL;
 }
 
-QGraphicsItem* ItemStore::last() {
+template <class T> T* ItemStore<T>::last() {
   if (items.isEmpty()) return NULL;
   return items.last();
 }
 
-bool ItemStore::delAt(const QPointF& p) {
-  foreach (QGraphicsItem* item, items) {
+template <class T> bool ItemStore<T>::delAt(const QPointF& p) {
+  foreach (T* item, items) {
     if (item->contains(item->mapFromScene(p))) {
       if (item->scene()) item->scene()->removeItem(item);
       int idx = items.indexOf(item);
+      emit itemAboutToBeRemoved(idx);
       items.removeAt(idx);
-      delete item;
       emit itemRemoved(idx);
+      delete item;
       return true;
     }
   }
   return false;
 }
 
-void ItemStore::clear() {
+template <class T> void ItemStore<T>::clear() {
   while (!items.empty()) {
-    QGraphicsItem* item = items.takeFirst();
+    emit itemAboutToBeRemoved(0);
+    T* item = items.takeFirst();
     if (item->scene()) item->scene()->removeItem(item);
-    delete item;
     emit itemRemoved(0);
+    delete item;
   }
   emit itemsCleared();
 }
 
-void ItemStore::emitChanged() {
-  QGraphicsObject* o = dynamic_cast<QGraphicsObject*>(sender());
-  int idx = items.indexOf(o);
+template <class T> void ItemStore<T>::emitChanged() {
+  int idx = items.indexOf(dynamic_cast<T*>(sender()));
   if (idx>=0) emit itemChanged(idx);
 }
 
-void ItemStore::addItem(QGraphicsItem* item) {
-  QGraphicsObject* o = dynamic_cast<QGraphicsObject*>(item);
+template <class T> void ItemStore<T>::addItem(T* item) {
+  QObject* o = dynamic_cast<QObject*>(item);
   if (o)
     connect(o, SIGNAL(positionChanged()), this, SLOT(emitChanged()));
   items << item;
   emit itemAdded(size()-1);
 }
+
+#endif

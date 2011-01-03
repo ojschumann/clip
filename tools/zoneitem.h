@@ -2,6 +2,7 @@
 #define ZONEITEM_H
 
 #include "tools/propagatinggraphicsobject.h"
+#include "tools/abstractmarkeritem.h"
 
 #include <QPen>
 #include <QDomElement>
@@ -11,7 +12,7 @@ class Projector;
 class CircleItem;
 class GraphicsEllipseItem;
 
-class ZoneItem : public PropagatingGraphicsObject
+class ZoneItem : public PropagatingGraphicsObject, public AbstractProjectorMarkerItem
 {
   Q_OBJECT
 public:
@@ -26,7 +27,7 @@ public:
   QPointF getEnd();
   void highlight(bool);
   bool isHighlighted();
-  Vec3D getZoneNormal();
+  virtual Vec3D getMarkerNormal();
 
   void saveToXML(QDomElement base);
   void loadFromXML(QDomElement base);
@@ -34,7 +35,7 @@ private slots:
   void updatePolygon();
   void updateOptimalZone();
 signals:
-  void zoneChanged();
+  void positionChanged();
 protected:
   QRectF imgRect;
   QList<QPolygonF> generatePolygon(const Vec3D&, const Vec3D&);
@@ -43,7 +44,6 @@ protected:
   qreal radius;
   bool highlighted;
   QPen pen;
-  Projector* projector;
   QList<QPolygonF> zoneLines;
   QList<QPolygonF> zonePolys;
   Vec3D zoneNormal;

@@ -15,6 +15,7 @@
 
 #include "tools/circleitem.h"
 #include "tools/ruleritem.h"
+#include "tools/spotitem.h"
 #include "tools/zoneitem.h"
 #include "tools/cropmarker.h"
 #include "core/reflection.h"
@@ -69,7 +70,7 @@ Projector::~Projector() {
 }
 
 void Projector::connectToCrystal(Crystal *c) {
-  if (not crystal.isNull()) {
+  if (!crystal.isNull()) {
     disconnect(this, 0, crystal, 0);
     disconnect(crystal, 0, this, 0);
     crystal->removeProjector(this);
@@ -131,7 +132,7 @@ void Projector::addInfoItem(const QString& text, const QPointF& p) {
   infoStore.addItem(bg);
 }
 
-ItemStore& Projector::infoItems() {
+ItemStore<QGraphicsRectItem>& Projector::infoItems() {
   return infoStore;
 }
 
@@ -329,7 +330,7 @@ void Projector::enableSpots(bool b) {
 
 // ----------------------- Handling of Spot Markers -------------
 void Projector::addSpotMarker(const QPointF& p) {
-  CircleItem* item = new CircleItem(getSpotSize(), imageItemsPlane);
+  SpotItem* item = new SpotItem(this, getSpotSize(), imageItemsPlane);
   item->setFlag(QGraphicsItem::ItemIsMovable, true);
   item->setCursor(QCursor(Qt::SizeAllCursor));
   item->setColor(QColor(0xFF,0xAA,0x33));
@@ -339,7 +340,7 @@ void Projector::addSpotMarker(const QPointF& p) {
   spotMarkers().addItem(item);
 }
 
-ItemStore& Projector::spotMarkers() {
+ItemStore<SpotItem>& Projector::spotMarkers() {
   return spotMarkerStore;
 }
 
@@ -349,14 +350,14 @@ QPointF Projector::getSpotMarkerDetPos(int n) {
 
 QList<Vec3D> Projector::getSpotMarkerNormals() {
   QList<Vec3D> r;
-  for (int i=0; i<spotMarkers().size(); i++)
-    r << det2normal(getSpotMarkerDetPos(i));
+  foreach (SpotItem* si, spotMarkers())
+    r << si->getMarkerNormal();
   return r;
 }
 
 
 // ---------------  Ruler handling ---------------------------
-ItemStore& Projector::rulers() {
+ItemStore<RulerItem>& Projector::rulers() {
   return rulerStore;
 }
 
@@ -369,7 +370,7 @@ void Projector::addRuler(const QPointF& p1, const QPointF& p2) {
 
 QPair<QPointF, QPointF> Projector::getRulerCoordinates(int n) {
   if (n<rulers().size()) {
-    RulerItem* ruler = dynamic_cast<RulerItem*>(rulers().at(n));
+    RulerItem* ruler = rulers().at(n);
     if (ruler)
       return qMakePair(img2det.map(ruler->getStart()), img2det.map(ruler->getEnd()));
   }
@@ -392,12 +393,12 @@ void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
 
 QList<Vec3D> Projector::getZoneMarkerNormals() {
   QList<Vec3D> r;
-  for (int i=0; i<zoneMarkers().size(); i++)
-    r << dynamic_cast<ZoneItem*>(zoneMarkers().at(i))->getZoneNormal();
+  foreach (ZoneItem* zi, zoneMarkers())
+    r << zi->getMarkerNormal();
   return r;
 }
 
-ItemStore& Projector::zoneMarkers() {
+ItemStore<ZoneItem>& Projector::zoneMarkers() {
   return zoneMarkerStore;
 }
 
@@ -535,8 +536,8 @@ QDomElement Projector::saveToXML(QDomElement base) {
 
   if (zoneMarkerStore.size()>0) {
     e = projector.appendChild(doc.createElement(XML_Projector_ZoneMarkers)).toElement();
-    foreach (QGraphicsItem* gi, zoneMarkerStore) {
-      dynamic_cast<ZoneItem*>(gi)->saveToXML(e);
+    foreach (ZoneItem* zi, zoneMarkerStore) {
+      zi->saveToXML(e);
     }
   }
 
@@ -588,7 +589,7 @@ bool Projector::parseXMLElement(QDomElement e) {
   } else if (e.tagName()==XML_Projector_ZoneMarkers) {
     for (QDomElement m=e.firstChildElement(); !m.isNull(); m=m.nextSiblingElement()) {
       addZoneMarker(QPointF(), QPointF());
-      dynamic_cast<ZoneItem*>(zoneMarkerStore.last())->loadFromXML(m);
+      zoneMarkerStore.last()->loadFromXML(m);
     }
   } else {
     return false;

@@ -46,7 +46,7 @@ public:
   double maxHklDeviation;
   double maxHKL;
 
-  Vec3D markerNormalToIndex(const Vec3D& marker, Indexer::MarkerType markerType);
+  Vec3D markerNormalToIndex(const Vec3D& marker, Indexer::MarkerType markerType, const Mat3D& rotation);
 
 };
 

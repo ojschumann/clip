@@ -96,7 +96,11 @@ SOURCES += main.cpp\
     core/projectorfactory.cpp \
     tools/xmllistiterators.cpp \
     tools/xmltools.cpp \
-    tools/zipiterator.cpp
+    tools/zipiterator.cpp \
+    indexing/livemarkermodel.cpp \
+    tools/abstractmarkeritem.cpp \
+    tools/spotitem.cpp \
+    indexing/marker.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -159,7 +163,11 @@ HEADERS  += ui/clip.h \
     core/projectorfactory.h \
     tools/xmllistiterators.h \
     tools/xmltools.h \
-    tools/zipiterator.h
+    tools/zipiterator.h \
+    indexing/livemarkermodel.h \
+    tools/abstractmarkeritem.h \
+    tools/spotitem.h \
+    indexing/marker.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

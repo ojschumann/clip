@@ -21,7 +21,6 @@ public:
   };
   class AngleInfo {
   public:
-
     AngleInfo(const Vec3D &_v1, MarkerType t1, int i1, const Vec3D &_v2, MarkerType t2, int i2, double maxDeviation);
     bool operator<(const AngleInfo &o) const;
 
@@ -51,8 +50,6 @@ signals:
   void nextMajorIndex(int);
 
 protected:
-
-
   void checkGuess(const CandidateGenerator::Candidate&, const CandidateGenerator::Candidate&, const AngleInfo &);
   void checkPossibleAngles(const CandidateGenerator::Candidate&, const CandidateGenerator::Candidate&, QList<AngleInfo>);
 

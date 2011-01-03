@@ -5,7 +5,7 @@
 #include "tools/ruleritem.h"
 
 
-RulerModel::RulerModel(ItemStore& r, QObject* parent): QAbstractTableModel(parent), rulers(r) {
+RulerModel::RulerModel(ItemStore<RulerItem>& r, QObject* parent): QAbstractTableModel(parent), rulers(r) {
   hRes = -1.0;
   vRes = -1.0;
   connect(&rulers, SIGNAL(itemAdded(int)), this, SLOT(slotRulerAdded()));

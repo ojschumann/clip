@@ -3,9 +3,7 @@
 
 using namespace std;
 
-DataScalerFactory::DataScalerFactory(QObject *parent) :
-    QObject(parent)
-{
+DataScalerFactory::DataScalerFactory() {
     cout << "init DataScalerFactory" << endl;
 }
 

@@ -6,9 +6,7 @@
 #include <image/datascaler.h>
 #include <image/dataprovider.h>
 
-class DataScalerFactory : public QObject
-{
-  Q_OBJECT
+class DataScalerFactory {
 public:
   typedef DataScaler*(*ScalerGenerator)(DataProvider*, QObject*);
 
@@ -18,7 +16,7 @@ public:
   DataScaler* getScaler(DataProvider* dp, QObject* = 0);
 
 private:
-  explicit DataScalerFactory(QObject *parent = 0);
+  explicit DataScalerFactory();
   DataScalerFactory(const DataScalerFactory&);
   ~DataScalerFactory();
 

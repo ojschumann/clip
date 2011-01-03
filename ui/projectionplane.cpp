@@ -27,6 +27,7 @@
 #include "image/laueimage.h"
 #include "image/dataproviderfactory.h"
 #include "tools/xmltools.h"
+#include "tools/spotitem.h"
 
 // List of all projectors. Sort of a hack ;-)
 QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
@@ -266,17 +267,15 @@ void ProjectionPlane::slotChangeMouseDragMode() {
 
 
 void ProjectionPlane::on_openImgAction_triggered() {
-  QSettings settings;
   QString formatfilters = "Images ("+DataProviderFactory::getInstance().registeredImageFormats().replaceInStrings(QRegExp("^"), "*.").join(" ")+");;All Files (*)";
-  cout << qPrintable(formatfilters) << endl;
   QString fileName = QFileDialog::getOpenFileName(this,
                                                   "Load Laue pattern",
-                                                  settings.value("LastDirectory").toString(),
+                                                  QSettings().value("LastDirectory").toString(),
                                                   formatfilters);
   QFileInfo fInfo(fileName);
 
   if (fInfo.exists()) {
-    settings.setValue("LastDirectory", fInfo.canonicalFilePath());
+    QSettings().setValue("LastDirectory", fInfo.canonicalFilePath());
     projector->loadImage(fileName);
   }
 
