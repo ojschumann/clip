@@ -84,7 +84,6 @@ SOURCES += main.cpp\
     tools/circleitem.cpp \
     tools/spotindicatorgraphicsitem.cpp \
     ui/indexdisplay.cpp \
-    indexing/markermodel.cpp \
     core/spacegroupdata.cpp \
     indexing/candidategenerator.cpp \
     indexing/solutionmodel.cpp \
@@ -152,7 +151,6 @@ HEADERS  += ui/clip.h \
     tools/circleitem.h \
     tools/spotindicatorgraphicsitem.h \
     ui/indexdisplay.h \
-    indexing/markermodel.h \
     indexing/candidategenerator.h \
     indexing/solutionmodel.h \
     image/xyzdataprovider.h \

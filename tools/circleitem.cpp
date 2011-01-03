@@ -9,10 +9,14 @@ CircleItem::CircleItem(double r, QGraphicsItem *parent) :
   skipNextPosChange=false;
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
   setRadius(r);
+  lineWidth = 1.0;
 }
 
 void CircleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-  painter->setPen(QPen(color));
+  QPen pen(color);
+  pen.setWidthF(lineWidth);
+  pen.setCosmetic(true);
+  painter->setPen(pen);
   painter->drawEllipse(QPointF(0,0), radius, radius);
 }
 
@@ -51,5 +55,10 @@ void CircleItem::setRadius(double r) {
 
 void CircleItem::setColor(QColor c) {
   color = c;
+  update();
+}
+
+void CircleItem::setLineWidth(double lw) {
+  lineWidth = lw;
   update();
 }

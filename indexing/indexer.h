@@ -6,9 +6,11 @@
 #include <QAtomicInt>
 #include <QReadWriteLock>
 #include <QTime>
+#include <QThreadStorage>
 
 #include "tools/vec3D.h"
 #include "indexing/candidategenerator.h"
+#include "indexing/marker.h"
 
 class Solution;
 
@@ -21,19 +23,14 @@ public:
   };
   class AngleInfo {
   public:
-    AngleInfo(const Vec3D &_v1, MarkerType t1, int i1, const Vec3D &_v2, MarkerType t2, int i2, double maxDeviation);
+    AngleInfo(int i1, int i2, const QList<Marker>& markers, double maxDeviation);
     bool operator<(const AngleInfo &o) const;
 
     double lowerBound;
     double cosAng;
     double upperBound;
 
-    Vec3D v1;
-    MarkerType type1;
     int index1;
-
-    Vec3D v2;
-    MarkerType type2;
     int index2;
   };
 
@@ -50,8 +47,14 @@ signals:
   void nextMajorIndex(int);
 
 protected:
-  void checkGuess(const CandidateGenerator::Candidate&, const CandidateGenerator::Candidate&, const AngleInfo &);
-  void checkPossibleAngles(const CandidateGenerator::Candidate&, const CandidateGenerator::Candidate&, QList<AngleInfo>);
+  struct ThreadLocalData {
+    QList<Marker> markers;
+    Mat3D spotNormalToIndex;
+    Mat3D zoneNormalToIndex;
+  };
+
+  void checkGuess(const CandidateGenerator::Candidate&, const CandidateGenerator::Candidate&, const AngleInfo &, ThreadLocalData&);
+  void checkPossibleAngles(const CandidateGenerator::Candidate&, const CandidateGenerator::Candidate&, QList<AngleInfo>, ThreadLocalData&);
 
   QAtomicInt candidatePos;
   CandidateGenerator candidates;
@@ -62,8 +65,11 @@ protected:
   QList<AngleInfo> spotZoneAngles;
   QList<AngleInfo> zoneZoneAngles;
 
+  QList<Marker> globalMarkers;
+
   QList<Vec3D> spotMarkerNormals;
   QList<Vec3D> zoneMarkerNormals;
+
   Mat3D MReal;
   Mat3D MRealInv;
   Mat3D MReziprocal;
@@ -72,11 +78,7 @@ protected:
   double maxHKLDeviation;
   int maxHKL;
 
-  struct SolutionInfo{
-    Mat3D R;
-    double score;
-  };
-  QList<SolutionInfo> uniqSolutions;
+  QList<Solution> uniqSolutions;
   QList<Mat3D> lauegroup;
   QReadWriteLock uniqLock;
 

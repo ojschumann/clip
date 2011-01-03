@@ -1,6 +1,8 @@
 #include "candidategenerator.h"
 
 #include <set>
+#include <iostream>
+#include <iomanip>
 
 #include "core/spacegroup.h"
 #include "defs.h"
@@ -14,9 +16,9 @@ CandidateGenerator::CandidateGenerator(const Mat3D& _MReal, const Mat3D& _MRecip
     MReal(_MReal),
     MReciprocal(_MReciprocal)
 {
-  addToGroup(TMat3D<int>(-1, 0, 0, 0,-1, 0, 0, 0,-1));
-  addToGroup(TMat3D<int>( 0, 1, 0, 0, 0, 1, 1, 0, 0));
-  addToGroup(TMat3D<int>( 0, 0, 1, 0, 1, 0, 1, 0, 0));
+  addToGroup(TMat3D<int>(-1, 0, 0, 0, 1, 0, 0, 0, 1));  // m
+  addToGroup(TMat3D<int>( 0, 1, 0, 0, 0, 1, 1, 0, 0));  // 3
+  addToGroup(TMat3D<int>(-1, 0, 0, 0, 0,-1, 0,-1, 0));  // m
 }
 
 void CandidateGenerator::addToGroup(const TMat3D<int> &e) {

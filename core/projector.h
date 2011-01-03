@@ -146,7 +146,13 @@ signals:
   void imageClosed();
   void spotSizeChanged(double);
   void textSizeChanged(double);
+
+protected slots:
+  virtual void updateImgTransformations();
+  void invalidateMarkerCache();
+  void setImage(LaueImage*);
 protected:
+  void internalSetWavevectors(double, double);
   virtual bool project(const Reflection &r, QPointF &point)=0;
   virtual bool parseXMLElement(QDomElement e);
 
@@ -185,11 +191,6 @@ protected:
 
   SpotIndicatorGraphicsItem* spotIndicator;
 
-protected slots:
-  virtual void updateImgTransformations();
-  void setImage(LaueImage*);
-protected:
-  void internalSetWavevectors(double, double);
 private:
   Projector(const Projector&);
 };

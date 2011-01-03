@@ -2,12 +2,17 @@
 #include "ui_indexdisplay.h"
 
 #include <iostream>
+#include <iomanip>
 #include <QThreadPool>
+#include <QSortFilterProxyModel>
 
 #include "core/crystal.h"
 #include "core/projector.h"
 #include "indexing/indexer.h"
 #include "indexing/livemarkermodel.h"
+#include "tools/zipiterator.h"
+
+
 using namespace std;
 
 IndexDisplay::IndexDisplay(Crystal* _c, QWidget *parent) :
@@ -15,31 +20,36 @@ IndexDisplay::IndexDisplay(Crystal* _c, QWidget *parent) :
     ui(new Ui::Indexing),
     crystal(_c),
     solutions(),
-    marker(this)
+    markerModel(crystal)
 {
-    ui->setupUi(this);
+  ui->setupUi(this);
 
-    ui->SolutionSelector->setModel(&solutions);
-    ui->SolutionDisplay->setModel(&marker);
-    ui->markerDisplay->setModel(new LiveMarkerModel(crystal));
+  ui->SolutionSelector->setModel(&solutions);
+  ui->SolutionSelector->sortByColumn(solutions.columnCount()-1, Qt::AscendingOrder);
+
+  QSortFilterProxyModel* sorter = new QSortFilterProxyModel(this);
+  sorter->setSourceModel(&markerModel);
+  sorter->setSortRole(Qt::UserRole);
+  sorter->setDynamicSortFilter(true);
+  ui->markerDisplay->setModel(sorter);
+  ui->markerDisplay->sortByColumn(markerModel.columnCount()-1, Qt::AscendingOrder);
 
 
-    ui->SolutionSelector ->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing());
-    ui->SolutionDisplay->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing());
-    ui->markerDisplay->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing());
+  ui->SolutionSelector ->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing());
+  ui->markerDisplay->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing());
 
-    ui->SolutionSelector->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->SolutionDisplay->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    ui->markerDisplay->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    for (int n=6; n<9; n++) {
-      ui->SolutionDisplay->horizontalHeader()->setResizeMode(n, QHeaderView::Stretch);
-      ui->markerDisplay->horizontalHeader()->setResizeMode(n, QHeaderView::Stretch);
-    }
+  ui->SolutionSelector->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+  ui->markerDisplay->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+  for (int n=6; n<9; n++) {
+    ui->markerDisplay->horizontalHeader()->setResizeMode(n, QHeaderView::Stretch);
+  }
 
-    connect(ui->SolutionSelector->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(updateSolutionDisplay(QModelIndex,QModelIndex)));
-    connect(&solutions, SIGNAL(solutionNumberChanged(int)), this, SLOT(showNumberOfSolutions(int)));
+  connect(ui->SolutionSelector->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(updateSolutionDisplay(QModelIndex,QModelIndex)));
+  connect(&solutions, SIGNAL(solutionNumberChanged(int)), this, SLOT(showNumberOfSolutions(int)));
 
-    indexRunning = false;
+  connect(ui->markerDisplay->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(highlightMarkers()));
+
+  indexRunning = false;
 
 }
 
@@ -53,7 +63,16 @@ void IndexDisplay::updateSolutionDisplay(QModelIndex index, QModelIndex prev) {
   int n=index.row();
   if (n>=0) {
     Solution s = solutions.getSolution(n);
-    marker.setSolution(s);
+    cout << endl;
+    QPair<double, Vec3D> p;
+    foreach (p, Zip(s.markerScore, s.markerIdx)) {
+      cout << setprecision(3) << 100.0*p.first << " ";
+      cout << setprecision(3) << p.second(0) << " ";
+      cout << setprecision(3) << p.second(1) << " ";
+      cout << setprecision(3) << p.second(2) << " ";
+      cout << endl;
+    }
+    cout << endl;
     crystal->setRotation(s.bestRotation);
   }
 }
@@ -113,4 +132,12 @@ void IndexDisplay::setProgress(int value) {
 
 void IndexDisplay::showNumberOfSolutions(int n) {
   ui->solutionsCount->setText(QString::number(n));
+}
+
+void IndexDisplay::highlightMarkers() {
+  QSortFilterProxyModel* sorter = dynamic_cast<QSortFilterProxyModel*>(ui->markerDisplay->model());
+  QItemSelection selection = sorter->mapSelectionToSource(ui->markerDisplay->selectionModel()->selection());
+  for (int i=0; i<markerModel.rowCount(); i++) {
+    markerModel.hightlightMarker(i, selection.contains(sorter->index(i, 0)));
+  }
 }

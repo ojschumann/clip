@@ -78,6 +78,7 @@ void Projector::connectToCrystal(Crystal *c) {
   crystal=c;
   crystal->addProjector(this);
   connect(crystal, SIGNAL(reflectionsUpdate()), this, SLOT(reflectionsUpdated()));
+  connect(crystal, SIGNAL(orientationChanged()), this, SLOT(invalidateMarkerCache()));
   emit projectionParamsChanged();
 }
 
@@ -235,7 +236,7 @@ Reflection Projector::getClosestReflection(const Vec3D& normal) {
   if (crystal.isNull())
     return Reflection();
   QVector<Reflection> r = crystal->getReflectionList();
-  if (r.size()!=reflectionIsProjected.size()) cout << "Somthing horrible is going on..." << endl;
+  if (r.size()!=reflectionIsProjected.size()) cout << "Something horrible is going on..." << endl;
   int minIdx=-1;
   double minDist=0;
   for (int n=0; n<r.size(); n++) {
@@ -269,6 +270,13 @@ void Projector::addRotation(const Mat3D& M) {
 void Projector::setRotation(const Mat3D& M) {
   if (not crystal.isNull())
     crystal->setRotation(M);
+}
+
+void Projector::invalidateMarkerCache() {
+  foreach (SpotItem* si, spotMarkers())
+    si->invalidateCache();
+  foreach (ZoneItem* zi, zoneMarkers())
+    zi->invalidateCache();
 }
 
 QGraphicsScene* Projector::getScene() {

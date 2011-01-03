@@ -18,7 +18,6 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
     startHandle(new CircleItem(0.1, this)),
     endHandle(new CircleItem(0.1, this))
 {
-  highlighted=true;
   highlight(false);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
   QList<CircleItem*> l = QList<CircleItem*>() << startHandle << endHandle;
@@ -62,7 +61,8 @@ void ZoneItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
     p->drawPolygon(poly);
 
   QPen pen;
-  pen.setWidth(0);
+  pen.setWidthF(highlighted?2.0:1.0);
+  pen.setCosmetic(true);
   pen.setColor(Qt::black);
   pen.setStyle(Qt::DashLine);
   p->setPen(pen);
@@ -355,30 +355,13 @@ QPointF ZoneItem::getEnd() {
   return endHandle->pos();
 }
 
-Vec3D ZoneItem::getMarkerNormal() {
+Vec3D ZoneItem::getMarkerNormal() const {
   return zoneNormal;
 }
 
 void ZoneItem::highlight(bool h) {
-  if (h!=isHighlighted()) {
-    highlighted=h;
-    double radius = projector->getSpotSize();
-    if (isHighlighted()) {
-      pen = QPen(QColor(255, 192, 0, 128));
-      pen.setWidthF(1.5*radius);
-    } else {
-      pen = QPen(QColor(0,0,0,255));
-      pen.setWidthF(1.5*radius);
-      pen.setWidthF(0);
-    }
-    //startHandle->setPen(pen);
-    //endHandle->setPen(pen);
-    update();
-  }
-}
-
-bool ZoneItem::isHighlighted() {
-  return highlighted;
+  highlighted = h;
+  update();
 }
 
 const char XML_ZoneMarker_element[] = "Marker";

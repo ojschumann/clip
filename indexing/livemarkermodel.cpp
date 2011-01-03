@@ -17,10 +17,14 @@ LiveMarkerModel::LiveMarkerModel(Crystal *c, QObject *parent) :
   connect(crystal, SIGNAL(orientationChanged()), this, SLOT(orientationChanged()));
 }
 
+LiveMarkerModel::~LiveMarkerModel() {
+  foreach (AbstractMarkerItem* item, markers)
+    item->highlight(false);
+}
+
 void LiveMarkerModel::addMarker(AbstractMarkerItem *m) {
   beginInsertRows(QModelIndex(), markers.size(), markers.size());
   markers << m;
-  cache << MarkerCacheData(m->getBestIndex());
   QObject* o = dynamic_cast<QObject*>(m);
   if (o) {
     connect(o, SIGNAL(positionChanged()), this, SLOT(markerChanged()));
@@ -32,7 +36,6 @@ void LiveMarkerModel::deleteMarker(AbstractMarkerItem* m) {
   int idx = markers.indexOf(m);
   beginRemoveRows(QModelIndex(), idx, idx);
   markers.removeAt(idx);
-  cache.removeAt(idx);
   endRemoveRows();
 }
 
@@ -93,19 +96,14 @@ void LiveMarkerModel::zoneMarkerRemoved(int n) {
 
 void LiveMarkerModel::markerChanged() {
   AbstractMarkerItem* item = dynamic_cast<AbstractMarkerItem*>(sender());
+  item->invalidateCache();
   int idx = markers.indexOf(item);
-  cache[idx] = MarkerCacheData(item->getBestIndex());
-  emit dataChanged(index(idx, 0), index(idx, columnCount()));
-  // emit changed
+  emit dataChanged(index(idx, 0), index(idx, columnCount()-1));
 }
-
 
 void LiveMarkerModel::orientationChanged() {
-  for (int n=0; n<markers.size(); n++)
-    cache[n].bestIndex = markers.at(n)->getBestIndex();
-  emit dataChanged(index(0, 0), index(columnCount(), rowCount()));
+  emit dataChanged(index(0, 0), index(rowCount()-1, columnCount()-1));
 }
-
 
 int LiveMarkerModel::rowCount(const QModelIndex &parent) const {
   return markers.size();
@@ -119,21 +117,29 @@ QVariant LiveMarkerModel::data(const QModelIndex &index, int role) const {
   if (role==Qt::DisplayRole) {
     int col = index.column();
     if (col==0 || col==1 || col==2) {
-      Vec3D n = cache.at(index.row()).bestIndex;
-      return QVariant(QString::number(qRound(n(col))));
+      TVec3D<int> n = markers.at(index.row())->getIntegerIndex();
+      return QVariant(n(col));
     } else if (col==3 || col==4 || col==5) {
-      Vec3D n = cache.at(index.row()).bestIndex;
-      return QVariant(QString::number(n(col-3), 'f', 3));
+      Vec3D n = markers.at(index.row())->getRationalIndex();      
+      return QVariant(QString::number(n(col-3), 'f', 2));
     } else if (col==8) {
-      Vec3D n = cache.at(index.row()).bestIndex;
-      double s = 0.0;
-      for (int i=0; i<3; i++) s += (n(i)-qRound(n(i)))*(n(i)-qRound(n(i)));
-      return QVariant(QString::number(100.0*sqrt(s), 'f', 2));
+      return QVariant(QString::number(100.0*markers.at(index.row())->getBestScore(), 'f', 2));
     }
   } else if (role==Qt::BackgroundRole && false) {
     return QVariant(QBrush(QColor(225, 255, 225)));
   } else if (role==Qt::TextAlignmentRole) {
     return QVariant(Qt::AlignRight);
+  } else if (role==Qt::UserRole) {
+    int col = index.column();
+    if (col==0 || col==1 || col==2) {
+      TVec3D<int> n = markers.at(index.row())->getIntegerIndex();
+      return QVariant(n(col));
+    } else if (col==3 || col==4 || col==5) {
+      Vec3D n = markers.at(index.row())->getRationalIndex();
+      return QVariant(n(col-3));
+    } else if (col==8) {
+      return QVariant(markers.at(index.row())->getBestScore());
+    }
   }
   return QVariant();
 }
@@ -148,4 +154,9 @@ QVariant LiveMarkerModel::headerData(int section, Qt::Orientation orientation, i
 
 void LiveMarkerModel::sort(int column, Qt::SortOrder order) {
 
+}
+
+void LiveMarkerModel::hightlightMarker(int n, bool b) {
+  if (n<markers.size())
+    markers.at(n)->highlight(b);
 }

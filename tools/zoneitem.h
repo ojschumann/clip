@@ -26,8 +26,7 @@ public:
   QPointF getStart();
   QPointF getEnd();
   void highlight(bool);
-  bool isHighlighted();
-  virtual Vec3D getMarkerNormal();
+  virtual Vec3D getMarkerNormal() const;
 
   void saveToXML(QDomElement base);
   void loadFromXML(QDomElement base);
@@ -43,7 +42,6 @@ protected:
   CircleItem* endHandle;
   qreal radius;
   bool highlighted;
-  QPen pen;
   QList<QPolygonF> zoneLines;
   QList<QPolygonF> zonePolys;
   Vec3D zoneNormal;

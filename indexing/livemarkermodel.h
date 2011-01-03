@@ -13,7 +13,7 @@ class LiveMarkerModel : public QAbstractTableModel
   Q_OBJECT
 public:
   explicit LiveMarkerModel(Crystal*, QObject *parent = 0);
-
+  ~LiveMarkerModel();
 
   virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
   virtual int columnCount(const QModelIndex & parent = QModelIndex()) const ;
@@ -25,6 +25,7 @@ signals:
 public slots:
   void observeProjector(Projector*);
   void forgetProjector(Projector*);
+  void hightlightMarker(int n, bool b);
 protected slots:
   void spotMarkerAdded(int);
   void zoneMarkerAdded(int);
@@ -37,12 +38,8 @@ protected:
   void deleteMarker(AbstractMarkerItem* m);
 private:
   Crystal* crystal;
-  struct MarkerCacheData {
-    MarkerCacheData(const Vec3D& n): bestIndex(n) {}
-    Vec3D bestIndex;
-  };
   QList<AbstractMarkerItem*> markers;
-  QList<MarkerCacheData> cache;
+
 };
 
 

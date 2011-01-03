@@ -20,8 +20,10 @@ public slots:
   void setPosNoSig(const QPointF& p);
   void setRadius(double);
   void setColor(QColor);
+  void setLineWidth(double);
 private:
   double radius;
+  double lineWidth;
   bool skipNextPosChange;
   QColor color;
 };

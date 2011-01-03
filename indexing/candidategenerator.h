@@ -16,6 +16,15 @@ public:
     TVec3D<int> index;
     Vec3D realNormal;
     Vec3D reziprocalNormal;
+    Vec3D normal;
+    Candidate& spot() {
+      normal = reziprocalNormal;
+      return *this;
+    }
+    Candidate& zone() {
+      normal = realNormal;
+      return *this;
+    }
   };
 
   CandidateGenerator(const Mat3D&, const Mat3D&, QObject* parent=0);

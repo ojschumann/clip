@@ -4,8 +4,7 @@
 #include <QWidget>
 
 #include "indexing/solutionmodel.h"
-#include "indexing/markermodel.h"
-
+#include "indexing/livemarkermodel.h"
 
 namespace Ui {
     class Indexing;
@@ -26,13 +25,14 @@ private:
     Ui::Indexing *ui;
     Crystal* crystal;
     SolutionModel solutions;
-    MarkerModel marker;
+    LiveMarkerModel markerModel;
 
     bool indexRunning;
 
 private slots:
     void on_startButton_clicked();
     void updateSolutionDisplay(QModelIndex, QModelIndex);
+    void highlightMarkers();
     void indexerDestroyed();
     void showMajorIndex(int);
     void showNumberOfSolutions(int);

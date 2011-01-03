@@ -38,21 +38,30 @@ Indexer::Indexer(QList<Vec3D> _spotMarkerNormals, QList<Vec3D> _zoneMarkerNormal
 
   shouldStop=false;
 
-  for (int i=0; i<spotMarkerNormals.size(); i++) {
+  foreach (Vec3D n, spotMarkerNormals)
+    globalMarkers << Marker(n, Marker::SpotMarker);
+  foreach (Vec3D n, zoneMarkerNormals)
+    globalMarkers << Marker(n, Marker::ZoneMarker);
+
+  int spotN = spotMarkerNormals.size();
+  int zoneN = zoneMarkerNormals.size();
+
+
+  for (int i=0; i<spotN; i++) {
     for (int j=0; j<i; j++) {
-      spotSpotAngles.append(AngleInfo(spotMarkerNormals.at(i), Spot, i, spotMarkerNormals.at(j), Spot, j, maxAngularDeviation));
+      spotSpotAngles.append(AngleInfo(i, j, globalMarkers, maxAngularDeviation));
     }
   }
   qSort(spotSpotAngles);
-  for (int i=0; i<zoneMarkerNormals.size(); i++) {
-    for (int j=0; j<i; j++) {
-      zoneZoneAngles.append(AngleInfo(zoneMarkerNormals.at(i), Zone, i, zoneMarkerNormals.at(j), Zone, j, maxAngularDeviation));
+  for (int i=spotN; i<spotN+zoneN; i++) {
+    for (int j=spotN; j<i; j++) {
+      zoneZoneAngles.append(AngleInfo(i, j, globalMarkers, maxAngularDeviation));
     }
   }
   qSort(zoneZoneAngles);
-  for (int i=0; i<spotMarkerNormals.size(); i++) {
-    for (int j=0; j<zoneMarkerNormals.size(); j++) {
-      spotZoneAngles.append(AngleInfo(spotMarkerNormals.at(i), Spot, i, zoneMarkerNormals.at(j), Zone, j, maxAngularDeviation));
+  for (int i=0; i<spotN; i++) {
+    for (int j=spotN; j<spotN+zoneN; j++) {
+      spotZoneAngles.append(AngleInfo(i, j, globalMarkers, maxAngularDeviation));
     }
   }
   qSort(spotZoneAngles);
@@ -64,11 +73,11 @@ Indexer::Indexer(QList<Vec3D> _spotMarkerNormals, QList<Vec3D> _zoneMarkerNormal
 
 void Indexer::run() {
   QThreadPool::globalInstance()->tryStart(this);
-  QList<Marker> markers;
-  foreach (Vec3D n, spotMarkerNormals)
-    markers << Marker(n, Marker::SpotMarker);
-  foreach (Vec3D n, zoneMarkerNormals)
-    markers << Marker(n, Marker::ZoneMarker);
+
+  ThreadLocalData localData;
+  localData.markers = globalMarkers;
+  for (int i=0; i<localData.markers.size(); i++)
+    localData.markers[i].setMatrices(localData.spotNormalToIndex, localData.zoneNormalToIndex, MReziprocal, MReal);
 
 
   forever {
@@ -76,22 +85,21 @@ void Indexer::run() {
     CandidateGenerator::Candidate c1 = candidates.getCandidate(i);
     for (int j=0; j<i; j++) {
       if (shouldStop) return;
+      // Be nice to the GUI Thread
+      QThread::yieldCurrentThread();
       CandidateGenerator::Candidate c2 = candidates.getCandidate(j);
 
-      checkPossibleAngles(c1, c2, spotSpotAngles);
-      checkPossibleAngles(c1, c2, zoneZoneAngles);
-      checkPossibleAngles(c1, c2, spotZoneAngles);
+      checkPossibleAngles(c1.spot(), c2.spot(), spotSpotAngles, localData);
+      checkPossibleAngles(c1.zone(), c2.zone(), zoneZoneAngles, localData);
+      checkPossibleAngles(c1.spot(), c2.zone(), spotZoneAngles, localData);
     }
   }
 }
 
-void Indexer::checkPossibleAngles(const CandidateGenerator::Candidate& c1, const CandidateGenerator::Candidate& c2, QList<AngleInfo> angles) {
+void Indexer::checkPossibleAngles(const CandidateGenerator::Candidate& c1, const CandidateGenerator::Candidate& c2, QList<AngleInfo> angles, ThreadLocalData& localData) {
   if (angles.empty()) return;
 
-  Vec3D v1 = (angles.at(0).type1==Spot)?c1.reziprocalNormal:c1.realNormal;
-  Vec3D v2 = (angles.at(0).type2==Spot)?c2.reziprocalNormal:c2.realNormal;
-
-  double cosAng = v1*v2;
+  double cosAng = c1.normal*c2.normal;
 
   // Binary search for first AngleInfo that has upperBound>cosAng
   int minIdx = 0;
@@ -106,34 +114,57 @@ void Indexer::checkPossibleAngles(const CandidateGenerator::Candidate& c1, const
   }
 
   for (int n=minIdx; n<angles.size() && cosAng>=angles.at(n).lowerBound; n++) {
-    checkGuess(c1, c2, angles.at(n));
-    checkGuess(c2, c1, angles.at(n));
+    checkGuess(c1, c2, angles.at(n), localData);
+    checkGuess(c2, c1, angles.at(n), localData);
   }
 }
 
 
-void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const CandidateGenerator::Candidate& c2, const AngleInfo &a) {
+void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const CandidateGenerator::Candidate& c2, const AngleInfo &a, ThreadLocalData& localData) {
   // Prepare Best Rotation Matrix from c1,c2 -> a(1) a(2)
 
-  Vec3D v1 = (a.type1==Spot)?c1.reziprocalNormal:c1.realNormal;
-  Vec3D v2 = (a.type2==Spot)?c2.reziprocalNormal:c2.realNormal;
-  Mat3D R(VectorPairRotation(a.v1, a.v2, v1, v2));
+  Mat3D R = VectorPairRotation(c1.normal,
+                               c2.normal,
+                               localData.markers.at(a.index1).getMarkerNormal(),
+                               localData.markers.at(a.index2).getMarkerNormal());
+
+  int loops = 0;
+  forever {
+    loops++;
+    localData.spotNormalToIndex = MReziprocalInv * R.transposed();
+    localData.zoneNormalToIndex = MRealInv * R.transposed();
+
+    OptimalRotation optRot;
+
+    for (int i=0; i<localData.markers.size(); i++) {
+      Marker& m = localData.markers[i];
+      if (i==a.index1) {
+        m.setIndex(c1.index);
+      } else if (i==a.index2) {
+        m.setIndex(c2.index);
+      } else {
+        m.invalidateCache();
+      }
+
+      if (m.getBestScore()>maxHKLDeviation) return;
+      optRot.addVectorPair(m.getIndexNormal(), m.getMarkerNormal());
+    }
+    Mat3D T = optRot.getOptimalRotation();
+    if (optRot.getOptimalRotation()==R) break;
+    R = optRot.getOptimalRotation();
+  }
+
+  if (loops>5)
+    cout << "Loops " << loops << endl;
 
   Solution solution;
-  solution.indexingRotation = R;
-  solution.maxHKL=maxHKL;
-  solution.maxHklDeviation = maxHKLDeviation;
-  solution.MReal = MReal;
-  solution.MRealInv = MRealInv;
-  solution.MReziprocal = MReziprocal;
-  solution.MReziprocalInv = MReziprocalInv;
-
-  if (!solution.addMarkers(spotMarkerNormals, Spot, a, c1.index, c2.index)) return;
-  if (!solution.addMarkers(zoneMarkerNormals, Zone, a, c1.index, c2.index)) return;
-
-  cout << "Solutioninfo " << solution.hklDeviationSum();
-  solution.calcBestRotation();
-  cout << "  " << solution.hklDeviationSum() << endl;
+  solution.bestRotation = R;
+  solution.hklDeviation = 0;
+  foreach (Marker m, localData.markers) {
+    solution.hklDeviation += m.getBestScore();
+    solution.markerIdx << m.getRationalIndex();
+    solution.markerScore += m.getBestScore();
+  }
 
   Mat3D bestinv(solution.bestRotation.transposed());
   int n=0;
@@ -145,10 +176,7 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
   uniqLock.lockForWrite();
   duplicate = symmetryEquivalentSolutionPresent(bestinv, n);
   if (!duplicate) {
-    SolutionInfo info;
-    info.R=solution.bestRotation;
-    info.score = solution.hklDeviationSum();
-    uniqSolutions << info;
+    uniqSolutions << solution;
 
     emit publishSolution(solution);
   }
@@ -157,9 +185,9 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
 
 bool Indexer::symmetryEquivalentSolutionPresent(const Mat3D &R, int &n) {
   for (; n<uniqSolutions.size(); n++) {
-    Mat3D T(R*uniqSolutions.at(n).R);
-    foreach (Mat3D R, lauegroup)  {
-      if ((R-T).sqSum()<1e-6) {
+    Mat3D T(R*uniqSolutions.at(n).bestRotation);
+    foreach (Mat3D G, lauegroup)  {
+      if ((G-T).sqSum()<1e-4) {
         return true;
       }
     }
@@ -170,15 +198,11 @@ bool Indexer::symmetryEquivalentSolutionPresent(const Mat3D &R, int &n) {
 
 
 
-Indexer::AngleInfo::AngleInfo(const Vec3D &_v1, Indexer::MarkerType t1, int i1, const Vec3D &_v2, Indexer::MarkerType t2, int i2, double maxDeviation):
-    v1(_v1),
-    type1(t1),
+Indexer::AngleInfo::AngleInfo(int i1, int i2, const QList<Marker>& markers, double maxDeviation):
     index1(i1),
-    v2(_v2),
-    type2(t2),
     index2(i2)
 {
-  cosAng=v1*v2;
+  cosAng=markers.at(index1).getMarkerNormal()*markers.at(index2).getMarkerNormal();
   double c=acos(cosAng);
   double c1=cos(c-maxDeviation);
   double c2=cos(c+maxDeviation);
