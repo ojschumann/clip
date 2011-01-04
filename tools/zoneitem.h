@@ -35,9 +35,11 @@ private slots:
   void updateOptimalZone();
 signals:
   void positionChanged();
+  void itemClicked();
 protected:
-  QRectF imgRect;
   QList<QPolygonF> generatePolygon(const Vec3D&, const Vec3D&);
+
+  QRectF imgRect;
   CircleItem* startHandle;
   CircleItem* endHandle;
   qreal radius;

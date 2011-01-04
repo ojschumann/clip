@@ -14,7 +14,7 @@ using namespace std;
 ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* parent):
     PropagatingGraphicsObject(parent),
     AbstractProjectorMarkerItem(p, AbstractMarkerItem::ZoneMarker),
-    imgRect(0.01, 0.01, 0.98, 0.98),
+    imgRect(-0.01, -0.01, 1.02, 1.02),
     startHandle(new CircleItem(0.1, this)),
     endHandle(new CircleItem(0.1, this))
 {
@@ -31,6 +31,7 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
     connect(item, SIGNAL(positionChanged()), this, SIGNAL(positionChanged()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updatePolygon()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updateOptimalZone()));
+    connect(item, SIGNAL(itemClicked()), this, SIGNAL(itemClicked()));
     connect(projector, SIGNAL(spotSizeChanged(double)), item, SLOT(setRadius(double)));
   }
   updatePolygon();

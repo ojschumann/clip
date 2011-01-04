@@ -1,6 +1,7 @@
 #include "circleitem.h"
 #include <QPainter>
 #include <QPainterPath>
+#include <QGraphicsSceneMouseEvent>
 
 
 CircleItem::CircleItem(double r, QGraphicsItem *parent) :
@@ -61,4 +62,12 @@ void CircleItem::setColor(QColor c) {
 void CircleItem::setLineWidth(double lw) {
   lineWidth = lw;
   update();
+}
+
+#include <iostream>
+using namespace std;
+void CircleItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+  cout << "Clicked" << endl;
+  if (event->button()==Qt::LeftButton) emit itemClicked();
+  QGraphicsObject::mousePressEvent(event);
 }

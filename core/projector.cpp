@@ -67,6 +67,8 @@ Projector::Projector(QObject *parent):
 Projector::Projector(const Projector &p): QObject() { }
 
 Projector::~Projector() {
+  if (!crystal.isNull())
+    crystal->removeProjector(this);
 }
 
 void Projector::connectToCrystal(Crystal *c) {

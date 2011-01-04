@@ -125,6 +125,7 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
   inMousePress = true;
   mousePressOrigin = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
   if (e->buttons()==Qt::LeftButton) {
+    addedDragItemOnThisMove = false;
     if (ui->zoomAction->isChecked()) {
       if (zoomRubber) {
         delete zoomRubber;
@@ -148,12 +149,16 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
   if (e->buttons()==Qt::LeftButton) {
     if (ui->zoomAction->isChecked()) {
       zoomRubber->setGeometry(QRect(ui->view->mapFromScene(mousePressOrigin), ui->view->mapFromScene(p)).normalized());
-    } else if (ui->rulerAction->isChecked() && largeMove) {
+    } else if (ui->rulerAction->isChecked() && largeMove && ! addedDragItemOnThisMove) {
+      addedDragItemOnThisMove = true;
       projector->addRuler(mousePressOrigin, p);
       QMouseEvent e_again(QEvent::MouseButtonPress, ui->view->viewport()->mapFromGlobal(e->globalPos()), Qt::LeftButton, e->buttons(), e->modifiers());
       ui->view->mousePressEvent(&e_again);
     } else if (ui->markZonesAction->isChecked() && largeMove) {
-      projector->addZoneMarker(mousePressOrigin, p);
+      if (!addedDragItemOnThisMove) {
+        addedDragItemOnThisMove = true;
+        projector->addZoneMarker(mousePressOrigin, p);
+      }
       QMouseEvent e_again(QEvent::MouseButtonPress, ui->view->viewport()->mapFromGlobal(e->globalPos()), Qt::LeftButton, e->buttons(), e->modifiers());
       ui->view->mousePressEvent(&e_again);
     } else if (ui->panAction->isChecked()) {

@@ -19,6 +19,7 @@ signals:
 public slots:
   virtual bool delAt(const QPointF&)=0;
   virtual void clear()=0;
+  virtual bool del(int)=0;
 protected slots:
   virtual void emitChanged()=0;
 };
@@ -31,7 +32,8 @@ public:
   int size();
   T* at(int);
   T* last();
-
+  bool del(T*);
+  bool del(int n);
   typedef typename QList<T*>::const_iterator const_iterator;
   const_iterator begin() const;
   const_iterator end() const;

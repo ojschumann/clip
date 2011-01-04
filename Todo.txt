@@ -1,6 +1,3 @@
-Highlighting of markers...
-Marked Spots and Zone info (call from Crystal) (new)
-Show if Spot/Zone in indexdisplay
 
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam

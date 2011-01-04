@@ -19,13 +19,14 @@ public:
   virtual int columnCount(const QModelIndex & parent = QModelIndex()) const ;
   virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-  virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
 signals:
+  void doHighlightMarker(int);
 public slots:
   void observeProjector(Projector*);
   void forgetProjector(Projector*);
-  void hightlightMarker(int n, bool b);
+  void highlightMarker(int n, bool b);
+  void deleteMarker(int);
 protected slots:
   void spotMarkerAdded(int);
   void zoneMarkerAdded(int);
@@ -33,6 +34,7 @@ protected slots:
   void zoneMarkerRemoved(int);
   void markerChanged();
   void orientationChanged();
+  void markerClicked();
 protected:
   void addMarker(AbstractMarkerItem* m);
   void deleteMarker(AbstractMarkerItem* m);

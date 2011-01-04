@@ -75,6 +75,8 @@ protected:
   QPointF mousePressOrigin;
   QPointF lastMousePosition;
   bool inMousePress;
+  // Prevents adding of multiple ZoneMarkers or Rulers. Workaround :-(
+  bool addedDragItemOnThisMove;
 
   QRubberBand* zoomRubber;
   QList<QRectF> zoomSteps;

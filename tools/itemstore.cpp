@@ -40,16 +40,26 @@ template <class T> T* ItemStore<T>::last() {
   return items.last();
 }
 
+template <class T> bool ItemStore<T>::del(int n) {
+  if (n>=0 && n<items.size()) {
+    emit itemAboutToBeRemoved(n);
+    T* item = items.takeAt(n);
+    if (item->scene()) item->scene()->removeItem(item);
+    emit itemRemoved(n);
+    delete item;
+    return true;
+  }
+  return false;
+}
+
+template <class T> bool ItemStore<T>::del(T* item) {
+  return del(items.indexOf(item));
+}
+
 template <class T> bool ItemStore<T>::delAt(const QPointF& p) {
   foreach (T* item, items) {
     if (item->contains(item->mapFromScene(p))) {
-      if (item->scene()) item->scene()->removeItem(item);
-      int idx = items.indexOf(item);
-      emit itemAboutToBeRemoved(idx);
-      items.removeAt(idx);
-      emit itemRemoved(idx);
-      delete item;
-      return true;
+      return del(item);
     }
   }
   return false;

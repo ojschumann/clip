@@ -16,11 +16,14 @@ protected:
   QPainterPath shape() const;
 signals:
   void positionChanged();
+  void itemClicked();
 public slots:
   void setPosNoSig(const QPointF& p);
   void setRadius(double);
   void setColor(QColor);
   void setLineWidth(double);
+protected:
+  void mousePressEvent(QGraphicsSceneMouseEvent *event);
 private:
   double radius;
   double lineWidth;

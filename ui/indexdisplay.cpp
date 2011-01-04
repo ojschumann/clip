@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <QThreadPool>
 #include <QSortFilterProxyModel>
+#include <QShortcut>
 
 #include "core/crystal.h"
 #include "core/projector.h"
@@ -33,7 +34,10 @@ IndexDisplay::IndexDisplay(Crystal* _c, QWidget *parent) :
   sorter->setDynamicSortFilter(true);
   ui->markerDisplay->setModel(sorter);
   ui->markerDisplay->sortByColumn(markerModel.columnCount()-1, Qt::AscendingOrder);
+  connect(&markerModel, SIGNAL(doHighlightMarker(int)), this, SLOT(highlightMarkerNr(int)));
 
+  QShortcut* shortcut = new QShortcut(Qt::Key_Delete, ui->markerDisplay);
+  connect(shortcut, SIGNAL(activated()), this, SLOT(deleteActiveMarker()));
 
   ui->SolutionSelector ->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing());
   ui->markerDisplay->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing());
@@ -138,6 +142,18 @@ void IndexDisplay::highlightMarkers() {
   QSortFilterProxyModel* sorter = dynamic_cast<QSortFilterProxyModel*>(ui->markerDisplay->model());
   QItemSelection selection = sorter->mapSelectionToSource(ui->markerDisplay->selectionModel()->selection());
   for (int i=0; i<markerModel.rowCount(); i++) {
-    markerModel.hightlightMarker(i, selection.contains(sorter->index(i, 0)));
+    markerModel.highlightMarker(i, selection.contains(sorter->index(i, 0)));
   }
+}
+
+void IndexDisplay::highlightMarkerNr(int n) {
+  QSortFilterProxyModel* sorter = dynamic_cast<QSortFilterProxyModel*>(ui->markerDisplay->model());
+  ui->markerDisplay->setCurrentIndex(sorter->mapFromSource(markerModel.index(n, 0)));
+}
+
+void IndexDisplay::deleteActiveMarker() {
+  QSortFilterProxyModel* sorter = dynamic_cast<QSortFilterProxyModel*>(ui->markerDisplay->model());
+  QModelIndex idx = sorter->mapToSource(ui->markerDisplay->selectionModel()->currentIndex());
+  if (idx.isValid())
+    markerModel.deleteMarker(idx.row());
 }

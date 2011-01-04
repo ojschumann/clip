@@ -28,6 +28,7 @@ void LiveMarkerModel::addMarker(AbstractMarkerItem *m) {
   QObject* o = dynamic_cast<QObject*>(m);
   if (o) {
     connect(o, SIGNAL(positionChanged()), this, SLOT(markerChanged()));
+    connect(o, SIGNAL(itemClicked()), this, SLOT(markerClicked()));
   }
   endInsertRows();
 }
@@ -110,19 +111,25 @@ int LiveMarkerModel::rowCount(const QModelIndex &parent) const {
 }
 
 int LiveMarkerModel::columnCount(const QModelIndex &parent) const {
-  return 9;
+  return 10;
 }
 
 QVariant LiveMarkerModel::data(const QModelIndex &index, int role) const {
   if (role==Qt::DisplayRole) {
     int col = index.column();
-    if (col==0 || col==1 || col==2) {
+    if (col==0) {
+      if (markers.at(index.row())->getType()==AbstractMarkerItem::SpotMarker) {
+        return QVariant("S");
+      } else if (markers.at(index.row())->getType()==AbstractMarkerItem::ZoneMarker) {
+        return QVariant("Z");
+      }
+    } else if (col==1 || col==2 || col==3) {
       TVec3D<int> n = markers.at(index.row())->getIntegerIndex();
-      return QVariant(n(col));
-    } else if (col==3 || col==4 || col==5) {
+      return QVariant(n(col-1));
+    } else if (col==4 || col==5 || col==6) {
       Vec3D n = markers.at(index.row())->getRationalIndex();      
-      return QVariant(QString::number(n(col-3), 'f', 2));
-    } else if (col==8) {
+      return QVariant(QString::number(n(col-4), 'f', 2));
+    } else if (col==9) {
       return QVariant(QString::number(100.0*markers.at(index.row())->getBestScore(), 'f', 2));
     }
   } else if (role==Qt::BackgroundRole && false) {
@@ -131,13 +138,15 @@ QVariant LiveMarkerModel::data(const QModelIndex &index, int role) const {
     return QVariant(Qt::AlignRight);
   } else if (role==Qt::UserRole) {
     int col = index.column();
-    if (col==0 || col==1 || col==2) {
+    if (col==0) {
+      return data(index, Qt::DisplayRole);
+    } else if (col==1 || col==2 || col==3) {
       TVec3D<int> n = markers.at(index.row())->getIntegerIndex();
-      return QVariant(n(col));
-    } else if (col==3 || col==4 || col==5) {
+      return QVariant(n(col-1));
+    } else if (col==4 || col==5 || col==6) {
       Vec3D n = markers.at(index.row())->getRationalIndex();
-      return QVariant(n(col-3));
-    } else if (col==8) {
+      return QVariant(n(col-4));
+    } else if (col==9) {
       return QVariant(markers.at(index.row())->getBestScore());
     }
   }
@@ -146,17 +155,32 @@ QVariant LiveMarkerModel::data(const QModelIndex &index, int role) const {
 
 QVariant LiveMarkerModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if ((role==Qt::DisplayRole) && (orientation==Qt::Horizontal)) {
-    const char* data[] = {"h", "k", "l", "h", "k", "l", "Angular", "Spatial", "HKL"};
+    const char* data[] = {"T", "h", "k", "l", "h", "k", "l", "Angular", "Spatial", "HKL"};
     return QVariant(QString(data[section]));
   }
   return QVariant();
 }
 
-void LiveMarkerModel::sort(int column, Qt::SortOrder order) {
-
-}
-
-void LiveMarkerModel::hightlightMarker(int n, bool b) {
+void LiveMarkerModel::highlightMarker(int n, bool b) {
   if (n<markers.size())
     markers.at(n)->highlight(b);
+}
+
+void LiveMarkerModel::deleteMarker(int n) {
+  if (ZoneItem* zi=dynamic_cast<ZoneItem*>(markers.at(n))) {
+    foreach(Projector* p, crystal->getConnectedProjectors()) {
+      if (p->zoneMarkers().del(zi)) return;
+    }
+  } else if (SpotItem* si=dynamic_cast<SpotItem*>(markers.at(n))) {
+    foreach(Projector* p, crystal->getConnectedProjectors()) {
+      if (p->spotMarkers().del(si)) return;
+    }
+  }
+}
+
+void LiveMarkerModel::markerClicked() {
+  AbstractMarkerItem* item = dynamic_cast<AbstractMarkerItem*>(sender());
+  int idx = markers.indexOf(item);
+  if (idx>=0) emit doHighlightMarker(idx);
+
 }

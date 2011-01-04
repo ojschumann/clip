@@ -33,6 +33,8 @@ private slots:
     void on_startButton_clicked();
     void updateSolutionDisplay(QModelIndex, QModelIndex);
     void highlightMarkers();
+    void highlightMarkerNr(int);
+    void deleteActiveMarker();
     void indexerDestroyed();
     void showMajorIndex(int);
     void showNumberOfSolutions(int);
