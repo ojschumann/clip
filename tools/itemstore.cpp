@@ -1,11 +1,11 @@
 #ifdef ITEMSTORE_H
+//#include "tools/itemstore.h"
 
 #include <QGraphicsScene>
+#include <QMetaMethod>
+#include <iostream>
 
-#include "tools/zoneitem.h"
-#include "tools/ruleritem.h"
-
-
+using namespace std;
 
 template <class T> ItemStore<T>::ItemStore(QObject* parent) :
     AbstractItemStore(parent),
@@ -44,7 +44,8 @@ template <class T> bool ItemStore<T>::del(int n) {
   if (n>=0 && n<items.size()) {
     emit itemAboutToBeRemoved(n);
     T* item = items.takeAt(n);
-    if (item->scene()) item->scene()->removeItem(item);
+    // Don't remove Item from scene. This leads to a crash and
+    // is done in the destructor anyway
     emit itemRemoved(n);
     delete item;
     return true;
@@ -66,13 +67,8 @@ template <class T> bool ItemStore<T>::delAt(const QPointF& p) {
 }
 
 template <class T> void ItemStore<T>::clear() {
-  while (!items.empty()) {
-    emit itemAboutToBeRemoved(0);
-    T* item = items.takeFirst();
-    if (item->scene()) item->scene()->removeItem(item);
-    emit itemRemoved(0);
-    delete item;
-  }
+  while (!items.empty())
+    del(0);
   emit itemsCleared();
 }
 
@@ -83,10 +79,24 @@ template <class T> void ItemStore<T>::emitChanged() {
 
 template <class T> void ItemStore<T>::addItem(T* item) {
   QObject* o = dynamic_cast<QObject*>(item);
-  if (o)
+  if (o) {
     connect(o, SIGNAL(positionChanged()), this, SLOT(emitChanged()));
+    for (int i=0; i<o->metaObject()->methodCount(); i++) {
+      if (o->metaObject()->method(i).methodType()==QMetaMethod::Signal) {
+        if (QString(o->metaObject()->method(i).signature())=="itemClicked()") {
+          connect(o, SIGNAL(itemClicked()), this, SLOT(emitItemClicked()));
+        }
+      }
+    }
+  }
   items << item;
   emit itemAdded(size()-1);
+}
+
+template <class T> void ItemStore<T>::emitItemClicked() {
+  int idx = items.indexOf(dynamic_cast<T*>(sender()));
+  if (idx>=0)
+    emit itemClicked(idx);
 }
 
 #endif

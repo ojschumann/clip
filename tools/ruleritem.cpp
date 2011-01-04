@@ -11,24 +11,25 @@ RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, double r, QGraphicsIt
     PropagatingGraphicsObject(parent),
     startHandle(new CircleItem(r, this)),
     endHandle(new CircleItem(r,this)),
+    highlighted(true),
     radius(r)
 {
-  highlighted=true;
   highlight(false);
   startHandle->setPos(p1);
   endHandle->setPos(p2);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
-  QList<CircleItem*> l;
-  l << startHandle << endHandle;
+  QList<CircleItem*> l = QList<CircleItem*>() << startHandle << endHandle;
   foreach (CircleItem* item, l) {
     item->setColor(Qt::red);
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
-    connect(item, SIGNAL(positionChanged()), this, SIGNAL(rulerChanged()));
+    connect(item, SIGNAL(itemClicked()),     this, SIGNAL(itemClicked()));
+    connect(item, SIGNAL(positionChanged()), this, SIGNAL(positionChanged()));
   }
 }
 
 RulerItem::~RulerItem() {
+
 }
 
 QRectF RulerItem::boundingRect() const {
@@ -38,19 +39,25 @@ QRectF RulerItem::boundingRect() const {
 QPainterPath RulerItem::shape() const {
   QPainterPath path(startHandle->pos());
   path.addEllipse(startHandle->pos(), radius, radius);
-  path.lineTo(endHandle->pos());
+  path.moveTo(endHandle->pos());
   path.addEllipse(endHandle->pos(), radius, radius);
   return path;
 }
 
 void RulerItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
   if (startHandle->pos()!=endHandle->pos()) {
+    QPen pen(QColor(255, 128, 0));
+    if (highlighted) {
+      pen.setWidthF(2.5);
+    } else {
+      pen.setWidthF(0);
+    }
+    pen.setCosmetic(true);
     p->setPen(pen);
     QVector<QLineF> lines;
     QLineF l(startHandle->pos(), endHandle->pos());
+    p->drawLine(l);
 
-
-    lines << l;
     l.setLength(0.7*radius);
     l.setAngle(l.angle()+30.0);
     lines << l;
@@ -62,6 +69,9 @@ void RulerItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) 
     lines << l;
     l.setAngle(l.angle()-60.0);
     lines << l;
+
+    pen.setWidth(0);
+    p->setPen(pen);
     p->drawLines(lines);
   }
 }
@@ -83,21 +93,8 @@ QPointF RulerItem::getEnd() {
 }
 
 void RulerItem::highlight(bool h) {
-  if (h!=highlighted) {
-    highlighted=h;
-    if (isHighlighted()) {
-      pen = QPen(QColor(255, 128, 0));
-      pen.setWidthF(2.5);
-      pen.setCosmetic(true);
-    } else {
-      pen = QPen(QColor(255, 128, 0));
-      pen.setWidthF(0.0);
-    }
-    //startHandle->setPen(pen);
-    //endHandle->setPen(pen);
-
-    update();
-  }
+  highlighted=h;
+  update();
 }
 
 bool RulerItem::isHighlighted() {

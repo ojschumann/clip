@@ -2,7 +2,9 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QGraphicsSceneMouseEvent>
+#include <iostream>
 
+using namespace std;
 
 CircleItem::CircleItem(double r, QGraphicsItem *parent) :
     QGraphicsObject(parent)
@@ -11,6 +13,9 @@ CircleItem::CircleItem(double r, QGraphicsItem *parent) :
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
   setRadius(r);
   lineWidth = 1.0;
+}
+
+CircleItem::~CircleItem() {
 }
 
 void CircleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -67,7 +72,6 @@ void CircleItem::setLineWidth(double lw) {
 #include <iostream>
 using namespace std;
 void CircleItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-  cout << "Clicked" << endl;
   if (event->button()==Qt::LeftButton) emit itemClicked();
   QGraphicsObject::mousePressEvent(event);
 }

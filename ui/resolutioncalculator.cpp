@@ -2,6 +2,7 @@
 #include "ui_resolutioncalculator.h"
 
 #include <cmath>
+#include <QShortcut>
 
 #include <tools/rulermodel.h>
 #include <QAbstractTableModel>
@@ -9,8 +10,9 @@
 #include "tools/itemstore.h"
 #include "tools/mat3D.h"
 #include "tools/vec3D.h"
+#include "image/laueimage.h"
 
-ResolutionCalculator::ResolutionCalculator(ItemStore<RulerItem>& r, QWidget *parent) :
+ResolutionCalculator::ResolutionCalculator(ItemStore<RulerItem>& r, LaueImage* img, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ResolutionCalculator),
     rulers(r)
@@ -20,10 +22,13 @@ ResolutionCalculator::ResolutionCalculator(ItemStore<RulerItem>& r, QWidget *par
   ui->rulerView->verticalHeader()->setDefaultSectionSize(ui->rulerView->fontMetrics().height());
   ui->rulerView->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
-  model = new RulerModel(rulers);
+  model = new RulerModel(rulers, img);
   ui->rulerView->setModel(model);
   connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SLOT(slotCalcResolution()));
   connect(ui->rulerView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(slotSelectionChanged()));
+  connect(&r, SIGNAL(itemClicked(int)), ui->rulerView, SLOT(selectRow(int)));
+  QShortcut* deleteShortcut = new QShortcut(Qt::Key_Delete, ui->rulerView);
+  connect(deleteShortcut, SIGNAL(activated()), this, SLOT(deletePressed()));
 
   slotCalcResolution();
 
@@ -38,10 +43,13 @@ ResolutionCalculator::~ResolutionCalculator()
 void ResolutionCalculator::slotSelectionChanged() {
   QItemSelectionModel* selection = ui->rulerView->selectionModel();
   for (int n=0; n<rulers.size(); n++) {
-    bool b = selection->isRowSelected(n, QModelIndex());
-    // Todo: make better
-    dynamic_cast<RulerItem*>(rulers.at(n))->highlight(b);
+    rulers.at(n)->highlight(selection->isRowSelected(n, QModelIndex()));
   }
+}
+
+void ResolutionCalculator::deletePressed() {
+  int idx=ui->rulerView->currentIndex().row();
+  rulers.del(idx);
 }
 
 void ResolutionCalculator::slotCalcResolution() {

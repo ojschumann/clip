@@ -20,7 +20,7 @@ ImageToolbox::ImageToolbox(Projector* p, QWidget *parent):
     ui->tabWidget->addTab(new ContrastCurves(projector->getLaueImage()), "Contrast");
 
     if (!projector->getLaueImage()->hasAbsoluteSize()) {
-      ui->tabWidget->addTab(new ResolutionCalculator(projector->rulers()), "Resolution");
+      ui->tabWidget->addTab(new ResolutionCalculator(projector->rulers(), projector->getLaueImage()), "Resolution");
     }
 
     foreach (QWidget* page, projector->getLaueImage()->toolboxPages()) {

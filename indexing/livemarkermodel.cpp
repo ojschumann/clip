@@ -119,9 +119,9 @@ QVariant LiveMarkerModel::data(const QModelIndex &index, int role) const {
     int col = index.column();
     if (col==0) {
       if (markers.at(index.row())->getType()==AbstractMarkerItem::SpotMarker) {
-        return QVariant("S");
+        return QVariant("Spot");
       } else if (markers.at(index.row())->getType()==AbstractMarkerItem::ZoneMarker) {
-        return QVariant("Z");
+        return QVariant("Zone");
       }
     } else if (col==1 || col==2 || col==3) {
       TVec3D<int> n = markers.at(index.row())->getIntegerIndex();

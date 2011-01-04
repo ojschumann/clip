@@ -31,7 +31,6 @@ class ZoneItem;
 class CropMarker;
 class LaueImage;
 class SpotIndicatorGraphicsItem;
-class CircleItem;
 
 
 class Projector: public QObject, public FitObject {
@@ -156,6 +155,7 @@ protected:
   virtual bool project(const Reflection &r, QPointF &point)=0;
   virtual bool parseXMLElement(QDomElement e);
 
+
   // Stuff like Primary beam marker, Coordinate lines
   QList<QGraphicsItem*> decorationItems;
   // written indexes in the scene
@@ -164,10 +164,10 @@ protected:
   ItemStore<SpotItem> spotMarkerStore;
   // Zone markers
   ItemStore<ZoneItem> zoneMarkerStore;
-  // Info Items. These will be set on Mousepress from Python and be deleted on orientation change or slot!
-  ItemStore<QGraphicsRectItem> infoStore;
   // Ruler Item
   ItemStore<RulerItem> rulerStore;
+  // Info Items. These will be set on Mousepress from Python and be deleted on orientation change or slot!
+  ItemStore<QGraphicsRectItem> infoStore;
   // The Crop Marker
   QPointer<CropMarker> cropMarker;
 

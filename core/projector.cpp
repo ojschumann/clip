@@ -31,9 +31,10 @@ Projector::Projector(QObject *parent):
     FitObject(),
     decorationItems(),
     textMarkerItems(),
-    spotMarkerStore(),
-    zoneMarkerStore(),
-    rulerStore(),
+    spotMarkerStore(this),
+    zoneMarkerStore(this),
+    rulerStore(this),
+    infoStore(this),
     crystal(),
     scene(this),
     imageItemsPlane(new QGraphicsPixmapItem()),
@@ -397,7 +398,6 @@ void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
   connect(&spotMarkers(), SIGNAL(itemAdded(int)), zoneMarker, SLOT(updateOptimalZone()));
   connect(&spotMarkers(), SIGNAL(itemChanged(int)), zoneMarker, SLOT(updateOptimalZone()));
   connect(&spotMarkers(), SIGNAL(itemRemoved(int)), zoneMarker, SLOT(updateOptimalZone()));
-  // Todo connect for update of spotsize
   zoneMarkers().addItem(zoneMarker);
 }
 

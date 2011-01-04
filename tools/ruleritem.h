@@ -24,13 +24,15 @@ public:
 public slots:
   void setHandleSize(double);
 signals:
-  void rulerChanged();
+  void positionChanged();
+  void itemClicked();
 protected:
   CircleItem* startHandle;
   CircleItem* endHandle;
   bool highlighted;
-  QPen pen;
   double radius;
+private:
+  RulerItem(const RulerItem& o) {}
 };
 
 #endif // RULERITEM_H

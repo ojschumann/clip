@@ -1,14 +1,15 @@
-#include <core/laueplaneprojector.h>
-#include <cmath>
-#include <QtGui/QGraphicsEllipseItem>
-#include <QtGui/QCursor>
-#include <tools/circleitem.h>
-#include <iostream>
-#include <ui/laueplanecfg.h>
-#include <core/reflection.h>
+#include "core/laueplaneprojector.h"
 
-#include "image/laueimage.h"
+#include <QCursor>
+#include <QPointF>
+#include <cmath>
+#include <iostream>
+
+#include "ui/laueplanecfg.h"
+#include "core/reflection.h"
 #include "core/projectorfactory.h"
+#include "image/laueimage.h"
+#include "tools/circleitem.h"
 #include "tools/xmltools.h"
 
 using namespace std;
@@ -323,9 +324,9 @@ double LauePlaneProjector::yOffset() const {
 
 void LauePlaneProjector::doImgRotation(const QTransform& t) {
   Projector::doImgRotation(t);
-  if (getLaueImage()) {
-    QSizeF s = getLaueImage()->transformedAbsoluteSize();
-    setDetSize(dist(), s.width(), s.height());
+  if (getLaueImage() && getLaueImage()->hasAbsoluteSize()) {
+    QSizeF imgSize = getLaueImage()->transformedAbsoluteSize();
+    setDetSize(dist(), imgSize.width(), imgSize.height());
   } else {
     QTransform Tinv = t.inverted();
     QPointF c = Tinv.map(QPointF(0,0));
@@ -336,6 +337,19 @@ void LauePlaneProjector::doImgRotation(const QTransform& t) {
     setDetSize(dist(), dw, dh);
   }
 }
+
+void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
+  QSizeF imgSize;
+  if (img->hasAbsoluteSize()) {
+    imgSize = img->transformedAbsoluteSize();
+  } else {
+    imgSize = img->transformedSize();
+    imgSize *= sqrt(width()*height()/(imgSize.width()*imgSize.height()));
+  }
+  setDetSize(dist(), imgSize.width(), imgSize.height());
+}
+
+
 
 double LauePlaneProjector::fitParameterValue(unsigned int n) {
   switch (n)  {
@@ -479,16 +493,6 @@ double LauePlaneProjector::maxCos(Vec3D n) const {
   return maxCosTT;
 }
 
-void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
-  QSizeF imgSize;
-  if (img->hasAbsoluteSize()) {
-    imgSize = img->transformedAbsoluteSize();
-  } else {
-    imgSize = img->transformedSize();
-    imgSize *= sqrt(width()*height()/(imgSize.width()*imgSize.height()));
-  }
-  setDetSize(dist(), imgSize.width(), imgSize.height());
-}
 
 
 

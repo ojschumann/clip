@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QMouseEvent>
 #include <QApplication>
-#include <QtOpenGL/QGLWidget>
+#include <QGLWidget>
 #include <QTimer>
 #include <QSignalMapper>
 #include <QMdiArea>
@@ -24,12 +24,16 @@
 #include "core/projector.h"
 #include "tools/mousepositioninfo.h"
 #include "tools/itemstore.h"
+#include "tools/xmltools.h"
 #include "image/laueimage.h"
 #include "image/dataproviderfactory.h"
-#include "tools/xmltools.h"
+
 #include "tools/spotitem.h"
+#include "tools/zoneitem.h"
+#include "tools/ruleritem.h"
 
 // List of all projectors. Sort of a hack ;-)
+// Used to synchronize the Mousemode
 QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
 
 
@@ -149,17 +153,22 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
   if (e->buttons()==Qt::LeftButton) {
     if (ui->zoomAction->isChecked()) {
       zoomRubber->setGeometry(QRect(ui->view->mapFromScene(mousePressOrigin), ui->view->mapFromScene(p)).normalized());
-    } else if (ui->rulerAction->isChecked() && largeMove && ! addedDragItemOnThisMove) {
-      addedDragItemOnThisMove = true;
-      projector->addRuler(mousePressOrigin, p);
-      QMouseEvent e_again(QEvent::MouseButtonPress, ui->view->viewport()->mapFromGlobal(e->globalPos()), Qt::LeftButton, e->buttons(), e->modifiers());
-      ui->view->mousePressEvent(&e_again);
-    } else if (ui->markZonesAction->isChecked() && largeMove) {
+    } else if ((ui->rulerAction->isChecked() || ui->markZonesAction->isChecked()) && largeMove) {
       if (!addedDragItemOnThisMove) {
         addedDragItemOnThisMove = true;
-        projector->addZoneMarker(mousePressOrigin, p);
+        if (ui->rulerAction->isChecked()) {
+          projector->addRuler(mousePressOrigin, p);
+        } else if (ui->markZonesAction->isChecked()) {
+          projector->addZoneMarker(mousePressOrigin, p);
+        }
+      } else {
+        if (ui->rulerAction->isChecked()) {
+          projector->rulers().last()->setEnd(projector->det2img.map(p));
+        } else if (ui->markZonesAction->isChecked()) {
+          projector->zoneMarkers().last()->setEnd(projector->det2img.map(p));
+        }
       }
-      QMouseEvent e_again(QEvent::MouseButtonPress, ui->view->viewport()->mapFromGlobal(e->globalPos()), Qt::LeftButton, e->buttons(), e->modifiers());
+      QMouseEvent e_again(QEvent::MouseButtonPress, ui->view->viewport()->mapFromGlobal(QCursor::pos()), Qt::LeftButton, e->buttons(), e->modifiers());
       ui->view->mousePressEvent(&e_again);
     } else if (ui->panAction->isChecked()) {
       bool b1, b2;
@@ -353,7 +362,7 @@ void ProjectionPlane::on_imageToolboxAction_triggered()
 }
 
 void ProjectionPlane::slotOpenResolutionCalc() {
-  on_imageToolboxAction_triggered();
+  //on_imageToolboxAction_triggered();
 }
 
 void ProjectionPlane::on_actionCrop_triggered() {

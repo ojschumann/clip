@@ -15,8 +15,8 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
     PropagatingGraphicsObject(parent),
     AbstractProjectorMarkerItem(p, AbstractMarkerItem::ZoneMarker),
     imgRect(-0.01, -0.01, 1.02, 1.02),
-    startHandle(new CircleItem(0.1, this)),
-    endHandle(new CircleItem(0.1, this))
+    startHandle(new CircleItem(projector->getSpotSize(), this)),
+    endHandle(new CircleItem(projector->getSpotSize(), this))
 {
   highlight(false);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
@@ -24,14 +24,13 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updatePolygon()));
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updateOptimalZone()));
   foreach (CircleItem* item, l) {
-    item->setRadius(projector->getSpotSize());
     item->setColor(Qt::red);
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
+    connect(item, SIGNAL(itemClicked()),     this, SIGNAL(itemClicked()));
     connect(item, SIGNAL(positionChanged()), this, SIGNAL(positionChanged()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updatePolygon()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updateOptimalZone()));
-    connect(item, SIGNAL(itemClicked()), this, SIGNAL(itemClicked()));
     connect(projector, SIGNAL(spotSizeChanged(double)), item, SLOT(setRadius(double)));
   }
   updatePolygon();
@@ -287,10 +286,6 @@ void ZoneItem::updateOptimalZone() {
   update();
 
 }
-
-
-
-
 
 QList<QPolygonF> ZoneItem::generatePolygon(const Vec3D& n, const Vec3D& _v) {
   QList<QLineF> imgBorders;

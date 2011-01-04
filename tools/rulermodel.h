@@ -5,6 +5,7 @@
 
 #include <QPointer>
 #include "tools/itemstore.h"
+#include "image/laueimage.h"
 
 class RulerItem;
 
@@ -12,7 +13,7 @@ class RulerModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
-  explicit RulerModel(ItemStore<RulerItem>& r, QObject* parent=0);
+  explicit RulerModel(ItemStore<RulerItem>& r, LaueImage* img, QObject* parent=0);
   int rowCount(const QModelIndex &parent) const;
   int columnCount(const QModelIndex &parent) const;
   QVariant data(const QModelIndex &index, int role) const;
@@ -20,11 +21,13 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const;
   bool setData(const QModelIndex &index, const QVariant &value, int role);
 public slots:
-  void slotRulerAdded();
-  void itemChanged(int);
+  void rulerAdded();
+  void rulerChanged(int);
+  void rulerRemoved(int);
   void setResolution(double, double);
 protected:
   ItemStore<RulerItem>& rulers;
+  LaueImage* image;
   double hRes;
   double vRes;
 };

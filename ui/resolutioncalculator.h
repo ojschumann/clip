@@ -3,23 +3,27 @@
 
 #include <QWidget>
 #include "tools/itemstore.h"
+
 namespace Ui {
   class ResolutionCalculator;
 }
 
 class RulerModel;
 class RulerItem;
+class LaueImage;
 
 class ResolutionCalculator : public QWidget
 {
   Q_OBJECT
 
 public:
-  explicit ResolutionCalculator(ItemStore<RulerItem>& r, QWidget *parent = 0);
+  explicit ResolutionCalculator(ItemStore<RulerItem>& r, LaueImage* img, QWidget *parent = 0);
   ~ResolutionCalculator();
 public slots:
   void slotSelectionChanged();
   void slotCalcResolution();
+protected slots:
+  void deletePressed();
 private:
   Ui::ResolutionCalculator *ui;
   ItemStore<RulerItem>& rulers;

@@ -10,7 +10,6 @@
 
 class Projector;
 class CircleItem;
-class GraphicsEllipseItem;
 
 class ZoneItem : public PropagatingGraphicsObject, public AbstractProjectorMarkerItem
 {
@@ -38,11 +37,9 @@ signals:
   void itemClicked();
 protected:
   QList<QPolygonF> generatePolygon(const Vec3D&, const Vec3D&);
-
   QRectF imgRect;
   CircleItem* startHandle;
   CircleItem* endHandle;
-  qreal radius;
   bool highlighted;
   QList<QPolygonF> zoneLines;
   QList<QPolygonF> zonePolys;
