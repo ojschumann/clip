@@ -37,6 +37,8 @@ class Projector: public QObject, public FitObject {
   Q_OBJECT
 public:
   Projector(QObject* parent=0);
+  Projector(const Projector&);
+
   ~Projector();
 
   // Functions for transformations in the different Coordinate systems
@@ -190,9 +192,6 @@ protected:
 
 
   SpotIndicatorGraphicsItem* spotIndicator;
-
-private:
-  Projector(const Projector&);
 };
 
 

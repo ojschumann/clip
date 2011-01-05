@@ -184,8 +184,9 @@ void CrystalDisplay::slotLoadCrystalData() {
 void CrystalDisplay::slotSaveCrystalData() {
 
 }
-
+#include "ui/fitdisplay.h"
 void CrystalDisplay::slotStartIndexing() {
+  Clip::getInstance()->addMdiWindow(new FitDisplay(crystal));
   if (indexDisplay.isNull()) {
     indexDisplay = new IndexDisplay(crystal);
     connect(this, SIGNAL(destroyed()), indexDisplay, SLOT(deleteLater()));

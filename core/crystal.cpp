@@ -53,7 +53,7 @@ public:
 };
 
 
-Crystal::Crystal(QObject* parent=NULL):
+Crystal::Crystal(QObject* parent):
     QObject(parent),
     FitObject(),
     MReal(),
@@ -90,6 +90,12 @@ Crystal::Crystal(const Crystal& c) {
   predictionFactor = 1.0;
   connect(&connectedProjectors, SIGNAL(objectAdded()), this, SLOT(updateWavevectorsFromProjectors()));
   connect(&connectedProjectors, SIGNAL(objectRemoved()), this, SLOT(updateWavevectorsFromProjectors()));
+
+  connect(&spaceGroup, SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
+  connect(&spaceGroup, SIGNAL(triclinHtoR()), this, SLOT(convertHtoR()));
+  connect(&spaceGroup, SIGNAL(triclinRtoH()), this, SLOT(convertRtoH()));
+  connect(&spaceGroup, SIGNAL(groupChanged()),this, SLOT(generateReflections()));
+  connect(&reflectionFuture, SIGNAL(finished()), this, SLOT(reflectionGenerated()));
 
   setRotation(c.getRotationMatrix());
   setRotationAxis(c.getRotationAxis(), c.getRotationAxisType());

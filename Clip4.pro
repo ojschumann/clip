@@ -99,7 +99,8 @@ SOURCES += main.cpp\
     indexing/livemarkermodel.cpp \
     tools/abstractmarkeritem.cpp \
     tools/spotitem.cpp \
-    indexing/marker.cpp
+    indexing/marker.cpp \
+    ui/fitdisplay.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -165,7 +166,8 @@ HEADERS  += ui/clip.h \
     indexing/livemarkermodel.h \
     tools/abstractmarkeritem.h \
     tools/spotitem.h \
-    indexing/marker.h
+    indexing/marker.h \
+    ui/fitdisplay.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -178,7 +180,8 @@ FORMS    += ui/clip.ui \
     ui/mouseinfodisplay.ui \
     ui/indexdisplay.ui \
     ui/rotatecrystal.ui \
-    ui/reorient.ui
+    ui/reorient.ui \
+    ui/fitdisplay.ui
 
 RESOURCES += \
     resources/resources.qrc

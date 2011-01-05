@@ -26,9 +26,11 @@ public:
     DirectSpace
   };
 
-  Crystal(QObject* parent);
+  Crystal(QObject* parent=0);
   Crystal(const Crystal &);
   ~Crystal();
+
+  Crystal& operator=(const Crystal& o);
 
   void saveToXML(QDomElement base);
   bool loadFromXML(QDomElement base);
