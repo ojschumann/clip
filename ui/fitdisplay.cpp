@@ -126,12 +126,12 @@ void FitDisplay::on_doFit_clicked()
   for (int loop=0; loop<30; loop++) {
 
 
-    Vertex<N, this> M(N);
+    Vertex<N, this> M();
     for (int n=0; n<simplex.size()-1; n++)
       M += simplex[n];
     M *= 2.0/(simplex.size()-1);
 
-    Vertex<N, this> L(N);
+    Vertex<N, this> L();
     L = M - simplex.last()*alpha;
 
     for (int n=0; n<N; n++) {
