@@ -37,9 +37,10 @@ class Projector: public QObject, public FitObject {
   Q_OBJECT
 public:
   Projector(QObject* parent=0);
-  Projector(const Projector&);
-
   ~Projector();
+
+  virtual Projector& operator=(const Projector& o);
+
 
   // Functions for transformations in the different Coordinate systems
 
@@ -115,7 +116,7 @@ public slots:
   void connectToCrystal(Crystal *);
 
   // Set Wavevectors. Note that the Value is 1/lambda, not 2*pi/lambda
-  // Still valid???
+  // TODO: Still valid???
   void setWavevectors(double Qmin, double Qmax);
   void reflectionsUpdated();
 
@@ -130,6 +131,7 @@ public slots:
   void enableSpots(bool b=true);
 
   // For speedup of fitting...
+  //TODO: Check if nessesary
   void enableProjection(bool b=true);
 
   void loadImage(QString);
@@ -187,11 +189,14 @@ protected:
   QVector<bool> reflectionIsProjected;
 
   QGraphicsScene scene;
+
+  // Parent for Items "living" on the image, e.g. in the Rect(0,0)->(1,1)
   QGraphicsPixmapItem* imageItemsPlane;
-  LaueImage* imageData;
 
-
+  // Projected Spots, drawing is done multithreaded
   SpotIndicatorGraphicsItem* spotIndicator;
+
+  LaueImage* imageData;
 };
 
 

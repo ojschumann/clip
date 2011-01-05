@@ -30,6 +30,8 @@ protected slots:
 template <class T> class ItemStore: public AbstractItemStore {
 friend class Projector;
 public:
+  typedef T* value_type;
+
   explicit ItemStore(QObject* parent=0);
   ItemStore(const ItemStore<T>&);
   virtual ~ItemStore() {}

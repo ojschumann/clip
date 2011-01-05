@@ -62,7 +62,8 @@ Crystal::Crystal(QObject* parent):
     connectedProjectors(this),
     rotationAxis(1,0,0),
     spaceGroup(this),
-    reflections()
+    reflections(),
+    cellGroup(this)
 {
   spaceGroup.setGroupSymbol("P1");
   internalSetCell(4.0, 4.0, 4.0, 90.0, 90.0, 90.0);
@@ -80,27 +81,23 @@ Crystal::Crystal(QObject* parent):
   enableUpdate();
   restartReflectionUpdate = false;
   generateReflections();
+
+  addParameterGroup(&cellGroup);
 }
 
-Crystal::Crystal(const Crystal& c) {
+Crystal& Crystal::operator=(const Crystal& c) {
   spaceGroup.setGroupSymbol(c.spaceGroup.groupSymbol());
   internalSetCell(c.a,c.b,c.c,c.alpha,c.beta,c.gamma);
   Qmin=c.Qmin;
   Qmax=c.Qmax;
   predictionFactor = 1.0;
-  connect(&connectedProjectors, SIGNAL(objectAdded()), this, SLOT(updateWavevectorsFromProjectors()));
-  connect(&connectedProjectors, SIGNAL(objectRemoved()), this, SLOT(updateWavevectorsFromProjectors()));
-
-  connect(&spaceGroup, SIGNAL(constrainsChanged()), this, SLOT(slotSetSGConstrains()));
-  connect(&spaceGroup, SIGNAL(triclinHtoR()), this, SLOT(convertHtoR()));
-  connect(&spaceGroup, SIGNAL(triclinRtoH()), this, SLOT(convertRtoH()));
-  connect(&spaceGroup, SIGNAL(groupChanged()),this, SLOT(generateReflections()));
-  connect(&reflectionFuture, SIGNAL(finished()), this, SLOT(reflectionGenerated()));
 
   setRotation(c.getRotationMatrix());
   setRotationAxis(c.getRotationAxis(), c.getRotationAxisType());
   enableUpdate(c.updateEnabled);
   restartReflectionUpdate = false;
+
+  return *this;
 }
 
 Crystal::~Crystal() {}
@@ -476,61 +473,6 @@ void Crystal::enableUpdate(bool b) {
   updateEnabled=b;
 }
 
-double Crystal::fitParameterValue(int n) {
-  if (fitParameterName(n)=="a") {
-    return a;
-  } else if (fitParameterName(n)=="b") {
-    return b;
-  } else if (fitParameterName(n)=="c") {
-    return c;
-  } else if (fitParameterName(n)=="alpha") {
-    return alpha;
-  } else if (fitParameterName(n)=="beta") {
-    return beta;
-  } else if (fitParameterName(n)=="gamma") {
-    return gamma;
-  }
-  return 0.0;
-}
-
-void Crystal::fitParameterSetValue(int n, double val) {
-  if (fitParameterName(n)=="a") {
-    setCell(val, b,c,alpha, beta, gamma);
-  } else if (fitParameterName(n)=="b") {
-    setCell(a, val,c,alpha, beta, gamma);
-  } else if (fitParameterName(n)=="c") {
-    setCell(a, b,val,alpha, beta, gamma);
-  } else if (fitParameterName(n)=="alpha") {
-    setCell(a, b,c,val, beta, gamma);
-  } else if (fitParameterName(n)=="beta") {
-    setCell(a, b,c,alpha, val, gamma);
-  } else if (fitParameterName(n)=="gamma") {
-    setCell(a, b,c,alpha, beta, val);
-  }
-}
-
-void Crystal::fitParameterSetEnabled(int n, bool enable) {
-  int nDist=0;
-  QList<int> spacegroupConstrains = spaceGroup.getConstrains();
-  for (int i=0; i<3; i++) {
-    if (spacegroupConstrains[i]==0)
-      nDist++;
-  }
-  if (nDist==1)
-    nDist=0;
-  if ((n<nDist) and enable) {
-    bool b=true;
-    for (int i=0; i<nDist; i++) {
-      b = b and (fitParameterEnabled(i) or i==n);
-    }
-    if (b) {
-      fitParameterSetEnabled((n+1)%nDist, false);
-    }
-  }
-  FitObject::fitParameterSetEnabled(n, enable);
-}
-
-
 void Crystal::calcEulerAngles(double &omega, double &chi, double &phi) {
   omega=-atan2(MRot(0,1),MRot(1,1));
   //chi=asin(MRot[2][1]);
@@ -557,16 +499,17 @@ void Crystal::slotSetSGConstrains() {
 
   QList<int> constrains = spaceGroup.getConstrains();
 
-  QList<QString> fitParameterTempNames;
-  fitParameterTempNames << "b" << "c" << "alpha" << "beta" << "gamma";
-  QList<QString> fitParameterNames;
-  if (constrains[1]==0 or constrains[2]==0)
-    fitParameterNames << "a";
-  for (int n=1; n<constrains.size(); n++) {
-    if (constrains[n]==0)
-      fitParameterNames << fitParameterTempNames[n-1];
+  int unconstrainedLength=0;
+  for (int i=0; i<6; i++) {
+    if ((i<3) && (constrains[i]==0)) unconstrainedLength++;
+    cellGroup.parameters().at(i)->setChangeable(constrains[i]==0);
   }
-  setFitParameterNames(fitParameterNames);
+
+  if (unconstrainedLength<2) {
+    for (int i=0; i<3; i++) {
+      cellGroup.parameters().at(i)->setChangeable(false);
+    }
+  }
   //emit constrainsChanged();
 }
 
@@ -679,3 +622,55 @@ bool Crystal::loadFromXML(QDomElement base) {
   }
   return true;
 }
+
+
+Crystal::CellGroup::CellGroup(Crystal* c): crystal(c) {
+  addParameter("a");
+  addParameter("b");
+  addParameter("c");
+  addParameter("alpha");
+  addParameter("beta");
+  addParameter("gamma");
+}
+
+double Crystal::CellGroup::value(int member) const {
+  if (member==0) {
+    return crystal->a;
+  } else if (member==1) {
+    return crystal->b;
+  } else if (member==2) {
+    return crystal->c;
+  } else if (member==3) {
+    return crystal->alpha;
+  } else if (member==4) {
+    return crystal->beta;
+  } else if (member==5) {
+    return crystal->gamma;
+  }
+  return -1.0;
+}
+
+void Crystal::CellGroup::doSetValue(QList<double> values) {
+  crystal->internalSetCell(values.at(0),
+                           values.at(1),
+                           values.at(2),
+                           values.at(3),
+                           values.at(4),
+                           values.at(5));
+}
+
+double Crystal::CellGroup::epsilon(int member) const {
+  if (member<3) return 0.0001;
+  return 0.01;
+}
+
+double Crystal::CellGroup::lowerBound(int member) const {
+  if (member<3) return 0.5;
+  return 10;
+}
+
+double Crystal::CellGroup::upperBound(int member) const {
+  if (member<3) return 25.0;
+  return 170;
+}
+

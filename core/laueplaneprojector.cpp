@@ -4,6 +4,7 @@
 #include <QPointF>
 #include <cmath>
 #include <iostream>
+#include <typeinfo>
 
 #include "ui/laueplanecfg.h"
 #include "core/reflection.h"
@@ -14,7 +15,13 @@
 
 using namespace std;
 
-LauePlaneProjector::LauePlaneProjector(QObject* parent): Projector(parent), localCoordinates() {
+LauePlaneProjector::LauePlaneProjector(QObject* parent):
+    Projector(parent),
+    localCoordinates(),
+    distGroup(this),
+    orientationGroup(this),
+    shiftGroup(this)
+{
   internalSetWavevectors(0.0, 2.0*M_PI);
   setDetSize(30.0, 110.0, 140.0);
   setDetOrientation(180.0, 0, 0);
@@ -22,11 +29,27 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent): Projector(parent), loca
   detDy=1.0;
   setDetOffset(0.0, 0.0);
 
-  QList<QString> fitParameterNames;
-  fitParameterNames << "Distance" << "X-Offset" << "Y-Offset" << "Omega" << "Chi";
-  setFitParameterNames(fitParameterNames);
+  addParameterGroup(&distGroup);
+  addParameterGroup(&shiftGroup);
+  addParameterGroup(&orientationGroup);
+
   connect(this, SIGNAL(imageLoaded(LaueImage*)), this, SLOT(loadParmetersFromImage(LaueImage*)));
 };
+
+Projector& LauePlaneProjector::operator=(const Projector& _o) {
+  Projector::operator =(_o);
+  try {
+    const LauePlaneProjector& o = dynamic_cast<const LauePlaneProjector&>(_o);
+    setDetSize(o.dist(), o.width(), o.height());
+    setDetOrientation(o.omega(), o.chi(), o.phi());
+    setDetOffset(o.xOffset(), o.yOffset());
+  }
+  catch (const bad_cast& e) {
+    cerr << e.what() << endl;
+    cerr << "Copy operator on LauePlaneProjector " << endl;
+  }
+  return *this;
+}
 
 Projector* LauePlaneProjector::getInstance() {
   return new LauePlaneProjector();
@@ -349,39 +372,6 @@ void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
   setDetSize(dist(), imgSize.width(), imgSize.height());
 }
 
-
-
-double LauePlaneProjector::fitParameterValue(unsigned int n) {
-  switch (n)  {
-  case 0:
-    return dist();
-  case 1:
-    return xOffset();
-  case 2:
-    return yOffset();
-  case 3:
-    return omega();
-  case 4:
-    return chi();
-  }
-  return 0.0;
-}
-
-void LauePlaneProjector::fitParameterSetValue(unsigned int n, double val) {
-  switch (n)  {
-  case 0:
-    return setDetSize(val, width(), height());
-  case 1:
-    return setDetOffset(val, yOffset());
-  case 2:
-    return setDetOffset(xOffset(), val);;
-  case 3:
-    return setDetOrientation(val, chi(), phi());
-  case 4:
-    return setDetOrientation(omega(), val, phi());
-  }
-}
-
 const char XML_LPP_DetSize[] = "DetSize";
 const char XML_LPP_DetSize_dist[] = "dist";
 const char XML_LPP_DetSize_width[] = "width";
@@ -493,6 +483,93 @@ double LauePlaneProjector::maxCos(Vec3D n) const {
   return maxCosTT;
 }
 
+
+LauePlaneProjector::DistGroup::DistGroup(LauePlaneProjector* p): projector(p) {
+  addParameter("Distance");
+}
+
+double LauePlaneProjector::DistGroup::value(int member) const {
+  return projector->dist();
+}
+
+void LauePlaneProjector::DistGroup::doSetValue(QList<double> values) {
+  projector->setDetSize(values.at(0), projector->width(), projector->height());
+}
+
+double LauePlaneProjector::DistGroup::epsilon(int member) const {
+  return 0.0001;
+}
+
+double LauePlaneProjector::DistGroup::lowerBound(int member) const {
+  return 5.0;
+}
+
+double LauePlaneProjector::DistGroup::upperBound(int member) const {
+  return 300.0;
+}
+
+
+LauePlaneProjector::ShiftGroup::ShiftGroup(LauePlaneProjector* p): projector(p) {
+  addParameter("Det_x");
+  addParameter("Det_y");
+}
+
+double LauePlaneProjector::ShiftGroup::value(int member) const {
+  if (member==0) {
+    return projector->xOffset();
+  } else if (member==1) {
+    return projector->yOffset();
+  }
+  return -1.0;
+}
+
+void LauePlaneProjector::ShiftGroup::doSetValue(QList<double> values) {
+  projector->setDetOffset(values.at(0), values.at(1));
+}
+
+double LauePlaneProjector::ShiftGroup::epsilon(int member) const {
+  return 0.0001;
+}
+
+double LauePlaneProjector::ShiftGroup::lowerBound(int member) const {
+  return -20.0;
+}
+
+double LauePlaneProjector::ShiftGroup::upperBound(int member) const {
+  return 380;
+}
+
+
+
+LauePlaneProjector::OrientationGroup::OrientationGroup(LauePlaneProjector* p): projector(p) {
+  addParameter("omega");
+  addParameter("chi");
+}
+
+double LauePlaneProjector::OrientationGroup::value(int member) const {
+  if (member==0) {
+    return projector->omega();
+  } else if (member==1) {
+    return projector->chi();
+  }
+  return -1.0;
+}
+
+void LauePlaneProjector::OrientationGroup::doSetValue(QList<double> values) {
+  projector->setDetOrientation(values.at(0), values.at(1), projector->phi());
+}
+
+double LauePlaneProjector::OrientationGroup::epsilon(int member) const {
+  return 0.0001;
+}
+
+double LauePlaneProjector::OrientationGroup::lowerBound(int member) const {
+  return -20.0;
+}
+
+double LauePlaneProjector::OrientationGroup::upperBound(int member) const {
+  return 380;
+}
 
 
 

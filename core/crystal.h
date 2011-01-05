@@ -27,7 +27,6 @@ public:
   };
 
   Crystal(QObject* parent=0);
-  Crystal(const Crystal &);
   ~Crystal();
 
   Crystal& operator=(const Crystal& o);
@@ -63,12 +62,7 @@ public:
   QList<Projector*> getConnectedProjectors();
 
   QList<double> getCell();
-  void enableUpdate(bool b=true);
-
-  // Functions for fitting parameters
-  virtual double fitParameterValue(int n);
-  virtual void fitParameterSetValue(int n, double val);
-  virtual void fitParameterSetEnabled(int n, bool enable);
+  void enableUpdate(bool b=true);  
 
 public slots:
   void addRotation(const Vec3D& axis, double angle);
@@ -100,6 +94,7 @@ signals:
 private:
   // Do the real work. Does not use possible uninitial values of objects variables
   void internalSetCell(double a, double b, double c, double alpha, double beta, double gamma);
+  QVector<Reflection> doGeneration();
 
 
   // Real and reziprocal orientation Matrix
@@ -152,7 +147,20 @@ private:
     double Qmax;
   };
 
-  QVector<Reflection> doGeneration();
+  // FitParameterGroups for fitting
+  class CellGroup: public FitParameterGroup {
+  public:
+    CellGroup(Crystal* c);
+    virtual double value(int member) const;
+    virtual double epsilon(int member) const;
+    virtual double lowerBound(int member) const;
+    virtual double upperBound(int member) const;
+  protected:
+    virtual void doSetValue(QList<double> values);
+    Crystal* crystal;
+  };
+
+  CellGroup cellGroup;
 
 };
 

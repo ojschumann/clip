@@ -38,8 +38,8 @@ Projector::Projector(QObject *parent):
     crystal(),
     scene(this),
     imageItemsPlane(new QGraphicsPixmapItem()),
-    imageData(0),
-    spotIndicator(new SpotIndicatorGraphicsItem())
+    spotIndicator(new SpotIndicatorGraphicsItem()),
+    imageData(0)
 {
   imageItemsPlane->setFlag(QGraphicsItem::ItemIsMovable, false);
 
@@ -65,11 +65,42 @@ Projector::Projector(QObject *parent):
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
 };
 
-Projector::Projector(const Projector &p): QObject() { }
 
 Projector::~Projector() {
   if (!crystal.isNull())
     crystal->removeProjector(this);
+}
+
+Projector& Projector::operator=(const Projector& o) {
+  det2img = o.det2img;
+  img2det = o.img2det;
+
+  internalSetWavevectors(o.Qmin(), o.Qmax());
+  setMaxHklSqSum(o.getMaxHklSqSum());
+  setTextSizeFraction(o.getTextSizeFraction());
+  setSpotSizeFraction(o.getSpotSizeFraction());
+  enableSpots(o.spotsEnabled());
+  enableProjection((o.projectionEnabled));
+
+  foreach (SpotItem* si, o.spotMarkerStore) {
+    addSpotMarker(img2det.map(si->pos()));
+    Vec3D v1 = si->getMarkerNormal();
+    Vec3D v2 = spotMarkers().last()->getMarkerNormal();
+    Vec3D v3 = v1-v2;
+    double n = v3.norm();
+    n = n*n;
+  }
+
+  foreach (ZoneItem* zi, o.zoneMarkerStore) {
+    addZoneMarker(o.img2det.map(zi->getStart()), o.img2det.map(zi->getEnd()));
+    Vec3D v1 = zi->getMarkerNormal();
+    Vec3D v2 = zoneMarkers().last()->getMarkerNormal();
+    Vec3D v3 = v1-v2;
+    double n = v3.norm();
+    n = n*n;
+  }
+
+  return *this;
 }
 
 void Projector::connectToCrystal(Crystal *c) {
@@ -366,6 +397,27 @@ QList<Vec3D> Projector::getSpotMarkerNormals() {
   return r;
 }
 
+// ----------------------- Handling of Zone Markers -------------
+
+void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
+  ZoneItem* zoneMarker = new ZoneItem(det2img.map(p1), det2img.map(p2), this, imageItemsPlane);
+  zoneMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
+  connect(&spotMarkers(), SIGNAL(itemAdded(int)), zoneMarker, SLOT(updateOptimalZone()));
+  connect(&spotMarkers(), SIGNAL(itemChanged(int)), zoneMarker, SLOT(updateOptimalZone()));
+  connect(&spotMarkers(), SIGNAL(itemRemoved(int)), zoneMarker, SLOT(updateOptimalZone()));
+  zoneMarkers().addItem(zoneMarker);
+}
+
+QList<Vec3D> Projector::getZoneMarkerNormals() {
+  QList<Vec3D> r;
+  foreach (ZoneItem* zi, zoneMarkers())
+    r << zi->getMarkerNormal();
+  return r;
+}
+
+ItemStore<ZoneItem>& Projector::zoneMarkers() {
+  return zoneMarkerStore;
+}
 
 // ---------------  Ruler handling ---------------------------
 ItemStore<RulerItem>& Projector::rulers() {
@@ -390,27 +442,6 @@ QPair<QPointF, QPointF> Projector::getRulerCoordinates(int n) {
 
 
 
-// ----------------------- Handling of Zone Markers -------------
-
-void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
-  ZoneItem* zoneMarker = new ZoneItem(det2img.map(p1), det2img.map(p2), this, imageItemsPlane);
-  zoneMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
-  connect(&spotMarkers(), SIGNAL(itemAdded(int)), zoneMarker, SLOT(updateOptimalZone()));
-  connect(&spotMarkers(), SIGNAL(itemChanged(int)), zoneMarker, SLOT(updateOptimalZone()));
-  connect(&spotMarkers(), SIGNAL(itemRemoved(int)), zoneMarker, SLOT(updateOptimalZone()));
-  zoneMarkers().addItem(zoneMarker);
-}
-
-QList<Vec3D> Projector::getZoneMarkerNormals() {
-  QList<Vec3D> r;
-  foreach (ZoneItem* zi, zoneMarkers())
-    r << zi->getMarkerNormal();
-  return r;
-}
-
-ItemStore<ZoneItem>& Projector::zoneMarkers() {
-  return zoneMarkerStore;
-}
 
 // ------------ Handling of Crop Marker ---------------
 void Projector::showCropMarker() {

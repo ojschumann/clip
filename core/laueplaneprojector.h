@@ -7,6 +7,10 @@ class LauePlaneProjector: public Projector {
   Q_OBJECT
 public:
   LauePlaneProjector(QObject* parent=0);
+
+  virtual Projector& operator=(const Projector& o);
+
+  // Needed for ProjectorFactory
   static Projector* getInstance();
 
   virtual QPointF scattered2det(const Vec3D&) const;
@@ -35,10 +39,6 @@ public:
 
   virtual double TTmin() const;
   virtual double TTmax() const;
-
-  // Functions for fitting parameters
-  virtual double fitParameterValue(unsigned int n);
-  virtual void fitParameterSetValue(unsigned int n, double val);
 
   virtual QDomElement saveToXML(QDomElement base);
 public slots:
@@ -74,8 +74,53 @@ protected:
   double detPhi;
   double detDx;
   double detDy;
+
+  // FitParameterGroups for fitting
+  class DistGroup: public FitParameterGroup {
+  public:
+    DistGroup(LauePlaneProjector* p);
+    virtual double value(int member) const;
+    virtual double epsilon(int member) const;
+    virtual double lowerBound(int member) const;
+    virtual double upperBound(int member) const;
+  protected:
+    virtual void doSetValue(QList<double> values);
+    LauePlaneProjector* projector;
+  };
+
+  class OrientationGroup: public FitParameterGroup {
+  public:
+    OrientationGroup(LauePlaneProjector* p);
+    virtual double value(int member) const;
+    virtual double epsilon(int member) const;
+    virtual double lowerBound(int member) const;
+    virtual double upperBound(int member) const;
+  protected:
+    virtual void doSetValue(QList<double> values);
+    LauePlaneProjector* projector;
+  };
+
+  class ShiftGroup: public FitParameterGroup {
+  public:
+    ShiftGroup(LauePlaneProjector* p);
+    virtual double value(int member) const;
+    virtual double epsilon(int member) const;
+    virtual double lowerBound(int member) const;
+    virtual double upperBound(int member) const;
+  protected:
+    virtual void doSetValue(QList<double> values);
+    LauePlaneProjector* projector;
+  };
+
+  DistGroup distGroup;
+  OrientationGroup orientationGroup;
+  ShiftGroup shiftGroup;
+
 private:
-  LauePlaneProjector(const LauePlaneProjector&) {};
+  LauePlaneProjector(const LauePlaneProjector&):
+      distGroup(this),
+      orientationGroup(this),
+      shiftGroup(this) {};
 };
 
 #endif

@@ -1,59 +1,52 @@
-#include <core/fitobject.h>
+#include "core/fitobject.h"
 
-FitObject::FitObject():fitParameter() {
+FitParameterGroup::~FitParameterGroup()  {
+  foreach (FitParameter* p, groupParameters)
+    delete p;
+  groupParameters.clear();
 }
 
-FitObject::~FitObject() {
-}
-
-void FitObject::setFitParameterNames(QList<QString> names) {
-  fitParameter.clear();
-  for (int i=0; i<names.size(); i++) {
-    FitParameter p;
-    p.name=names[i];
-    p.enabled=false;
-    p.bounds=qMakePair((double)-INFINITY, (double)INFINITY);
-    p.changeHint=1.0;
-    fitParameter << p;
+void FitParameterGroup::setValue() {
+  if (valuesCached) {
+    QList<double> values;
+    foreach(FitParameter* p, groupParameters)
+      values +=p->getCachedValue();
+    doSetValue(values);
   }
+  valuesCached=false;
 }
 
-int FitObject::fitParameterNumber() {
-  return fitParameter.size();
+void FitParameterGroup::addParameter(QString name)  {
+  groupParameters += new FitParameter(name, groupParameters.size(), *this);
 }
 
-QString FitObject::fitParameterName(int n) {
-  if (n<fitParameter.size())
-    return fitParameter[n].name;
-  return "";
+
+
+void FitObject::addParameterGroup(FitParameterGroup* g) {
+  groups << g;
 }
 
-double FitObject::fitParameterValue(int n) {
-  return 0.0;
+QList<FitParameter*> FitObject::allParameters() const {
+  QList<FitParameter*>  list;
+  foreach (FitParameterGroup* g, groups)
+    list += g->parameters();
+  return list;
 }
 
-void FitObject::fitParameterSetValue(int n, double val) {
+QList<FitParameter*> FitObject::changeableParameters() const {
+  QList<FitParameter*>  list;
+  foreach (FitParameterGroup* g, groups)
+    foreach (FitParameter* p, g->parameters())
+      if (p->isChangeable())
+        list += p;
+  return list;
 }
 
-QPair<double, double> FitObject::fitParameterBounds(int n) {
-  if (n<fitParameter.size())
-    return fitParameter[n].bounds;
-  return qMakePair((double)-INFINITY, (double)INFINITY);
-}
-
-double FitObject::fitParameterChangeHint(int n) {
-  if (n<fitParameter.size())
-    return fitParameter[n].changeHint;
-  return 1.0;
-}
-
-bool FitObject::fitParameterEnabled(int n) {
-  if (n<fitParameter.size())
-    return fitParameter[n].enabled;
-  return false;
-}
-
-void FitObject::fitParameterSetEnabled(int n, bool enable) {
-  if (n<fitParameter.size())
-    fitParameter[n].enabled=enable;
+QList<FitParameter*> FitObject::enabledParameters() const {
+  QList<FitParameter*>  list;
+  foreach (FitParameterGroup* g, groups)
+    foreach (FitParameter* p, g->parameters())
+      if (p->isEnabled())
+        list += p;
+  return list;
 }
