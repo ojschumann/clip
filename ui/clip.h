@@ -24,7 +24,7 @@ public:
 private:
   explicit Clip(QWidget *parent = 0);
   Clip(const Clip&);
-virtual ~Clip();
+  virtual ~Clip();
   static Clip* instance;
 signals:
   void projectorRotation(double);

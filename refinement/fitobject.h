@@ -58,6 +58,7 @@ public:
   FitObject(QObject* parent=0): QObject(parent) {}
   virtual ~FitObject() {}
   void addParameterGroup(FitParameterGroup* g);
+  virtual QString FitObjectName()=0;
   QList<FitParameter*> allParameters() const;
   QList<FitParameter*> changeableParameters() const;
   QList<FitParameter*> enabledParameters() const;

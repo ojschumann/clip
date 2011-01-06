@@ -43,7 +43,7 @@ SOURCES += main.cpp\
     tools/vec3D.cpp \
     tools/mat3D.cpp \
     core/crystal.cpp \
-    core/fitobject.cpp \
+    refinement/fitobject.cpp \
     core/projector.cpp \
     tools/objectstore.cpp \
     core/reflection.cpp \
@@ -101,7 +101,8 @@ SOURCES += main.cpp\
     tools/spotitem.cpp \
     indexing/marker.cpp \
     ui/fitdisplay.cpp \
-    refinement/neldermead.cpp
+    refinement/neldermead.cpp \
+    refinement/fitparametermodel.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -109,7 +110,7 @@ HEADERS  += ui/clip.h \
     tools/mat3D.h \
     defs.h \
     core/crystal.h \
-    core/fitobject.h \
+    refinement/fitobject.h \
     core/projector.h \
     tools/objectstore.h \
     core/reflection.h \
@@ -169,7 +170,8 @@ HEADERS  += ui/clip.h \
     tools/spotitem.h \
     indexing/marker.h \
     ui/fitdisplay.h \
-    refinement/neldermead.h
+    refinement/neldermead.h \
+    refinement/fitparametermodel.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

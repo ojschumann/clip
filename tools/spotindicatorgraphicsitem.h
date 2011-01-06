@@ -10,7 +10,7 @@
 class SpotIndicatorGraphicsItem: public QGraphicsItem {
 public:
   SpotIndicatorGraphicsItem();
-virtual ~SpotIndicatorGraphicsItem();
+  virtual ~SpotIndicatorGraphicsItem();
 private:
   SpotIndicatorGraphicsItem(const SpotIndicatorGraphicsItem&);
 public:

@@ -103,7 +103,9 @@ Crystal& Crystal::operator=(const Crystal& c) {
 
 Crystal::~Crystal() {}
 
-
+QString Crystal::FitObjectName() {
+  return "Crystal";
+}
 
 void Crystal::setCell(double _a, double _b, double _c, double _alpha, double _beta, double _gamma) {
   QList<double> c;

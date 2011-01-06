@@ -71,6 +71,10 @@ Projector::~Projector() {
     crystal->removeProjector(this);
 }
 
+QString Projector::FitObjectName() {
+  return displayName();
+}
+
 Projector& Projector::operator=(const Projector& o) {
   det2img = o.det2img;
   img2det = o.img2det;
@@ -84,20 +88,10 @@ Projector& Projector::operator=(const Projector& o) {
 
   foreach (SpotItem* si, o.spotMarkerStore) {
     addSpotMarker(img2det.map(si->pos()));
-    Vec3D v1 = si->getMarkerNormal();
-    Vec3D v2 = spotMarkers().last()->getMarkerNormal();
-    Vec3D v3 = v1-v2;
-    double n = v3.norm();
-    n = n*n;
   }
 
   foreach (ZoneItem* zi, o.zoneMarkerStore) {
     addZoneMarker(o.img2det.map(zi->getStart()), o.img2det.map(zi->getEnd()));
-    Vec3D v1 = zi->getMarkerNormal();
-    Vec3D v2 = zoneMarkers().last()->getMarkerNormal();
-    Vec3D v3 = v1-v2;
-    double n = v3.norm();
-    n = n*n;
   }
 
   return *this;
@@ -307,10 +301,7 @@ void Projector::setRotation(const Mat3D& M) {
 }
 
 void Projector::invalidateMarkerCache() {
-  foreach (SpotItem* si, spotMarkers())
-    si->invalidateCache();
-  foreach (ZoneItem* zi, zoneMarkers())
-    zi->invalidateCache();
+  foreach (AbstractMarkerItem* im, getAllMarkers()) im->invalidateCache();
 }
 
 QGraphicsScene* Projector::getScene() {
@@ -417,6 +408,19 @@ QList<Vec3D> Projector::getZoneMarkerNormals() {
 
 ItemStore<ZoneItem>& Projector::zoneMarkers() {
   return zoneMarkerStore;
+}
+
+// ---------------  General FitMarker Handling--------------------
+
+bool Projector::hasMarkers() {
+  return (spotMarkers().size()>0) || (zoneMarkers().size()>0);
+}
+
+QList<AbstractMarkerItem*> Projector::getAllMarkers() {
+  QList<AbstractMarkerItem*> list;
+  foreach (SpotItem* si, spotMarkers()) list << si;
+  foreach (ZoneItem* zi, zoneMarkers()) list << zi;
+  return list;
 }
 
 // ---------------  Ruler handling ---------------------------
@@ -568,16 +572,16 @@ QDomElement Projector::saveToXML(QDomElement base) {
   e.setAttribute(XML_Projector_Display_spotSize, getSpotSizeFraction());
   e.setAttribute(XML_Projector_Display_spotsEnables, spotsEnabled());
 
-  if (spotMarkerStore.size()>0) {
+  if (spotMarkers().size()>0) {
     e = projector.appendChild(doc.createElement(XML_Projector_SpotMarkers)).toElement();
-    foreach (QGraphicsItem* item, spotMarkerStore) {
+    foreach (QGraphicsItem* item, spotMarkers()) {
       PointToTag(e, XML_Projector_SpotMarkers_marker, item->pos());
     }
   }
 
-  if (zoneMarkerStore.size()>0) {
+  if (zoneMarkers().size()>0) {
     e = projector.appendChild(doc.createElement(XML_Projector_ZoneMarkers)).toElement();
-    foreach (ZoneItem* zi, zoneMarkerStore) {
+    foreach (ZoneItem* zi, zoneMarkers()) {
       zi->saveToXML(e);
     }
   }
@@ -630,7 +634,7 @@ bool Projector::parseXMLElement(QDomElement e) {
   } else if (e.tagName()==XML_Projector_ZoneMarkers) {
     for (QDomElement m=e.firstChildElement(); !m.isNull(); m=m.nextSiblingElement()) {
       addZoneMarker(QPointF(), QPointF());
-      zoneMarkerStore.last()->loadFromXML(m);
+      zoneMarkers().last()->loadFromXML(m);
     }
   } else {
     return false;

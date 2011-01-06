@@ -23,7 +23,7 @@ class ContrastCurves : public QWidget
 
 public:
     explicit ContrastCurves(LaueImage* img, QWidget *parent = 0);
-virtual ~ContrastCurves();
+    virtual ~ContrastCurves();
     void mousePressEvent(QMouseEvent *);
   public slots:
     void loadFromFile(const QString&);

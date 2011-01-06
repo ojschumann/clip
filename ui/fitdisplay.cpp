@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "refinement/fitparametermodel.h"
+
 using namespace std;
 
 FitDisplay::FitDisplay(Crystal* c, QWidget *parent) :
@@ -11,6 +13,9 @@ FitDisplay::FitDisplay(Crystal* c, QWidget *parent) :
     crystal(c)
 {
   ui->setupUi(this);
+
+  FitParameterModel* model = new FitParameterModel(crystal, this);
+  ui->parameterView->setModel(model);
 
 }
 

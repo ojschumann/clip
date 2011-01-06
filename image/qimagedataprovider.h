@@ -26,7 +26,7 @@ public:
   virtual Format format();
 private:
   explicit QImageDataProvider(const QImage& img, QObject *parent = 0);
-  ~QImageDataProvider();
+  virtual ~QImageDataProvider();
   QImageDataProvider(const QImageDataProvider&) {}
   QImage data;
 

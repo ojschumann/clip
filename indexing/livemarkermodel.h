@@ -13,7 +13,7 @@ class LiveMarkerModel : public QAbstractTableModel
   Q_OBJECT
 public:
   explicit LiveMarkerModel(Crystal*, QObject *parent = 0);
-  ~LiveMarkerModel();
+  virtual ~LiveMarkerModel();
 
   virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
   virtual int columnCount(const QModelIndex & parent = QModelIndex()) const ;

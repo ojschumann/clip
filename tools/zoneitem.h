@@ -16,7 +16,7 @@ class ZoneItem : public PropagatingGraphicsObject, public AbstractProjectorMarke
   Q_OBJECT
 public:
   ZoneItem(const QPointF&, const QPointF&, Projector* p, QGraphicsItem* parent=0);
-virtual ~ZoneItem();
+  virtual ~ZoneItem();
   QRectF boundingRect() const;
   QPainterPath shape () const;
   void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);

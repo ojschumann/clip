@@ -10,7 +10,7 @@
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
 #include "tools/objectstore.h"
-#include "core/fitobject.h"
+#include "refinement/fitobject.h"
 #include "core/spacegroup.h"
 #include "core/reflection.h"
 
@@ -34,6 +34,7 @@ public:
   void saveToXML(QDomElement base);
   bool loadFromXML(QDomElement base);
 
+  virtual QString FitObjectName();
 
   int reflectionCount();
   Reflection getReflection(int i);

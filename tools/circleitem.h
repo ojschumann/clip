@@ -8,7 +8,7 @@ class CircleItem : public QGraphicsObject
   Q_OBJECT
 public:
   explicit CircleItem(double r, QGraphicsItem *parent = 0);
-  ~CircleItem();
+  virtual ~CircleItem();
 
 protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant & value );

@@ -1,4 +1,4 @@
-#include "core/fitobject.h"
+#include "refinement/fitobject.h"
 
 FitParameterGroup::~FitParameterGroup()  {
   foreach (FitParameter* p, groupParameters)

@@ -1,83 +1,295 @@
 #include "neldermead.h"
 
-NelderMead::NelderMead(QObject *parent) :
-    QObject(parent)
-{
-}
-
-
-/*
-#include "fitdisplay.h"
-#include "ui_fitdisplay.h"
-
-#include <iostream>
-#include <cmath>
+#include <QtConcurrentRun>
 
 #include "core/crystal.h"
 #include "core/projector.h"
 #include "core/projectorfactory.h"
 #include "tools/abstractmarkeritem.h"
-#include "tools/zipiterator.h"
-#include "tools/spotitem.h"
-#include "tools/zoneitem.h"
-#include "tools/vec3D.h"
 
-using namespace std;
-
-FitDisplay::FitDisplay(Crystal* c, QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::FitDisplay),
-    crystal(c)
+NelderMead::NelderMead(Crystal* c, QObject *parent) :
+    QObject(parent),
+    liveCrystal(c),
+    shouldStop(false)
 {
-  ui->setupUi(this);
+}
 
-  fitCrystal = new Crystal();
-  *fitCrystal = *crystal;
+// Call only in thread.
+//Signal connections need to be between objects in the worker thread
+void NelderMead::init() {
+  Crystal* fitCrystal = new Crystal();
+  *fitCrystal = *liveCrystal;
   fitCrystal->enableUpdate(false);
+  copiedFitObjects << fitCrystal;
 
   connect(fitCrystal, SIGNAL(cellChanged()), this, SLOT(updateTransferMatrix()));
   connect(fitCrystal, SIGNAL(orientationChanged()), this, SLOT(updateTransferMatrix()));
   updateTransferMatrix();
 
-  fitParameters += fitCrystal->allParameters();
-  baseParameters += crystal->allParameters();
+  parameters += fitCrystal->enabledParameters();
 
-  foreach (Projector* p, crystal->getConnectedProjectors()) {
-    if ((p->zoneMarkers().size()>0) || (p->spotMarkers().size()>0)) {
-      Projector* fitP = ProjectorFactory::getInstance().getProjector(p->projectorName());
-      *fitP = *p;
-      fitParameters += fitP->allParameters();
-      baseParameters += p->allParameters();
-      QPair<ZoneItem*, ZoneItem*> zi;
-      foreach(zi, Zip(fitP->zoneMarkers(), p->zoneMarkers())) {
-        FitMarker m;
-        m.marker = zi.first;
-        m.index = zi.second->getIntegerIndex().toType<double>();
-        m.index_sq = m.index.norm_sq();
-        marker << m;
-      }
-      QPair<SpotItem*, SpotItem*> si;
-      foreach(si, Zip(fitP->spotMarkers(), p->spotMarkers())) {
-        FitMarker m;
-        m.marker = si.first;
-        m.index = si.second->getIntegerIndex().toType<double>();
-        m.index_sq = m.index.norm_sq();
-        marker << m;
+  foreach (Projector* liveP, crystal->getConnectedProjectors()) {
+    if (liveP->hasMarkers() && liveP->enabledParameters().size()>0) {
+      Projector* fitP = ProjectorFactory::getInstance().getProjector(liveP->projectorName());
+      *fitP = *liveP;
+      fitP->connectToCrystal(fitCrystal);
+      copiedFitObjects << fitP;
+      parameters += fitP->enabledParameters();
+
+      foreach (AbstractMarkerItem* m, fitP->getAllMarkers()) {
+        markers << MarkerInfo(m);
       }
     }
   }
 }
 
-FitDisplay::~FitDisplay()
-{
-  delete ui;
+
+void NelderMead::start() {
+  threadWatcher.setFuture(QtConcurrent::run(this, &runWrapper));
+}
+
+void NelderMead::runWrapper() {
+  // Funny stuff... runner now lives in this thread.
+  // Thus it could receive signals from stuff created in initSimplex()
+
+  NelderMead* runner = new NelderMead(liveCrystal);
+  connect(runner, SIGNAL(newBestVertex(Vertex)), this, SLOT(setSolution(Vertex)), Qt::QueuedConnection);
+  connect(this, SIGNAL(stopSignal()), runner, SLOT(receiveStop()), Qt::QueuedConnection);
+  runner->init();
+  runner->run();
+  delete runner;
+}
+
+void NelderMead::stop() {
+  emit stopSignal();
+  threadWatcher.waitForFinished();
+}
+
+void NelderMead::receiveStop() {
+  shouldStop = true;
 }
 
 
-void FitDisplay::updateTransferMatrix() {
+double NelderMead::score() {
+  foreach (FitParameter* p, parameters) p->setValue();
+  double score=0;
+  foreach (MarkerInfo m, markers) score += m.score(spotTransferMatrix, zoneTransferMatrix);
+  return score;
+}
+
+double NelderMead::score(Vertex &v) {
+  for (int n=0; n<v.size(); n++)
+    fitParameters.at(n)->prepareValue(v.at(n));
+  v.score = score();
+  return v.score;
+}
+
+
+void NelderMead::run() {
+
+    const int N = fitParameters.size();
+    double alpha = 1.0;
+    double beta = 0.5;
+    double gamma = 2.0;
+
+    // Downhill-Simplex-Verfahren from Nelder and Mead
+
+    // Init the Simplex
+    QList<Vertex> simplex;
+
+    // Set actual Values of parameters as first simplex vertex
+    Vertex v(N);
+    for (int n=0; n<N; n++)
+      v.coordinates[n]= parameters.at(n)->value();
+    simplex << v;
+
+    // Add N more Vertices, with exactely one parameter changed
+    for (int n=0; n<N; n++) {
+      Vertex t(v);
+      t.coordinates[n] += 10.0*fitParameters.at(n)->epsilon();
+      simplex << t;
+    }
+
+    // Score all Elements in the Simplex
+    for (int i=0; i<simplex.size(); i++)
+      score(simplex[i]);
+
+    // And sort the Simplex...
+    qSort(simplex);
+
+    int loop = 0;
+    forever {
+      loop++;
+      if (shouldStop) return;
+
+      double bestLoopScore = simplex.first().score;
+
+      // Take Worst Vertex
+      Vertex W = simplex.takeLast();
+
+      // Calculate center without worst element
+      Vertex CoG;
+      for (int n=0; n<simplex.size(); n++)
+        CoG += simplex[n];
+      CoG *= 1.0/simplex.size();
+
+
+      // Reflect worst element about center and score
+      Vertex R = CoG + (CoG - W)*alpha;
+      score(R);
+
+      if (simplex.first()<R && R<simplex.last()) {
+        // Score is better than second-worst but not better than best
+        // ToDo: insert at right place (bisect)
+        simplex << R;
+        qSort(simplex);
+      } else if (R<simplex.first()) {
+        // Score is better than best, try to extend further
+        Vertex E = CoG + (CoG - W)*gamma;
+        score(E);
+        // add best
+        if (E<R) {
+          simplex.prepend(E);
+        } else {
+          simplex.prepend(R);
+        }
+      } else {
+        // Move worst to the center
+        Vertex C = W + (CoG - W)*beta;
+        score(C);
+        if (C<simplex.last()) {
+          // if good, then take
+          simplex << C;
+          qSort(simplex);
+        } else {
+          // Shrink Simplex aroung best element
+          simplex << W;
+          for (int i=1; i<simplex.size(); i++) {
+            simplex[i] = simplex.first() + (simplex[i] - simplex.first())*beta;
+            score(simplex[i]);
+          }
+          qSort(simplex);
+        }
+      }
+
+      if (simplex.first().score < bestLoopScore) {
+        // We have a better Solution. Publish it
+        emit
+      }
+
+    }
+
+
+
+}
+
+void NelderMead::updateTransferMatrix() {
   spotTransfer = fitCrystal->getRealOrientationMatrix().transposed() * fitCrystal->getRotationMatrix().transposed();
   zoneTransfer = fitCrystal->getReziprocalOrientationMatrix().transposed() * fitCrystal->getRotationMatrix().transposed();
 }
+
+
+NelderMead::MarkerInfo(AbstractMarkerItem *item, const Vec3D &idx):
+    marker(item),
+    index(item->getIntegerIndex().toType<double>()),
+    index_sq(index.norm_sq())
+{
+}
+
+double NelderMead::MarkerInfo::score(const Mat3D& spotTransfer, const Mat3D& zoneTransfer) const {
+  Vec3D n = marker->getMarkerNormal();
+  if (marker->getType()==AbstractMarkerItem::SpotMarker) {
+    n = spotTransfer * n;
+  } else if (m.marker->getType()==AbstractMarkerItem::ZoneMarker) {
+    n = zoneTransfer * n;
+  }
+  n.normalize();
+  double x = index*n;
+  // TODO: Remove sqrt, not nessesary for fitting
+  return sqrt(index_sq - x*x);
+}
+
+NelderMead::Vertex::Vertex() {
+  score = -1;
+}
+
+NelderMead::Vertex::Vertex(int N) {
+  score=-1;
+  coordinates.resize(N);
+  for (int n=0; n<N; n++) coordinates[n]=0.0;
+}
+
+NelderMead::Vertex::Vertex(const Vertex& o) {
+  score = o.score;
+  coordinates = o.coordinates;
+}
+
+NelderMead::Vertex& NelderMead::Vertex::operator=(const Vertex& o) {
+  score = o.score;
+  coordinates = o.coordinates;
+  return *this;
+}
+
+bool NelderMead::Vertex::operator<(const Vertex& o) const {
+  return score<o.score;
+}
+
+NelderMead::Vertex& NelderMead::Vertex::operator+=(const Vertex& o) {
+  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
+  score = -1;
+  for (int n=0; n<coordinates.size(); n++) coordinates[n] += o.coordinates.at(n);
+  return *this;
+}
+
+NelderMead::Vertex& NelderMead::Vertex::operator-=(const Vertex& o) {
+  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
+  score = -1;
+  for (int n=0; n<coordinates.size(); n++) coordinates[n] -= o.coordinates.at(n);
+  return *this;
+}
+
+NelderMead::Vertex& NelderMead::Vertex::operator*=(double scale) {
+  score = -1;
+  for (int n=0; n<coordinates.size(); n++) coordinates[n] *= scale;
+  return *this;
+}
+
+NelderMead::Vertex NelderMead::Vertex::operator+(const Vertex& o) {
+  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
+  Vertex tmp(*this);
+  tmp += o;
+  return tmp;
+}
+
+NelderMead::Vertex NelderMead::Vertex::operator-(const Vertex& o) {
+  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
+  Vertex tmp(*this);
+  tmp -= o;
+  return tmp;
+}
+
+NelderMead::Vertex NelderMead::Vertex::operator*(double scale) const {
+  Vertex tmp(*this);
+  tmp *= scale;
+  return tmp;
+}
+
+double NelderMead::Vertex::at(int n) const {
+  return coordinates.at(n);
+}
+
+int NelderMead::Vertex::size() const {
+  return coordinates.size();
+}
+
+
+
+
+/*
+
+
+
+
 
 double FitDisplay::score() {
   foreach (FitParameter* p, fitParameters) p->setValue();
@@ -185,76 +397,4 @@ void FitDisplay::on_doFit_clicked()
 }
 
 
-FitDisplay::Vertex::Vertex() {
-  score = -1;
-}
-
-FitDisplay::Vertex::Vertex(int N) {
-  score=-1;
-  coordinates.resize(N);
-  for (int n=0; n<N; n++) coordinates[n]=0.0;
-}
-
-FitDisplay::Vertex::Vertex(const Vertex& o) {
-  score = o.score;
-  coordinates = o.coordinates;
-}
-
-FitDisplay::Vertex& FitDisplay::Vertex::operator=(const Vertex& o) {
-  score = o.score;
-  coordinates = o.coordinates;
-  return *this;
-}
-
-bool FitDisplay::Vertex::operator<(const Vertex& o) const {
-  return score<o.score;
-}
-
-FitDisplay::Vertex& FitDisplay::Vertex::operator+=(const Vertex& o) {
-  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
-  score = -1;
-  for (int n=0; n<coordinates.size(); n++) coordinates[n] += o.coordinates.at(n);
-  return *this;
-}
-
-FitDisplay::Vertex& FitDisplay::Vertex::operator-=(const Vertex& o) {
-  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
-  score = -1;
-  for (int n=0; n<coordinates.size(); n++) coordinates[n] -= o.coordinates.at(n);
-  return *this;
-}
-
-FitDisplay::Vertex& FitDisplay::Vertex::operator*=(double scale) {
-  score = -1;
-  for (int n=0; n<coordinates.size(); n++) coordinates[n] *= scale;
-  return *this;
-}
-
-FitDisplay::Vertex FitDisplay::Vertex::operator+(const Vertex& o) {
-  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
-  Vertex tmp(*this);
-  tmp += o;
-  return tmp;
-}
-
-FitDisplay::Vertex FitDisplay::Vertex::operator-(const Vertex& o) {
-  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
-  Vertex tmp(*this);
-  tmp -= o;
-  return tmp;
-}
-
-FitDisplay::Vertex FitDisplay::Vertex::operator*(double scale) const {
-  Vertex tmp(*this);
-  tmp *= scale;
-  return tmp;
-}
-
-double FitDisplay::Vertex::at(int n) const {
-  return coordinates.at(n);
-}
-
-int FitDisplay::Vertex::size() const {
-  return coordinates.size();
-}
 */

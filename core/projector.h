@@ -18,9 +18,9 @@
 #include <QMutex>
 #include <QDomElement>
 
-#include <core/fitobject.h>
-#include <tools/vec3D.h>
-#include <tools/mat3D.h>
+#include "refinement/fitobject.h"
+#include "tools/vec3D.h"
+#include "tools/mat3D.h"
 #include "tools/itemstore.h"
 
 class Crystal;
@@ -28,6 +28,7 @@ class Reflection;
 class RulerItem;
 class SpotItem;
 class ZoneItem;
+class AbstractMarkerItem;
 class CropMarker;
 class LaueImage;
 class SpotIndicatorGraphicsItem;
@@ -73,6 +74,7 @@ public:
 
   virtual QString projectorName()=0;
   virtual QString displayName()=0;
+  virtual QString FitObjectName();
 
   double Qmin() const;
   double Qmax() const;
@@ -98,6 +100,9 @@ public:
   ItemStore<ZoneItem>& zoneMarkers();
   void addZoneMarker(const QPointF& p1, const QPointF& p2);
   QList<Vec3D> getZoneMarkerNormals();
+
+  bool hasMarkers();
+  QList<AbstractMarkerItem*> getAllMarkers();
 
   ItemStore<RulerItem>& rulers();
   void addRuler(const QPointF& p1, const QPointF& p2);

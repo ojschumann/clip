@@ -7,24 +7,24 @@ class StereoProjector;
 
 
 namespace Ui {
-    class StereoCfg;
+  class StereoCfg;
 }
 
 class StereoCfg : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    explicit StereoCfg(StereoProjector*, QWidget *parent = 0);
-virtual ~StereoCfg();
-  public slots:
-    void slotSetQRange();
-    void slotLoadParams();
-    void slotSetProjectionDirection();
-    void slotUpdateRenderHints();
+  explicit StereoCfg(StereoProjector*, QWidget *parent = 0);
+  virtual ~StereoCfg();
+public slots:
+  void slotSetQRange();
+  void slotLoadParams();
+  void slotSetProjectionDirection();
+  void slotUpdateRenderHints();
 private:
-    Ui::StereoCfg *ui;
-    StereoProjector* projector;
+  Ui::StereoCfg *ui;
+  StereoProjector* projector;
 };
 
 #endif // STEREOCFG_H

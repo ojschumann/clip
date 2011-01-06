@@ -41,28 +41,20 @@ void LiveMarkerModel::deleteMarker(AbstractMarkerItem* m) {
 }
 
 void LiveMarkerModel::observeProjector(Projector* p) {
-  foreach (SpotItem* si, p->spotMarkers()) {
-    addMarker(si);
-  }
+  markers += p->getAllMarkers();
   connect(&p->spotMarkers(), SIGNAL(itemAdded(int)), this, SLOT(spotMarkerAdded(int)));
   connect(&p->spotMarkers(), SIGNAL(itemAboutToBeRemoved(int)), this, SLOT(spotMarkerRemoved(int)));
-  foreach (ZoneItem* zi, p->zoneMarkers()) {
-    addMarker(zi);
-  }
   connect(&p->zoneMarkers(), SIGNAL(itemAdded(int)), this, SLOT(zoneMarkerAdded(int)));
   connect(&p->zoneMarkers(), SIGNAL(itemAboutToBeRemoved(int)), this, SLOT(zoneMarkerRemoved(int)));
 }
 
 void LiveMarkerModel::forgetProjector(Projector* p) {
-  foreach (SpotItem* si, p->spotMarkers()) {
-    deleteMarker(si);
-    si->disconnect(this);
+  foreach (AbstractMarkerItem* mi, p->getAllMarkers()) {
+    deleteMarker(mi);
+    if (SpotItem* si=dynamic_cast<SpotItem*>(mi)) si->disconnect(this);
+    if (ZoneItem* zi=dynamic_cast<ZoneItem*>(mi)) zi->disconnect(this);
   }
   p->spotMarkers().disconnect(this);
-  foreach (ZoneItem* zi, p->zoneMarkers()) {
-    deleteMarker(zi);
-    zi->disconnect(this);
-  }
   p->zoneMarkers().disconnect(this);
 }
 

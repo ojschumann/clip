@@ -19,7 +19,7 @@ class CrystalDisplay : public QMainWindow
 
 public:
   explicit CrystalDisplay(QWidget *parent = 0);
-virtual ~CrystalDisplay();
+  virtual ~CrystalDisplay();
 
   void loadFromXML(QDomElement base);
   void saveToXML(QDomElement base);

@@ -15,7 +15,7 @@ class MouseInfoDisplay : public QWidget
 
 public:
   explicit MouseInfoDisplay(QWidget *parent = 0);
-virtual ~MouseInfoDisplay();
+  virtual ~MouseInfoDisplay();
 public slots:
   void showMouseInfo(MousePositionInfo);
 private:

@@ -9,6 +9,9 @@ ReflectionInfo (port and enhance)
     2Theta
     Image Positon (Pixel x,y) and Image Value (at point, mapped to RGB)
 
+SpotMarker and ZoneMarker
+  Check mapping of start() and end(). If possible let Spot/ZoneMaker do the conversion
+
 Lock/Unlock Crystal and Projector for large updates (like from fit)
   * lock()
   * setOrientation()
