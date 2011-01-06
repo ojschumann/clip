@@ -34,8 +34,29 @@ private:
     Vec3D index;
     double index_sq;
   };
+  class Vertex {
+  public:
+    Vertex();
+    Vertex(int N);
+    Vertex(const Vertex& o);
+    double score;
+    QVector<double> coordinates;
+
+    bool operator<(const Vertex& o) const;
+    Vertex& operator=(const Vertex& o);
+    Vertex& operator+=(const Vertex& o);
+    Vertex& operator-=(const Vertex& o);
+    Vertex& operator*=(double scale);
+    Vertex operator+(const Vertex& o);
+    Vertex operator-(const Vertex& o);
+    Vertex operator*(double scale) const;
+
+    double at(int n) const;
+    int size() const;
+  };
 
   double score();
+  double score(Vertex& v);
 
   Ui::FitDisplay *ui;
   Crystal* crystal;
@@ -51,21 +72,5 @@ private:
 };
 
 
-template <int N, FitDisplay* fit> class Vertex {
-public:
-  Vertex();
-  Vertex(const Vertex& o);
-  double score;
-  QVector<double> coordinates;
-
-  bool operator<(const Vertex& o) const;
-  Vertex& operator=(const Vertex& o);
-  Vertex& operator+=(const Vertex& o);
-  Vertex& operator-=(const Vertex& o);
-  Vertex& operator*=(double scale);
-  Vertex operator+(const Vertex& o) const;
-  Vertex operator-(const Vertex& o) const;
-  Vertex operator*(double scale) const;
-};
 
 #endif // FITDISPLAY_H

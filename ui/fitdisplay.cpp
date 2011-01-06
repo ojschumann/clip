@@ -24,6 +24,7 @@ FitDisplay::FitDisplay(Crystal* c, QWidget *parent) :
 
   fitCrystal = new Crystal();
   *fitCrystal = *crystal;
+  fitCrystal->enableUpdate(false);
 
   connect(fitCrystal, SIGNAL(cellChanged()), this, SLOT(updateTransferMatrix()));
   connect(fitCrystal, SIGNAL(orientationChanged()), this, SLOT(updateTransferMatrix()));
@@ -87,6 +88,13 @@ double FitDisplay::score() {
   return score;
 }
 
+double FitDisplay::score(Vertex &v) {
+  for (int n=0; n<v.size(); n++)
+    fitParameters.at(n)->prepareValue(v.at(n));
+  v.score = score();
+  return v.score;
+}
+
 void FitDisplay::on_doFit_clicked()
 {
   int N = fitParameters.size();
@@ -96,126 +104,147 @@ void FitDisplay::on_doFit_clicked()
 
   // Versuch des Downhill-Simplex-Verfahrens.....
 
-  Vertex<N, this> v;
+  Vertex v(N);
   for (int n=0; n<N; n++)
     v.coordinates[n]= fitParameters.at(n)->value();
 
-  QList< Vertex<N, this> > simplex;
+  QList<Vertex> simplex;
 
   simplex << v;
 
   for (int n=0; n<N; n++) {
-    Vertex<N, this> t(v);
-    t.coordinates[n] += fitParameters.at(n)->epsilon();
+    Vertex t(v);
+    t.coordinates[n] += 10.0*fitParameters.at(n)->epsilon();
     simplex << t;
   }
 
   for (int i=0; i<simplex.size(); i++) {
-    for (int n=0; n<N; n++) {
-      fitParameters.at(n)->prepareValue(simplex[i].coordinates[n]);
-    }
-    simplex[i].score = score();
+    score(simplex[i]);
   }
 
   qSort(simplex);
-  for (int i=0; i<N; i++) {
-    baseParameters.at(i)->prepareValue(simplex.last().coordinates.at(i));
-  }
-  foreach (FitParameter* p, baseParameters) p->setValue();
-  return;
-  for (int loop=0; loop<30; loop++) {
+
+  for (int loop=0; loop<100; loop++) {
+    cout << simplex.first().score << endl;
+    // Take Worst Vertex
+
+    Vertex W = simplex.takeLast();
+    // Calc center without worst element
+    Vertex CoG;
+    for (int n=0; n<simplex.size(); n++)
+      CoG += simplex[n];
+    CoG *= 1.0/simplex.size();
 
 
-    Vertex<N, this> M();
-    for (int n=0; n<simplex.size()-1; n++)
-      M += simplex[n];
-    M *= 2.0/(simplex.size()-1);
-
-    Vertex<N, this> L();
-    L = M - simplex.last()*alpha;
-
-    for (int n=0; n<N; n++) {
-      fitParameters.at(n)->prepareValue(L.coordinates[n]);
-    }
-    L.score = score();
-    if (L<simplex.first()) {
-      Vertex<N, this> X();
-      X = M - simplex.last()*gamma;
-      for (int n=0; n<N; n++) {
-        fitParameters.at(n)->prepareValue(X.coordinates[n]);
-      }
-      X.score = score();
-
-      simplex.removeLast();
-      if (X<L) {
-        simplex.prepend(X);
+    // Reflect worst element about center
+    Vertex R = CoG + (CoG - W)*alpha;
+    score(R);
+    // Score is better than best...
+    if (simplex.first()<R && R<simplex.last()) {
+      // ToDo: insert at right place
+      simplex << R;
+      qSort(simplex);
+    } else if (R<simplex.first()) {
+      Vertex E = CoG + (CoG - W)*gamma;
+      score(E);
+      if (E<R) {
+        simplex.prepend(E);
       } else {
-        simplex.prepend(L);
+        simplex.prepend(R);
+      }
+    } else {
+      Vertex C = W + (CoG - W)*beta;
+      score(C);
+      if (C<simplex.last()) {
+        simplex << C;
+        qSort(simplex);
+      } else {
+        simplex << W;
+        for (int i=1; i<simplex.size(); i++) {
+          simplex[i] = simplex.first() + (simplex[i] - simplex.first())*beta;
+          score(simplex[i]);
+        }
+        qSort(simplex);
       }
     }
 
 
   }
-
+  for (int n=0; n<N; n++) baseParameters.at(n)->prepareValue(simplex.first().at(n));
+  for (int n=0; n<N; n++) baseParameters.at(n)->setValue();
 
 }
 
 
+FitDisplay::Vertex::Vertex() {
+  score = -1;
+}
 
-template<int N, FitDisplay* fit> Vertex<N, fit>::Vertex() {
+FitDisplay::Vertex::Vertex(int N) {
   score=-1;
   coordinates.resize(N);
   for (int n=0; n<N; n++) coordinates[n]=0.0;
 }
 
-template<int N, FitDisplay* fit> Vertex<N,fit>& Vertex<N, fit>::operator=(const Vertex<N, fit>& o) {
+FitDisplay::Vertex::Vertex(const Vertex& o) {
+  score = o.score;
+  coordinates = o.coordinates;
+}
+
+FitDisplay::Vertex& FitDisplay::Vertex::operator=(const Vertex& o) {
   score = o.score;
   coordinates = o.coordinates;
   return *this;
 }
 
-template<int N, FitDisplay* fit> Vertex<N, fit>::Vertex(const Vertex<N, fit>& o) {
-  score = o.score;
-  coordinates = o.coordinates;
-}
-
-
-template<int N, FitDisplay* fit> bool Vertex<N, fit>::operator<(const Vertex<N, fit>& o) const {
+bool FitDisplay::Vertex::operator<(const Vertex& o) const {
   return score<o.score;
 }
 
-template<int N, FitDisplay* fit> Vertex<N, fit>& Vertex<N, fit>::operator+=(const Vertex<N, fit>& o) {
+FitDisplay::Vertex& FitDisplay::Vertex::operator+=(const Vertex& o) {
+  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
   score = -1;
   for (int n=0; n<coordinates.size(); n++) coordinates[n] += o.coordinates.at(n);
   return *this;
 }
 
-template<int N, FitDisplay* fit> Vertex<N, fit>& Vertex<N, fit>::operator-=(const Vertex<N, fit>& o) {
+FitDisplay::Vertex& FitDisplay::Vertex::operator-=(const Vertex& o) {
+  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
   score = -1;
   for (int n=0; n<coordinates.size(); n++) coordinates[n] -= o.coordinates.at(n);
   return *this;
 }
 
-template<int N, FitDisplay* fit> Vertex<N, fit>& Vertex<N, fit>::operator*=(double scale) {
+FitDisplay::Vertex& FitDisplay::Vertex::operator*=(double scale) {
   score = -1;
   for (int n=0; n<coordinates.size(); n++) coordinates[n] *= scale;
   return *this;
 }
 
-template<int N, FitDisplay* fit> Vertex<N, fit> Vertex<N, fit>::operator+(const Vertex<N, fit>& o) const {
-  Vertex<N, fit> tmp(*this);
+FitDisplay::Vertex FitDisplay::Vertex::operator+(const Vertex& o) {
+  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
+  Vertex tmp(*this);
   tmp += o;
   return tmp;
 }
 
-template<int N, FitDisplay* fit> Vertex<N, fit> Vertex<N, fit>::operator-(const Vertex<N, fit>& o) const {
-  Vertex<N, fit> tmp(*this);
+FitDisplay::Vertex FitDisplay::Vertex::operator-(const Vertex& o) {
+  if (coordinates.empty()) coordinates.resize(o.coordinates.size());
+  Vertex tmp(*this);
   tmp -= o;
   return tmp;
 }
 
-template<int N, FitDisplay* fit> Vertex<N, fit> Vertex<N, fit>::operator*(double scale) const {
-  Vertex<N, fit> tmp(*this);
+FitDisplay::Vertex FitDisplay::Vertex::operator*(double scale) const {
+  Vertex tmp(*this);
   tmp *= scale;
   return tmp;
+}
+
+double FitDisplay::Vertex::at(int n) const {
+  return coordinates.at(n);
+}
+
+int FitDisplay::Vertex::size() const {
+  return coordinates.size();
 }

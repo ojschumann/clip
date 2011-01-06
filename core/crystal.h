@@ -17,7 +17,7 @@
 class Projector;
 
 
-class Crystal: public QObject, public FitObject {
+class Crystal: public FitObject {
   Q_OBJECT
 public:
   enum RotationAxisType {
@@ -27,7 +27,7 @@ public:
   };
 
   Crystal(QObject* parent=0);
-  ~Crystal();
+  virtual ~Crystal();
 
   Crystal& operator=(const Crystal& o);
 
@@ -160,7 +160,21 @@ private:
     Crystal* crystal;
   };
 
+  // FitParameterGroups for fitting
+  class OrientationGroup: public FitParameterGroup {
+  public:
+    OrientationGroup(Crystal* c);
+    virtual double value(int member) const;
+    virtual double epsilon(int member) const;
+    virtual double lowerBound(int member) const;
+    virtual double upperBound(int member) const;
+  protected:
+    virtual void doSetValue(QList<double> values);
+    Crystal* crystal;
+  };
+
   CellGroup cellGroup;
+  OrientationGroup orientationGroup;
 
 };
 

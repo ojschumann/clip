@@ -1,5 +1,5 @@
 Refinement (basically new)
-  Optional show state after each iteration
+  Optional show state after each iteration or after some time (250 ms)
 
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
@@ -8,6 +8,13 @@ ReflectionInfo (port and enhance)
     Direction of scatter and direction of normal
     2Theta
     Image Positon (Pixel x,y) and Image Value (at point, mapped to RGB)
+
+Lock/Unlock Crystal and Projector for large updates (like from fit)
+  * lock()
+  * setOrientation()
+  * setDetSize()
+  * setCell()
+  * unlock()
 
 Allow to "print" to pdf/png/jpeg
 Implement printing (to paper :-))

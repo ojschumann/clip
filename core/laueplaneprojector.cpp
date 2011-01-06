@@ -113,7 +113,6 @@ Vec3D LauePlaneProjector::det2normal(const QPointF& p, bool& b)  const {
 }
 
 void LauePlaneProjector::setDetSize(double dist, double width, double height) {
-  cout << "SetDetSize" << dist << " " << width << " " << height << endl;
   if ((detDist!=dist) or (detWidth!=width) or (detHeight!=height)) {
     detDist=dist;
     detWidth=width;

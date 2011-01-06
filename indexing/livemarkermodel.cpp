@@ -103,6 +103,12 @@ void LiveMarkerModel::markerChanged() {
 }
 
 void LiveMarkerModel::orientationChanged() {
+  double score = 0.0;
+  foreach (AbstractMarkerItem* item, markers) {
+    score += item->getBestScore();
+  }
+  cout << "Sum of Score = " << score << endl;
+
   emit dataChanged(index(0, 0), index(rowCount()-1, columnCount()-1));
 }
 

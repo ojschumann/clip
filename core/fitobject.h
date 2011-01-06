@@ -1,16 +1,16 @@
 #ifndef __FITOBJECT_H__
 #define __FITOBJECT_H__
 
-#include <QtCore/QList>
-#include <QtCore/QPair>
-#include <cmath>
+#include <QObject>
+#include <QList>
+
 
 class FitParameter;
 
 class FitParameterGroup {
 public:
   FitParameterGroup() { valuesCached = false; }
-  ~FitParameterGroup();
+  virtual ~FitParameterGroup();
   QList<FitParameter*> parameters() const { return groupParameters; }
   void notifyCached() { valuesCached = true; }
   void setValue();
@@ -52,9 +52,11 @@ protected:
 
 
 
-class FitObject {
+class FitObject: public QObject {
+  Q_OBJECT
 public:
-  FitObject() {}
+  FitObject(QObject* parent=0): QObject(parent) {}
+  virtual ~FitObject() {}
   void addParameterGroup(FitParameterGroup* g);
   QList<FitParameter*> allParameters() const;
   QList<FitParameter*> changeableParameters() const;

@@ -27,8 +27,7 @@
 using namespace std;
 
 Projector::Projector(QObject *parent):
-    QObject(parent),
-    FitObject(),
+    FitObject(parent),
     decorationItems(),
     textMarkerItems(),
     spotMarkerStore(this),
@@ -61,6 +60,7 @@ Projector::Projector(QObject *parent):
   connect(this, SIGNAL(textSizeChanged(double)), this, SLOT(reflectionsUpdated()));
 
   QTimer::singleShot(0, this, SLOT(decorateScene()));
+  connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(invalidateMarkerCache()));
   connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
 };

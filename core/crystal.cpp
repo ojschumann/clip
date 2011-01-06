@@ -54,8 +54,7 @@ public:
 
 
 Crystal::Crystal(QObject* parent):
-    QObject(parent),
-    FitObject(),
+    FitObject(parent),
     MReal(),
     MReziprocal(),
     MRot(),
@@ -63,7 +62,8 @@ Crystal::Crystal(QObject* parent):
     rotationAxis(1,0,0),
     spaceGroup(this),
     reflections(),
-    cellGroup(this)
+    cellGroup(this),
+    orientationGroup(this)
 {
   spaceGroup.setGroupSymbol("P1");
   internalSetCell(4.0, 4.0, 4.0, 90.0, 90.0, 90.0);
@@ -83,6 +83,7 @@ Crystal::Crystal(QObject* parent):
   generateReflections();
 
   addParameterGroup(&cellGroup);
+  addParameterGroup(&orientationGroup);
 }
 
 Crystal& Crystal::operator=(const Crystal& c) {
@@ -674,3 +675,39 @@ double Crystal::CellGroup::upperBound(int member) const {
   return 170;
 }
 
+Crystal::OrientationGroup::OrientationGroup(Crystal* c): crystal(c) {
+  addParameter("omega");
+  addParameter("phi");
+  addParameter("chi");
+}
+
+double Crystal::OrientationGroup::value(int member) const {
+  double omega, chi, phi;
+  crystal->calcEulerAngles(omega, phi, chi);
+  if (member==0) {
+    return omega;
+  } else if (member==1) {
+    return phi;
+  } else if (member==2) {
+    return chi;
+  }
+  return -1.0;
+}
+
+void Crystal::OrientationGroup::doSetValue(QList<double> values) {
+  crystal->setEulerAngles(values.at(0),
+                           values.at(1),
+                           values.at(2));
+}
+
+double Crystal::OrientationGroup::epsilon(int member) const {
+  return 0.0001;
+}
+
+double Crystal::OrientationGroup::lowerBound(int member) const {
+  return -360;
+}
+
+double Crystal::OrientationGroup::upperBound(int member) const {
+  return 360;
+}

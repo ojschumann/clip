@@ -33,7 +33,7 @@ class LaueImage;
 class SpotIndicatorGraphicsItem;
 
 
-class Projector: public QObject, public FitObject {
+class Projector: public FitObject {
   Q_OBJECT
 public:
   Projector(QObject* parent=0);
