@@ -15,7 +15,7 @@ class LauePlaneCfg : public QWidget
 
 public:
   explicit LauePlaneCfg(LauePlaneProjector*, QWidget *parent = 0);
-  ~LauePlaneCfg();
+virtual ~LauePlaneCfg();
 public slots:
   void slotSetQRange();
   void slotLoadParams();

@@ -18,7 +18,7 @@ class IndexDisplay : public QWidget
 
 public:
     explicit IndexDisplay(Crystal* _c, QWidget *parent = 0);
-    ~IndexDisplay();
+virtual ~IndexDisplay();
 signals:
     void stopIndexer();
 private:

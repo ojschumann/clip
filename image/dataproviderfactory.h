@@ -20,7 +20,7 @@ public:
 private:
   explicit DataProviderFactory();
   DataProviderFactory(const DataProviderFactory&);
-  ~DataProviderFactory();
+  virtual ~DataProviderFactory();
 
   QMultiMap<int, DataProvider::ImageFactoryClass*> imageLoaders;
 

@@ -9,7 +9,7 @@ class AbstractMonoScaler : public DataScaler {
   Q_OBJECT
 public:
   explicit AbstractMonoScaler(DataProvider* dp, QObject *parent = 0): DataScaler(dp, parent) {}
-  ~AbstractMonoScaler() {}
+  virtual ~AbstractMonoScaler() {}
 protected slots:
   virtual void setHistogramEqualisation(bool)=0;
 };
@@ -18,7 +18,7 @@ template <typename T> class SimpleMonochromScaler : public AbstractMonoScaler
 {
 public:
   static DataScaler* getScaler(DataProvider*, QObject*);
-  ~SimpleMonochromScaler();
+  virtual ~SimpleMonochromScaler();
   virtual void updateContrastMapping();
   QList<QWidget*> toolboxPages();
 protected:

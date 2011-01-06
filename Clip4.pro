@@ -100,7 +100,8 @@ SOURCES += main.cpp\
     tools/abstractmarkeritem.cpp \
     tools/spotitem.cpp \
     indexing/marker.cpp \
-    ui/fitdisplay.cpp
+    ui/fitdisplay.cpp \
+    refinement/neldermead.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -167,7 +168,8 @@ HEADERS  += ui/clip.h \
     tools/abstractmarkeritem.h \
     tools/spotitem.h \
     indexing/marker.h \
-    ui/fitdisplay.h
+    ui/fitdisplay.h \
+    refinement/neldermead.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

@@ -12,7 +12,7 @@
 class ImageTransfer {
 public:
   ImageTransfer();
-  ~ImageTransfer();
+  virtual ~ImageTransfer();
 
   void setData(int width, int height, int format, char *data, int len);
   QList<BezierCurve> getTransferCurves();

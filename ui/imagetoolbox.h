@@ -15,7 +15,7 @@ class ImageToolbox : public QMainWindow
 
 public:
   explicit ImageToolbox(Projector* p, QWidget *parent = 0);
-  ~ImageToolbox();
+  virtual ~ImageToolbox();
    Ui::ImageToolbox *ui;
 protected:
    Projector* projector;

@@ -19,7 +19,7 @@ public:
   private:
     explicit ProjectorFactory();
     ProjectorFactory(const ProjectorFactory&);
-    ~ProjectorFactory();
+    virtual ~ProjectorFactory();
 
     QMap<QString, Provider> providers;
 

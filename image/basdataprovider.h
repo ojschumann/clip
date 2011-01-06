@@ -19,7 +19,7 @@ public:
     DataProvider* getProvider(QString, QObject* = 0);
   };
 
-  ~BasDataProvider();
+  virtual ~BasDataProvider();
 
   virtual const void* getData();
   virtual QSize size();

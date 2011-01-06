@@ -18,7 +18,7 @@ public:
 private:
   explicit DataScalerFactory();
   DataScalerFactory(const DataScalerFactory&);
-  ~DataScalerFactory();
+  virtual ~DataScalerFactory();
 
   QMap<DataProvider::Format, ScalerGenerator> scalerGenerators;
 

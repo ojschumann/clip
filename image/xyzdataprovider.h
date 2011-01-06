@@ -16,7 +16,7 @@ public:
     QStringList fileFormatFilters();
     DataProvider* getProvider(QString, QObject* = 0);
   };
-  ~XYZDataProvider();
+  virtual ~XYZDataProvider();
 
   virtual void saveToXML(QDomElement);
   virtual void loadFromXML(QDomElement);

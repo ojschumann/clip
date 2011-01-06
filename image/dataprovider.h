@@ -31,7 +31,7 @@ public:
 
   static DataProvider* loadImage(const QString&);
   static DataProvider* openDevice();
-  ~DataProvider();
+  virtual ~DataProvider();
 
   void insertFileInformation(const QString&);
   virtual void saveToXML(QDomElement);

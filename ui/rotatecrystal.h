@@ -16,7 +16,7 @@ class RotateCrystal : public QWidget
 
 public:
   explicit RotateCrystal(QWidget *parent = 0);
-  ~RotateCrystal();
+virtual ~RotateCrystal();
 public slots:
   void rotAxisChanged();
   void addRotationAngle(double);

@@ -10,7 +10,7 @@ class SimpleRGBScaler : public DataScaler
   Q_OBJECT
 public:
   static DataScaler* getScaler(DataProvider*, QObject*);
-  ~SimpleRGBScaler();
+  virtual ~SimpleRGBScaler();
 protected:
   virtual QRgb getRGB(const QPointF &);
 private:

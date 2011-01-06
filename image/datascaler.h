@@ -16,7 +16,7 @@ class DataScaler : public QObject
   Q_OBJECT
 public:
   explicit DataScaler(DataProvider* dp, QObject *parent = 0);
-  ~DataScaler();
+  virtual ~DataScaler();
 
   void saveToXML(QDomElement);
   void loadFromXML(QDomElement);

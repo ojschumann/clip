@@ -18,7 +18,7 @@ class Reorient : public QWidget
 
 public:
   explicit Reorient(QWidget *parent = 0);
-  ~Reorient();
+virtual ~Reorient();
 
 public slots:
   void updateDisplay();

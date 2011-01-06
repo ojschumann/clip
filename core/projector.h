@@ -37,7 +37,7 @@ class Projector: public FitObject {
   Q_OBJECT
 public:
   Projector(QObject* parent=0);
-  ~Projector();
+  virtual ~Projector();
 
   virtual Projector& operator=(const Projector& o);
 

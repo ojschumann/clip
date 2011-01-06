@@ -18,7 +18,7 @@ class LaueImage : public QObject
   Q_OBJECT
 public:
   explicit LaueImage(QObject *parent = 0);
-  ~LaueImage();
+  virtual ~LaueImage();
 
   void startOpenFile(QString filename, QDomElement base=QDomElement());
 

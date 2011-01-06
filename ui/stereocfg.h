@@ -16,7 +16,7 @@ class StereoCfg : public QWidget
 
 public:
     explicit StereoCfg(StereoProjector*, QWidget *parent = 0);
-    ~StereoCfg();
+virtual ~StereoCfg();
   public slots:
     void slotSetQRange();
     void slotLoadParams();
