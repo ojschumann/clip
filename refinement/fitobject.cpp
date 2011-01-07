@@ -26,6 +26,16 @@ void FitObject::addParameterGroup(FitParameterGroup* g) {
   groups << g;
 }
 
+FitObject& FitObject::operator=(const FitObject& o) {
+  QList<FitParameter*> tP = allParameters();
+  QList<FitParameter*> oP = o.allParameters();
+  for (int n=0; n<tP.size(); n++) {
+    tP.at(n)->setChangeable(oP.at(n)->isChangeable());
+    tP.at(n)->setEnabled(oP.at(n)->isEnabled());
+  }
+
+}
+
 QList<FitParameter*> FitObject::allParameters() const {
   QList<FitParameter*>  list;
   foreach (FitParameterGroup* g, groups)

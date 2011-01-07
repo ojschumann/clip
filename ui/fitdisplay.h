@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 class Crystal;
+class NelderMead;
 
 namespace Ui {
   class FitDisplay;
@@ -22,6 +23,7 @@ private slots:
 private:
   Ui::FitDisplay *ui;
   Crystal* crystal;
+  NelderMead* fitter;
 };
 
 

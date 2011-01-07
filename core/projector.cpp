@@ -94,6 +94,8 @@ Projector& Projector::operator=(const Projector& o) {
     addZoneMarker(o.img2det.map(zi->getStart()), o.img2det.map(zi->getEnd()));
   }
 
+  FitObject::operator =(o);
+
   return *this;
 }
 

@@ -1,11 +1,15 @@
 #include "neldermead.h"
 
 #include <QtConcurrentRun>
+#include <QMetaType>
+#include <iostream>
 
 #include "core/crystal.h"
 #include "core/projector.h"
 #include "core/projectorfactory.h"
 #include "tools/abstractmarkeritem.h"
+
+using namespace std;
 
 NelderMead::NelderMead(Crystal* c, QObject *parent) :
     QObject(parent),
@@ -22,14 +26,14 @@ void NelderMead::init() {
   fitCrystal->enableUpdate(false);
   copiedFitObjects << fitCrystal;
 
-  connect(fitCrystal, SIGNAL(cellChanged()), this, SLOT(updateTransferMatrix()));
-  connect(fitCrystal, SIGNAL(orientationChanged()), this, SLOT(updateTransferMatrix()));
-  updateTransferMatrix();
+  connect(fitCrystal, SIGNAL(cellChanged()), this, SLOT(updateTransformationMatrices()));
+  connect(fitCrystal, SIGNAL(orientationChanged()), this, SLOT(updateTransformationMatrices()));
+  updateTransformationMatrices();
 
   parameters += fitCrystal->enabledParameters();
 
-  foreach (Projector* liveP, crystal->getConnectedProjectors()) {
-    if (liveP->hasMarkers() && liveP->enabledParameters().size()>0) {
+  foreach (Projector* liveP, liveCrystal->getConnectedProjectors()) {
+    if (liveP->hasMarkers()) {
       Projector* fitP = ProjectorFactory::getInstance().getProjector(liveP->projectorName());
       *fitP = *liveP;
       fitP->connectToCrystal(fitCrystal);
@@ -45,7 +49,7 @@ void NelderMead::init() {
 
 
 void NelderMead::start() {
-  threadWatcher.setFuture(QtConcurrent::run(this, &runWrapper));
+  threadWatcher.setFuture(QtConcurrent::run(this, &NelderMead::runWrapper));
 }
 
 void NelderMead::runWrapper() {
@@ -53,7 +57,7 @@ void NelderMead::runWrapper() {
   // Thus it could receive signals from stuff created in initSimplex()
 
   NelderMead* runner = new NelderMead(liveCrystal);
-  connect(runner, SIGNAL(newBestVertex(Vertex)), this, SLOT(setSolution(Vertex)), Qt::QueuedConnection);
+  connect(runner, SIGNAL(newBestVertex(double, QList<double>)), this, SLOT(receiveSolution(double, QList<double>)), Qt::QueuedConnection);
   connect(this, SIGNAL(stopSignal()), runner, SLOT(receiveStop()), Qt::QueuedConnection);
   runner->init();
   runner->run();
@@ -79,7 +83,7 @@ double NelderMead::score() {
 
 double NelderMead::score(Vertex &v) {
   for (int n=0; n<v.size(); n++)
-    fitParameters.at(n)->prepareValue(v.at(n));
+    parameters.at(n)->prepareValue(v.at(n));
   v.score = score();
   return v.score;
 }
@@ -87,109 +91,131 @@ double NelderMead::score(Vertex &v) {
 
 void NelderMead::run() {
 
-    const int N = fitParameters.size();
-    double alpha = 1.0;
-    double beta = 0.5;
-    double gamma = 2.0;
+  const int N = parameters.size();
+  double alpha = 1.0;
+  double beta = 0.5;
+  double gamma = 2.0;
 
-    // Downhill-Simplex-Verfahren from Nelder and Mead
+  // Downhill-Simplex-Verfahren from Nelder and Mead
 
-    // Init the Simplex
-    QList<Vertex> simplex;
+  // Init the Simplex
+  QList<Vertex> simplex;
 
-    // Set actual Values of parameters as first simplex vertex
-    Vertex v(N);
-    for (int n=0; n<N; n++)
-      v.coordinates[n]= parameters.at(n)->value();
-    simplex << v;
+  // Set actual Values of parameters as first simplex vertex
+  Vertex v(N);
+  for (int n=0; n<N; n++)
+    v.coordinates[n]= parameters.at(n)->value();
+  simplex << v;
 
-    // Add N more Vertices, with exactely one parameter changed
-    for (int n=0; n<N; n++) {
-      Vertex t(v);
-      t.coordinates[n] += 10.0*fitParameters.at(n)->epsilon();
-      simplex << t;
-    }
+  // Add N more Vertices, with exactely one parameter changed
+  for (int n=0; n<N; n++) {
+    Vertex t(v);
+    t.coordinates[n] += 10.0*parameters.at(n)->epsilon();
+    simplex << t;
+  }
 
-    // Score all Elements in the Simplex
-    for (int i=0; i<simplex.size(); i++)
-      score(simplex[i]);
+  // Score all Elements in the Simplex
+  for (int i=0; i<simplex.size(); i++)
+    score(simplex[i]);
 
-    // And sort the Simplex...
-    qSort(simplex);
+  // And sort the Simplex...
+  qSort(simplex);
 
-    int loop = 0;
-    forever {
-      loop++;
-      if (shouldStop) return;
+  int loop = 0;
+  forever {
+    loop++;
+    if (shouldStop) return;
 
-      double bestLoopScore = simplex.first().score;
+    double bestLoopScore = simplex.first().score;
 
-      // Take Worst Vertex
-      Vertex W = simplex.takeLast();
+    // Take Worst Vertex
+    Vertex W = simplex.takeLast();
 
-      // Calculate center without worst element
-      Vertex CoG;
-      for (int n=0; n<simplex.size(); n++)
-        CoG += simplex[n];
-      CoG *= 1.0/simplex.size();
+    // Calculate center without worst element
+    Vertex CoG;
+    for (int n=0; n<simplex.size(); n++)
+      CoG += simplex[n];
+    CoG *= 1.0/simplex.size();
 
 
-      // Reflect worst element about center and score
-      Vertex R = CoG + (CoG - W)*alpha;
-      score(R);
+    // Reflect worst element about center and score
+    Vertex R = CoG + (CoG - W)*alpha;
+    score(R);
 
-      if (simplex.first()<R && R<simplex.last()) {
-        // Score is better than second-worst but not better than best
-        // ToDo: insert at right place (bisect)
-        simplex << R;
-        qSort(simplex);
-      } else if (R<simplex.first()) {
-        // Score is better than best, try to extend further
-        Vertex E = CoG + (CoG - W)*gamma;
-        score(E);
-        // add best
-        if (E<R) {
-          simplex.prepend(E);
-        } else {
-          simplex.prepend(R);
-        }
+    if (simplex.first()<R && R<simplex.last()) {
+      // Score is better than second-worst but not better than best
+      // ToDo: insert at right place (bisect)
+      simplex << R;
+      qSort(simplex);
+    } else if (R<simplex.first()) {
+      // Score is better than best, try to extend further
+      Vertex E = CoG + (CoG - W)*gamma;
+      score(E);
+      // add best
+      if (E<R) {
+        simplex.prepend(E);
       } else {
-        // Move worst to the center
-        Vertex C = W + (CoG - W)*beta;
-        score(C);
-        if (C<simplex.last()) {
-          // if good, then take
-          simplex << C;
-          qSort(simplex);
-        } else {
-          // Shrink Simplex aroung best element
-          simplex << W;
-          for (int i=1; i<simplex.size(); i++) {
-            simplex[i] = simplex.first() + (simplex[i] - simplex.first())*beta;
-            score(simplex[i]);
-          }
-          qSort(simplex);
+        simplex.prepend(R);
+      }
+    } else {
+      // Move worst to the center
+      Vertex C = W + (CoG - W)*beta;
+      score(C);
+      if (C<simplex.last()) {
+        // if good, then take
+        simplex << C;
+        qSort(simplex);
+      } else {
+        // Shrink Simplex aroung best element
+        simplex << W;
+        for (int i=1; i<simplex.size(); i++) {
+          simplex[i] = simplex.first() + (simplex[i] - simplex.first())*beta;
+          score(simplex[i]);
         }
+        qSort(simplex);
       }
-
-      if (simplex.first().score < bestLoopScore) {
-        // We have a better Solution. Publish it
-        emit
-      }
-
     }
 
+    if (simplex.first().score < bestLoopScore) {
+      // We have a better Solution. Publish it
+      emit newBestVertex(simplex.first().score, simplex.first().coordinates.toList());
+    }
 
-
+    QList<double> parameterDelta;
+    bool allParameterBelowEpsilon=true;
+    for (int m=0; m<N; m++) {
+      double minP=simplex.at(0).at(m);
+      double maxP=minP;
+      for (int n=1; n<simplex.size(); n++) {
+        double p = simplex.at(n).at(m);
+        if (p>maxP) {
+          maxP=p;
+        } else if (p<minP){
+          minP=p;
+        }
+      }
+      parameterDelta << maxP-minP;
+      if ((maxP-minP) > 1e-6*parameters.at(m)->epsilon()) allParameterBelowEpsilon=false;
+    }
+    if (allParameterBelowEpsilon) {
+      cout << "All Parameters below Delta..." << endl;
+      return;
+    }
+  }
 }
 
-void NelderMead::updateTransferMatrix() {
-  spotTransfer = fitCrystal->getRealOrientationMatrix().transposed() * fitCrystal->getRotationMatrix().transposed();
-  zoneTransfer = fitCrystal->getReziprocalOrientationMatrix().transposed() * fitCrystal->getRotationMatrix().transposed();
+void NelderMead::receiveSolution(double score, QList<double> solution) {
+  cout << "Solution: " << score << endl;
+}
+
+void NelderMead::updateTransformationMatrices() {
+  Crystal* fitCrystal = dynamic_cast<Crystal*>(copiedFitObjects.first());
+  spotTransferMatrix = fitCrystal->getRealOrientationMatrix().transposed() * fitCrystal->getRotationMatrix().transposed();
+  zoneTransferMatrix = fitCrystal->getReziprocalOrientationMatrix().transposed() * fitCrystal->getRotationMatrix().transposed();
 }
 
 
-NelderMead::MarkerInfo(AbstractMarkerItem *item, const Vec3D &idx):
+NelderMead::MarkerInfo::MarkerInfo(AbstractMarkerItem *item):
     marker(item),
     index(item->getIntegerIndex().toType<double>()),
     index_sq(index.norm_sq())
@@ -200,7 +226,7 @@ double NelderMead::MarkerInfo::score(const Mat3D& spotTransfer, const Mat3D& zon
   Vec3D n = marker->getMarkerNormal();
   if (marker->getType()==AbstractMarkerItem::SpotMarker) {
     n = spotTransfer * n;
-  } else if (m.marker->getType()==AbstractMarkerItem::ZoneMarker) {
+  } else if (marker->getType()==AbstractMarkerItem::ZoneMarker) {
     n = zoneTransfer * n;
   }
   n.normalize();
@@ -283,118 +309,4 @@ int NelderMead::Vertex::size() const {
 }
 
 
-
-
-/*
-
-
-
-
-
-double FitDisplay::score() {
-  foreach (FitParameter* p, fitParameters) p->setValue();
-  double score=0;
-  foreach (FitMarker m, marker) {
-    Vec3D n = m.marker->getMarkerNormal();
-    if (m.marker->getType()==AbstractMarkerItem::SpotMarker) {
-      n = spotTransfer * n;
-    } else if (m.marker->getType()==AbstractMarkerItem::ZoneMarker) {
-      n = zoneTransfer * n;
-    }
-    n.normalize();
-    double x = m.index*n;
-    // TODO: Remove sqrt, not nessesary for fitting
-    score += sqrt(m.index_sq - x*x);
-  }
-  return score;
-}
-
-double FitDisplay::score(Vertex &v) {
-  for (int n=0; n<v.size(); n++)
-    fitParameters.at(n)->prepareValue(v.at(n));
-  v.score = score();
-  return v.score;
-}
-
-void FitDisplay::on_doFit_clicked()
-{
-  int N = fitParameters.size();
-  double alpha = 1.0;
-  double beta = 0.5;
-  double gamma = 2.0;
-
-  // Versuch des Downhill-Simplex-Verfahrens.....
-
-  Vertex v(N);
-  for (int n=0; n<N; n++)
-    v.coordinates[n]= fitParameters.at(n)->value();
-
-  QList<Vertex> simplex;
-
-  simplex << v;
-
-  for (int n=0; n<N; n++) {
-    Vertex t(v);
-    t.coordinates[n] += 10.0*fitParameters.at(n)->epsilon();
-    simplex << t;
-  }
-
-  for (int i=0; i<simplex.size(); i++) {
-    score(simplex[i]);
-  }
-
-  qSort(simplex);
-
-  for (int loop=0; loop<100; loop++) {
-    cout << simplex.first().score << endl;
-    // Take Worst Vertex
-
-    Vertex W = simplex.takeLast();
-    // Calc center without worst element
-    Vertex CoG;
-    for (int n=0; n<simplex.size(); n++)
-      CoG += simplex[n];
-    CoG *= 1.0/simplex.size();
-
-
-    // Reflect worst element about center
-    Vertex R = CoG + (CoG - W)*alpha;
-    score(R);
-    // Score is better than best...
-    if (simplex.first()<R && R<simplex.last()) {
-      // ToDo: insert at right place
-      simplex << R;
-      qSort(simplex);
-    } else if (R<simplex.first()) {
-      Vertex E = CoG + (CoG - W)*gamma;
-      score(E);
-      if (E<R) {
-        simplex.prepend(E);
-      } else {
-        simplex.prepend(R);
-      }
-    } else {
-      Vertex C = W + (CoG - W)*beta;
-      score(C);
-      if (C<simplex.last()) {
-        simplex << C;
-        qSort(simplex);
-      } else {
-        simplex << W;
-        for (int i=1; i<simplex.size(); i++) {
-          simplex[i] = simplex.first() + (simplex[i] - simplex.first())*beta;
-          score(simplex[i]);
-        }
-        qSort(simplex);
-      }
-    }
-
-
-  }
-  for (int n=0; n<N; n++) baseParameters.at(n)->prepareValue(simplex.first().at(n));
-  for (int n=0; n<N; n++) baseParameters.at(n)->setValue();
-
-}
-
-
-*/
+int QListDoubleRegistered = qRegisterMetaType< QList<double> >();

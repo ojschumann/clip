@@ -29,7 +29,7 @@ public:
   Crystal(QObject* parent=0);
   virtual ~Crystal();
 
-  Crystal& operator=(const Crystal& o);
+  virtual Crystal& operator=(const Crystal& o);
 
   void saveToXML(QDomElement base);
   bool loadFromXML(QDomElement base);

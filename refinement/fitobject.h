@@ -57,6 +57,7 @@ class FitObject: public QObject {
 public:
   FitObject(QObject* parent=0): QObject(parent) {}
   virtual ~FitObject() {}
+  virtual FitObject& operator=(const FitObject& o);
   void addParameterGroup(FitParameterGroup* g);
   virtual QString FitObjectName()=0;
   QList<FitParameter*> allParameters() const;

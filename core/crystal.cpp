@@ -98,6 +98,7 @@ Crystal& Crystal::operator=(const Crystal& c) {
   enableUpdate(c.updateEnabled);
   restartReflectionUpdate = false;
 
+  FitObject::operator=(c);
   return *this;
 }
 

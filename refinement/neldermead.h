@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QFutureWatcher>
+#include <QMetaType>
 
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
@@ -21,13 +22,15 @@ public slots:
   void start();
   void stop();
 signals:
-  void newBestVertex(QList<double>);
+  void newBestVertex(double, QList<double>);
   void stopSignal();
 protected slots:
-  void receiveSolution(QList<double>);
+  void receiveSolution(double, QList<double>);
   void updateTransformationMatrices();
   void receiveStop();
 protected:
+  class Vertex;
+
   void init();
   void runWrapper();
   void run();
@@ -57,7 +60,7 @@ protected:
   };
   class MarkerInfo {
   public:
-    MarkerInfo(AbstractMarkerItem* item, const Vec3D& index);
+    MarkerInfo(AbstractMarkerItem* item);
     double score(const Mat3D& spotTransfer, const Mat3D& zoneTransfer) const;
   protected:
     AbstractMarkerItem* marker;
@@ -76,7 +79,7 @@ protected:
   // local copies of crystal and projectors
   QList<FitObject*> copiedFitObjects;
   QList<FitParameter*> parameters;
-  QList<MarkerInfo*> markers;
+  QList<MarkerInfo> markers;
 
   // Crystal, that is used in the UI
   Crystal* liveCrystal;
@@ -87,4 +90,5 @@ protected:
 
 };
 
+Q_DECLARE_METATYPE(QList<double>)
 #endif // NELDERMEAD_H
