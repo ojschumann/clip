@@ -5,32 +5,6 @@
       <CrystalDisplay>
         <Geometry width="214" x="0" y="0" height="275"/>
         <Crystal>
-          <Spacegroup symbol="P1"/>
-          <Cell beta="90" gamma="90" alpha="90" a="4" b="4" c="4"/>
-          <Orientation phi="0" omega="-0" chi="0"/>
-          <RotationAxis x="1" y="0" z="0" type="0"/>
-        </Crystal>
-      </CrystalDisplay>
-    </ConnectedCrystal>
-    <ConnectedProjectors>
-      <ProjectionPlane projectortype="LauePlaneProjector">
-        <Geometry width="331" x="214" y="0" height="384"/>
-        <ZoomSteps/>
-        <Projector>
-          <QRange Qmax="6.283" Qmin="0"/>
-          <Display textSize="7.000000000000001" spotSize="1" spotsEnabled="1" maxHKLSum="3"/>
-          <DetSize width="150" dist="30" height="150"/>
-          <DetOrientation Chi="0" Phi="0" Omega="180"/>
-          <DetOffset xOffset="0" yOffset="0"/>
-        </Projector>
-      </ProjectionPlane>
-    </ConnectedProjectors>
-  </CrystalConnection>
-  <CrystalConnection>
-    <ConnectedCrystal>
-      <CrystalDisplay>
-        <Geometry width="214" x="0" y="0" height="275"/>
-        <Crystal>
           <Spacegroup symbol="Pm3m"/>
           <Cell beta="90.00000000000001" gamma="90.00000000000001" alpha="90.00000000000001" a="5" b="5" c="5"/>
           <Orientation phi="-102.840489505743" omega="-170.1046270958483" chi="-79.1761400114387"/>

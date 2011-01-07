@@ -41,6 +41,7 @@ protected:
 private:
   Crystal* crystal;
   QList<AbstractMarkerItem*> markers;
+  QMultiMap<Projector*, AbstractMarkerItem*> markersOfProjector;
 
 };
 

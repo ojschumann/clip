@@ -1,5 +1,9 @@
 #include "refinement/fitobject.h"
 
+FitParameterGroup::FitParameterGroup() {
+  valuesCached = false;
+}
+
 FitParameterGroup::~FitParameterGroup()  {
   foreach (FitParameter* p, groupParameters)
     delete p;
@@ -16,9 +20,39 @@ void FitParameterGroup::setValue() {
   valuesCached=false;
 }
 
-void FitParameterGroup::addParameter(QString name)  {
+void FitParameterGroup::addParameter(QString name, bool initiallyEnabled)  {
   groupParameters += new FitParameter(name, groupParameters.size(), *this);
+  groupParameters.last()->setEnabled(initiallyEnabled);
 }
+
+
+FitParameter::FitParameter(QString n, int id, FitParameterGroup &g):
+    _name(n),
+    memberId(id),
+    group(g)
+{
+  setEnabled(false);
+  setChangeable(true);
+  cachedValue = value();
+  hasCachedValue=false;
+}
+
+void FitParameter::prepareValue(double v) {
+  if (v != value()) {
+    cachedValue=v;
+    group.notifyCached();
+    hasCachedValue=true;
+  }
+}
+
+double FitParameter::getCachedValue() const {
+  if (hasCachedValue) {
+    return cachedValue;
+  } else {
+    return value();
+  }
+}
+
 
 
 
@@ -33,7 +67,7 @@ FitObject& FitObject::operator=(const FitObject& o) {
     tP.at(n)->setChangeable(oP.at(n)->isChangeable());
     tP.at(n)->setEnabled(oP.at(n)->isEnabled());
   }
-
+  return *this;
 }
 
 QList<FitParameter*> FitObject::allParameters() const {

@@ -63,6 +63,11 @@ Projector::Projector(QObject *parent):
   connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(invalidateMarkerCache()));
   connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
+
+  connect(&spotMarkerStore, SIGNAL(itemAdded(int)), this, SIGNAL(markerAdded()));
+  connect(&zoneMarkerStore, SIGNAL(itemAdded(int)), this, SIGNAL(markerAdded()));
+  connect(&spotMarkerStore, SIGNAL(itemRemoved(int)), this, SIGNAL(markerRemoved()));
+  connect(&zoneMarkerStore, SIGNAL(itemRemoved(int)), this, SIGNAL(markerRemoved()));
 };
 
 

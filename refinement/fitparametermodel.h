@@ -2,10 +2,12 @@
 #define FITPARAMETERMODEL_H
 
 #include <QAbstractItemModel>
+#include <QSignalMapper>
 
 class Crystal;
 class FitObject;
 class FitParameter;
+class Projector;
 
 class FitParameterModel : public QAbstractItemModel
 {
@@ -25,10 +27,17 @@ public:
   FitObject* node(const QModelIndex& index) const;
   FitParameter* parameter(const QModelIndex& index) const;
 
+protected slots:
+  void handleProjectorAdd(Projector*);
+  void handleProjectorDel(Projector*);
+
+  void handleMarkerAdd();
+  void handleMarkerDel();
 
 protected:
   Crystal* crystal;
   QList<FitObject*> nodes;
+  QSignalMapper mapper;
 
 };
 

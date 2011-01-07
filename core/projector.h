@@ -154,7 +154,8 @@ signals:
   void imageClosed();
   void spotSizeChanged(double);
   void textSizeChanged(double);
-
+  void markerAdded();
+  void markerRemoved();
 protected slots:
   virtual void updateImgTransformations();
   void invalidateMarkerCache();

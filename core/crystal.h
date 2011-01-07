@@ -35,6 +35,7 @@ public:
   bool loadFromXML(QDomElement base);
 
   virtual QString FitObjectName();
+  virtual void prepareForFit();
 
   int reflectionCount();
   Reflection getReflection(int i);
@@ -169,9 +170,12 @@ private:
     virtual double epsilon(int member) const;
     virtual double lowerBound(int member) const;
     virtual double upperBound(int member) const;
+    void setBaseRotation(const Mat3D& R);
   protected:
     virtual void doSetValue(QList<double> values);
     Crystal* crystal;
+    Mat3D baseRotation;
+    double omega, chi, phi;
   };
 
   CellGroup cellGroup;

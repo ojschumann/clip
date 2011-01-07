@@ -43,6 +43,7 @@ class AbstractProjectorMarkerItem: public AbstractMarkerItem
 public:
   AbstractProjectorMarkerItem(Projector* p, MarkerType t);
   virtual ~AbstractProjectorMarkerItem();
+  Projector* getProjector() const { return projector; }
 protected:
   virtual Vec3D normalToIndex(const Vec3D&);
   Projector* projector;

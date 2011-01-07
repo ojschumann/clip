@@ -102,7 +102,8 @@ SOURCES += main.cpp\
     indexing/marker.cpp \
     ui/fitdisplay.cpp \
     refinement/neldermead.cpp \
-    refinement/fitparametermodel.cpp
+    refinement/fitparametermodel.cpp \
+    refinement/neldermead_worker.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -171,7 +172,8 @@ HEADERS  += ui/clip.h \
     indexing/marker.h \
     ui/fitdisplay.h \
     refinement/neldermead.h \
-    refinement/fitparametermodel.h
+    refinement/fitparametermodel.h \
+    refinement/neldermead_worker.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

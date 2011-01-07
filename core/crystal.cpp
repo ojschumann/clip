@@ -108,6 +108,10 @@ QString Crystal::FitObjectName() {
   return "Crystal";
 }
 
+void Crystal::prepareForFit() {
+  orientationGroup.setBaseRotation(getRotationMatrix());
+}
+
 void Crystal::setCell(double _a, double _b, double _c, double _alpha, double _beta, double _gamma) {
   QList<double> c;
   c << _a << _b << _c << _alpha << _beta << _gamma;
@@ -679,28 +683,38 @@ double Crystal::CellGroup::upperBound(int member) const {
 }
 
 Crystal::OrientationGroup::OrientationGroup(Crystal* c): crystal(c) {
-  addParameter("omega");
-  addParameter("phi");
-  addParameter("chi");
+  omega = chi = phi = 0.0;
+  addParameter("omega", true);
+  addParameter("chi", true);
+  addParameter("phi", true);
+}
+
+void Crystal::OrientationGroup::setBaseRotation(const Mat3D &R) {
+  baseRotation = R;
+  omega = chi = phi = 0.0;
 }
 
 double Crystal::OrientationGroup::value(int member) const {
-  double omega, chi, phi;
-  crystal->calcEulerAngles(omega, phi, chi);
   if (member==0) {
     return omega;
   } else if (member==1) {
-    return phi;
-  } else if (member==2) {
     return chi;
+  } else if (member==2) {
+    return phi;
   }
   return -1.0;
 }
 
 void Crystal::OrientationGroup::doSetValue(QList<double> values) {
-  crystal->setEulerAngles(values.at(0),
-                           values.at(1),
-                           values.at(2));
+  omega = values.at(0);
+  chi   = values.at(1);
+  phi   = values.at(2);
+  Mat3D M;
+  M*=Mat3D(Vec3D(0,0,1), M_PI/180.0*omega);
+  M*=Mat3D(Vec3D(1,0,0), M_PI/180.0*chi);
+  M*=Mat3D(Vec3D(0,1,0), M_PI/180.0*phi);
+  M*= baseRotation;
+  crystal->setRotation(M);
 }
 
 double Crystal::OrientationGroup::epsilon(int member) const {
@@ -708,9 +722,9 @@ double Crystal::OrientationGroup::epsilon(int member) const {
 }
 
 double Crystal::OrientationGroup::lowerBound(int member) const {
-  return -360;
+  return -10;
 }
 
 double Crystal::OrientationGroup::upperBound(int member) const {
-  return 360;
+  return 10;
 }
