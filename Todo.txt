@@ -1,5 +1,7 @@
 Refinement (basically new)
-  Optional show state after each iteration or after some time (250 ms)
+  Show if Running,
+  Show Score
+
 
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
@@ -12,7 +14,7 @@ ReflectionInfo (port and enhance)
 SpotMarker and ZoneMarker
   Check mapping of start() and end(). If possible let Spot/ZoneMaker do the conversion
 
-Lock/Unlock Crystal and Projector for large updates (like from fit)
+Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
   * lock()
   * setOrientation()
   * setDetSize()

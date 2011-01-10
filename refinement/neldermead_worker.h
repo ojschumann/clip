@@ -16,7 +16,6 @@ public:
   double bestScore();
 
   void restart();
-
 protected slots:
   void updateTransformationMatrices();
 protected:

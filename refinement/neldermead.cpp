@@ -8,6 +8,8 @@
 
 #include "core/crystal.h"
 #include "core/projector.h"
+#include "refinement/fitparameter.h"
+#include "refinement/fitparametergroup.h"
 
 using namespace std;
 
@@ -18,7 +20,7 @@ NelderMead::NelderMead(Crystal* c, QObject *parent) :
 {
   connect(&threadWatcher, SIGNAL(finished()), this, SLOT(publishBestSolution()));
   connect(&publishTimer, SIGNAL(timeout()), this, SLOT(publishBestSolution()));
-
+  connect(&threadWatcher, SIGNAL(finished()), this, SIGNAL(finished()));
 }
 
 
@@ -35,6 +37,11 @@ void NelderMead::stop() {
   threadLock.unlock();
   threadWatcher.waitForFinished();
 }
+
+bool NelderMead::isRunning() {
+  return threadWatcher.isRunning();
+}
+
 void NelderMead::run() {
   NMWorker* worker = new NMWorker(liveCrystal);
   threadLock.lockForWrite();
@@ -49,24 +56,23 @@ void NelderMead::run() {
     bool _shouldStop = shouldStop;
     threadLock.unlock();
     if (_shouldStop) {
-      delete worker;
-      return;
+      break;
     }
 
     double lastScore = worker->bestScore();
     worker->doOneIteration();
     if (lastScore>worker->bestScore()) {
+      cout << noImprovmentLoops << " bad loops" << endl;
       noImprovmentLoops = 0;
       threadLock.lockForWrite();
       bestSolution = worker->bestSolution();
       bestSolutionAlreadyPublished = false;
       bestScore = worker->bestScore();
       threadLock.unlock();
+      emit bestSolutionScore(bestScore);
     }
-    if (noImprovmentLoops>5000) {
-      noImprovmentLoops = 0;
-      cout << "RestartWorker" << endl;
-      worker->restart();
+    if (noImprovmentLoops>50) {
+      break;
     }
   }
   threadLock.lockForWrite();
@@ -84,7 +90,6 @@ void NelderMead::publishBestSolution() {
   threadLock.unlock();
 
   if (!_bestSolutionAlreadyPublished) {
-    cout << "Best Solution " << localBestScore << " Delta " << lastBestScore-localBestScore;
     lastBestScore = localBestScore;
     threadLock.lockForWrite();
     bestSolutionAlreadyPublished = true;
@@ -99,18 +104,13 @@ void NelderMead::publishBestSolution() {
     if (parameters.size()==localBestSolution.size()) {
       for (int n=0; n<parameters.size(); n++) {
         parameters.at(n)->prepareValue(localBestSolution.at(n));
-        cout << " " << localBestSolution.at(n);
       }
-      cout << endl;
       foreach (FitParameter* p, parameters) p->setValue();
     }
 
 
   }
 }
-
-
-
 
 
 int QListDoubleRegistered = qRegisterMetaType< QList<double> >();

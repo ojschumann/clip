@@ -118,6 +118,8 @@ public slots:
   void delCropMarker();
   void setCrop(QPolygonF);
 
+  void deleteMarker(AbstractMarkerItem*);
+
   void connectToCrystal(Crystal *);
 
   // Set Wavevectors. Note that the Value is 1/lambda, not 2*pi/lambda
@@ -154,12 +156,24 @@ signals:
   void imageClosed();
   void spotSizeChanged(double);
   void textSizeChanged(double);
-  void markerAdded();
-  void markerRemoved();
+  void markerAdded(AbstractMarkerItem*);
+  void markerChanged(AbstractMarkerItem*);
+  void markerClicked(AbstractMarkerItem*);
+  void markerRemoved(AbstractMarkerItem*);
 protected slots:
   virtual void updateImgTransformations();
   void invalidateMarkerCache();
   void setImage(LaueImage*);
+
+  void spotMarkerAdded(int);
+  void spotMarkerChanged(int);
+  void spotMarkerClicked(int);
+  void spotMarkerRemoved(int);
+  void zoneMarkerAdded(int);
+  void zoneMarkerChanged(int);
+  void zoneMarkerClicked(int);
+  void zoneMarkerRemoved(int);
+
 protected:
   void internalSetWavevectors(double, double);
   virtual bool project(const Reflection &r, QPointF &point)=0;

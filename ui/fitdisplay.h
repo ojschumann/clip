@@ -1,16 +1,17 @@
 #ifndef FITDISPLAY_H
 #define FITDISPLAY_H
 
-#include <QMainWindow>
+#include <QWidget>
 
 class Crystal;
+class FitObject;
 class NelderMead;
 
 namespace Ui {
   class FitDisplay;
 }
 
-class FitDisplay : public QMainWindow
+class FitDisplay : public QWidget
 {
   Q_OBJECT
 
@@ -19,10 +20,14 @@ public:
   virtual ~FitDisplay();
 
 private slots:
-
+  void fitObjectAdded(FitObject*);
+  void fitObjectRemoved(FitObject*);
+  void startStopFit();
+  void toggleStartButtonText();
+  void displayScore(double);
 private:
   Ui::FitDisplay *ui;
-  Crystal* crystal;
+  FitObject* mainFitObject;
   NelderMead* fitter;
 };
 

@@ -20,9 +20,13 @@ class NelderMead : public QObject
   Q_OBJECT
 public:
   explicit NelderMead(Crystal* c, QObject *parent = 0);
+  bool isRunning();
 public slots:
   void start();
   void stop();
+signals:
+  void finished();
+  void bestSolutionScore(double);
 protected slots:
   void publishBestSolution();
 protected:

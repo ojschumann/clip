@@ -17,12 +17,10 @@ using namespace std;
 
 
 
-Indexer::Indexer(QList<Vec3D> _spotMarkerNormals, QList<Vec3D> _zoneMarkerNormals, const Mat3D& _MReal, const Mat3D& _MReziprocal, double maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup):
+Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal, const Mat3D& _MReziprocal, double maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup):
     QObject(),
     QRunnable(),
     candidates(_MReal, _MReziprocal),
-    spotMarkerNormals(_spotMarkerNormals),
-    zoneMarkerNormals(_zoneMarkerNormals),
     MReal(_MReal),
     MReziprocal(_MReziprocal),
     maxHKLDeviation(_maxHKLDeviation),
@@ -38,32 +36,22 @@ Indexer::Indexer(QList<Vec3D> _spotMarkerNormals, QList<Vec3D> _zoneMarkerNormal
 
   shouldStop=false;
 
-  foreach (Vec3D n, spotMarkerNormals)
-    globalMarkers << Marker(n, Marker::SpotMarker);
-  foreach (Vec3D n, zoneMarkerNormals)
-    globalMarkers << Marker(n, Marker::ZoneMarker);
+  foreach (AbstractMarkerItem* m, crystalMarkers)
+    globalMarkers << Marker(m->getMarkerNormal(), m->getType());
 
-  int spotN = spotMarkerNormals.size();
-  int zoneN = zoneMarkerNormals.size();
-
-
-  for (int i=0; i<spotN; i++) {
+  for (int i=0; i<globalMarkers.size(); i++) {
     for (int j=0; j<i; j++) {
-      spotSpotAngles.append(AngleInfo(i, j, globalMarkers, maxAngularDeviation));
+      if (globalMarkers.at(i).getType()==Marker::SpotMarker && globalMarkers.at(j).getType()==Marker::SpotMarker) {
+        spotSpotAngles.append(AngleInfo(i, j, globalMarkers, maxAngularDeviation));
+      } else if (globalMarkers.at(i).getType()==Marker::ZoneMarker && globalMarkers.at(j).getType()==Marker::ZoneMarker) {
+        zoneZoneAngles.append(AngleInfo(i, j, globalMarkers, maxAngularDeviation));
+      } else {
+        spotZoneAngles.append(AngleInfo(i, j, globalMarkers, maxAngularDeviation));
+      }
     }
   }
   qSort(spotSpotAngles);
-  for (int i=spotN; i<spotN+zoneN; i++) {
-    for (int j=spotN; j<i; j++) {
-      zoneZoneAngles.append(AngleInfo(i, j, globalMarkers, maxAngularDeviation));
-    }
-  }
   qSort(zoneZoneAngles);
-  for (int i=0; i<spotN; i++) {
-    for (int j=spotN; j<spotN+zoneN; j++) {
-      spotZoneAngles.append(AngleInfo(i, j, globalMarkers, maxAngularDeviation));
-    }
-  }
   qSort(spotZoneAngles);
 
   connect(&candidates, SIGNAL(nextMajorIndex(int)), this, SIGNAL(nextMajorIndex(int)));

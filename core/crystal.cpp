@@ -1,19 +1,20 @@
-#include <core/crystal.h>
+
 #include <cmath>
 #include <iostream>
-#include <core/projector.h>
-#include <tools/optimalrotation.h>
-#include <core/reflection.h>
-#include <core/spacegroup.h>
+#include <QTime>
+#include <QMetaObject>
+#include <QtConcurrentMap>
 #include <QtConcurrentRun>
 
-#include <QTime>
-#include <QtConcurrentMap>
-#include <QMetaObject>
-
 #include "defs.h"
+#include "core/crystal.h"
+#include "core/projector.h"
+#include "tools/optimalrotation.h"
+#include "core/reflection.h"
+#include "core/spacegroup.h"
 #include "tools/xmltools.h"
-
+#include "tools/abstractmarkeritem.h"
+#include "refinement/fitparameter.h"
 using namespace std;
 
 
@@ -84,6 +85,9 @@ Crystal::Crystal(QObject* parent):
 
   addParameterGroup(&cellGroup);
   addParameterGroup(&orientationGroup);
+
+  connect(this, SIGNAL(cellChanged()), &cellGroup, SLOT(groupDataChanged()));
+  connect(this, SIGNAL(orientationChanged()), &orientationGroup, SLOT(groupDataChanged()));
 }
 
 Crystal& Crystal::operator=(const Crystal& c) {
@@ -408,13 +412,23 @@ Mat3D Crystal::getRotationMatrix() const {
 void Crystal::addProjector(Projector* p) {
   connectedProjectors.addObject(p);
   connect(p, SIGNAL(wavevectorsUpdated()), this, SLOT(updateWavevectorsFromProjectors()));
+  connect(p, SIGNAL(markerAdded(AbstractMarkerItem*)), this, SIGNAL(markerAdded(AbstractMarkerItem*)));
+  connect(p, SIGNAL(markerChanged(AbstractMarkerItem*)), this, SIGNAL(markerChanged(AbstractMarkerItem*)));
+  connect(p, SIGNAL(markerClicked(AbstractMarkerItem*)), this, SIGNAL(markerClicked(AbstractMarkerItem*)));
+  connect(p, SIGNAL(markerRemoved(AbstractMarkerItem*)), this, SIGNAL(markerRemoved(AbstractMarkerItem*)));
   emit projectorAdded(p);
+  emit fitObjectAdded(p);
+  foreach (AbstractMarkerItem* item, p->getAllMarkers())
+    emit markerAdded(item);
 }
 
 void Crystal::removeProjector(Projector* p) {
+  foreach (AbstractMarkerItem* item, p->getAllMarkers())
+    emit markerRemoved(item);
   connectedProjectors.removeObject(p);
-  disconnect(p, 0, this, 0);
+  disconnect(p);
   emit projectorRemoved(p);
+  emit fitObjectRemoved(p);
 }
 
 
@@ -432,10 +446,26 @@ void Crystal::updateWavevectorsFromProjectors() {
 }
 
 QList<Projector*> Crystal::getConnectedProjectors() {
-  QList<Projector*> r;
+  QList<Projector*> list;
   for (int i=0; i<connectedProjectors.size(); i++)
-    r << dynamic_cast<Projector*>(connectedProjectors.at(i));
-  return r;
+    list << dynamic_cast<Projector*>(connectedProjectors.at(i));
+  return list;
+}
+
+QList<FitObject*> Crystal::getFitObjects() {
+  QList<FitObject*> list;
+  list << this;
+  foreach (Projector* p, getConnectedProjectors()) {
+    list << p;
+  }
+  return list;
+}
+
+QList<AbstractMarkerItem*> Crystal::getMarkers() {
+  QList<AbstractMarkerItem*> list;
+  foreach (Projector* p, getConnectedProjectors())
+    list += p->getAllMarkers();
+  return list;
 }
 
 void Crystal::setRotationAxis(const Vec3D& axis, RotationAxisType type) {
@@ -632,13 +662,17 @@ bool Crystal::loadFromXML(QDomElement base) {
 }
 
 
-Crystal::CellGroup::CellGroup(Crystal* c): crystal(c) {
+Crystal::CellGroup::CellGroup(Crystal* c):
+    FitParameterGroup(c),
+    crystal(c)
+{
   addParameter("a");
   addParameter("b");
   addParameter("c");
   addParameter("alpha");
   addParameter("beta");
   addParameter("gamma");
+
 }
 
 double Crystal::CellGroup::value(int member) const {
@@ -682,7 +716,39 @@ double Crystal::CellGroup::upperBound(int member) const {
   return 170;
 }
 
-Crystal::OrientationGroup::OrientationGroup(Crystal* c): crystal(c) {
+void Crystal::CellGroup::notifySetEnabled(int member, bool b) {
+  // Only check, if the parameter was enabled
+  if (b) {
+    bool allChecked = true;
+    // Check if all changable parameters are checked
+    for (int i=0; i<3; i++) {
+      FitParameter* q = groupParameters.at(i);
+      if (q->isChangeable() && !q->isEnabled()) allChecked = false;
+    }
+    // if this is the case, disable the next changeable parameter
+    if (allChecked) {
+      for (int i=0; i<3; i++) {
+        FitParameter* q = groupParameters.at((member + i + 1)%3);
+        if (q->isChangeable() && q->isEnabled()) {
+          q->setEnabled(false);
+          return;
+        }
+      }
+
+    }
+  }
+}
+
+void Crystal::CellGroup::notifySetChangeable(int member, bool b) {
+  if (!b) {
+    notifySetEnabled(member, true);
+  }
+}
+
+Crystal::OrientationGroup::OrientationGroup(Crystal* c):
+    FitParameterGroup(c),
+    crystal(c)
+{
   omega = chi = phi = 0.0;
   addParameter("omega", true);
   addParameter("chi", true);

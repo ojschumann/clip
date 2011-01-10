@@ -64,11 +64,15 @@ Projector::Projector(QObject *parent):
   connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
 
-  connect(&spotMarkerStore, SIGNAL(itemAdded(int)), this, SIGNAL(markerAdded()));
-  connect(&zoneMarkerStore, SIGNAL(itemAdded(int)), this, SIGNAL(markerAdded()));
-  connect(&spotMarkerStore, SIGNAL(itemRemoved(int)), this, SIGNAL(markerRemoved()));
-  connect(&zoneMarkerStore, SIGNAL(itemRemoved(int)), this, SIGNAL(markerRemoved()));
-};
+  connect(&spotMarkerStore, SIGNAL(itemAdded(int)), this, SLOT(spotMarkerAdded(int)));
+  connect(&spotMarkerStore, SIGNAL(itemChanged(int)), this, SLOT(spotMarkerChanged(int)));
+  connect(&spotMarkerStore, SIGNAL(itemAboutToBeRemoved(int)), this, SLOT(spotMarkerRemoved(int)));
+  connect(&spotMarkerStore, SIGNAL(itemClicked(int)), this, SLOT(spotMarkerClicked(int)));
+  connect(&zoneMarkerStore, SIGNAL(itemAdded(int)), this, SLOT(zoneMarkerAdded(int)));
+  connect(&zoneMarkerStore, SIGNAL(itemChanged(int)), this, SLOT(zoneMarkerChanged(int)));
+  connect(&zoneMarkerStore, SIGNAL(itemAboutToBeRemoved(int)), this, SLOT(zoneMarkerRemoved(int)));
+  connect(&zoneMarkerStore, SIGNAL(itemClicked(int)), this, SLOT(zoneMarkerClicked(int)));
+}
 
 
 Projector::~Projector() {
@@ -106,14 +110,14 @@ Projector& Projector::operator=(const Projector& o) {
 
 void Projector::connectToCrystal(Crystal *c) {
   if (!crystal.isNull()) {
-    disconnect(this, 0, crystal, 0);
-    disconnect(crystal, 0, this, 0);
+    disconnect(c);
     crystal->removeProjector(this);
   }
   crystal=c;
   crystal->addProjector(this);
   connect(crystal, SIGNAL(reflectionsUpdate()), this, SLOT(reflectionsUpdated()));
   connect(crystal, SIGNAL(orientationChanged()), this, SLOT(invalidateMarkerCache()));
+  connect(crystal, SIGNAL(deleteMarker(AbstractMarkerItem*)), this, SLOT(deleteMarker(AbstractMarkerItem*)));
   emit projectionParamsChanged();
 }
 
@@ -428,6 +432,47 @@ QList<AbstractMarkerItem*> Projector::getAllMarkers() {
   foreach (SpotItem* si, spotMarkers()) list << si;
   foreach (ZoneItem* zi, zoneMarkers()) list << zi;
   return list;
+}
+
+void Projector::spotMarkerAdded(int n) {
+  emit markerAdded(spotMarkerStore.at(n));
+}
+
+void Projector::spotMarkerChanged(int n) {
+  spotMarkerStore.at(n)->invalidateCache();
+  emit markerChanged(spotMarkerStore.at(n));
+}
+
+void Projector::spotMarkerClicked(int n) {
+  emit markerClicked(spotMarkerStore.at(n));
+}
+
+void Projector::spotMarkerRemoved(int n) {
+  emit markerRemoved(spotMarkerStore.at(n));
+}
+
+void Projector::zoneMarkerAdded(int n) {
+  emit markerAdded(zoneMarkerStore.at(n));
+}
+
+void Projector::zoneMarkerChanged(int n) {
+  zoneMarkerStore.at(n)->invalidateCache();
+  emit markerChanged(zoneMarkerStore.at(n));
+}
+
+void Projector::zoneMarkerClicked(int n) {
+  emit markerClicked(zoneMarkerStore.at(n));
+}
+
+void Projector::zoneMarkerRemoved(int n) {
+  emit markerRemoved(zoneMarkerStore.at(n));
+}
+void Projector::deleteMarker(AbstractMarkerItem* item) {
+  if (ZoneItem* zi=dynamic_cast<ZoneItem*>(item)) {
+    zoneMarkers().del(zi);
+  } else if (SpotItem* si=dynamic_cast<SpotItem*>(item)) {
+    spotMarkers().del(si);
+  }
 }
 
 // ---------------  Ruler handling ---------------------------

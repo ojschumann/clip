@@ -5,7 +5,7 @@
 #include <QPointer>
 #include <QDomElement>
 
-#include "ui/indexdisplay.h"
+#include "ui/hkltool.h"
 
 class Crystal;
 
@@ -47,7 +47,7 @@ private:
   Ui::CrystalDisplay *ui;
   Crystal* crystal;
   bool allowRotationUpdate;
-  QPointer<IndexDisplay> indexDisplay;
+  QPointer<HKLTool> hklTool;
 
 private slots:
   void on_actionSave_triggered();

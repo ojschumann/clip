@@ -1,7 +1,8 @@
 #ifndef __LAUEPLANEPROJECTOR_H__
 #define __LAUEPLANEPROJECTOR_H__
 
-#include <core/projector.h>
+#include "core/projector.h"
+#include "refinement/fitparametergroup.h"
 
 class LauePlaneProjector: public Projector {
   Q_OBJECT

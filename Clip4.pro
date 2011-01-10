@@ -102,8 +102,11 @@ SOURCES += main.cpp\
     indexing/marker.cpp \
     ui/fitdisplay.cpp \
     refinement/neldermead.cpp \
-    refinement/fitparametermodel.cpp \
-    refinement/neldermead_worker.cpp
+    refinement/neldermead_worker.cpp \
+    refinement/fitparameter.cpp \
+    refinement/fitparametergroup.cpp \
+    refinement/fitparametertreeitem.cpp \
+    ui/hkltool.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -172,8 +175,11 @@ HEADERS  += ui/clip.h \
     indexing/marker.h \
     ui/fitdisplay.h \
     refinement/neldermead.h \
-    refinement/fitparametermodel.h \
-    refinement/neldermead_worker.h
+    refinement/neldermead_worker.h \
+    refinement/fitparameter.h \
+    refinement/fitparametergroup.h \
+    refinement/fitparametertreeitem.h \
+    ui/hkltool.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -187,7 +193,8 @@ FORMS    += ui/clip.ui \
     ui/indexdisplay.ui \
     ui/rotatecrystal.ui \
     ui/reorient.ui \
-    ui/fitdisplay.ui
+    ui/fitdisplay.ui \
+    ui/hkltool.ui
 
 RESOURCES += \
     resources/resources.qrc

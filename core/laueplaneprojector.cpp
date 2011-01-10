@@ -33,7 +33,12 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent):
   addParameterGroup(&shiftGroup);
   addParameterGroup(&orientationGroup);
 
+  connect(this, SIGNAL(projectionParamsChanged()), &distGroup, SLOT(groupDataChanged()));
+  connect(this, SIGNAL(projectionParamsChanged()), &shiftGroup, SLOT(groupDataChanged()));
+  connect(this, SIGNAL(projectionParamsChanged()), &orientationGroup, SLOT(groupDataChanged()));
+
   connect(this, SIGNAL(imageLoaded(LaueImage*)), this, SLOT(loadParmetersFromImage(LaueImage*)));
+
 };
 
 Projector& LauePlaneProjector::operator=(const Projector& _o) {
@@ -483,7 +488,10 @@ double LauePlaneProjector::maxCos(Vec3D n) const {
 }
 
 
-LauePlaneProjector::DistGroup::DistGroup(LauePlaneProjector* p): projector(p) {
+LauePlaneProjector::DistGroup::DistGroup(LauePlaneProjector* p):
+    FitParameterGroup(p),
+    projector(p)
+{
   addParameter("Distance");
 }
 
@@ -508,7 +516,10 @@ double LauePlaneProjector::DistGroup::upperBound(int member) const {
 }
 
 
-LauePlaneProjector::ShiftGroup::ShiftGroup(LauePlaneProjector* p): projector(p) {
+LauePlaneProjector::ShiftGroup::ShiftGroup(LauePlaneProjector* p):
+    FitParameterGroup(p),
+    projector(p)
+{
   addParameter("Det_x");
   addParameter("Det_y");
 }
@@ -540,7 +551,10 @@ double LauePlaneProjector::ShiftGroup::upperBound(int member) const {
 
 
 
-LauePlaneProjector::OrientationGroup::OrientationGroup(LauePlaneProjector* p): projector(p) {
+LauePlaneProjector::OrientationGroup::OrientationGroup(LauePlaneProjector* p):
+    FitParameterGroup(p),
+    projector(p)
+{
   addParameter("omega");
   addParameter("chi");
 }

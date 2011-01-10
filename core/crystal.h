@@ -11,10 +11,12 @@
 #include "tools/mat3D.h"
 #include "tools/objectstore.h"
 #include "refinement/fitobject.h"
+#include "refinement/fitparametergroup.h"
 #include "core/spacegroup.h"
 #include "core/reflection.h"
 
 class Projector;
+class AbstractMarkerItem;
 
 
 class Crystal: public FitObject {
@@ -62,6 +64,8 @@ public:
   RotationAxisType getRotationAxisType() const;
 
   QList<Projector*> getConnectedProjectors();
+  QList<AbstractMarkerItem*> getMarkers();
+  virtual QList<FitObject*> getFitObjects();
 
   QList<double> getCell();
   void enableUpdate(bool b=true);  
@@ -81,6 +85,7 @@ public slots:
   void slotSetSGConstrains();
   void generateReflections();
 
+
 private slots:
   void convertHtoR();
   void convertRtoH();
@@ -93,6 +98,11 @@ signals:
   void info(QString, int);
   void projectorAdded(Projector*);
   void projectorRemoved(Projector*);
+  void markerAdded(AbstractMarkerItem*);
+  void markerChanged(AbstractMarkerItem*);
+  void markerClicked(AbstractMarkerItem*);
+  void markerRemoved(AbstractMarkerItem*);
+  void deleteMarker(AbstractMarkerItem*);
 private:
   // Do the real work. Does not use possible uninitial values of objects variables
   void internalSetCell(double a, double b, double c, double alpha, double beta, double gamma);
@@ -157,6 +167,8 @@ private:
     virtual double epsilon(int member) const;
     virtual double lowerBound(int member) const;
     virtual double upperBound(int member) const;
+    virtual void notifySetEnabled(int member, bool b);
+    virtual void notifySetChangeable(int member, bool b);
   protected:
     virtual void doSetValue(QList<double> values);
     Crystal* crystal;

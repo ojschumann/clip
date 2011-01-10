@@ -2,25 +2,49 @@
 #include "ui_fitdisplay.h"
 
 #include <iostream>
+#include <QTreeWidgetItem>
+#include <QVariant>
+#include <QStyledItemDelegate>
 
+#include "core/crystal.h"
+#include "refinement/fitobject.h"
+#include "refinement/fitparametergroup.h"
+#include "refinement/fitparameter.h"
+#include "refinement/fitparametertreeitem.h"
 #include "refinement/fitparametermodel.h"
+
 #include "refinement/neldermead.h"
 
 using namespace std;
 
-FitDisplay::FitDisplay(Crystal* c, QWidget *parent) :
-    QMainWindow(parent),
+class NoEditDelegate: public QStyledItemDelegate {
+public:
+  NoEditDelegate(QObject* parent=0): QStyledItemDelegate(parent) {}
+  virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+    return 0;
+  }
+};
+
+FitDisplay::FitDisplay(Crystal* c, QWidget *parent):
+    QWidget(parent),
     ui(new Ui::FitDisplay),
-    crystal(c)
+    mainFitObject(c)
 {
   ui->setupUi(this);
+  ui->parameterView->setItemDelegateForColumn(0, new NoEditDelegate(this));
 
-  FitParameterModel* model = new FitParameterModel(crystal, this);
-  ui->parameterView->setModel(model);
-  fitter= new NelderMead(c, this);
+  foreach (FitObject* o, mainFitObject->getFitObjects()) {
+    fitObjectAdded(o);
+  }
 
-  connect(ui->doFit, SIGNAL(clicked()), fitter, SLOT(start()));
-  connect(ui->stopFit, SIGNAL(clicked()), fitter, SLOT(stop()));
+  connect(mainFitObject, SIGNAL(fitObjectAdded(FitObject*)), this, SLOT(fitObjectAdded(FitObject*)));
+  connect(mainFitObject, SIGNAL(fitObjectRemoved(FitObject*)), this, SLOT(fitObjectRemoved(FitObject*)));
+
+  fitter = new NelderMead(c, this);
+
+  connect(ui->doFit, SIGNAL(clicked()), this, SLOT(startStopFit()));
+  connect(fitter, SIGNAL(finished()), this, SLOT(toggleStartButtonText()));
+  connect(fitter, SIGNAL(bestSolutionScore(double)), this, SLOT(displayScore(double)), Qt::QueuedConnection);
 }
 
 FitDisplay::~FitDisplay()
@@ -28,4 +52,45 @@ FitDisplay::~FitDisplay()
   delete ui;
 }
 
+void FitDisplay::startStopFit() {
+  if (fitter->isRunning()) {
+    fitter->stop();
+  } else {
+    fitter->start();
+  }
+  toggleStartButtonText();
+}
 
+void FitDisplay::toggleStartButtonText() {
+  if (fitter->isRunning()) {
+    ui->doFit->setText("Stop");
+  } else {
+    ui->doFit->setText("Start");
+  }
+}
+
+void FitDisplay::displayScore(double score) {
+  ui->scoreDisplay->setText(QString::number(100.0*score, 'f', 3));
+}
+
+void FitDisplay::fitObjectAdded(FitObject* o) {
+  if (o->allParameters().size()>0) {
+    QTreeWidgetItem* objectItem = new QTreeWidgetItem(ui->parameterView);
+    objectItem->setText(0, o->FitObjectName());
+    objectItem->setData(0, Qt::UserRole, qVariantFromValue(o));
+    foreach(FitParameter* p, o->allParameters()) {
+      FitParameterTreeItem* item = new FitParameterTreeItem(p, objectItem);
+    }
+  }
+}
+
+void FitDisplay::fitObjectRemoved(FitObject* o) {
+  for (int i=0; i<ui->parameterView->topLevelItemCount(); i++) {
+    QVariant v = ui->parameterView->topLevelItem(i)->data(0, Qt::UserRole);
+    if (o==qVariantValue<FitObject*>(v)) {
+      QTreeWidgetItem* item = ui->parameterView->takeTopLevelItem(i);
+      delete item;
+      return;
+    }
+  }
+}

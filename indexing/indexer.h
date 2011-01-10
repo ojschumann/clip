@@ -17,10 +17,6 @@ class Solution;
 class Indexer: public QObject, public QRunnable {
   Q_OBJECT
 public:
-  enum MarkerType {
-    Spot,
-    Zone
-  };
   class AngleInfo {
   public:
     AngleInfo(int i1, int i2, const QList<Marker>& markers, double maxDeviation);
@@ -34,7 +30,7 @@ public:
     int index2;
   };
 
-  Indexer(QList<Vec3D> spotMarkerNormals, QList<Vec3D> zoneMarkerNormals, const Mat3D& MReal, const Mat3D& MReziprocal, double _maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup);
+  Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& MReal, const Mat3D& MReziprocal, double _maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup);
 
   void run();
 
@@ -66,9 +62,6 @@ protected:
   QList<AngleInfo> zoneZoneAngles;
 
   QList<Marker> globalMarkers;
-
-  QList<Vec3D> spotMarkerNormals;
-  QList<Vec3D> zoneMarkerNormals;
 
   Mat3D MReal;
   Mat3D MRealInv;

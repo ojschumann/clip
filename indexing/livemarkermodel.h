@@ -6,7 +6,6 @@
 #include "tools/abstractmarkeritem.h"
 
 class Crystal;
-class Projector;
 
 class LiveMarkerModel : public QAbstractTableModel
 {
@@ -22,27 +21,19 @@ public:
 
 signals:
   void doHighlightMarker(int);
+  void deleteMarker(AbstractMarkerItem*);
 public slots:
-  void observeProjector(Projector*);
-  void forgetProjector(Projector*);
   void highlightMarker(int n, bool b);
   void deleteMarker(int);
 protected slots:
-  void spotMarkerAdded(int);
-  void zoneMarkerAdded(int);
-  void spotMarkerRemoved(int);
-  void zoneMarkerRemoved(int);
-  void markerChanged();
+  void markerAdded(AbstractMarkerItem*);
+  void markerChanged(AbstractMarkerItem*);
+  void markerClicked(AbstractMarkerItem*);
+  void markerRemoved(AbstractMarkerItem*);
   void orientationChanged();
-  void markerClicked();
-protected:
-  void addMarker(AbstractMarkerItem* m);
-  void deleteMarker(AbstractMarkerItem* m);
 private:
   Crystal* crystal;
   QList<AbstractMarkerItem*> markers;
-  QMultiMap<Projector*, AbstractMarkerItem*> markersOfProjector;
-
 };
 
 

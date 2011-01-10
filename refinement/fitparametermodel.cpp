@@ -4,32 +4,36 @@
 
 #include "core/crystal.h"
 #include "core/projector.h"
+#include "refinement/fitparameter.h"
+#include "refinement/fitparametergroup.h"
 
 FitParameterModel::FitParameterModel(Crystal* c, QObject *parent) :
     QAbstractItemModel(parent),
     crystal(c)
 {
   nodes << crystal;
+  foreach (FitParameter* fp, crystal->allParameters())
+    connect(fp, SIGNAL(valueChanged(FitParameter*,double)), this, SLOT(parameterValueChanged(FitParameter*,double)));
+
   foreach (Projector* p, crystal->getConnectedProjectors()) {
     if (p->hasMarkers() && p->allParameters().size()>0)
-      nodes << p;
+      handleProjectorAdd(p);
   }
   // ToDo:
-  // Handle addition and deletion of nodes;
   // Handle change of Changable flag for FitParameters
-  // Handle addition and deletion of Projector
-  // Handle Addition and deletion of markers (might hide a detector)
-
+  // Handle change of values and enabled flag
   connect(crystal, SIGNAL(projectorAdded(Projector*)), this, SLOT(handleProjectorAdd(Projector*)));
   connect(crystal, SIGNAL(projectorRemoved(Projector*)), this, SLOT(handleProjectorDel(Projector*)));
+  connect(crystal, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 }
 
 FitParameterModel::~FitParameterModel() {}
 
 void FitParameterModel::handleProjectorAdd(Projector* p) {
   connect(p, SIGNAL(markerAdded()), this, SLOT(handleMarkerAdd()));
-  connect(p, SIGNAL(markerRemoved())), this, SLOT(handleMarkerDel()));
-
+  connect(p, SIGNAL(markerRemoved()), this, SLOT(handleMarkerDel()));
+  foreach (FitParameter* fp, p->allParameters())
+    connect(fp, SIGNAL(valueChanged(FitParameter*,double)), this, SLOT(parameterValueChanged(FitParameter*,double)));
   if (p->hasMarkers()) {
     int idx = nodes.size();
     beginInsertRows(QModelIndex(), idx, idx);
@@ -39,8 +43,7 @@ void FitParameterModel::handleProjectorAdd(Projector* p) {
 }
 
 void FitParameterModel::handleProjectorDel(Projector* p) {
-  p->spotMarkers().disconnect(this);
-  p->zoneMarkers().disconnect(this);
+  p->disconnect(this);
 
   FitObject* o = dynamic_cast<FitObject*>(p);
   int idx = nodes.indexOf(o);
@@ -53,7 +56,7 @@ void FitParameterModel::handleProjectorDel(Projector* p) {
 }
 
 void FitParameterModel::handleMarkerAdd() {
-  Projector* o = dynamic_cast<Projector*>(sender(o));
+  FitObject* o = dynamic_cast<FitObject*>(sender());
   if (o && !nodes.contains(o)) {
     int idx = nodes.size();
     beginInsertRows(QModelIndex(), idx, idx);
@@ -62,7 +65,18 @@ void FitParameterModel::handleMarkerAdd() {
   }
 }
 
-void FitParameterModel::handleMarkerDel() {}
+void FitParameterModel::handleMarkerDel() {
+  Projector* p = dynamic_cast<Projector*>(sender());
+  if (!p->hasMarkers()) {
+    FitObject* o = dynamic_cast<FitObject*>(p);
+    if (o && nodes.contains(o)) {
+      int idx = nodes.indexOf(o);
+      beginRemoveRows(QModelIndex(), idx, idx);
+      nodes.removeAt(idx);
+      endRemoveRows();
+    }
+  }
+}
 
 
 int FitParameterModel::columnCount(const QModelIndex &parent) const {
@@ -154,4 +168,13 @@ bool FitParameterModel::setData(const QModelIndex &index, const QVariant &value,
     return true;
   }
   return false;
+}
+
+void FitParameterModel::parameterValueChanged(FitParameter* p, double v) {
+  int parentRow = nodes.indexOf(p->getFitObject());
+  if (parentRow>=0) {
+    int row = p->getFitObject()->enabledParameters().indexOf(p);
+    QModelIndex parent = index(parentRow, 0, QModelIndex());
+    emit dataChanged(index(row, 1, parent), index(row, 1, parent));
+  }
 }

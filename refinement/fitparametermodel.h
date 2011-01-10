@@ -34,6 +34,8 @@ protected slots:
   void handleMarkerAdd();
   void handleMarkerDel();
 
+  void parameterValueChanged(FitParameter*, double);
+
 protected:
   Crystal* crystal;
   QList<FitObject*> nodes;

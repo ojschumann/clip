@@ -1,7 +1,6 @@
 #include "livemarkermodel.h"
 
 #include "core/crystal.h"
-#include "core/projector.h"
 #include "tools/spotitem.h"
 #include "tools/zoneitem.h"
 
@@ -9,11 +8,13 @@ LiveMarkerModel::LiveMarkerModel(Crystal *c, QObject *parent) :
     QAbstractTableModel(parent),
     crystal(c)
 {
-  foreach (Projector* p, c->getConnectedProjectors()) {
-    observeProjector(p);
-  }
-  connect(crystal, SIGNAL(projectorAdded(Projector*)), this, SLOT(observeProjector(Projector*)));
-  connect(crystal, SIGNAL(projectorRemoved(Projector*)), this, SLOT(forgetProjector(Projector*)));
+  foreach (AbstractMarkerItem* item, crystal->getMarkers())
+    markerAdded(item);
+  connect(crystal, SIGNAL(markerAdded(AbstractMarkerItem*)), this, SLOT(markerAdded(AbstractMarkerItem*)));
+  connect(crystal, SIGNAL(markerChanged(AbstractMarkerItem*)), this, SLOT(markerChanged(AbstractMarkerItem*)));
+  connect(crystal, SIGNAL(markerClicked(AbstractMarkerItem*)), this, SLOT(markerClicked(AbstractMarkerItem*)));
+  connect(crystal, SIGNAL(markerRemoved(AbstractMarkerItem*)), this, SLOT(markerRemoved(AbstractMarkerItem*)));
+  connect(this, SIGNAL(deleteMarker(AbstractMarkerItem*)), crystal, SIGNAL(deleteMarker(AbstractMarkerItem*)));
   connect(crystal, SIGNAL(orientationChanged()), this, SLOT(orientationChanged()));
 }
 
@@ -22,79 +23,37 @@ LiveMarkerModel::~LiveMarkerModel() {
     item->highlight(false);
 }
 
-void LiveMarkerModel::addMarker(AbstractMarkerItem *m) {
+void LiveMarkerModel::markerAdded(AbstractMarkerItem *m) {
   beginInsertRows(QModelIndex(), markers.size(), markers.size());
   markers << m;
-  QObject* o = dynamic_cast<QObject*>(m);
-  if (o) {
-    connect(o, SIGNAL(positionChanged()), this, SLOT(markerChanged()));
-    connect(o, SIGNAL(itemClicked()), this, SLOT(markerClicked()));
-  }
   endInsertRows();
 }
 
-void LiveMarkerModel::deleteMarker(AbstractMarkerItem* m) {
+void LiveMarkerModel::markerChanged(AbstractMarkerItem *item) {
+  int idx = markers.indexOf(item);
+  emit dataChanged(index(idx, 0), index(idx, columnCount()-1));
+}
+
+void LiveMarkerModel::markerClicked(AbstractMarkerItem *item) {
+  int idx = markers.indexOf(item);
+  if (idx>=0) emit doHighlightMarker(idx);
+}
+
+void LiveMarkerModel::markerRemoved(AbstractMarkerItem* m) {
   int idx = markers.indexOf(m);
   beginRemoveRows(QModelIndex(), idx, idx);
   markers.removeAt(idx);
   endRemoveRows();
-  if (SpotItem* si=dynamic_cast<SpotItem*>(m)) si->disconnect(this);
-  if (ZoneItem* zi=dynamic_cast<ZoneItem*>(m)) zi->disconnect(this);
 }
 
-void LiveMarkerModel::observeProjector(Projector* p) {
-  foreach (AbstractMarkerItem* m, p->getAllMarkers()) {
-    addMarker(m);
-    markersOfProjector.insert(p, m);
-  }
-  connect(&p->spotMarkers(), SIGNAL(itemAdded(int)), this, SLOT(spotMarkerAdded(int)));
-  connect(&p->spotMarkers(), SIGNAL(itemAboutToBeRemoved(int)), this, SLOT(spotMarkerRemoved(int)));
-  connect(&p->zoneMarkers(), SIGNAL(itemAdded(int)), this, SLOT(zoneMarkerAdded(int)));
-  connect(&p->zoneMarkers(), SIGNAL(itemAboutToBeRemoved(int)), this, SLOT(zoneMarkerRemoved(int)));
-}
-
-void LiveMarkerModel::forgetProjector(Projector* p) {
-  foreach (AbstractMarkerItem* m, p->getAllMarkers()) {
-    deleteMarker(m);
-  }
-  p->spotMarkers().disconnect(this);
-  p->zoneMarkers().disconnect(this);
+void LiveMarkerModel::highlightMarker(int n, bool b) {
+  if (n<markers.size())
+    markers.at(n)->highlight(b);
 }
 
 
-void LiveMarkerModel::spotMarkerAdded(int n) {
-  ItemStore<SpotItem>* is = dynamic_cast<ItemStore<SpotItem>*>(sender());
-  if (is) {
-    addMarker(is->at(n));
-  }
-}
-
-void LiveMarkerModel::zoneMarkerAdded(int n) {
-  ItemStore<ZoneItem>* is = dynamic_cast<ItemStore<ZoneItem>*>(sender());
-  if (is) {
-    addMarker(is->at(n));
-  }
-}
-
-void LiveMarkerModel::spotMarkerRemoved(int n) {
-  ItemStore<SpotItem>* is = dynamic_cast<ItemStore<SpotItem>*>(sender());
-  if (is) {
-    deleteMarker(is->at(n));
-  }
-}
-
-void LiveMarkerModel::zoneMarkerRemoved(int n) {
-  ItemStore<ZoneItem>* is = dynamic_cast<ItemStore<ZoneItem>*>(sender());
-  if (is) {
-    deleteMarker(is->at(n));
-  }
-}
-
-void LiveMarkerModel::markerChanged() {
-  AbstractMarkerItem* item = dynamic_cast<AbstractMarkerItem*>(sender());
-  item->invalidateCache();
-  int idx = markers.indexOf(item);
-  emit dataChanged(index(idx, 0), index(idx, columnCount()-1));
+void LiveMarkerModel::deleteMarker(int n) {
+  emit deleteMarker(markers.at(n));
 }
 
 void LiveMarkerModel::orientationChanged() {
@@ -160,28 +119,4 @@ QVariant LiveMarkerModel::headerData(int section, Qt::Orientation orientation, i
     return QVariant(QString(data[section]));
   }
   return QVariant();
-}
-
-void LiveMarkerModel::highlightMarker(int n, bool b) {
-  if (n<markers.size())
-    markers.at(n)->highlight(b);
-}
-
-void LiveMarkerModel::deleteMarker(int n) {
-  if (ZoneItem* zi=dynamic_cast<ZoneItem*>(markers.at(n))) {
-    foreach(Projector* p, crystal->getConnectedProjectors()) {
-      if (p->zoneMarkers().del(zi)) return;
-    }
-  } else if (SpotItem* si=dynamic_cast<SpotItem*>(markers.at(n))) {
-    foreach(Projector* p, crystal->getConnectedProjectors()) {
-      if (p->spotMarkers().del(si)) return;
-    }
-  }
-}
-
-void LiveMarkerModel::markerClicked() {
-  AbstractMarkerItem* item = dynamic_cast<AbstractMarkerItem*>(sender());
-  int idx = markers.indexOf(item);
-  if (idx>=0) emit doHighlightMarker(idx);
-
 }

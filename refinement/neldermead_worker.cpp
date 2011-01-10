@@ -6,7 +6,8 @@
 #include "core/projector.h"
 #include "core/projectorfactory.h"
 #include "tools/abstractmarkeritem.h"
-
+#include "refinement/fitparameter.h"
+#include "refinement/fitparametergroup.h"
 
 NMWorker::NMWorker(Crystal* c, QObject* parent):
     QObject(parent),

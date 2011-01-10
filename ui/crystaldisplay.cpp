@@ -15,7 +15,7 @@
 #include "tools/mat3D.h"
 #include "core/crystal.h"
 #include "core/spacegroup.h"
-#include "ui/indexdisplay.h"
+#include "ui/hkltool.h"
 #include "ui/clip.h"
 #include "tools/tools.h"
 #include "tools/xmltools.h"
@@ -184,15 +184,14 @@ void CrystalDisplay::slotLoadCrystalData() {
 void CrystalDisplay::slotSaveCrystalData() {
 
 }
-#include "ui/fitdisplay.h"
+
 void CrystalDisplay::slotStartIndexing() {
-  Clip::getInstance()->addMdiWindow(new FitDisplay(crystal));
-  if (indexDisplay.isNull()) {
-    indexDisplay = new IndexDisplay(crystal);
-    connect(this, SIGNAL(destroyed()), indexDisplay, SLOT(deleteLater()));
-    Clip::getInstance()->addMdiWindow(indexDisplay);
+  if (hklTool.isNull()) {
+    hklTool = new HKLTool(crystal);
+    connect(this, SIGNAL(destroyed()), hklTool, SLOT(deleteLater()));
+    Clip::getInstance()->addMdiWindow(hklTool);
   } else {
-    Clip::getInstance()->setActiveSubWindow(indexDisplay);
+    Clip::getInstance()->setActiveSubWindow(hklTool);
   }
 }
 
