@@ -33,6 +33,7 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
     connect(item, SIGNAL(positionChanged()), this, SLOT(updateOptimalZone()));
     connect(projector, SIGNAL(spotSizeChanged(double)), item, SLOT(setRadius(double)));
   }
+  connect(this, SIGNAL(positionChanged()), this, SLOT(slotInvalidateCache()));
   updatePolygon();
   updateOptimalZone();
   startHandle->setPos(p1);
@@ -358,6 +359,10 @@ Vec3D ZoneItem::getMarkerNormal() const {
 void ZoneItem::highlight(bool h) {
   highlighted = h;
   update();
+}
+
+void ZoneItem::slotInvalidateCache() {
+  invalidateCache();
 }
 
 const char XML_ZoneMarker_element[] = "Marker";

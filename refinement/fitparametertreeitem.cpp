@@ -1,6 +1,7 @@
 #include "fitparametertreeitem.h"
 
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -25,7 +26,8 @@ QVariant FitParameterTreeItem::data(int column, int role) const {
     }
   } else if (column==1) {
     if (role==Qt::DisplayRole) {
-      return QVariant(parameter->value());
+      int digits = std::max(0, -static_cast<int>(floor(log10(parameter->epsilon()))));
+      return QVariant(QString::number(parameter->value(), 'f', digits));
     } else if (role==Qt::EditRole) {
       return QVariant(QString::number(parameter->value()));
     }

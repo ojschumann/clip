@@ -80,6 +80,7 @@ Crystal::Crystal(QObject* parent):
   connect(&reflectionFuture, SIGNAL(finished()), this, SLOT(reflectionGenerated()));
   axisType=LabSystem;
   enableUpdate();
+  synchronUpdate();
   restartReflectionUpdate = false;
   generateReflections();
 
@@ -93,13 +94,11 @@ Crystal::Crystal(QObject* parent):
 Crystal& Crystal::operator=(const Crystal& c) {
   spaceGroup.setGroupSymbol(c.spaceGroup.groupSymbol());
   internalSetCell(c.a,c.b,c.c,c.alpha,c.beta,c.gamma);
-  Qmin=c.Qmin;
-  Qmax=c.Qmax;
+  setWavevectors(c.Qmin, c.Qmax);
   predictionFactor = 1.0;
 
   setRotation(c.getRotationMatrix());
   setRotationAxis(c.getRotationAxis(), c.getRotationAxisType());
-  enableUpdate(c.updateEnabled);
   restartReflectionUpdate = false;
 
   FitObject::operator=(c);
@@ -176,8 +175,8 @@ void Crystal::internalSetCell(double _a, double _b, double _c, double _alpha, do
   astar=MReziprocal(0);
   bstar=MReziprocal(1);
   cstar=MReziprocal(2);
-  emit cellChanged();
   generateReflections();
+  emit cellChanged();
 }
 
 void Crystal::addRotation(const Vec3D& axis, double angle) {
@@ -200,12 +199,34 @@ void Crystal::setRotation(const Mat3D& M) {
 
 void Crystal::setWavevectors(double _Qmin, double _Qmax) {
   if ((_Qmin<_Qmax) and ((_Qmin!=Qmin) or (_Qmax!=Qmax))) {
-    Qmax=_Qmax;
     Qmin=_Qmin;
+    Qmax=_Qmax;
     generateReflections();
   }
 }
 
+void Crystal::generateReflections() {
+  if (not updateEnabled)
+    return;
+  if (updateIsSynchron) {
+    reflections = doGeneration();
+    emit reflectionsUpdate();
+  } else if (reflectionFuture.isRunning()) {
+    restartReflectionUpdate = true;
+  } else {
+    reflectionFuture.setFuture(QtConcurrent::run(this, &Crystal::doGeneration));
+  }
+}
+
+void Crystal::reflectionGenerated() {
+  reflections = reflectionFuture.result();
+
+  if (restartReflectionUpdate) {
+    restartReflectionUpdate = false;
+    generateReflections();
+  }
+  emit reflectionsUpdate();
+}
 
 QVector<Reflection> Crystal::doGeneration() {
   Vec3D astar(this->astar);
@@ -276,28 +297,6 @@ QVector<Reflection> Crystal::doGeneration() {
   predictionFactor = 0.8 * predictionFactor + 0.2 * (refs.size()/prediction);
   return refs;
 }
-
-
-
-void Crystal::generateReflections() {
-  if (not updateEnabled)
-    return;
-  if (reflectionFuture.isRunning()) {
-    restartReflectionUpdate = true;
-  } else {
-    reflectionFuture.setFuture(QtConcurrent::run(this, &Crystal::doGeneration));
-  }
-}
-
-void Crystal::reflectionGenerated() {
-  reflections = reflectionFuture.result();
-  if (restartReflectionUpdate) {
-    restartReflectionUpdate = false;
-    generateReflections();
-  }
-  emit reflectionsUpdate();
-}
-
 
 Crystal::UpdateRef::UpdateRef(Crystal *c) {
   MRot = c->MRot;
@@ -378,7 +377,6 @@ QVector<Reflection> Crystal::getReflectionList() {
   return reflections;
 }
 
-
 Vec3D Crystal::uvw2Real(const Vec3D& v) {
   return MRot*MReal*v;
 }
@@ -420,6 +418,7 @@ void Crystal::addProjector(Projector* p) {
   emit fitObjectAdded(p);
   foreach (AbstractMarkerItem* item, p->getAllMarkers())
     emit markerAdded(item);
+  updateWavevectorsFromProjectors();
 }
 
 void Crystal::removeProjector(Projector* p) {
@@ -429,6 +428,7 @@ void Crystal::removeProjector(Projector* p) {
   disconnect(p);
   emit projectorRemoved(p);
   emit fitObjectRemoved(p);
+  updateWavevectorsFromProjectors();
 }
 
 
@@ -509,6 +509,10 @@ Spacegroup* Crystal::getSpacegroup() {
 
 void Crystal::enableUpdate(bool b) {
   updateEnabled=b;
+}
+
+void Crystal::synchronUpdate(bool b) {
+  updateIsSynchron=b;
 }
 
 void Crystal::calcEulerAngles(double &omega, double &chi, double &phi) {

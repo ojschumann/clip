@@ -106,7 +106,8 @@ SOURCES += main.cpp\
     refinement/fitparameter.cpp \
     refinement/fitparametergroup.cpp \
     refinement/fitparametertreeitem.cpp \
-    ui/hkltool.cpp
+    ui/hkltool.cpp \
+    indexing/solutionscorer.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -179,7 +180,8 @@ HEADERS  += ui/clip.h \
     refinement/fitparameter.h \
     refinement/fitparametergroup.h \
     refinement/fitparametertreeitem.h \
-    ui/hkltool.h
+    ui/hkltool.h \
+    indexing/solutionscorer.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

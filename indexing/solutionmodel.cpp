@@ -85,9 +85,9 @@ SolutionModel::SolSort::SolSort(int col, Qt::SortOrder order) {
 bool SolutionModel::SolSort::operator()(const Solution& s1,const Solution& s2) {
   bool b=true;
   if (sortColumn==0) {
-    b=s1.angularDeviationSum()<s2.angularDeviationSum();
-  } else if (sortColumn==1) {
     b=s1.spatialDeviationSum()<s2.spatialDeviationSum();
+  } else if (sortColumn==1) {
+    b=s1.angularDeviationSum()<s2.angularDeviationSum();
   } else if (sortColumn==2) {
     b=s1.hklDeviationSum()<s2.hklDeviationSum();
   }

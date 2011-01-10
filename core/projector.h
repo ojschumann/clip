@@ -66,6 +66,8 @@ public:
   virtual Vec3D det2normal(const QPointF&, bool& b) const = 0;
 
   Reflection getClosestReflection(const Vec3D& normal);
+  QList<Reflection> getProjectedReflections();
+  QList<Reflection> getProjectedReflectionsNormalTo(const TVec3D<int>& uvw);
 
   QGraphicsScene* getScene();
   Crystal* getCrystal();

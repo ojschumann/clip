@@ -6,24 +6,34 @@
 AbstractMarkerItem::AbstractMarkerItem(MarkerType t):
   markerType(t)
 {
-  deviation = -1;
+  indexDeviation = -1;
 }
 
 AbstractMarkerItem::~AbstractMarkerItem() {}
 
 Vec3D AbstractMarkerItem::getRationalIndex() {
-  if (deviation<0) calcBestIndex();
+  if (indexDeviation<0) calcBestIndex();
   return rationalIndex;
 }
 
 TVec3D<int> AbstractMarkerItem::getIntegerIndex() {
-  if (deviation<0) calcBestIndex();
+  if (indexDeviation<0) calcBestIndex();
   return integerIndex;
 }
 
-double AbstractMarkerItem::getBestScore() {
-  if (deviation<0) calcBestIndex();
-  return deviation;
+double AbstractMarkerItem::getIndexDeviationScore() {
+  if (indexDeviation<0) calcBestIndex();
+  return indexDeviation;
+}
+
+double AbstractMarkerItem::getDetectorPositionScore() {
+  if (detectorPositionDeviation<0) calcDetectorDeviation();
+  return detectorPositionDeviation;
+}
+
+double AbstractMarkerItem::getAngularDeviation() {
+  if (angularDeviation<0) calcAngularDeviation();
+  return angularDeviation;
 }
 
 void AbstractMarkerItem::calcBestIndex() {
@@ -38,12 +48,20 @@ void AbstractMarkerItem::calcBestIndex() {
     double scale = integerIdx*v;
     Vec3D rationalIdx = v*scale;
     double testDeviation = (rationalIdx-integerIdx).norm();
-    if (n==1 || testDeviation<deviation) {
+    if (n==1 || testDeviation<indexDeviation) {
       rationalIndex = rationalIdx;
       integerIndex = integerIdx.toType<int>();
-      deviation = testDeviation;
+      indexDeviation = testDeviation;
     }
   }
+}
+
+void AbstractMarkerItem::calcDetectorDeviation() {
+  detectorPositionDeviation = 0.0;
+}
+
+void AbstractMarkerItem::calcAngularDeviation() {
+  angularDeviation = 0.0;
 }
 
 void AbstractMarkerItem::setIndex(const TVec3D<int> &index) {
@@ -52,13 +70,20 @@ void AbstractMarkerItem::setIndex(const TVec3D<int> &index) {
 
   rationalIndex = v * ( v * index.toType<double>() );
   integerIndex = index;
-  deviation = (rationalIndex-integerIndex.toType<double>()).norm();
+  indexDeviation = (rationalIndex-integerIndex.toType<double>()).norm();
 }
 
 void AbstractMarkerItem::invalidateCache() {
-  deviation = -1;
+  indexDeviation = -1.0;
+  angularDeviation = -1.0;
+  detectorPositionDeviation = -1.0;
 }
 
+
+
+
+
+// #################################################
 
 AbstractProjectorMarkerItem::AbstractProjectorMarkerItem(Projector *p, MarkerType t):
   AbstractMarkerItem(t),
@@ -77,3 +102,49 @@ Vec3D AbstractProjectorMarkerItem::normalToIndex(const Vec3D &v) {
     return projector->getCrystal()->getReziprocalOrientationMatrix().transposed() * n;
   }
 }
+
+void AbstractProjectorMarkerItem::calcDetectorDeviation() {
+  if (markerType==SpotMarker) {
+    bool ok1, ok2;
+    QPointF p = projector->normal2det(getMarkerNormal(), ok1);
+    p -= projector->normal2det(projector->getCrystal()->hkl2Reziprocal(getIntegerIndex().toType<double>()).normalized(), ok2);
+    if (ok1 && ok2) {
+      detectorPositionDeviation = hypot(p.x(), p.y());
+    }
+  } else {
+    double score = 0.0;
+    int N = 0;
+    Vec3D n = getMarkerNormal();
+    QRectF plane(0, 0, 1, 1);
+    foreach (Reflection r, projector->getProjectedReflectionsNormalTo(getIntegerIndex())) {
+      bool ok;
+      QPointF pSpot = projector->normal2det(r.normal, ok);
+      if (!ok || !plane.contains(projector->det2img.map(pSpot)))
+        continue;
+      Vec3D v = r.normal - n*(n*r.normal);
+      v.normalize();
+      QPointF pZone = projector->normal2det(v, ok);
+      if (ok) {
+        QPointF dp = pSpot - pZone;
+        score += hypot(dp.x(), dp.y());
+        N++;
+      }
+    }
+    if (N>0) {
+      detectorPositionDeviation = score/N;
+    } else {
+      detectorPositionDeviation = 0.0;
+    }
+  }
+}
+
+void AbstractProjectorMarkerItem::calcAngularDeviation() {
+  Vec3D n;
+  if (markerType==SpotMarker) {
+    n = projector->getCrystal()->hkl2Reziprocal(getIntegerIndex().toType<double>());
+  } else {
+    n = projector->getCrystal()->uvw2Real(getIntegerIndex().toType<double>());
+  }
+  angularDeviation = 180.0*M_1_PI*acos(n.normalized()*getMarkerNormal());
+}
+

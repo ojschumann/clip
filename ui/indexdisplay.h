@@ -4,6 +4,7 @@
 #include <QWidget>
 
 #include "indexing/solutionmodel.h"
+#include "indexing/solutionscorer.h"
 
 namespace Ui {
     class Indexing;
@@ -24,6 +25,7 @@ private:
     Ui::Indexing *ui;
     Crystal* crystal;
     SolutionModel solutions;
+    SolutionScorer solutionScorer;
 
     bool indexRunning;
 

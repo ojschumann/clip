@@ -11,6 +11,8 @@ public:
   explicit SpotItem(Projector* p, double r, QGraphicsItem* parent = 0);
   virtual Vec3D getMarkerNormal() const;
   virtual void highlight(bool b);
+private slots:
+  void slotInvalidateCache();
 };
 
 #endif // SPOTITEM_H

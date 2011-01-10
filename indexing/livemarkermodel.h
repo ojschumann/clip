@@ -30,7 +30,7 @@ protected slots:
   void markerChanged(AbstractMarkerItem*);
   void markerClicked(AbstractMarkerItem*);
   void markerRemoved(AbstractMarkerItem*);
-  void orientationChanged();
+  void rescore();
 private:
   Crystal* crystal;
   QList<AbstractMarkerItem*> markers;

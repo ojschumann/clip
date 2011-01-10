@@ -15,7 +15,8 @@ LiveMarkerModel::LiveMarkerModel(Crystal *c, QObject *parent) :
   connect(crystal, SIGNAL(markerClicked(AbstractMarkerItem*)), this, SLOT(markerClicked(AbstractMarkerItem*)));
   connect(crystal, SIGNAL(markerRemoved(AbstractMarkerItem*)), this, SLOT(markerRemoved(AbstractMarkerItem*)));
   connect(this, SIGNAL(deleteMarker(AbstractMarkerItem*)), crystal, SIGNAL(deleteMarker(AbstractMarkerItem*)));
-  connect(crystal, SIGNAL(orientationChanged()), this, SLOT(orientationChanged()));
+  connect(crystal, SIGNAL(orientationChanged()), this, SLOT(rescore()));
+  connect(crystal, SIGNAL(cellChanged()), this, SLOT(rescore()));
 }
 
 LiveMarkerModel::~LiveMarkerModel() {
@@ -56,10 +57,10 @@ void LiveMarkerModel::deleteMarker(int n) {
   emit deleteMarker(markers.at(n));
 }
 
-void LiveMarkerModel::orientationChanged() {
+void LiveMarkerModel::rescore() {
   double score = 0.0;
   foreach (AbstractMarkerItem* item, markers) {
-    score += item->getBestScore();
+    score += item->getIndexDeviationScore();
   }
   cout << "Sum of Score = " << score << endl;
 
@@ -89,14 +90,18 @@ QVariant LiveMarkerModel::data(const QModelIndex &index, int role) const {
     } else if (col==4 || col==5 || col==6) {
       Vec3D n = markers.at(index.row())->getRationalIndex();      
       return QVariant(QString::number(n(col-4), 'f', 2));
+    } else if (col==7) {
+      return QVariant(QString::number(markers.at(index.row())->getAngularDeviation(), 'f', 2));
+    } else if (col==8) {
+      return QVariant(QString::number(100.0*markers.at(index.row())->getDetectorPositionScore(), 'f', 2));
     } else if (col==9) {
-      return QVariant(QString::number(100.0*markers.at(index.row())->getBestScore(), 'f', 2));
+      return QVariant(QString::number(100.0*markers.at(index.row())->getIndexDeviationScore(), 'f', 2));
     }
   } else if (role==Qt::BackgroundRole && false) {
     return QVariant(QBrush(QColor(225, 255, 225)));
   } else if (role==Qt::TextAlignmentRole) {
     return QVariant(Qt::AlignRight);
-  } else if (role==Qt::UserRole) {
+  } else if (role==Qt::UserRole) { // Used for Sorting
     int col = index.column();
     if (col==0) {
       return data(index, Qt::DisplayRole);
@@ -106,8 +111,12 @@ QVariant LiveMarkerModel::data(const QModelIndex &index, int role) const {
     } else if (col==4 || col==5 || col==6) {
       Vec3D n = markers.at(index.row())->getRationalIndex();
       return QVariant(n(col-4));
+    } else if (col==7) {
+      return QVariant(markers.at(index.row())->getAngularDeviation());
+    } else if (col==8) {
+      return QVariant(markers.at(index.row())->getDetectorPositionScore());
     } else if (col==9) {
-      return QVariant(markers.at(index.row())->getBestScore());
+      return QVariant(markers.at(index.row())->getIndexDeviationScore());
     }
   }
   return QVariant();

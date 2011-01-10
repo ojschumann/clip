@@ -134,7 +134,7 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
         m.invalidateCache();
       }
 
-      if (m.getBestScore()>maxHKLDeviation) return;
+      if (m.getIndexDeviationScore()>maxHKLDeviation) return;
       optRot.addVectorPair(m.getIndexNormal(), m.getMarkerNormal());
     }
     Mat3D T = optRot.getOptimalRotation();
@@ -149,9 +149,9 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
   solution.bestRotation = R;
   solution.hklDeviation = 0;
   foreach (Marker m, localData.markers) {
-    solution.hklDeviation += m.getBestScore();
+    solution.hklDeviation += m.getIndexDeviationScore();
     solution.markerIdx << m.getRationalIndex();
-    solution.markerScore += m.getBestScore();
+    solution.markerScore += m.getIndexDeviationScore();
   }
 
   Mat3D bestinv(solution.bestRotation.transposed());

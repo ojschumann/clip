@@ -15,27 +15,37 @@ public:
 
   AbstractMarkerItem(MarkerType t);
   virtual ~AbstractMarkerItem();
+
   virtual Vec3D getMarkerNormal() const = 0;
 
   virtual Vec3D getRationalIndex();
   virtual TVec3D<int> getIntegerIndex();
-  double getBestScore();
+
+  double getIndexDeviationScore();
+  double getDetectorPositionScore();
+  double getAngularDeviation();
 
   void setIndex(const TVec3D<int>& index);
 
   MarkerType getType() const { return markerType; }
-  virtual Vec3D normalToIndex(const Vec3D&)=0;
 
   void invalidateCache();
 
   virtual void highlight(bool b)=0;
 
 protected:
+  virtual Vec3D normalToIndex(const Vec3D&)=0;
   void calcBestIndex();
+  virtual void calcDetectorDeviation();
+  virtual void calcAngularDeviation();
+
   MarkerType markerType;
   Vec3D rationalIndex;
   TVec3D<int> integerIndex;
-  double deviation;
+
+  double indexDeviation;
+  double detectorPositionDeviation;
+  double angularDeviation;
 };
 
 class AbstractProjectorMarkerItem: public AbstractMarkerItem
@@ -46,6 +56,8 @@ public:
   Projector* getProjector() const { return projector; }
 protected:
   virtual Vec3D normalToIndex(const Vec3D&);
+  virtual void calcDetectorDeviation();
+  virtual void calcAngularDeviation();
   Projector* projector;
 };
 

@@ -12,6 +12,8 @@ Solution::Solution(const Solution &s) {
 Solution& Solution::operator=(const Solution& s) {
   bestRotation = s.bestRotation;
   hklDeviation = s.hklDeviation;
+  angularDeviation = s.angularDeviation;
+  detectorPositionDeviation = s.detectorPositionDeviation;
   markerIdx = s.markerIdx;
   markerScore = s.markerScore;
 
@@ -23,10 +25,10 @@ double Solution::hklDeviationSum() const {
 }
 
 double Solution::spatialDeviationSum() const {
-  return 0;
+  return detectorPositionDeviation;
 }
 double Solution::angularDeviationSum() const {
-  return 0;
+  return angularDeviation;
 }
 
 int Solution_ID = qRegisterMetaType<Solution>("Solution");

@@ -32,6 +32,7 @@ public:
 private slots:
   void updatePolygon();
   void updateOptimalZone();
+  void slotInvalidateCache();
 signals:
   void positionChanged();
   void itemClicked();

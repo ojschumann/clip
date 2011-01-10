@@ -116,6 +116,7 @@ void Projector::connectToCrystal(Crystal *c) {
   crystal=c;
   crystal->addProjector(this);
   connect(crystal, SIGNAL(reflectionsUpdate()), this, SLOT(reflectionsUpdated()));
+  connect(crystal, SIGNAL(cellChanged()), this, SLOT(invalidateMarkerCache()));
   connect(crystal, SIGNAL(orientationChanged()), this, SLOT(invalidateMarkerCache()));
   connect(crystal, SIGNAL(deleteMarker(AbstractMarkerItem*)), this, SLOT(deleteMarker(AbstractMarkerItem*)));
   emit projectionParamsChanged();
@@ -144,8 +145,8 @@ void Projector::setWavevectors(double Qmin, double Qmax)  {
 }
 
 void Projector::internalSetWavevectors(double Qmin, double Qmax)  {
-  QmaxVal=Qmax;
   QminVal=Qmin;
+  QmaxVal=Qmax;
   emit projectionParamsChanged();
   emit wavevectorsUpdated();
 
@@ -198,7 +199,7 @@ void Projector::reflectionsUpdated() {
   QPointF p;
   // Loop over all reflections
   for (int i=0; i<refs.size(); i++) {
-    // Do the actual projection
+    // Do the actual projection and store, if reflection could be projected
     if ((reflectionIsProjected[i] = project(refs[i], p))) {
       // Save the projected coordinate
       spotIndicator->coordinates << p;
@@ -292,6 +293,24 @@ Reflection Projector::getClosestReflection(const Vec3D& normal) {
   } else {
     return r[minIdx];
   }
+}
+
+QList<Reflection> Projector::getProjectedReflections() {
+  QList<Reflection> list;
+  QVector<Reflection> r = crystal->getReflectionList();
+  for (int n=0; n<r.size(); n++)
+    if (reflectionIsProjected.at(n))
+      list << r.at(n);
+  return list;
+}
+
+QList<Reflection> Projector::getProjectedReflectionsNormalTo(const TVec3D<int>& uvw) {
+  QList<Reflection> list;
+  QVector<Reflection> r = crystal->getReflectionList();
+  for (int n=0; n<r.size(); n++)
+    if (reflectionIsProjected.at(n) && ((r.at(n).hkl()*uvw)==0))
+      list << r.at(n);
+  return list;
 }
 
 
@@ -439,7 +458,6 @@ void Projector::spotMarkerAdded(int n) {
 }
 
 void Projector::spotMarkerChanged(int n) {
-  spotMarkerStore.at(n)->invalidateCache();
   emit markerChanged(spotMarkerStore.at(n));
 }
 
@@ -456,7 +474,6 @@ void Projector::zoneMarkerAdded(int n) {
 }
 
 void Projector::zoneMarkerChanged(int n) {
-  zoneMarkerStore.at(n)->invalidateCache();
   emit markerChanged(zoneMarkerStore.at(n));
 }
 

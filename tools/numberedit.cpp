@@ -10,11 +10,14 @@ QValidator::State NumberEdit::validate( QString & text, int & pos ) const {
   QValidator::State state = QDoubleSpinBox::validate(text, pos);
   if (state == QValidator::Invalid && pos >0 && pos-1<text.size()) {
     QString s(text);
-    QChar justEntered = s[pos-1];
     QChar decimalPoint = QLocale().decimalPoint();
+    QRegExp decimalPointRegExp("[\\.,]");
     bool changedString=false;
 
+    s.replace(decimalPointRegExp, decimalPoint);
+
     // Stange thing entered...
+    QChar justEntered = s[pos-1];
     if (justEntered!=decimalPoint && !justEntered.isDigit())
       return state;
 

@@ -50,7 +50,6 @@ void SpotIndicatorGraphicsItem::updateCache() {
 }
 
 void SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem *option, QWidget *w) {
-
   if (!cache || (cache->size()!=p->viewport().size())) {
     if (cache) delete cache;
     cache = new QPixmap(p->viewport().size());

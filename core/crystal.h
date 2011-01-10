@@ -69,6 +69,7 @@ public:
 
   QList<double> getCell();
   void enableUpdate(bool b=true);  
+  void synchronUpdate(bool b=true);
 
 public slots:
   void addRotation(const Vec3D& axis, double angle);
@@ -146,6 +147,7 @@ private:
   double predictionFactor;
 
   bool updateEnabled;
+  bool updateIsSynchron;
 
   // Function Object that perfoms the
   // update of Reflection Parameters depending on rotation

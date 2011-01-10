@@ -15,6 +15,8 @@ public:
 
   Mat3D bestRotation;
   double hklDeviation;
+  double angularDeviation;
+  double detectorPositionDeviation;
 
   double angularDeviationSum() const;
   double spatialDeviationSum() const;

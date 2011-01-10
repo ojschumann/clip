@@ -6,6 +6,7 @@ SpotItem::SpotItem(Projector *p, double r, QGraphicsItem *parent):
   AbstractProjectorMarkerItem(p, AbstractMarkerItem::SpotMarker)
 {
   highlight(false);
+  connect(this, SIGNAL(positionChanged()), this, SLOT(slotInvalidateCache()));
 }
 
 
@@ -15,4 +16,8 @@ Vec3D SpotItem::getMarkerNormal() const {
 
 void SpotItem::highlight(bool b) {
   setLineWidth(b?2.0:1.0);
+}
+
+void SpotItem::slotInvalidateCache() {
+  invalidateCache();
 }

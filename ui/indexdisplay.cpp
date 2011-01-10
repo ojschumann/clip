@@ -32,6 +32,7 @@ IndexDisplay::IndexDisplay(Crystal* _c, QWidget *parent) :
 
   connect(ui->SolutionSelector->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(updateSolutionDisplay(QModelIndex,QModelIndex)));
   connect(&solutions, SIGNAL(solutionNumberChanged(int)), this, SLOT(showNumberOfSolutions(int)));
+  connect(&solutionScorer, SIGNAL(solutionScored(Solution)), &solutions, SLOT(addSolution(Solution)));
 
 
   indexRunning = false;
@@ -61,6 +62,7 @@ void IndexDisplay::on_startButton_clicked()
     ui->progress->setEnabled(true);
     ui->progress->setValue(0);
 
+    solutionScorer.copyCrystal(crystal);
     Indexer* indexer = new Indexer(crystal->getMarkers(),
                                    crystal->getRealOrientationMatrix(),
                                    crystal->getReziprocalOrientationMatrix(),
@@ -68,7 +70,8 @@ void IndexDisplay::on_startButton_clicked()
                                    0.01*ui->IntDev->value(),
                                    ui->MaxIdx->value(),
                                    crystal->getSpacegroup()->getLauegroup());
-    connect(indexer, SIGNAL(publishSolution(Solution)), &solutions, SLOT(addSolution(Solution)));
+    //connect(indexer, SIGNAL(publishSolution(Solution)), &solutions, SLOT(addSolution(Solution)));
+    connect(indexer, SIGNAL(publishSolution(Solution)), &solutionScorer, SLOT(scoreSolution(Solution)));
     connect(indexer, SIGNAL(destroyed()), this, SLOT(indexerDestroyed()));
     connect(indexer, SIGNAL(nextMajorIndex(int)), this, SLOT(showMajorIndex(int)));
     connect(indexer, SIGNAL(progressInfo(int)), this, SLOT(setProgress(int)));

@@ -26,6 +26,9 @@ CrystalDisplay::CrystalDisplay(QWidget *parent) :
 {
   ui->setupUi(this);
 
+  // This is an interactive Crystal, enable background generation of reflections
+  crystal->synchronUpdate(false);
+
   // Connect Signals of the crystal
   connect(crystal, SIGNAL(orientationChanged()), this, SLOT(slotUpdateOrientationMatrix()));
   connect(crystal, SIGNAL(cellChanged()), this, SLOT(slotUpdateOrientationMatrix()));
