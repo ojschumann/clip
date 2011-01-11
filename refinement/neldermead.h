@@ -27,8 +27,9 @@ public slots:
 signals:
   void finished();
   void bestSolutionScore(double);
+  void bestSolution(QList<double>);
 protected slots:
-  void publishBestSolution();
+  void setBestSolutionToLiveCrystal(QList<double>);
 protected:
   class Worker;
   void run();
@@ -37,16 +38,9 @@ protected:
   // Crystal, that is used in the UI
   Crystal* liveCrystal;
 
-  QTimer publishTimer;
-
   QFutureWatcher<void> threadWatcher;
   QReadWriteLock threadLock;
   bool shouldStop;
-  QList<double> bestSolution;
-  double bestScore;
-  double lastBestScore;
-  bool bestSolutionAlreadyPublished;
-
 };
 
 Q_DECLARE_METATYPE(QList<double>)

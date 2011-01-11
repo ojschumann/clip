@@ -15,14 +15,14 @@ public:
 
   Mat3D bestRotation;
   double hklDeviation;
-  double angularDeviation;
-  double detectorPositionDeviation;
+  double indexMean;
+  double indexRMS;
 
-  double angularDeviationSum() const;
-  double spatialDeviationSum() const;
+  double allIndexRMS() const;
+  double allIndexMean() const;
   double hklDeviationSum() const;
 
-  QList<Vec3D> markerIdx;
+  QList< TVec3D<int> > markerIdx;
   QList<double> markerScore;
 
 };

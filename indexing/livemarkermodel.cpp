@@ -10,8 +10,7 @@ LiveMarkerModel::LiveMarkerModel(Crystal *c, QObject *parent) :
 {
   sortColumn = 0;
   sortOrder = Qt::AscendingOrder;
-  foreach (AbstractMarkerItem* item, crystal->getMarkers())
-    markerAdded(item);
+
   connect(crystal, SIGNAL(markerAdded(AbstractMarkerItem*)), this, SLOT(markerAdded(AbstractMarkerItem*)));
   connect(crystal, SIGNAL(markerChanged(AbstractMarkerItem*)), this, SLOT(markerChanged(AbstractMarkerItem*)));
   connect(crystal, SIGNAL(markerClicked(AbstractMarkerItem*)), this, SLOT(markerClicked(AbstractMarkerItem*)));
@@ -19,6 +18,10 @@ LiveMarkerModel::LiveMarkerModel(Crystal *c, QObject *parent) :
   connect(this, SIGNAL(deleteMarker(AbstractMarkerItem*)), crystal, SIGNAL(deleteMarker(AbstractMarkerItem*)));
   connect(crystal, SIGNAL(orientationChanged()), this, SLOT(rescore()));
   connect(crystal, SIGNAL(cellChanged()), this, SLOT(rescore()));
+
+  // Add all Markers from Crystal
+  foreach (AbstractMarkerItem* item, crystal->getMarkers())
+    markerAdded(item);
 }
 
 LiveMarkerModel::~LiveMarkerModel() {
@@ -26,32 +29,44 @@ LiveMarkerModel::~LiveMarkerModel() {
     item->highlight(false);
 }
 
-void LiveMarkerModel::markerAdded(AbstractMarkerItem *m) {
+void LiveMarkerModel::markerAdded(AbstractMarkerItem *item) {
+  // Get sorted keys
   QList<double> markerValues = getSortDataList();
-  int idx = qLowerBound(markerValues, getSortData(m)) - markerValues.begin();
+  // search index, where to insert
+  int idx = qLowerBound(markerValues, getSortData(item)) - markerValues.begin();
+  // Do acutal insertion
   beginInsertRows(QModelIndex(), idx, idx);
-  markers.insert(idx, m);
+  markers.insert(idx, item);
   endInsertRows();
 }
 
-void LiveMarkerModel::markerChanged(AbstractMarkerItem *item) {
+void LiveMarkerModel::markerChanged(AbstractMarkerItem *item) {  
+  // Get index of changed item. If not present, do nothing
   int idx = markers.indexOf(item);
   if (idx>=0) {
+    // Get keys (the value for *item is possibly not ordered)
     QList<double> markerValues = getSortDataList();
-    // Remove changed marker Value from (otherwise ordered !) array
+    // Remove changed marker value from (otherwise ordered!) array
     double val = markerValues.takeAt(idx);
-    // Check, where to insert to have the array completly ordered
+    // Search, where to insert the marker in order to have the array ordered completly
     int newIdx = qLowerBound(markerValues, val) - markerValues.begin();
-    // if different, move the row
-    cout << "move " << idx << " -> " << newIdx << " " << val << endl;
-    if (idx!=newIdx) {
-      beginMoveRows(QModelIndex(), idx, idx, QModelIndex(), newIdx);
-      AbstractMarkerItem* m = markers.takeAt(idx);
-      markers.insert(newIdx, m);
+    // if beginMoveRows returns true, the move is valid.
+    if (beginMoveRows(QModelIndex(), idx, idx, QModelIndex(), (idx>newIdx) ? newIdx : newIdx+1)) {
+      // Acutally move the marker
+      markers.insert(newIdx, markers.takeAt(idx));
       endMoveRows();
     }
     emit dataChanged(index(newIdx, 0), index(newIdx, columnCount()-1));
   }
+}
+
+void LiveMarkerModel::markerRemoved(AbstractMarkerItem* item) {
+  // Get index of marker to remove
+  int idx = markers.indexOf(item);
+  // and remove it
+  beginRemoveRows(QModelIndex(), idx, idx);
+  markers.removeAt(idx);
+  endRemoveRows();
 }
 
 void LiveMarkerModel::markerClicked(AbstractMarkerItem *item) {
@@ -59,33 +74,23 @@ void LiveMarkerModel::markerClicked(AbstractMarkerItem *item) {
   if (idx>=0) emit doHighlightMarker(idx);
 }
 
-void LiveMarkerModel::markerRemoved(AbstractMarkerItem* m) {
-  int idx = markers.indexOf(m);
-  beginRemoveRows(QModelIndex(), idx, idx);
-  markers.removeAt(idx);
-  endRemoveRows();
-}
 
 void LiveMarkerModel::highlightMarker(int n, bool b) {
   if (n<markers.size())
     markers.at(n)->highlight(b);
 }
 
-
 void LiveMarkerModel::deleteMarker(int n) {
   emit deleteMarker(markers.at(n));
 }
 
 void LiveMarkerModel::rescore() {
-  double score = 0.0;
-  foreach (AbstractMarkerItem* item, markers) {
-    score += item->getIndexDeviationScore();
-  }
-  cout << "Sum of Score = " << score << endl;
+  // Just do a complete sort. Will emit DataChanged for the complete model, including the sum row
   sort(sortColumn, sortOrder);
 }
 
 int LiveMarkerModel::rowCount(const QModelIndex &parent) const {
+  // Has markers.size() rows for the individual markers plus one for the sum
   return markers.size()+1;
 }
 
@@ -117,8 +122,6 @@ QVariant LiveMarkerModel::data(const QModelIndex &index, int role) const {
     } else if (col==9) {
       return QVariant(QString::number(100.0*markers.at(index.row())->getIndexDeviationScore(), 'f', 2));
     }
-  } else if (role==Qt::BackgroundRole && false) {
-    return QVariant(QBrush(QColor(225, 255, 225)));
   } else if (role==Qt::TextAlignmentRole) {
     return QVariant(Qt::AlignRight);
   }
@@ -152,7 +155,7 @@ QVariant LiveMarkerModel::sumRowData(const QModelIndex &index, int role) const {
   } else if (role==Qt::ForegroundRole) {
     return QVariant(QBrush(Qt::black));
   } else if (role==Qt::BackgroundRole) {
-    return QVariant(QBrush(QColor(0xC0, 0xC0, 0xC0)));
+    return QVariant(QBrush(QColor(0xFF, 0xD0, 0xD0)));
   }
   return QVariant();
 }

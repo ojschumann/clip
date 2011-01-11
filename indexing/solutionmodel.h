@@ -28,6 +28,9 @@ public slots:
   void clear();
 
 private:
+  QList<double> getSortDataList() const;
+  double getSortData(const Solution& s) const;
+
   class SolSort {
   public:
     SolSort(int col, Qt::SortOrder order);

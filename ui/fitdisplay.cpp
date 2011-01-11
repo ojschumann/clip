@@ -36,6 +36,7 @@ FitDisplay::FitDisplay(Crystal* c, QWidget *parent):
   foreach (FitObject* o, mainFitObject->getFitObjects()) {
     fitObjectAdded(o);
   }
+  ui->parameterView->expandAll();
 
   connect(mainFitObject, SIGNAL(fitObjectAdded(FitObject*)), this, SLOT(fitObjectAdded(FitObject*)));
   connect(mainFitObject, SIGNAL(fitObjectRemoved(FitObject*)), this, SLOT(fitObjectRemoved(FitObject*)));

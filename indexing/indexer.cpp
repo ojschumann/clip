@@ -147,11 +147,10 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
 
   Solution solution;
   solution.bestRotation = R;
-  solution.hklDeviation = 0;
+  solution.hklDeviation = 0.0;
   foreach (Marker m, localData.markers) {
+    solution.markerIdx << m.getIntegerIndex();
     solution.hklDeviation += m.getIndexDeviationScore();
-    solution.markerIdx << m.getRationalIndex();
-    solution.markerScore += m.getIndexDeviationScore();
   }
 
   Mat3D bestinv(solution.bestRotation.transposed());
@@ -165,7 +164,6 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
   duplicate = symmetryEquivalentSolutionPresent(bestinv, n);
   if (!duplicate) {
     uniqSolutions << solution;
-
     emit publishSolution(solution);
   }
   uniqLock.unlock();

@@ -1,7 +1,9 @@
-Refinement (basically new)
-  Show if Running,
-  Show Score
-
+Refinement
+  Show if Running
+  Faster
+  Better automatic stop
+  Stop if model changes
+  Check, why score ind livemarkermodel and in fitdisplay differs
 
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
@@ -29,6 +31,14 @@ configurable width of Zonemarker (including zero)
 
 LaueImage
   Display of Images from Bruker Apex (reduced Wavelength band)
+  implement setting of resolution from ResolutionCalculator
+  Generic Interface for ImageInfo
+    * hasCrystalOrientation / getOrientation
+    * hasResolution / absoluteResolution / pixelSize / ...
+    * DetectorOrientation
+    * detectorDistance
+    * ...
+
 
 Mark user defined reflection (like magnetic/incomensurate one)
 

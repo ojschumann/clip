@@ -61,6 +61,14 @@ QList<double> NMWorker::parameterDelta() {
   return delta;
 }
 
+QList<double> NMWorker::parameterRelativeDelta() {
+  QList<double> list = parameterDelta();
+  for (int n=0; n<list.size(); n++) {
+    list[n] /= parameters.at(n)->epsilon();
+  }
+  return list;
+}
+
 void NMWorker::restart() {
   // This sets the Parameters to those of the best score
   score(simplex.first());
@@ -97,8 +105,6 @@ void NMWorker::initParameter() {
       }
     }
   }
-  foreach (FitParameter* p, parameters)
-    cout << "Name: " << qPrintable(p->name()) << endl;
 }
 
 void NMWorker::initSimplex() {
@@ -136,7 +142,7 @@ void NMWorker::doOneIteration() {
   // Take Worst Vertex
   Vertex W = simplex.takeLast();
 
-  // Calculate center without worst element
+  // Calculate center of Gravity (CoG) without the worst element
   Vertex CoG;
   for (int n=0; n<simplex.size(); n++)
     CoG += simplex[n];
@@ -149,9 +155,10 @@ void NMWorker::doOneIteration() {
 
   if (simplex.first()<R && R<simplex.last()) {
     // Score is better than second-worst but not better than best
-    // ToDo: insert at right place (bisect)
-    simplex << R;
-    qSort(simplex);
+    // Insert at right position
+    simplex.insert(qLowerBound(simplex, R) - simplex.begin(), R);
+    //simplex << R;
+    //qSort(simplex);
   } else if (R<simplex.first()) {
     // Score is better than best, try to extend further
     Vertex E = CoG + (CoG - W)*gamma;
@@ -163,13 +170,12 @@ void NMWorker::doOneIteration() {
       simplex.prepend(R);
     }
   } else {
-    // Move worst to the center
+    // Move worst element nearer to the center
     Vertex C = W + (CoG - W)*beta;
     score(C);
     if (C<simplex.last()) {
       // if good, then take
-      simplex << C;
-      qSort(simplex);
+      simplex.insert(qLowerBound(simplex, C) - simplex.begin(), C);
     } else {
       // Shrink Simplex around best element
       simplex << W;
@@ -180,6 +186,25 @@ void NMWorker::doOneIteration() {
       qSort(simplex);
     }
   }
+  cout << "ParamValues ";
+  foreach (double d , simplex.first().coordinates) {
+    cout << d << " ";
+  }
+  cout << endl;
+  cout << "MarkerScores";
+  QList<double> xx;
+  foreach (MarkerInfo m, markers) xx << m.score(spotTransferMatrix, zoneTransferMatrix);
+  qSort(xx);
+  foreach (double v, xx)
+    cout << " " << 100.0*v;
+  cout << endl;
+  cout << "MarkerScores";
+  QList<double> xx;
+  foreach (MarkerInfo m, markers) xx << m.marker->getIndexDeviationScore();
+  qSort(xx);
+  foreach (double v, xx)
+    cout << " " << 100.0*v;
+  cout << endl;
 }
 
 
@@ -208,6 +233,7 @@ double NMWorker::MarkerInfo::score(const Mat3D& spotTransfer, const Mat3D& zoneT
   n.normalize();
   double x = index*n;
   // TODO: Remove sqrt, not nessesary for fitting
+  //return index_sq - x*x;
   return sqrt(index_sq - x*x);
 }
 

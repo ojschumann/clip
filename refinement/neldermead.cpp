@@ -4,7 +4,7 @@
 #include <QtConcurrentRun>
 #include <QMetaType>
 #include <iostream>
-#include <QTimer>
+#include <QTime>
 
 #include "core/crystal.h"
 #include "core/projector.h"
@@ -18,9 +18,8 @@ NelderMead::NelderMead(Crystal* c, QObject *parent) :
     liveCrystal(c),
     shouldStop(false)
 {
-  connect(&threadWatcher, SIGNAL(finished()), this, SLOT(publishBestSolution()));
-  connect(&publishTimer, SIGNAL(timeout()), this, SLOT(publishBestSolution()));
   connect(&threadWatcher, SIGNAL(finished()), this, SIGNAL(finished()));
+  connect(this, SIGNAL(bestSolution(QList<double>)), this, SLOT(setBestSolutionToLiveCrystal(QList<double>)), Qt::QueuedConnection);
 }
 
 
@@ -28,7 +27,6 @@ void NelderMead::start() {
   if (threadWatcher.isRunning()) return;
   shouldStop = false;
   threadWatcher.setFuture(QtConcurrent::run(this, &NelderMead::run));
-  publishTimer.start(200);
 }
 
 void NelderMead::stop() {
@@ -44,11 +42,11 @@ bool NelderMead::isRunning() {
 
 void NelderMead::run() {
   NMWorker* worker = new NMWorker(liveCrystal);
-  threadLock.lockForWrite();
-  bestScore = worker->bestScore();
-  threadLock.unlock();
   int loops = 0;
   int noImprovmentLoops=0;
+  QTime rateLimiter;
+  double bestEmitedScore=worker->bestScore();
+  rateLimiter.start();
   forever {
     loops++;
     noImprovmentLoops++;
@@ -61,55 +59,44 @@ void NelderMead::run() {
 
     double lastScore = worker->bestScore();
     worker->doOneIteration();
-    if (lastScore>worker->bestScore()) {
-      cout << noImprovmentLoops << " bad loops" << endl;
+    if (worker->bestScore()<lastScore) {
       noImprovmentLoops = 0;
-      threadLock.lockForWrite();
-      bestSolution = worker->bestSolution();
-      bestSolutionAlreadyPublished = false;
-      bestScore = worker->bestScore();
-      threadLock.unlock();
-      emit bestSolutionScore(bestScore);
+    }
+    if (worker->bestScore()<bestEmitedScore && rateLimiter.elapsed()>100) {
+      bestEmitedScore = worker->bestScore();
+      emit bestSolutionScore(worker->bestScore());
+      emit bestSolution(worker->bestSolution());
+      rateLimiter.restart();
     }
     if (noImprovmentLoops>50) {
       break;
     }
+    //TODO: For debugging
+    QList<double> deltas = worker->parameterRelativeDelta();
+    qSort(deltas);
+    cout << worker->bestScore() << " " << deltas.first() << " " << deltas.last() << endl;
   }
-  threadLock.lockForWrite();
-  bestSolution = worker->bestSolution();
-  threadLock.unlock();
+  emit bestSolutionScore(worker->bestScore());
+  emit bestSolution(worker->bestSolution());
   delete worker;
 }
 
-void NelderMead::publishBestSolution() {
-  if (!threadWatcher.isRunning()) publishTimer.stop();
-  threadLock.lockForRead();
-  QList<double> localBestSolution = bestSolution;
-  double localBestScore = bestScore;
-  bool _bestSolutionAlreadyPublished = bestSolutionAlreadyPublished;
-  threadLock.unlock();
+void NelderMead::setBestSolutionToLiveCrystal(QList<double> solution) {
+  QList<FitParameter*> parameters;
+  foreach (FitObject* o, liveCrystal->getFitObjects())
+    parameters += o->enabledParameters();
 
-  if (!_bestSolutionAlreadyPublished) {
-    lastBestScore = localBestScore;
-    threadLock.lockForWrite();
-    bestSolutionAlreadyPublished = true;
-    threadLock.unlock();
-
-    QList<FitParameter*> parameters;
-    parameters += liveCrystal->enabledParameters();
-    foreach (Projector* p, liveCrystal->getConnectedProjectors())
-      if (p->hasMarkers())
-        parameters += p->enabledParameters();
-
-    if (parameters.size()==localBestSolution.size()) {
-      for (int n=0; n<parameters.size(); n++) {
-        parameters.at(n)->prepareValue(localBestSolution.at(n));
-      }
-      foreach (FitParameter* p, parameters) p->setValue();
+  if (parameters.size()==solution.size()) {
+    for (int n=0; n<parameters.size(); n++) {
+      parameters.at(n)->prepareValue(solution.at(n));
     }
-
-
+    foreach (FitParameter* p, parameters) p->setValue();
+    cout << "LocalValues:";
+    foreach (FitParameter* p, parameters) cout << " " << p->value();
+    cout << endl;
   }
+
+
 }
 
 
