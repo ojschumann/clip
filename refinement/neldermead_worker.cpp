@@ -199,7 +199,7 @@ void NMWorker::doOneIteration() {
     cout << " " << 100.0*v;
   cout << endl;
   cout << "MarkerScores";
-  QList<double> xx;
+  xx.clear();
   foreach (MarkerInfo m, markers) xx << m.marker->getIndexDeviationScore();
   qSort(xx);
   foreach (double v, xx)

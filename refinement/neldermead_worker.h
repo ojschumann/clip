@@ -44,7 +44,7 @@ protected:
   public:
     MarkerInfo(AbstractMarkerItem* item);
     double score(const Mat3D& spotTransfer, const Mat3D& zoneTransfer) const;
-  protected:
+  //protected:
     AbstractMarkerItem* marker;
     Vec3D index;
     double index_sq;

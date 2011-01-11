@@ -75,6 +75,14 @@ void NelderMead::run() {
     QList<double> deltas = worker->parameterRelativeDelta();
     qSort(deltas);
     cout << worker->bestScore() << " " << deltas.first() << " " << deltas.last() << endl;
+
+    QList<FitParameter*> XXp;
+    foreach (FitObject* o, liveCrystal->getFitObjects())
+      XXp += o->allParameters();
+    cout << "  FitValues:";
+    foreach (FitParameter* p, XXp) cout << " " << p->value();
+    cout << endl;
+
   }
   emit bestSolutionScore(worker->bestScore());
   emit bestSolution(worker->bestSolution());
@@ -84,7 +92,7 @@ void NelderMead::run() {
 void NelderMead::setBestSolutionToLiveCrystal(QList<double> solution) {
   QList<FitParameter*> parameters;
   foreach (FitObject* o, liveCrystal->getFitObjects())
-    parameters += o->enabledParameters();
+    parameters += o->allParameters();
 
   if (parameters.size()==solution.size()) {
     for (int n=0; n<parameters.size(); n++) {
@@ -95,6 +103,12 @@ void NelderMead::setBestSolutionToLiveCrystal(QList<double> solution) {
     foreach (FitParameter* p, parameters) cout << " " << p->value();
     cout << endl;
   }
+  QList<FitParameter*> XXp;
+  foreach (FitObject* o, liveCrystal->getFitObjects())
+    XXp += o->allParameters();
+  cout << " LiveValues:";
+  foreach (FitParameter* p, XXp) cout << " " << p->value();
+  cout << endl;
 
 
 }
