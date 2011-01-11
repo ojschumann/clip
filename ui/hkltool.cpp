@@ -19,12 +19,13 @@ HKLTool::HKLTool(Crystal* c, QWidget *parent) :
   ui->tabWidget->addTab(new FitDisplay(c, ui->tabWidget), "Refinement");
 
 
-  QSortFilterProxyModel* sorter = new QSortFilterProxyModel(this);
   markerModel = new LiveMarkerModel(c, this);
+  /*QSortFilterProxyModel* sorter = new QSortFilterProxyModel(this);
   sorter->setSourceModel(markerModel);
   sorter->setSortRole(Qt::UserRole);
   sorter->setDynamicSortFilter(true);
-  ui->markerDisplay->setModel(sorter);
+  ui->markerDisplay->setModel(sorter);*/
+  ui->markerDisplay->setModel(markerModel);
   ui->markerDisplay->sortByColumn(markerModel->columnCount()-1, Qt::AscendingOrder);
   connect(markerModel, SIGNAL(doHighlightMarker(int)), this, SLOT(highlightMarkerNr(int)));
 
@@ -45,21 +46,24 @@ HKLTool::~HKLTool() {
 }
 
 void HKLTool::highlightMarkers() {
-  QSortFilterProxyModel* sorter = dynamic_cast<QSortFilterProxyModel*>(ui->markerDisplay->model());
-  QItemSelection selection = sorter->mapSelectionToSource(ui->markerDisplay->selectionModel()->selection());
+  //QSortFilterProxyModel* sorter = dynamic_cast<QSortFilterProxyModel*>(ui->markerDisplay->model());
+  //QItemSelection selection = sorter->mapSelectionToSource(ui->markerDisplay->selectionModel()->selection());
+  QItemSelection selection = ui->markerDisplay->selectionModel()->selection();
   for (int i=0; i<markerModel->rowCount(); i++) {
-    markerModel->highlightMarker(i, selection.contains(sorter->index(i, 0)));
+    markerModel->highlightMarker(i, selection.contains(markerModel->index(i, 0)));
   }
 }
 
 void HKLTool::highlightMarkerNr(int n) {
-  QSortFilterProxyModel* sorter = dynamic_cast<QSortFilterProxyModel*>(ui->markerDisplay->model());
-  ui->markerDisplay->setCurrentIndex(sorter->mapFromSource(markerModel->index(n, 0)));
+  //QSortFilterProxyModel* sorter = dynamic_cast<QSortFilterProxyModel*>(ui->markerDisplay->model());
+  //ui->markerDisplay->setCurrentIndex(sorter->mapFromSource(markerModel->index(n, 0)));
+  ui->markerDisplay->setCurrentIndex(markerModel->index(n, 0));
 }
 
 void HKLTool::deleteActiveMarker() {
-  QSortFilterProxyModel* sorter = dynamic_cast<QSortFilterProxyModel*>(ui->markerDisplay->model());
-  QModelIndex idx = sorter->mapToSource(ui->markerDisplay->selectionModel()->currentIndex());
+  //QSortFilterProxyModel* sorter = dynamic_cast<QSortFilterProxyModel*>(ui->markerDisplay->model());
+  //QModelIndex idx = sorter->mapToSource(ui->markerDisplay->selectionModel()->currentIndex());
+  QModelIndex idx = ui->markerDisplay->selectionModel()->currentIndex();
   if (idx.isValid())
     markerModel->deleteMarker(idx.row());
 }

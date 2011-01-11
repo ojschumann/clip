@@ -79,7 +79,7 @@ void FitDisplay::fitObjectAdded(FitObject* o) {
     objectItem->setText(0, o->FitObjectName());
     objectItem->setData(0, Qt::UserRole, qVariantFromValue(o));
     foreach(FitParameter* p, o->allParameters()) {
-      FitParameterTreeItem* item = new FitParameterTreeItem(p, objectItem);
+      new FitParameterTreeItem(p, objectItem);
     }
   }
 }

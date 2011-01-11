@@ -18,7 +18,8 @@ public:
   virtual int columnCount(const QModelIndex & parent = QModelIndex()) const ;
   virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-
+  virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+  virtual void sort(int column, Qt::SortOrder order);
 signals:
   void doHighlightMarker(int);
   void deleteMarker(AbstractMarkerItem*);
@@ -32,8 +33,13 @@ protected slots:
   void markerRemoved(AbstractMarkerItem*);
   void rescore();
 private:
+  QVariant sumRowData(const QModelIndex & index, int role = Qt::DisplayRole) const;
+  QList<double> getSortDataList();
+  double getSortData(AbstractMarkerItem*);
   Crystal* crystal;
   QList<AbstractMarkerItem*> markers;
+  int sortColumn;
+  Qt::SortOrder sortOrder;
 };
 
 
