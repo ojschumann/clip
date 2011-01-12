@@ -707,7 +707,7 @@ void Crystal::CellGroup::doSetValue(QList<double> values) {
 
 double Crystal::CellGroup::epsilon(int member) const {
   if (member<3) return 0.0001;
-  return 0.01;
+  return 0.001;
 }
 
 double Crystal::CellGroup::lowerBound(int member) const {

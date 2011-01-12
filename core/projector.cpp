@@ -56,12 +56,12 @@ Projector::Projector(QObject *parent):
   setTextSizeFraction(10.0);
   setSpotSizeFraction(1.0);
 
-  connect(this, SIGNAL(spotSizeChanged(double)), this, SLOT(reflectionsUpdated()));
-  connect(this, SIGNAL(textSizeChanged(double)), this, SLOT(reflectionsUpdated()));
+  connect(this, SIGNAL(spotSizeChanged(double)), this, SLOT(doProjection()));
+  connect(this, SIGNAL(textSizeChanged(double)), this, SLOT(doProjection()));
 
   QTimer::singleShot(0, this, SLOT(decorateScene()));
   connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(invalidateMarkerCache()));
-  connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(reflectionsUpdated()));
+  connect(this, SIGNAL(projectionParamsChanged()), this, SLOT(doProjection()));
   connect(&scene, SIGNAL(sceneRectChanged(const QRectF&)), this, SLOT(updateImgTransformations()));
 
   connect(&spotMarkerStore, SIGNAL(itemAdded(int)), this, SLOT(spotMarkerAdded(int)));
@@ -115,7 +115,7 @@ void Projector::connectToCrystal(Crystal *c) {
   }
   crystal=c;
   crystal->addProjector(this);
-  connect(crystal, SIGNAL(reflectionsUpdate()), this, SLOT(reflectionsUpdated()));
+  connect(crystal, SIGNAL(reflectionsUpdate()), this, SLOT(doProjection()));
   connect(crystal, SIGNAL(cellChanged()), this, SLOT(invalidateMarkerCache()));
   connect(crystal, SIGNAL(orientationChanged()), this, SLOT(invalidateMarkerCache()));
   connect(crystal, SIGNAL(deleteMarker(AbstractMarkerItem*)), this, SLOT(deleteMarker(AbstractMarkerItem*)));
@@ -178,7 +178,7 @@ ItemStore<QGraphicsRectItem>& Projector::infoItems() {
 }
 
 
-void Projector::reflectionsUpdated() {  
+void Projector::doProjection() {
   if (crystal.isNull() or not projectionEnabled)
     return;
 

@@ -24,7 +24,6 @@ private slots:
   void fitObjectRemoved(FitObject*);
   void startStopFit();
   void toggleStartButtonText();
-  void displayScore(double);
 private:
   Ui::FitDisplay *ui;
   FitObject* mainFitObject;

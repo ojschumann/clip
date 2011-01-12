@@ -30,8 +30,8 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent):
   setDetOffset(0.0, 0.0);
 
   addParameterGroup(&distGroup);
-  addParameterGroup(&shiftGroup);
   addParameterGroup(&orientationGroup);
+  addParameterGroup(&shiftGroup);
 
   connect(this, SIGNAL(projectionParamsChanged()), &distGroup, SLOT(groupDataChanged()));
   connect(this, SIGNAL(projectionParamsChanged()), &shiftGroup, SLOT(groupDataChanged()));
@@ -133,16 +133,23 @@ void LauePlaneProjector::setDetSize(double dist, double width, double height) {
 
 void LauePlaneProjector::setDetOrientation(double omega, double chi, double phi) {
   if ((detOmega!=omega) or (detChi!=chi) or (detPhi!=phi)) {
+    
+    Vec3D w1 = localCoordinates * Vec3D(1, 0, 0);
+
     detOmega=omega;
     detChi=chi;
     detPhi=phi;
-    
     localCoordinates =Mat3D(Vec3D(0,0,1), M_PI*(omega-180.0)/180.0);
     localCoordinates*=Mat3D(Vec3D(0,1,0), M_PI*chi/180.0);
     localCoordinates*=Mat3D(Vec3D(1,0,0), M_PI*phi/180.0);
-    //localCoordinates=Mat3D(Vec3D(0,0,1), M_PI*(omega-180.0)/180.0)*Mat3D(Vec3D(0,1,0), M_PI*chi/180.0)*Mat3D(Vec3D(1,0,0), M_PI*phi/180.0);
-    movedPBMarker();
-    //emit projectionParamsChanged();
+
+    Vec3D w2 = localCoordinates * Vec3D(1, 0, 0);
+
+    //w1.y()/w1.x() + detx == w2.y()/w2.x() + detxn
+    detDx += w1.y()/w1.x() - w2.y()/w2.x();
+    detDy += w1.z()/w1.x() - w2.z()/w2.x();
+    //movedPBMarker();
+    emit projectionParamsChanged();
   }
 }
 
@@ -277,7 +284,6 @@ void LauePlaneProjector::movedPBMarker() {
     return;
   CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
   QPointF p=center->scenePos();
-  QPointF p2 = center->pos();
 
   bool b=false;
   QPointF q;
@@ -504,7 +510,7 @@ void LauePlaneProjector::DistGroup::doSetValue(QList<double> values) {
 }
 
 double LauePlaneProjector::DistGroup::epsilon(int member) const {
-  return 0.0001;
+  return 0.001;
 }
 
 double LauePlaneProjector::DistGroup::lowerBound(int member) const {
@@ -555,8 +561,8 @@ LauePlaneProjector::OrientationGroup::OrientationGroup(LauePlaneProjector* p):
     FitParameterGroup(p),
     projector(p)
 {
-  addParameter("omega");
-  addParameter("chi");
+  addParameter("Omega");
+  addParameter("Chi");
 }
 
 double LauePlaneProjector::OrientationGroup::value(int member) const {

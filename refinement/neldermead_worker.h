@@ -13,6 +13,7 @@ public:
   void doOneIteration();
   QList<double> parameterDelta();
   QList<double> parameterRelativeDelta();
+  QString parameterName(int n);
   QList<double> bestSolution();
   double bestScore();
 

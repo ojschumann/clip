@@ -22,7 +22,9 @@ NMWorker::~NMWorker() {
 }
 
 double NMWorker::score() {
-  foreach (FitParameter* p, parameters) p->setValue();
+  foreach (FitParameter* p, parameters) {
+    p->setValue();
+  }
   double score=0;
   foreach (MarkerInfo m, markers) score += m.score(spotTransferMatrix, zoneTransferMatrix);
   return score;
@@ -67,6 +69,13 @@ QList<double> NMWorker::parameterRelativeDelta() {
     list[n] /= parameters.at(n)->epsilon();
   }
   return list;
+}
+
+QString NMWorker::parameterName(int n) {
+  if (n>=0 && n<parameters.size()) {
+    return parameters.at(n)->name();
+  }
+  return QString();
 }
 
 void NMWorker::restart() {
@@ -186,25 +195,6 @@ void NMWorker::doOneIteration() {
       qSort(simplex);
     }
   }
-  cout << "ParamValues ";
-  foreach (double d , simplex.first().coordinates) {
-    cout << d << " ";
-  }
-  cout << endl;
-  cout << "MarkerScores";
-  QList<double> xx;
-  foreach (MarkerInfo m, markers) xx << m.score(spotTransferMatrix, zoneTransferMatrix);
-  qSort(xx);
-  foreach (double v, xx)
-    cout << " " << 100.0*v;
-  cout << endl;
-  cout << "MarkerScores";
-  xx.clear();
-  foreach (MarkerInfo m, markers) xx << m.marker->getIndexDeviationScore();
-  qSort(xx);
-  foreach (double v, xx)
-    cout << " " << 100.0*v;
-  cout << endl;
 }
 
 
@@ -232,9 +222,7 @@ double NMWorker::MarkerInfo::score(const Mat3D& spotTransfer, const Mat3D& zoneT
   }
   n.normalize();
   double x = index*n;
-  // TODO: Remove sqrt, not nessesary for fitting
-  //return index_sq - x*x;
-  return sqrt(index_sq - x*x);
+  return index_sq - x*x;
 }
 
 NMWorker::Vertex::Vertex() {

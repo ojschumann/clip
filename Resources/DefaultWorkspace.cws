@@ -7,7 +7,7 @@
         <Crystal>
           <Spacegroup symbol="Pm3m"/>
           <Cell beta="90.00000000000001" gamma="90.00000000000001" alpha="90.00000000000001" a="5" b="5" c="5"/>
-          <Orientation phi="-102.8644291554523" omega="-170.0953973117163" chi="-79.22754262308001"/>
+          <Orientation phi="-101.163938285742" omega="-167.6189483214884" chi="-78.9145533703321"/>
           <RotationAxis x="1" y="0" z="0" type="0"/>
         </Crystal>
       </CrystalDisplay>

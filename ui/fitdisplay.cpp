@@ -45,7 +45,8 @@ FitDisplay::FitDisplay(Crystal* c, QWidget *parent):
 
   connect(ui->doFit, SIGNAL(clicked()), this, SLOT(startStopFit()));
   connect(fitter, SIGNAL(finished()), this, SLOT(toggleStartButtonText()));
-  connect(fitter, SIGNAL(bestSolutionScore(double)), this, SLOT(displayScore(double)), Qt::QueuedConnection);
+
+  toggleStartButtonText();
 }
 
 FitDisplay::~FitDisplay()
@@ -68,10 +69,6 @@ void FitDisplay::toggleStartButtonText() {
   } else {
     ui->doFit->setText("Start");
   }
-}
-
-void FitDisplay::displayScore(double score) {
-  ui->scoreDisplay->setText(QString::number(100.0*score, 'f', 3));
 }
 
 void FitDisplay::fitObjectAdded(FitObject* o) {

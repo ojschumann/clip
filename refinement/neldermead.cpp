@@ -59,30 +59,25 @@ void NelderMead::run() {
 
     double lastScore = worker->bestScore();
     worker->doOneIteration();
-    if (worker->bestScore()<lastScore) {
-      noImprovmentLoops = 0;
-    }
     if (worker->bestScore()<bestEmitedScore && rateLimiter.elapsed()>100) {
       bestEmitedScore = worker->bestScore();
       emit bestSolutionScore(worker->bestScore());
       emit bestSolution(worker->bestSolution());
       rateLimiter.restart();
     }
-    if (noImprovmentLoops>50) {
+    if (lastScore/worker->bestScore()>1.001) {
+      /*QList<double> deltas = worker->parameterRelativeDelta();
+      QList<double>::iterator iter = std::max_element(deltas.begin(), deltas.end());
+
+      cout << noImprovmentLoops << " " << worker->bestScore() << " " << lastScore-worker->bestScore() << " ";
+      cout << (lastScore-worker->bestScore())/worker->bestScore() << " " << *iter << "  ";
+      cout << qPrintable(worker->parameterName(iter-deltas.begin())) << endl;*/
+      noImprovmentLoops = 0;
+    }
+    QList<double> deltas = worker->parameterRelativeDelta();
+    if ((noImprovmentLoops>25) || ((*std::max_element(deltas.begin(), deltas.end()))<0.5)) {
       break;
     }
-    //TODO: For debugging
-    QList<double> deltas = worker->parameterRelativeDelta();
-    qSort(deltas);
-    cout << worker->bestScore() << " " << deltas.first() << " " << deltas.last() << endl;
-
-    QList<FitParameter*> XXp;
-    foreach (FitObject* o, liveCrystal->getFitObjects())
-      XXp += o->allParameters();
-    cout << "  FitValues:";
-    foreach (FitParameter* p, XXp) cout << " " << p->value();
-    cout << endl;
-
   }
   emit bestSolutionScore(worker->bestScore());
   emit bestSolution(worker->bestSolution());
@@ -92,25 +87,12 @@ void NelderMead::run() {
 void NelderMead::setBestSolutionToLiveCrystal(QList<double> solution) {
   QList<FitParameter*> parameters;
   foreach (FitObject* o, liveCrystal->getFitObjects())
-    parameters += o->allParameters();
+    parameters += o->enabledParameters();
 
   if (parameters.size()==solution.size()) {
-    for (int n=0; n<parameters.size(); n++) {
-      parameters.at(n)->prepareValue(solution.at(n));
-    }
-    foreach (FitParameter* p, parameters) p->setValue();
-    cout << "LocalValues:";
-    foreach (FitParameter* p, parameters) cout << " " << p->value();
-    cout << endl;
+    for (int n=0; n<parameters.size(); n++) parameters.at(n)->prepareValue(solution.at(n));
+    for (int n=0; n<parameters.size(); n++) parameters.at(n)->setValue();
   }
-  QList<FitParameter*> XXp;
-  foreach (FitObject* o, liveCrystal->getFitObjects())
-    XXp += o->allParameters();
-  cout << " LiveValues:";
-  foreach (FitParameter* p, XXp) cout << " " << p->value();
-  cout << endl;
-
-
 }
 
 

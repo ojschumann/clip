@@ -1,10 +1,9 @@
 Refinement
   Show if Running
   Faster
-  Better automatic stop
   Stop if model changes
-  Check, why score ind livemarkermodel and in fitdisplay differs
 
+Hide Markers
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
   Live info from Mousecursor (new)
