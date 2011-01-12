@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>303</width>
+    <width>399</width>
     <height>316</height>
    </rect>
   </property>
@@ -76,6 +76,7 @@
    <addaction name="separator"/>
    <addaction name="openImgAction"/>
    <addaction name="closeImgAction"/>
+   <addaction name="actionPrint"/>
    <addaction name="configAction"/>
   </widget>
   <widget class="QToolBar" name="imgToolBar">
@@ -265,6 +266,15 @@
    </property>
    <property name="text">
     <string>Crop</string>
+   </property>
+  </action>
+  <action name="actionPrint">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fileprint.png</normaloff>:/icons/icons/fileprint.png</iconset>
+   </property>
+   <property name="text">
+    <string>Print</string>
    </property>
   </action>
  </widget>

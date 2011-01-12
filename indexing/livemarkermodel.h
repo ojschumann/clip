@@ -32,6 +32,7 @@ protected slots:
   void markerClicked(AbstractMarkerItem*);
   void markerRemoved(AbstractMarkerItem*);
   void rescore();
+  void prepareDelete();
 private:
   QVariant sumRowData(const QModelIndex & index, int role = Qt::DisplayRole) const;
   QList<double> getSortDataList();

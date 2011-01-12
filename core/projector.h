@@ -67,7 +67,7 @@ public:
 
   Reflection getClosestReflection(const Vec3D& normal);
   QList<Reflection> getProjectedReflections();
-  QList<Reflection> getProjectedReflectionsNormalTo(const TVec3D<int>& uvw);
+  QList<Reflection> getProjectedReflectionsNormalToZone(const TVec3D<int>& uvw);
 
   QGraphicsScene* getScene();
   Crystal* getCrystal();
@@ -90,6 +90,8 @@ public:
   double getSpotSize() const;
   double getSpotSizeFraction() const;
   bool spotsEnabled() const;
+  bool markersEnabled() const;
+  bool isProjectionEnabled() const;
 
   virtual QDomElement saveToXML(QDomElement base);
   bool loadFromXML(QDomElement base);
@@ -136,10 +138,11 @@ public slots:
   void setMaxHklSqSum(int m);
   void setTextSizeFraction(double d);
   void setSpotSizeFraction(double d);
+
   void enableSpots(bool b=true);
+  void enableMarkers(bool b=true);
 
   // For speedup of fitting...
-  //TODO: Check if nessesary
   void enableProjection(bool b=true);
 
   void loadImage(QString);
@@ -205,8 +208,8 @@ protected:
   int maxHklSqSum;
   double textSizeFraction;
   double spotSizeFraction;
-  bool showSpots;
   bool projectionEnabled;
+  bool showMarkers;
   QVector<bool> reflectionIsProjected;
 
   QGraphicsScene scene;

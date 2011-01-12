@@ -175,8 +175,7 @@ QString StereoProjector::displayName() {
 void StereoProjector::setDetOrientation(const Mat3D& M) {
   localCoordinates=M;
   decorateScene();
-  if (projectionEnabled)
-    emit projectionParamsChanged();
+  emit projectionParamsChanged();
 }
 
 Mat3D StereoProjector::getDetOrientation() {

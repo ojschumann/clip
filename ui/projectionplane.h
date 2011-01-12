@@ -7,6 +7,7 @@
 #include <QActionGroup>
 #include <QPointer>
 #include <QDomElement>
+#include <QPrinter>
 
 #include "tools/objectstore.h"
 #include "tools/mousepositioninfo.h"
@@ -47,11 +48,14 @@ signals:
   void mousePositionInfo(MousePositionInfo);
   void rotationFromProjector(double);
 protected slots:
+  void renderPrintout(QPrinter*);
   void slotChangeMouseDragMode();
   void resizeView();
   void slotOpenResolutionCalc();
   void generateMousePositionInfo(QPointF);
   void generateEmptyMousePositionInfo();
+  void toggleDisplaySpots();
+  void toggleDisplayMarkers();
   void slotContextMenu();
   void slotContextSetRotationAxis();
   void slotContextSetRotationAxisOnSpot();
@@ -83,6 +87,7 @@ protected:
   static QList<ProjectionPlane*> allPlanes;
 
 private slots:
+  void on_actionPrint_triggered();
   void on_actionCrop_triggered();
   void on_imageToolboxAction_triggered();
   void on_flipVAction_triggered();

@@ -116,7 +116,7 @@ void AbstractProjectorMarkerItem::calcDetectorDeviation() {
     int N = 0;
     Vec3D n = getMarkerNormal();
     QRectF plane(0, 0, 1, 1);
-    foreach (Reflection r, projector->getProjectedReflectionsNormalTo(getIntegerIndex())) {
+    foreach (Reflection r, projector->getProjectedReflectionsNormalToZone(getIntegerIndex())) {
       bool ok;
       QPointF pSpot = projector->normal2det(r.normal, ok);
       if (!ok || !plane.contains(projector->det2img.map(pSpot)))

@@ -27,6 +27,9 @@ double NMWorker::score() {
   }
   double score=0;
   foreach (MarkerInfo m, markers) score += m.score(spotTransferMatrix, zoneTransferMatrix);
+  //foreach (MarkerInfo m, markers) score += m.marker->getIndexDeviationScore();
+  //foreach (MarkerInfo m, markers) score += m.marker->getAngularDeviation();
+  //foreach (MarkerInfo m, markers) score += m.marker->getDetectorPositionScore();
   return score;
 }
 

@@ -124,16 +124,16 @@ void LauePlaneProjector::setDetSize(double dist, double width, double height) {
     detHeight=height;
 
     scene.setSceneRect(QRectF(-0.5*detWidth/detDist, -0.5*detHeight/detDist, detWidth/detDist, detHeight/detDist));
-    if (projectionEnabled) {
-      emit projectionRectSizeChanged();
-      emit projectionParamsChanged();
-    }
+
+    emit projectionRectSizeChanged();
+    emit projectionParamsChanged();
   }
 }
 
 void LauePlaneProjector::setDetOrientation(double omega, double chi, double phi) {
   if ((detOmega!=omega) or (detChi!=chi) or (detPhi!=phi)) {
     
+    // Save detector offsets
     Vec3D w1 = localCoordinates * Vec3D(1, 0, 0);
 
     detOmega=omega;
@@ -143,12 +143,13 @@ void LauePlaneProjector::setDetOrientation(double omega, double chi, double phi)
     localCoordinates*=Mat3D(Vec3D(0,1,0), M_PI*chi/180.0);
     localCoordinates*=Mat3D(Vec3D(1,0,0), M_PI*phi/180.0);
 
+    //
     Vec3D w2 = localCoordinates * Vec3D(1, 0, 0);
 
-    //w1.y()/w1.x() + detx == w2.y()/w2.x() + detxn
+    //w1.y()/w1.x() + detx_old == w2.y()/w2.x() + detx_new
     detDx += w1.y()/w1.x() - w2.y()/w2.x();
     detDy += w1.z()/w1.x() - w2.z()/w2.x();
-    //movedPBMarker();
+
     emit projectionParamsChanged();
   }
 }
@@ -159,8 +160,7 @@ void LauePlaneProjector::setDetOffset(double dx, double dy) {
   detDx=dx;
   detDy=dy;
   updatePBPos();
-  if (projectionEnabled)
-    emit projectionParamsChanged();
+  emit projectionParamsChanged();
 }
 
 
@@ -266,7 +266,7 @@ void LauePlaneProjector::decorateScene() {
 
 
 void LauePlaneProjector::resizePBMarker() {
-  if (decorationItems.size()<3)
+  if ((decorationItems.size()<3) && !isProjectionEnabled())
     return;
 
   //CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
@@ -280,8 +280,9 @@ void LauePlaneProjector::resizePBMarker() {
 }
 
 void LauePlaneProjector::movedPBMarker() {
-  if (decorationItems.size()<3)
+  if ((decorationItems.size()<3) && !isProjectionEnabled())
     return;
+
   CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
   QPointF p=center->scenePos();
 
@@ -298,16 +299,18 @@ void LauePlaneProjector::movedPBMarker() {
 }
 
 void LauePlaneProjector::updatePBPos() {
-  bool b=false;
-  QPointF q;
-  if (omega()>90.5) {
-    q=(scattered2det(Vec3D(1,0,0), b));
-  } else if (omega()<89.5) {
-    q=scattered2det(Vec3D(-1,0,0), b);
-  }
-  if (b and decorationItems.size()>2) {
-    CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
-    center->setPosNoSig(det2img.map(q));
+  if ((decorationItems.size()>2) && isProjectionEnabled()) {
+    bool b=false;
+    QPointF q;
+    if (omega()>90.5) {
+      q=(scattered2det(Vec3D(1,0,0), b));
+    } else if (omega()<89.5) {
+      q=scattered2det(Vec3D(-1,0,0), b);
+    }
+    if (b) {
+      CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
+      center->setPosNoSig(det2img.map(q));
+    }
   }
 }
 

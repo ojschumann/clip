@@ -22,6 +22,9 @@ NelderMead::NelderMead(Crystal* c, QObject *parent) :
   connect(this, SIGNAL(bestSolution(QList<double>)), this, SLOT(setBestSolutionToLiveCrystal(QList<double>)), Qt::QueuedConnection);
 }
 
+NelderMead::~NelderMead() {
+  stop();
+}
 
 void NelderMead::start() {
   if (threadWatcher.isRunning()) return;
@@ -59,7 +62,7 @@ void NelderMead::run() {
 
     double lastScore = worker->bestScore();
     worker->doOneIteration();
-    if (worker->bestScore()<bestEmitedScore && rateLimiter.elapsed()>100) {
+    if (worker->bestScore()<bestEmitedScore && rateLimiter.elapsed()>50) {
       bestEmitedScore = worker->bestScore();
       emit bestSolutionScore(worker->bestScore());
       emit bestSolution(worker->bestSolution());

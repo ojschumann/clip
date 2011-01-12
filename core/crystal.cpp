@@ -419,6 +419,8 @@ void Crystal::addProjector(Projector* p) {
   foreach (AbstractMarkerItem* item, p->getAllMarkers())
     emit markerAdded(item);
   updateWavevectorsFromProjectors();
+  foreach (Projector* p, getConnectedProjectors())
+    p->enableProjection(updateEnabled);
 }
 
 void Crystal::removeProjector(Projector* p) {
@@ -509,6 +511,8 @@ Spacegroup* Crystal::getSpacegroup() {
 
 void Crystal::enableUpdate(bool b) {
   updateEnabled=b;
+  foreach (Projector* p, getConnectedProjectors())
+    p->enableProjection(updateEnabled);
 }
 
 void Crystal::synchronUpdate(bool b) {

@@ -15,6 +15,8 @@
 #include <QMenu>
 #include <QCursor>
 #include <QSettings>
+#include <QShortcut>
+#include <QPrintPreviewDialog>
 
 #include "ui/clip.h"
 #include "ui/imagetoolbox.h"
@@ -52,6 +54,12 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   connect(projector, SIGNAL(imageClosed()), this, SLOT(imageClosed()));
   connect(ui->view, SIGNAL(mouseMoved(QPointF)), this, SLOT(generateMousePositionInfo(QPointF)));
   connect(ui->view, SIGNAL(mouseLeft()), this, SLOT(generateEmptyMousePositionInfo()));
+
+  QShortcut* shortcut = new QShortcut(Qt::Key_F2, this);
+  connect (shortcut, SIGNAL(activated()), this, SLOT(toggleDisplaySpots()));
+  shortcut = new QShortcut(Qt::Key_F3, this);
+  connect (shortcut, SIGNAL(activated()), this, SLOT(toggleDisplayMarkers()));
+
 
   ui->view->setScene(projector->getScene());
   ui->view->setTransform(QTransform(1,0,0,-1,0,0));
@@ -382,6 +390,14 @@ void ProjectionPlane::imageClosed() {
   resizeView();
 }
 
+void ProjectionPlane::toggleDisplaySpots() {
+  projector->enableSpots(!projector->spotsEnabled());
+}
+
+void ProjectionPlane::toggleDisplayMarkers() {
+  projector->enableMarkers(!projector->markersEnabled());
+}
+
 void ProjectionPlane::slotContextMenu() {
   if (inMousePress) {
     QMenu context(this);
@@ -430,6 +446,21 @@ void ProjectionPlane::slotContextClearAll() {
   slotContextClearRulers();
 }
 
+
+void ProjectionPlane::renderPrintout(QPrinter* printer) {
+  //QTextDocument
+  QPainter painter(printer);
+
+  ui->view->render(&painter);
+}
+
+void ProjectionPlane::on_actionPrint_triggered()
+{
+  QPrintPreviewDialog* d = new QPrintPreviewDialog(this);
+  connect(d, SIGNAL(paintRequested(QPrinter*)), this, SLOT(renderPrintout(QPrinter*)));
+  d->exec();
+  delete d;
+}
 const char XML_ProjectionPlane_Element[] = "ProjectionPlane";
 const char XML_ProjectionPlane_type[] = "projectortype";
 const char XML_ProjectionPlane_Geometry[] = "Geometry";
@@ -486,3 +517,4 @@ void ProjectionPlane::loadDefault() {
     loadFromXML(doc.documentElement());
   }
 }
+

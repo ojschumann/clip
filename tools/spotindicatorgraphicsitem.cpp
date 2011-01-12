@@ -51,6 +51,7 @@ void SpotIndicatorGraphicsItem::updateCache() {
 
 void SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem *option, QWidget *w) {
   if (!cache || (cache->size()!=p->viewport().size())) {
+    cout << "New img cache " << p->viewport().size().width() << "x" << p->viewport().size().height() << endl;
     if (cache) delete cache;
     cache = new QPixmap(p->viewport().size());
     cacheNeedsUpdate = true;
@@ -63,9 +64,12 @@ void SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsIte
 
   updateCache();
 
+
   p->save();
   p->resetTransform();
   p->drawPixmap(QPoint(0,0), *cache);
+  //QRectF r = p->worldTransform().inverted().mapRect(QRectF(QPointF(0,0), QSizeF(cache->size())));
+  //p->drawPixmap(r, *cache, QRectF(cache->rect()));
   p->restore();
 
 
@@ -110,8 +114,10 @@ void SpotIndicatorGraphicsItem::Worker::run() {
     double ry = spotIndicator->transform.m22()*spotIndicator->spotSize;
 
 
-    if (!localCache || localCache->size()!=spotIndicator->cache->size())
+    if (!localCache || localCache->size()!=spotIndicator->cache->size()) {
+      if (localCache) delete localCache;
       localCache = new QImage(spotIndicator->cache->size(), QImage::Format_ARGB32_Premultiplied);
+    }
     localCache->fill(QColor(0,0,0,0).rgba());
     QPainter painter(localCache);
     QList<QGraphicsView*> l = spotIndicator->scene()->views();

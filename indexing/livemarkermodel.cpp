@@ -15,6 +15,7 @@ LiveMarkerModel::LiveMarkerModel(Crystal *c, QObject *parent) :
   connect(crystal, SIGNAL(markerChanged(AbstractMarkerItem*)), this, SLOT(markerChanged(AbstractMarkerItem*)));
   connect(crystal, SIGNAL(markerClicked(AbstractMarkerItem*)), this, SLOT(markerClicked(AbstractMarkerItem*)));
   connect(crystal, SIGNAL(markerRemoved(AbstractMarkerItem*)), this, SLOT(markerRemoved(AbstractMarkerItem*)));
+  connect(crystal, SIGNAL(destroyed()), this, SLOT(prepareDelete()));
   connect(this, SIGNAL(deleteMarker(AbstractMarkerItem*)), crystal, SIGNAL(deleteMarker(AbstractMarkerItem*)));
   connect(crystal, SIGNAL(orientationChanged()), this, SLOT(rescore()));
   connect(crystal, SIGNAL(cellChanged()), this, SLOT(rescore()));
@@ -27,6 +28,11 @@ LiveMarkerModel::LiveMarkerModel(Crystal *c, QObject *parent) :
 LiveMarkerModel::~LiveMarkerModel() {
   foreach (AbstractMarkerItem* item, markers)
     item->highlight(false);
+}
+
+void LiveMarkerModel::prepareDelete() {
+  markers.clear();
+  crystal = 0;
 }
 
 void LiveMarkerModel::markerAdded(AbstractMarkerItem *item) {

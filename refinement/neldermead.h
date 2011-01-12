@@ -20,6 +20,7 @@ class NelderMead : public QObject
   Q_OBJECT
 public:
   explicit NelderMead(Crystal* c, QObject *parent = 0);
+  virtual ~NelderMead();
   bool isRunning();
 public slots:
   void start();

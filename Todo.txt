@@ -1,9 +1,12 @@
+Allow to "print" to pdf/png/jpeg
+Implement printing (to paper :-))
+
+Highlighting of spotmarker should be more visible
+
 Refinement
   Show if Running
-  Faster
   Stop if model changes
 
-Hide Markers
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
   Live info from Mousecursor (new)
@@ -22,11 +25,10 @@ Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
   * setCell()
   * unlock()
 
-Allow to "print" to pdf/png/jpeg
-Implement printing (to paper :-))
-
 Allow to configure colors
 configurable width of Zonemarker (including zero)
+
+Crystal drag'n'drop to copy crystal parameters
 
 LaueImage
   Display of Images from Bruker Apex (reduced Wavelength band)
@@ -38,7 +40,6 @@ LaueImage
     * detectorDistance
     * ...
 
-
 Mark user defined reflection (like magnetic/incomensurate one)
 
-Populate all ToolTips with usefull help...
+Populate all ToolTips with useful help...

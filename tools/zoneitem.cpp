@@ -109,7 +109,7 @@ QPolygonF getPath(const QPointF& from, const QPointF& to, QRectF on, bool clockw
 
 void ZoneItem::updatePolygon() {
   zonePolys.clear();
-  if (startHandle->pos()!=endHandle->pos()) {
+  if ((startHandle->pos()!=endHandle->pos()) && projector->isProjectionEnabled()) {
 
     Vec3D u = projector->det2normal(projector->img2det.map(startHandle->pos()));
     Vec3D v = projector->det2normal(projector->img2det.map(endHandle->pos()));
@@ -255,37 +255,46 @@ void ZoneItem::updateOptimalZone() {
   Vec3D z = u%v;
   z.normalize();
 
+
   Mat3D M;
   M.zero();
-  M+= u^u;
-  M+= v^v;
+  bool hasCrossingSpotMarkers = false;
 
-  foreach (v, projector->getSpotMarkerNormals()) {
-    if (fabs(v*z)<sin(M_PI/180))
-      M += v^v;
+  foreach (Vec3D s, projector->getSpotMarkerNormals()) {
+    if (fabs(s*z)<sin(M_PI/180)) {
+      M += s^s;
+      hasCrossingSpotMarkers = true;
+    }
   }
 
-  Mat3D Q1, Q2;
-  M.svd(Q1, Q2);
+  if (hasCrossingSpotMarkers) {
+    M+= u^u;
+    M+= v^v;
+    Mat3D Q1, Q2;
+    M.svd(Q1, Q2);
 
-  z = Q2.transposed()*Vec3D(0,0,1);
+    Vec3D zp = Q2.transposed()*Vec3D(0,0,1);
+    z = zp;
+  }
+
   if (z!=zoneNormal) {
     zoneNormal = z;
     emit positionChanged();
   }
 
-  // Maximal scattering angle in this zone
-  Vec3D n(-1,0,0);
-  n = n-z*(z*n);
-  if (n.norm()<1e-8) {
-    n = Vec3D(0,0,1);
-  } else {
-    n.normalize();
+  if (projector->isProjectionEnabled()) {
+    // Maximal scattering angle in this zone
+    Vec3D n(-1,0,0);
+    n = n-z*(z*n);
+    if (n.norm()<1e-8) {
+      n = Vec3D(0,0,1);
+    } else {
+      n.normalize();
+    }
+
+    zoneLines = generatePolygon(zoneNormal, n);
+    update();
   }
-
-  zoneLines = generatePolygon(zoneNormal, n);
-  update();
-
 }
 
 QList<QPolygonF> ZoneItem::generatePolygon(const Vec3D& n, const Vec3D& _v) {

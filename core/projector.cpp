@@ -93,7 +93,7 @@ Projector& Projector::operator=(const Projector& o) {
   setTextSizeFraction(o.getTextSizeFraction());
   setSpotSizeFraction(o.getSpotSizeFraction());
   enableSpots(o.spotsEnabled());
-  enableProjection((o.projectionEnabled));
+  enableProjection((o.isProjectionEnabled()));
 
   foreach (SpotItem* si, o.spotMarkerStore) {
     addSpotMarker(img2det.map(si->pos()));
@@ -177,9 +177,8 @@ ItemStore<QGraphicsRectItem>& Projector::infoItems() {
   return infoStore;
 }
 
-
 void Projector::doProjection() {
-  if (crystal.isNull() or not projectionEnabled)
+  if (crystal.isNull() or !isProjectionEnabled())
     return;
 
   // Remove the textmarkeritems from the scene
@@ -304,7 +303,7 @@ QList<Reflection> Projector::getProjectedReflections() {
   return list;
 }
 
-QList<Reflection> Projector::getProjectedReflectionsNormalTo(const TVec3D<int>& uvw) {
+QList<Reflection> Projector::getProjectedReflectionsNormalToZone(const TVec3D<int>& uvw) {
   QList<Reflection> list;
   QVector<Reflection> r = crystal->getReflectionList();
   for (int n=0; n<r.size(); n++)
@@ -312,8 +311,6 @@ QList<Reflection> Projector::getProjectedReflectionsNormalTo(const TVec3D<int>& 
       list << r.at(n);
   return list;
 }
-
-
 
 void Projector::addRotation(const Vec3D& axis, double angle) {
   if (not crystal.isNull())
@@ -366,10 +363,6 @@ double Projector::getTextSizeFraction() const {
   return 100.0*textSizeFraction;
 }
 
-bool Projector::spotsEnabled() const {
-  return showSpots;
-}
-
 void Projector::setMaxHklSqSum(int m) {
   maxHklSqSum=m;
   emit projectionParamsChanged();
@@ -386,9 +379,31 @@ void Projector::setSpotSizeFraction(double d) {
 }
 
 void Projector::enableSpots(bool b) {
-  showSpots=b;
   spotIndicator->setVisible(b);
   emit projectionParamsChanged();
+}
+
+bool Projector::spotsEnabled() const {
+  return spotIndicator->isVisible();
+}
+
+void Projector::enableMarkers(bool b) {
+  showMarkers = b;
+  foreach (SpotItem* si, spotMarkers()) si->setVisible(showMarkers);
+  foreach (ZoneItem* zi, zoneMarkers()) zi->setVisible(showMarkers);
+  emit projectionParamsChanged();
+}
+
+bool Projector::markersEnabled() const {
+  return showMarkers;
+}
+
+void Projector::enableProjection(bool b) {
+  projectionEnabled=b;
+}
+
+bool Projector::isProjectionEnabled() const {
+  return projectionEnabled;
 }
 
 // ----------------------- Handling of Spot Markers -------------
@@ -397,6 +412,7 @@ void Projector::addSpotMarker(const QPointF& p) {
   item->setFlag(QGraphicsItem::ItemIsMovable, true);
   item->setCursor(QCursor(Qt::SizeAllCursor));
   item->setColor(QColor(0xFF,0xAA,0x33));
+  item->setVisible(showMarkers);
   connect(this, SIGNAL(spotSizeChanged(double)), item, SLOT(setRadius(double)));
   item->setPos(det2img.map(p));
   item->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
@@ -423,6 +439,7 @@ QList<Vec3D> Projector::getSpotMarkerNormals() {
 void Projector::addZoneMarker(const QPointF& p1, const QPointF& p2) {
   ZoneItem* zoneMarker = new ZoneItem(det2img.map(p1), det2img.map(p2), this, imageItemsPlane);
   zoneMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
+  zoneMarker->setVisible(showMarkers);
   connect(&spotMarkers(), SIGNAL(itemAdded(int)), zoneMarker, SLOT(updateOptimalZone()));
   connect(&spotMarkers(), SIGNAL(itemChanged(int)), zoneMarker, SLOT(updateOptimalZone()));
   connect(&spotMarkers(), SIGNAL(itemRemoved(int)), zoneMarker, SLOT(updateOptimalZone()));
@@ -512,8 +529,6 @@ QPair<QPointF, QPointF> Projector::getRulerCoordinates(int n) {
   }
   return QPair<QPointF, QPointF>();
 }
-
-
 
 
 // ------------ Handling of Crop Marker ---------------
@@ -606,10 +621,6 @@ void Projector::doImgRotation(const QTransform& t) {
   }
   if (imageData)
     imageData->addTransform(t.inverted());
-}
-
-void Projector::enableProjection(bool b) {
-  projectionEnabled=b;
 }
 
 

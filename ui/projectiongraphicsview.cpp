@@ -72,17 +72,34 @@ void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rec
   if (image.isNull()) {
     painter->fillRect(rect, Qt::white);
   } else {
-    QRectF visRect(mapToScene(0,0), mapToScene(viewport()->width(), viewport()->height()));
+    QTransform t = painter->worldTransform();
+
+    // Rect in scene coordinates of what is actually visible in the view
+    // sometimes a little bit more than sceneRect()!!!
+    QRectF visibleRect(mapToScene(0,0), mapToScene(viewport()->width(), viewport()->height()));
+
+    // Size of the Image. (on printer, it could give a non integer value)
+    QSizeF imgSize = t.mapRect(visibleRect).size();
+
+    // Sourcerect from image to copy
+    QRectF sourceRect = t.mapRect(rect);
+
     QRectF sc(sceneRect());
-    QRectF r((visRect.left()-sc.left())/sc.width(), (-visRect.bottom()-sc.top())/sc.height(), visRect.width()/sc.width(), visRect.height()/sc.height());
-    QImage cache = image->getScaledImage(viewport()->size(), r.normalized());
+    QRectF r((visibleRect.left()-sc.left())/sc.width(), (-visibleRect.bottom()-sc.top())/sc.height(), visibleRect.width()/sc.width(), visibleRect.height()/sc.height());
 
+    QImage cache = image->getScaledImage(imgSize.toSize(), r.normalized());
 
-    painter->save();
-    painter->resetTransform();
+    printRect(t.mapRect(visibleRect));
+    printRect(t.mapRect(rect));
+    printRect(sourceRect);
+    printRect(r);
+
+    //painter->save();
+    //painter->resetTransform();
     //painter->drawImage(viewportUpdateRect, cache, viewportUpdateRect);
-    painter->drawImage(0, 0, cache);
-    painter->restore();
+    painter->drawImage(rect, cache, sourceRect);
+    //painter->drawImage(0, 0, cache);
+    //painter->restore();
   }
 }
 
