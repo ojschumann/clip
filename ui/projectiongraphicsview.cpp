@@ -67,12 +67,17 @@ void ProjectionGraphicsView::setImage(LaueImage * img) {
 #include <QRectF>
 #include <tools/debug.h>
 
+QPolygonF rectToPoly(const QRectF& r) {
+  QPolygon poly;
+  poly << r.topLeft() << r.topRight() << r.bottomRight() << r.bottomLeft();
+  return poly;
+}
 
 void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rect) {
   if (image.isNull()) {
     painter->fillRect(rect, Qt::white);
   } else {
-    QTransform t = painter->worldTransform();
+    QTransform t =  QTransform(1, 0, 0, -1, 0, 0) * painter->worldTransform();
 
     // Rect in scene coordinates of what is actually visible in the view
     // sometimes a little bit more than sceneRect()!!!
@@ -82,17 +87,19 @@ void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rec
     QSizeF imgSize = t.mapRect(visibleRect).size();
 
     // Sourcerect from image to copy
-    QRectF sourceRect = t.mapRect(rect);
+    QTransform t3;
+    if (QTransform::quadToQuad(rectToPoly(visibleRect), rectToPoly(t.mapRect(visibleRect))))
+    //QRectF sourceRect = t.mapRect(rect);
 
-    QRectF sc(sceneRect());
-    QRectF r((visibleRect.left()-sc.left())/sc.width(), (-visibleRect.bottom()-sc.top())/sc.height(), visibleRect.width()/sc.width(), visibleRect.height()/sc.height());
+    QTransform t2;
+    if (QTransform::quadToSquare(rectToPoly(sceneRect()), t2)) {
+      cout << "transform ok" << endl;
+    }
+    QRectF r = t2.mapRect(visibleRect);
+    //QRectF sc(sceneRect());
+    //QRectF r((visibleRect.left()-sc.left())/sc.width(), (-visibleRect.bottom()-sc.top())/sc.height(), visibleRect.width()/sc.width(), visibleRect.height()/sc.height());
 
-    QImage cache = image->getScaledImage(imgSize.toSize(), r.normalized());
-
-    printRect(t.mapRect(visibleRect));
-    printRect(t.mapRect(rect));
-    printRect(sourceRect);
-    printRect(r);
+    QImage cache = image->getScaledImage(imgSize.toSize(), r);
 
     //painter->save();
     //painter->resetTransform();
