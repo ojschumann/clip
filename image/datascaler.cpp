@@ -79,7 +79,7 @@ void DataScaler::updateContrastMapping() {
   cout << "DataScaler::updateContrastMapping()" << endl;
 }
 
-QImage DataScaler::getImage(const QSize &size, const QRectF &_sourceRect) {
+QImage DataScaler::getImage(const QSize &size, const QPolygonF &_sourceRect) {
   if ((cache==0) || (size!=cache->size()) || (_sourceRect!=sourceRect)) {
     if (cache) delete cache;
     cache = new QImage(size, QImage::Format_ARGB32_Premultiplied);
@@ -99,12 +99,10 @@ void DataScaler::redrawCache() {
 
 
   QPolygonF poly2(QRectF(0,0,w,h));
-  QPolygonF poly3(sourceRect);
   poly2.pop_back();
-  poly3.pop_back();
 
   QTransform out2sqare;
-  QTransform::quadToQuad(poly2, poly3, out2sqare);
+  QTransform::quadToQuad(poly2, sourceRect, out2sqare);
   QTransform t = QTransform::fromTranslate(0.5, 0.5) * out2sqare * QTransform(1,0,0,-1,0,1) * sqareToRaw;
 
   // TODO: Multithreaded implementation

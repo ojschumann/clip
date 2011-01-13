@@ -141,6 +141,7 @@ public slots:
 
   void enableSpots(bool b=true);
   void enableMarkers(bool b=true);
+  void setHQPrintMode(bool b=false);
 
   // For speedup of fitting...
   void enableProjection(bool b=true);

@@ -18,10 +18,12 @@ public:
   virtual QRectF boundingRect() const;
 
   void setSpotsize(double s) { spotSize = s; cacheNeedsUpdate=true; }
+  void setCachedPainting(bool b=true) { cachedPainting = b; }
   void pointsUpdated();
   QVector<QPointF> coordinates;
 protected:
   bool cacheNeedsUpdate;
+  bool cachedPainting;
   void updateCache();
 
   QPixmap* cache;

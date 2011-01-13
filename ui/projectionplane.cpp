@@ -16,7 +16,7 @@
 #include <QCursor>
 #include <QSettings>
 #include <QShortcut>
-#include <QPrintPreviewDialog>
+#include <QPrintDialog>
 
 #include "ui/clip.h"
 #include "ui/imagetoolbox.h"
@@ -450,17 +450,20 @@ void ProjectionPlane::slotContextClearAll() {
 void ProjectionPlane::renderPrintout(QPrinter* printer) {
   //QTextDocument
   QPainter painter(printer);
-
+  projector->setHQPrintMode(true);
   ui->view->render(&painter);
+  projector->setHQPrintMode(false);
 }
 
 void ProjectionPlane::on_actionPrint_triggered()
 {
-  QPrintPreviewDialog* d = new QPrintPreviewDialog(this);
-  connect(d, SIGNAL(paintRequested(QPrinter*)), this, SLOT(renderPrintout(QPrinter*)));
-  d->exec();
-  delete d;
+  QPrintDialog printDialog(this);
+  if (printDialog.exec()==QDialog::Accepted) {
+    renderPrintout(printDialog.printer());
+
+  }
 }
+
 const char XML_ProjectionPlane_Element[] = "ProjectionPlane";
 const char XML_ProjectionPlane_type[] = "projectortype";
 const char XML_ProjectionPlane_Geometry[] = "Geometry";

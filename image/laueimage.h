@@ -39,7 +39,7 @@ public:
   QString name();
   QList<QWidget*> toolboxPages();
   QList<BezierCurve*> getTransferCurves();
-  QImage getScaledImage(const QSize& , const QRectF&);
+  QImage getScaledImage(const QSize& , const QPolygonF&);
 signals:
   void imageContentsChanged();
   void histogramChanged(QVector<int>, QVector<int>, QVector<int>);

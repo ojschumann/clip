@@ -68,7 +68,7 @@ void ProjectionGraphicsView::setImage(LaueImage * img) {
 #include <tools/debug.h>
 
 QPolygonF rectToPoly(const QRectF& r) {
-  QPolygon poly;
+  QPolygonF poly;
   poly << r.topLeft() << r.topRight() << r.bottomRight() << r.bottomLeft();
   return poly;
 }
@@ -76,37 +76,26 @@ QPolygonF rectToPoly(const QRectF& r) {
 void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rect) {
   if (image.isNull()) {
     painter->fillRect(rect, Qt::white);
-  } else {
-    QTransform t =  QTransform(1, 0, 0, -1, 0, 0) * painter->worldTransform();
 
+  } else {
     // Rect in scene coordinates of what is actually visible in the view
     // sometimes a little bit more than sceneRect()!!!
-    QRectF visibleRect(mapToScene(0,0), mapToScene(viewport()->width(), viewport()->height()));
 
-    // Size of the Image. (on printer, it could give a non integer value)
-    QSizeF imgSize = t.mapRect(visibleRect).size();
+    QTransform viewportTransform = painter->worldTransform();
+    QRectF visibleRect = QRectF(mapToScene(0, 0), mapToScene(viewport()->width(), viewport()->height())).normalized();
 
-    // Sourcerect from image to copy
-    QTransform t3;
-    if (QTransform::quadToQuad(rectToPoly(visibleRect), rectToPoly(t.mapRect(visibleRect))))
-    //QRectF sourceRect = t.mapRect(rect);
+    QRectF imgRect = viewportTransform.mapRect(visibleRect);
+    QRect sourceRect = viewportTransform.mapRect(rect).toRect();
 
-    QTransform t2;
-    if (QTransform::quadToSquare(rectToPoly(sceneRect()), t2)) {
-      cout << "transform ok" << endl;
-    }
-    QRectF r = t2.mapRect(visibleRect);
-    //QRectF sc(sceneRect());
-    //QRectF r((visibleRect.left()-sc.left())/sc.width(), (-visibleRect.bottom()-sc.top())/sc.height(), visibleRect.width()/sc.width(), visibleRect.height()/sc.height());
+    QTransform zoomTransform;
+    QTransform::quadToSquare(rectToPoly(sceneRect()), zoomTransform);
+    zoomTransform = QTransform::fromScale(1, -1) * zoomTransform;
 
-    QImage cache = image->getScaledImage(imgSize.toSize(), r);
+    QImage cache = image->getScaledImage(imgRect.size().toSize(), rectToPoly(zoomTransform.mapRect(visibleRect)));
 
-    //painter->save();
-    //painter->resetTransform();
-    //painter->drawImage(viewportUpdateRect, cache, viewportUpdateRect);
-    painter->drawImage(rect, cache, sourceRect);
-    //painter->drawImage(0, 0, cache);
-    //painter->restore();
+    painter->resetTransform();
+    painter->drawImage(sourceRect, cache, sourceRect);
+    painter->setTransform(viewportTransform);
   }
 }
 

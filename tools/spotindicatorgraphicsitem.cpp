@@ -9,6 +9,7 @@ using namespace std;
 SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem(): QGraphicsItem(), workerSync(0) {
   setCacheMode(NoCache);
   cacheNeedsUpdate = true;
+  setCachedPainting();
   cache = 0;
   for (int i=0; i<QThread::idealThreadCount(); i++) {
     Worker* w = new Worker(this, i);
@@ -50,30 +51,33 @@ void SpotIndicatorGraphicsItem::updateCache() {
 }
 
 void SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem *option, QWidget *w) {
-  if (!cache || (cache->size()!=p->viewport().size())) {
-    cout << "New img cache " << p->viewport().size().width() << "x" << p->viewport().size().height() << endl;
-    if (cache) delete cache;
-    cache = new QPixmap(p->viewport().size());
-    cacheNeedsUpdate = true;
+  if (cachedPainting) {
+    if (!cache || (cache->size()!=p->viewport().size())) {
+      if (cache) delete cache;
+      cache = new QPixmap(p->viewport().size());
+      cacheNeedsUpdate = true;
+    }
+
+    if (transform!=p->worldTransform()) {
+      transform = p->worldTransform();
+      cacheNeedsUpdate = true;
+    }
+
+    updateCache();
+
+
+    p->save();
+    p->resetTransform();
+    p->drawPixmap(QPoint(0,0), *cache);
+    p->restore();
+  } else {
+    p->setPen(Qt::green);
+    for (int i=0; i<coordinates.size(); i++) {
+      p->drawEllipse(coordinates.at(i), spotSize, spotSize);
+    }
   }
-
-  if (transform!=p->worldTransform()) {
-    transform = p->worldTransform();
-    cacheNeedsUpdate = true;
-  }
-
-  updateCache();
-
-
-  p->save();
-  p->resetTransform();
-  p->drawPixmap(QPoint(0,0), *cache);
-  //QRectF r = p->worldTransform().inverted().mapRect(QRectF(QPointF(0,0), QSizeF(cache->size())));
-  //p->drawPixmap(r, *cache, QRectF(cache->rect()));
-  p->restore();
-
-
 }
+
 
 void SpotIndicatorGraphicsItem::pointsUpdated() {
   cacheNeedsUpdate = true;

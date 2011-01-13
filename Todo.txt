@@ -1,7 +1,9 @@
-Allow to "print" to pdf/png/jpeg
-Implement printing (to paper :-))
-
 Highlighting of spotmarker should be more visible
+
+Crystal drag'n'drop to copy crystal parameters
+
+SpotMarker and ZoneMarker
+  Check mapping of start() and end(). If possible let Spot/ZoneMaker do the conversion
 
 Refinement
   Show if Running
@@ -15,20 +17,9 @@ ReflectionInfo (port and enhance)
     2Theta
     Image Positon (Pixel x,y) and Image Value (at point, mapped to RGB)
 
-SpotMarker and ZoneMarker
-  Check mapping of start() and end(). If possible let Spot/ZoneMaker do the conversion
-
-Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
-  * lock()
-  * setOrientation()
-  * setDetSize()
-  * setCell()
-  * unlock()
-
-Allow to configure colors
-configurable width of Zonemarker (including zero)
-
-Crystal drag'n'drop to copy crystal parameters
+Config
+  Allow to configure colors
+  configurable width of Zonemarker (including zero)
 
 LaueImage
   Display of Images from Bruker Apex (reduced Wavelength band)
@@ -40,6 +31,18 @@ LaueImage
     * detectorDistance
     * ...
 
-Mark user defined reflection (like magnetic/incomensurate one)
+######### Beta Version Line ########################
 
 Populate all ToolTips with useful help...
+
+Allow to "print" to pdf/png/jpeg
+Print with increased linewidth
+
+Mark user defined reflection (like magnetic/incomensurate one)
+
+Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
+  * lock()
+  * setOrientation()
+  * setDetSize()
+  * setCell()
+  * unlock()

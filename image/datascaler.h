@@ -21,7 +21,7 @@ public:
   void saveToXML(QDomElement);
   void loadFromXML(QDomElement);
 
-  QImage getImage(const QSize& size, const QRectF& from);
+  QImage getImage(const QSize& size, const QPolygonF& from);
   QList<BezierCurve*> getTransferCurves() { return transferCurves; }
 
   QSizeF transformedSize();
@@ -42,7 +42,7 @@ protected:
 
   DataProvider* provider;
   QImage* cache;
-  QRectF sourceRect;
+  QPolygonF sourceRect;
   QTransform sqareToRaw;
   QList<BezierCurve*> transferCurves;
 };

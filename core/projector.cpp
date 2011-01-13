@@ -46,8 +46,11 @@ Projector::Projector(QObject *parent):
   scene.addItem(imageItemsPlane);
 
   spotIndicator->stackBefore(imageItemsPlane);
+  spotIndicator->setCachedPainting(false);
 
   enableSpots();
+  enableMarkers();
+  setHQPrintMode(false);
   enableProjection();
   updateImgTransformations();
 
@@ -404,6 +407,10 @@ void Projector::enableProjection(bool b) {
 
 bool Projector::isProjectionEnabled() const {
   return projectionEnabled;
+}
+
+void Projector::setHQPrintMode(bool b) {
+  spotIndicator->setCachedPainting(!b);
 }
 
 // ----------------------- Handling of Spot Markers -------------

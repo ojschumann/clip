@@ -69,7 +69,7 @@ LaueImage::~LaueImage() {
   cout << "delete LaueImage" << endl;
 }
 
-QImage LaueImage::getScaledImage(const QSize& requestedSize, const QRectF& r) {
+QImage LaueImage::getScaledImage(const QSize& requestedSize, const QPolygonF& r) {
   return scaler->getImage(requestedSize, r);
 }
 
