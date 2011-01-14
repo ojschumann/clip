@@ -9,7 +9,6 @@ namespace Ui {
 
 class Crystal;
 class LiveMarkerModel;
-
 class HKLTool : public QMainWindow
 {
   Q_OBJECT

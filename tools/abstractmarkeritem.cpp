@@ -6,7 +6,8 @@
 AbstractMarkerItem::AbstractMarkerItem(MarkerType t):
   markerType(t)
 {
-  indexDeviation = -1;
+  invalidateCache();
+  maxSearchIndex = 10;
 }
 
 AbstractMarkerItem::~AbstractMarkerItem() {}
@@ -40,7 +41,7 @@ void AbstractMarkerItem::calcBestIndex() {
   Vec3D v = normalToIndex(getMarkerNormal());
   v.normalize();
   double preliminaryScale = 1.0/std::max(fabs(v.x()), std::max(fabs(v.y()), fabs(v.z())));
-  for (int n=1; n<20; n++) {
+  for (int n=1; n<=maxSearchIndex; n++) {
     Vec3D integerIdx = v * preliminaryScale * n;
     for (int i=0; i<3; i++) integerIdx(i) = qRound(integerIdx(i));
     //0 = d/ds sum (s*v_i - hkl_i)^2
@@ -56,14 +57,6 @@ void AbstractMarkerItem::calcBestIndex() {
   }
 }
 
-void AbstractMarkerItem::calcDetectorDeviation() {
-  detectorPositionDeviation = 0.0;
-}
-
-void AbstractMarkerItem::calcAngularDeviation() {
-  angularDeviation = 0.0;
-}
-
 void AbstractMarkerItem::setIndex(const TVec3D<int> &index) {
   Vec3D v = normalToIndex(getMarkerNormal());
   v.normalize();
@@ -72,6 +65,20 @@ void AbstractMarkerItem::setIndex(const TVec3D<int> &index) {
   integerIndex = index;
   indexDeviation = (rationalIndex-integerIndex.toType<double>()).norm();
 }
+
+void AbstractMarkerItem::setMaxSearchIndex(int n) {
+  maxSearchIndex = n;
+  invalidateCache();
+}
+
+void AbstractMarkerItem::calcDetectorDeviation() {
+  detectorPositionDeviation = 0.0;
+}
+
+void AbstractMarkerItem::calcAngularDeviation() {
+  angularDeviation = 0.0;
+}
+
 
 void AbstractMarkerItem::invalidateCache() {
   indexDeviation = -1.0;

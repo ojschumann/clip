@@ -66,8 +66,12 @@ void FitDisplay::startStopFit() {
 void FitDisplay::toggleStartButtonText() {
   if (fitter->isRunning()) {
     ui->doFit->setText("Stop");
+    ui->status->setText("Running");
+    ui->status->setStyleSheet("background-color: #80C080");
   } else {
     ui->doFit->setText("Start");
+    ui->status->setText("idle");
+    ui->status->setStyleSheet("");
   }
 }
 

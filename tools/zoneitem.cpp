@@ -366,6 +366,7 @@ Vec3D ZoneItem::getMarkerNormal() const {
 }
 
 void ZoneItem::highlight(bool h) {
+  setZValue(h ? 10 : 0);
   highlighted = h;
   update();
 }
@@ -373,6 +374,11 @@ void ZoneItem::highlight(bool h) {
 void ZoneItem::slotInvalidateCache() {
   invalidateCache();
 }
+
+void ZoneItem::slotSetMaxSearchIndex(int n) {
+  setMaxSearchIndex(n);
+}
+
 
 const char XML_ZoneMarker_element[] = "Marker";
 const char XML_ZoneMarker_start[] = "StartHandle";

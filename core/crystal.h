@@ -141,8 +141,11 @@ private:
   QVector<Reflection> reflections;
   // Flag, that indicates an running update of the reflection list.
   QFutureWatcher<QVector<Reflection> > reflectionFuture;
-  // flag to restart immediately
+  // flag to restart generation of reflections immediately
   bool restartReflectionUpdate;
+  // flag to immediately update the rotation on newly generated reflections
+  // nessesary if rotation is altered during generation of reflections
+  bool immediateRotationUpdate;
   // Factor for ab initio prediction of the number of reflections.
   double predictionFactor;
 

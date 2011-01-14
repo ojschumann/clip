@@ -90,6 +90,13 @@ void LiveMarkerModel::deleteMarker(int n) {
   emit deleteMarker(markers.at(n));
 }
 
+void LiveMarkerModel::maxSearchIndexChanged(int n) {
+  foreach (AbstractMarkerItem* marker, markers) {
+    marker->setMaxSearchIndex(n);
+  }
+  emit dataChanged(index(0, 0), index(rowCount()-1, columnCount()-1));
+}
+
 void LiveMarkerModel::rescore() {
   // Just do a complete sort. Will emit DataChanged for the complete model, including the sum row
   sort(sortColumn, sortOrder);

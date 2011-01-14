@@ -92,6 +92,7 @@ Crystal::Crystal(QObject* parent):
 }
 
 Crystal& Crystal::operator=(const Crystal& c) {
+  synchronUpdate();
   spaceGroup.setGroupSymbol(c.spaceGroup.groupSymbol());
   internalSetCell(c.a,c.b,c.c,c.alpha,c.beta,c.gamma);
   setWavevectors(c.Qmin, c.Qmax);
@@ -99,8 +100,7 @@ Crystal& Crystal::operator=(const Crystal& c) {
 
   setRotation(c.getRotationMatrix());
   setRotationAxis(c.getRotationAxis(), c.getRotationAxisType());
-  restartReflectionUpdate = false;
-
+  synchronUpdate(c.updateIsSynchron);
   FitObject::operator=(c);
   return *this;
 }
@@ -220,7 +220,6 @@ void Crystal::generateReflections() {
 
 void Crystal::reflectionGenerated() {
   reflections = reflectionFuture.result();
-
   if (restartReflectionUpdate) {
     restartReflectionUpdate = false;
     generateReflections();

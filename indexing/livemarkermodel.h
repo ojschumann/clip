@@ -26,6 +26,7 @@ signals:
 public slots:
   void highlightMarker(int n, bool b);
   void deleteMarker(int);
+  void maxSearchIndexChanged(int);
 protected slots:
   void markerAdded(AbstractMarkerItem*);
   void markerChanged(AbstractMarkerItem*);

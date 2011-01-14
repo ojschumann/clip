@@ -14,20 +14,19 @@ HKLTool::HKLTool(Crystal* c, QWidget *parent) :
 {
   ui->setupUi(this);
 
-
-  ui->tabWidget->addTab(new IndexDisplay(c, ui->tabWidget), "Indexation");
+  // Setup Indexation and refinement tab
+  IndexDisplay* indexDisplay = new IndexDisplay(c, ui->tabWidget);
+  ui->tabWidget->addTab(indexDisplay, "Indexation");
   ui->tabWidget->addTab(new FitDisplay(c, ui->tabWidget), "Refinement");
 
-
+  // creat MarkerModel
   markerModel = new LiveMarkerModel(c, this);
-  /*QSortFilterProxyModel* sorter = new QSortFilterProxyModel(this);
-  sorter->setSourceModel(markerModel);
-  sorter->setSortRole(Qt::UserRole);
-  sorter->setDynamicSortFilter(true);
-  ui->markerDisplay->setModel(sorter);*/
+
   ui->markerDisplay->setModel(markerModel);
   ui->markerDisplay->sortByColumn(markerModel->columnCount()-1, Qt::AscendingOrder);
+
   connect(markerModel, SIGNAL(doHighlightMarker(int)), this, SLOT(highlightMarkerNr(int)));
+  connect(indexDisplay, SIGNAL(maxSearchIndexChanged(int)), markerModel, SLOT(maxSearchIndexChanged(int)));
 
   QShortcut* shortcut = new QShortcut(Qt::Key_Delete, ui->markerDisplay);
   connect(shortcut, SIGNAL(activated()), this, SLOT(deleteActiveMarker()));
@@ -67,3 +66,4 @@ void HKLTool::deleteActiveMarker() {
   if (idx.isValid())
     markerModel->deleteMarker(idx.row());
 }
+

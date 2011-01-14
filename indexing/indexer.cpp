@@ -23,8 +23,7 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
     candidates(_MReal, _MReziprocal),
     MReal(_MReal),
     MReziprocal(_MReziprocal),
-    maxHKLDeviation(_maxHKLDeviation),
-    maxHKL(_maxHKL)
+    maxHKLDeviation(_maxHKLDeviation)
 {
 
   MRealInv = MReziprocal.transposed();
@@ -37,7 +36,7 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
   shouldStop=false;
 
   foreach (AbstractMarkerItem* m, crystalMarkers)
-    globalMarkers << Marker(m->getMarkerNormal(), m->getType());
+    globalMarkers << Marker(m->getMarkerNormal(), m->getType(), _maxHKL);
 
   for (int i=0; i<globalMarkers.size(); i++) {
     for (int j=0; j<i; j++) {

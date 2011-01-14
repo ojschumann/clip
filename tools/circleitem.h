@@ -25,8 +25,8 @@ public slots:
   void setLineWidth(double);
 protected:
   void mousePressEvent(QGraphicsSceneMouseEvent *event);
-private:
   double radius;
+private:
   double lineWidth;
   bool skipNextPosChange;
   QColor color;

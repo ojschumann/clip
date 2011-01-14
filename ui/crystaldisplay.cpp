@@ -208,6 +208,30 @@ void CrystalDisplay::on_actionDrag_hovered() {
 
 }
 
+void CrystalDisplay::dragEnterEvent(QDragEnterEvent *e) {
+  if (e->mimeData()->hasFormat("application/CrystalPointer") && e->mimeData()->hasImage()) {
+    QVariant v = e->mimeData()->imageData();
+    if (v.canConvert<Crystal*>()) {
+      Crystal* c = v.value<Crystal*>();
+      if (c != crystal)
+        e->acceptProposedAction();
+    }
+  }
+}
+
+void CrystalDisplay::dropEvent(QDropEvent *e) {
+  if (e->mimeData()->hasImage()) {
+    QVariant v = e->mimeData()->imageData();
+    if (v.canConvert<Crystal*>()) {
+      Crystal* c = v.value<Crystal*>();
+      if (c!=crystal) {
+        e->acceptProposedAction();
+        *crystal = *c;
+      }
+    }
+  }
+}
+
 const char XML_CrystalDisplay_Element[] = "CrystalDisplay";
 const char XML_CrystalDisplay_Geometry[] = "Geometry";
 

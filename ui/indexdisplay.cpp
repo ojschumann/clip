@@ -32,8 +32,7 @@ IndexDisplay::IndexDisplay(Crystal* _c, QWidget *parent) :
 
   connect(ui->SolutionSelector->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(updateSolutionDisplay(QModelIndex,QModelIndex)));
   connect(&solutions, SIGNAL(solutionNumberChanged(int)), this, SLOT(showNumberOfSolutions(int)));
-
-
+  connect(ui->maxIndex, SIGNAL(valueChanged(int)), this, SIGNAL(maxSearchIndexChanged(int)));
   indexRunning = false;
 
 }
@@ -66,7 +65,7 @@ void IndexDisplay::on_startButton_clicked()
                                    crystal->getReziprocalOrientationMatrix(),
                                    M_PI/180.0*ui->AngDev->value(),
                                    0.01*ui->IntDev->value(),
-                                   ui->MaxIdx->value(),
+                                   ui->maxIndex->value(),
                                    crystal->getSpacegroup()->getLauegroup());
     connect(indexer, SIGNAL(publishSolution(Solution)), &solutions, SLOT(addSolution(Solution)));
     connect(indexer, SIGNAL(destroyed()), this, SLOT(indexerDestroyed()));
@@ -82,14 +81,14 @@ void IndexDisplay::on_startButton_clicked()
 void IndexDisplay::indexerDestroyed() {
   indexRunning=false;
   ui->startButton->setText("Start");
-  ui->maxIndex->setText("");
+  ui->maxIndexDisplay->setText("");
   ui->progress->setEnabled(false);
   ui->progress->setValue(0);
 
 }
 
 void IndexDisplay::showMajorIndex(int n) {
-  ui->maxIndex->setText(QString::number(n));
+  ui->maxIndexDisplay->setText(QString::number(n));
   ui->progress->setMaximum((n+2)*(n+1)/2-1);
 }
 

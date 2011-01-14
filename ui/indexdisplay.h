@@ -20,6 +20,7 @@ public:
     virtual ~IndexDisplay();
 signals:
     void stopIndexer();
+    void maxSearchIndexChanged(int);
 private:
     Ui::Indexing *ui;
     Crystal* crystal;

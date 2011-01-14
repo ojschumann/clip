@@ -29,6 +29,9 @@ public:
 
   void saveToXML(QDomElement base);
   void loadFromXML(QDomElement base);
+
+public slots:
+  void slotSetMaxSearchIndex(int);
 private slots:
   void updatePolygon();
   void updateOptimalZone();

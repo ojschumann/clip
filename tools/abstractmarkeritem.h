@@ -25,6 +25,7 @@ public:
   double getDetectorPositionScore();
   double getAngularDeviation();
 
+  void setMaxSearchIndex(int n);
   void setIndex(const TVec3D<int>& index);
 
   MarkerType getType() const { return markerType; }
@@ -46,6 +47,7 @@ protected:
   double indexDeviation;
   double detectorPositionDeviation;
   double angularDeviation;
+  int maxSearchIndex;
 };
 
 class AbstractProjectorMarkerItem: public AbstractMarkerItem

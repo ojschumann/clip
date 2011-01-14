@@ -9,7 +9,7 @@
 class Marker : public AbstractMarkerItem
 {
 public:
-  Marker(const Vec3D& n, MarkerType t);
+  Marker(const Vec3D& n, MarkerType t, int _maxSearchIndex);
   Vec3D getMarkerNormal() const;
   Vec3D getIndexNormal();
   void setMatrices(const Mat3D& SpotNormalToIndex, const Mat3D& ZoneNormalToIndex, const Mat3D& MReciprocal, const Mat3D& MReal);

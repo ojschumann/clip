@@ -30,6 +30,10 @@ public:
   QSize sizeHint() const;
 
   Crystal* getCrystal() { return crystal; }
+
+  virtual void dragEnterEvent(QDragEnterEvent *);
+  virtual void dropEvent(QDropEvent *);
+
 signals:
   void info(QString, int);
 public slots:

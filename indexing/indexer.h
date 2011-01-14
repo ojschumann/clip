@@ -69,7 +69,6 @@ protected:
   Mat3D MReziprocalInv;
 
   double maxHKLDeviation;
-  int maxHKL;
 
   QList<Solution> uniqSolutions;
   QList<Mat3D> lauegroup;

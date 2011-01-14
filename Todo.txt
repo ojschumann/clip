@@ -1,14 +1,3 @@
-Highlighting of spotmarker should be more visible
-
-Crystal drag'n'drop to copy crystal parameters
-
-SpotMarker and ZoneMarker
-  Check mapping of start() and end(). If possible let Spot/ZoneMaker do the conversion
-
-Refinement
-  Show if Running
-  Stop if model changes
-
 ReflectionInfo (port and enhance)
   including Direction of normal and scattered beam
   Live info from Mousecursor (new)
@@ -31,9 +20,12 @@ LaueImage
     * detectorDistance
     * ...
 
+Populate all ToolTips with useful help...
+
 ######### Beta Version Line ########################
 
-Populate all ToolTips with useful help...
+Refinement
+  Stop if model changes
 
 Allow to "print" to pdf/png/jpeg
 Print with increased linewidth
