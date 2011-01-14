@@ -20,6 +20,8 @@ using namespace std;
 Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal, const Mat3D& _MReziprocal, double maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup):
     QObject(),
     QRunnable(),
+    candidatePos(0),
+    loopCounter(0),
     candidates(_MReal, _MReziprocal),
     MReal(_MReal),
     MReziprocal(_MReziprocal),
@@ -55,26 +57,41 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
 
   connect(&candidates, SIGNAL(nextMajorIndex(int)), this, SIGNAL(nextMajorIndex(int)));
   connect(&candidates, SIGNAL(progessInfo(int)), this, SIGNAL(progressInfo(int)));
+  loopTimer.start();
+  runTimer.start();
 }
 
 
 void Indexer::run() {
-  QThreadPool::globalInstance()->tryStart(this);
+  if (multithreaded)
+    QThreadPool::globalInstance()->tryStart(this);
 
   ThreadLocalData localData;
   localData.markers = globalMarkers;
   for (int i=0; i<localData.markers.size(); i++)
     localData.markers[i].setMatrices(localData.spotNormalToIndex, localData.zoneNormalToIndex, MReziprocal, MReal);
 
-
+  int loop=0;
   forever {
     int i = candidatePos.fetchAndAddOrdered(1);
     CandidateGenerator::Candidate c1 = candidates.getCandidate(i);
-    for (int j=0; j<i; j++) {
+    QList<CandidateGenerator::Candidate> cList = candidates.getCandidateList(i);
+    for (int j=0; j<cList.size(); j++) {
       if (shouldStop) return;
+      if (uniqSolutions.size()>200) return;
       // Be nice to the GUI Thread
-      QThread::yieldCurrentThread();
-      CandidateGenerator::Candidate c2 = candidates.getCandidate(j);
+      loop++;
+      if ((loop%10000)==0)
+        QThread::yieldCurrentThread();
+
+      int testNr = loopCounter.fetchAndAddRelaxed(1);
+      if (testNr%10000==0) {
+        int dt = loopTimer.restart();
+        cout << testNr << " " << loop << " " << dt << " " << 10000000.0/dt << " " << 1000.0*testNr/runTimer.elapsed() << endl;
+      }
+
+
+      CandidateGenerator::Candidate c2 = cList.at(j);
 
       checkPossibleAngles(c1.spot(), c2.spot(), spotSpotAngles, localData);
       checkPossibleAngles(c1.zone(), c2.zone(), zoneZoneAngles, localData);
@@ -122,7 +139,6 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
     localData.zoneNormalToIndex = MRealInv * R.transposed();
 
     OptimalRotation optRot;
-
     for (int i=0; i<localData.markers.size(); i++) {
       Marker& m = localData.markers[i];
       if (i==a.index1) {
@@ -155,25 +171,28 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
   Mat3D bestinv(solution.bestRotation.transposed());
   int n=0;
   uniqLock.lockForRead();
-  bool duplicate = symmetryEquivalentSolutionPresent(bestinv, n);
+  bool duplicate = symmetryEquivalentSolutionPresent(bestinv, solution.hklDeviation, n);
   uniqLock.unlock();
   if (duplicate) return;
 
   uniqLock.lockForWrite();
-  duplicate = symmetryEquivalentSolutionPresent(bestinv, n);
+  duplicate = symmetryEquivalentSolutionPresent(bestinv, solution.hklDeviation, n);
   if (!duplicate) {
     uniqSolutions << solution;
+    //cout << c1.index(0) << "," << c1.index(1) << "," << c1.index(2) << " + " << c2.index(0) << "," << c2.index(1) << "," << c2.index(2) << endl;
     emit publishSolution(solution);
   }
   uniqLock.unlock();
 }
 
-bool Indexer::symmetryEquivalentSolutionPresent(const Mat3D &R, int &n) {
+bool Indexer::symmetryEquivalentSolutionPresent(const Mat3D &R, double hklDeviation, int &n) {
   for (; n<uniqSolutions.size(); n++) {
-    Mat3D T(R*uniqSolutions.at(n).bestRotation);
-    foreach (Mat3D G, lauegroup)  {
-      if ((G-T).sqSum()<1e-4) {
-        return true;
+    if ((fabs(uniqSolutions.at(n).hklDeviation - hklDeviation) / hklDeviation)<1e-4) {;
+      Mat3D T(R*uniqSolutions.at(n).bestRotation);
+      foreach (Mat3D G, lauegroup)  {
+        if ((G-T).sqSum()<1e-4) {
+          return true;
+        }
       }
     }
   }

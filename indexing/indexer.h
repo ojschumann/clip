@@ -33,7 +33,7 @@ public:
   Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& MReal, const Mat3D& MReziprocal, double _maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup);
 
   void run();
-
+  bool multithreaded;
 public slots:
   void stop();
 
@@ -53,6 +53,9 @@ protected:
   void checkPossibleAngles(const CandidateGenerator::Candidate&, const CandidateGenerator::Candidate&, QList<AngleInfo>, ThreadLocalData&);
 
   QAtomicInt candidatePos;
+  QAtomicInt loopCounter;
+  QTime loopTimer;
+  QTime runTimer;
   CandidateGenerator candidates;
 
   bool shouldStop;
@@ -74,7 +77,7 @@ protected:
   QList<Mat3D> lauegroup;
   QReadWriteLock uniqLock;
 
-  bool symmetryEquivalentSolutionPresent(const Mat3D& R, int& checkFrom);
+  bool symmetryEquivalentSolutionPresent(const Mat3D& R, double hklDeviation, int& checkFrom);
 };
 
 #include "indexing/solution.h"

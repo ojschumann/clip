@@ -27,6 +27,7 @@ HKLTool::HKLTool(Crystal* c, QWidget *parent) :
 
   connect(markerModel, SIGNAL(doHighlightMarker(int)), this, SLOT(highlightMarkerNr(int)));
   connect(indexDisplay, SIGNAL(maxSearchIndexChanged(int)), markerModel, SLOT(maxSearchIndexChanged(int)));
+  markerModel->maxSearchIndexChanged(indexDisplay->maxSearchIndex());
 
   QShortcut* shortcut = new QShortcut(Qt::Key_Delete, ui->markerDisplay);
   connect(shortcut, SIGNAL(activated()), this, SLOT(deleteActiveMarker()));

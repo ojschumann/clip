@@ -47,6 +47,25 @@ CandidateGenerator::Candidate CandidateGenerator::getCandidate(int n) {
   return c;
 }
 
+QList<CandidateGenerator::Candidate> CandidateGenerator::getCandidateList(int n) {
+  locker.lockForRead();
+  if (n>=candidates.size()) {
+    locker.unlock();
+    locker.lockForWrite();
+    while (n>=candidates.size()) {
+      generateNextIndex();
+    }
+    locker.unlock();
+    locker.lockForRead();
+  }
+  QList<Candidate> list;
+  for (int i=0; i<n; i++) {
+    list << candidates.at(i);
+  }
+  locker.unlock();
+  return list;
+}
+
 void CandidateGenerator::reset() {
   locker.lockForWrite();
   candidates.clear();

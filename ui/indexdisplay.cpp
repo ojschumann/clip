@@ -43,6 +43,10 @@ IndexDisplay::~IndexDisplay()
   delete ui;
 }
 
+int IndexDisplay::maxSearchIndex() {
+  return ui->maxIndex->value();
+}
+
 void IndexDisplay::updateSolutionDisplay(QModelIndex index, QModelIndex prev) {
   int n=index.row();
   if (n>=0) {
@@ -74,6 +78,9 @@ void IndexDisplay::on_startButton_clicked()
     connect(this, SIGNAL(stopIndexer()), indexer, SLOT(stop()));
     solutions.clear();
     indexRunning = true;
+
+    indexer->multithreaded = ui->checkBox->isChecked();
+
     QThreadPool::globalInstance()->start(indexer);
   }
 }

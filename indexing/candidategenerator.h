@@ -29,6 +29,7 @@ public:
 
   CandidateGenerator(const Mat3D&, const Mat3D&, QObject* parent=0);
   Candidate getCandidate(int);
+  QList<Candidate> getCandidateList(int until);
 
   void reset();
 signals:
