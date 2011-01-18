@@ -58,9 +58,11 @@ public:
   void svd(TMat3D<T>& L, TMat3D<T>& R);
 
 protected:
-  struct KeyClass {};
-  static const KeyClass Key;
-  inline TMat3D(KeyClass ) {};
+  enum Key {
+    NoInit
+  };
+
+  inline TMat3D(Key) {}
 
   inline void givens(double a, double b, double &c, double &s);
 

@@ -26,13 +26,13 @@ template <typename T> TVec3D<T>::TVec3D(const T _x[3]) {
 
 
 template <typename T> TVec3D<T> TVec3D<T>::operator+(const TVec3D<T>& v) const{
-  TVec3D<T> r(Key);
+  TVec3D<T> r(TVec3D<T>::NoInit);
   for (int i=0; i<3; i++) r(i) = (*this)(i)+v(i);
   return r;
 }
 
 template <typename T> TVec3D<T> TVec3D<T>::operator-(const TVec3D<T>& v) const {
-  TVec3D<T> r(Key);
+  TVec3D<T> r(TVec3D<T>::NoInit);
   for (int i=0; i<3; i++) r(i) = (*this)(i)-v(i);
   return r;
 }
@@ -46,13 +46,13 @@ template <typename T> template <typename U> T TVec3D<T>::operator*(const TVec3D<
 
 
 template <typename T> TVec3D<T> TVec3D<T>::operator*(const T& a) const {
-  TVec3D<T> r(Key);
+  TVec3D<T> r(TVec3D<T>::NoInit);
   for (int i=0; i<3; i++) r(i) = (*this)(i) * a;
   return r;
 }
 
 template <typename T> TVec3D<T> TVec3D<T>::operator%(const TVec3D<T> &v) const {
-  TVec3D<T> r(Key);
+  TVec3D<T> r(TVec3D<T>::NoInit);
   r(0)=(*this)(1)*v(2)-(*this)(2)*v(1);
   r(1)=(*this)(2)*v(0)-(*this)(0)*v(2);
   r(2)=(*this)(0)*v(1)-(*this)(1)*v(0);
@@ -60,7 +60,7 @@ template <typename T> TVec3D<T> TVec3D<T>::operator%(const TVec3D<T> &v) const {
 }
 
 template <typename T> TMat3D<T> TVec3D<T>::operator^(const TVec3D<T> &v) const {
-  TMat3D<T> M(TMat3D<T>::Key);
+  TMat3D<T> M(TMat3D<T>::NoInit);
   for (int i=0; i<3; i++) {
     for (int j=0; j<3; j++) {
       M(i,j)=(*this)(i)*v(j);
@@ -71,7 +71,7 @@ template <typename T> TMat3D<T> TVec3D<T>::operator^(const TVec3D<T> &v) const {
 
 template <typename T> TVec3D<T> TVec3D<T>::operator/(const T& a)  const {
   if (a==0) return TVec3D<T>(*this);
-  TVec3D<T> r(Key);
+  TVec3D<T> r(TVec3D<T>::NoInit);
   for (int i=0; i<3; i++) r(i) = (*this)(i) / a;
   return r;
 }

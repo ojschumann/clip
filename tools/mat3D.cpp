@@ -88,7 +88,7 @@ template <typename T> void TMat3D<T>::zero() {
 
 
 template <typename T> TMat3D<T> TMat3D<T>::operator+(const TMat3D<T>& m) const {
-  TMat3D<T> r(TMat3D<T>::Key);
+  TMat3D<T> r(TMat3D<T>::NoInit);
   for (int i=0; i<3; i++)
     for (int j=0; j<3; j++)
       r(i,j)=(*this)(i,j)+m(i,j);
@@ -96,7 +96,7 @@ template <typename T> TMat3D<T> TMat3D<T>::operator+(const TMat3D<T>& m) const {
 }
 
 template <typename T> TMat3D<T> TMat3D<T>::operator-(const TMat3D<T>& m) const {
-  TMat3D<T> r(TMat3D<T>::Key);
+  TMat3D<T> r(TMat3D<T>::NoInit);
   for (int i=0; i<3; i++)
     for (int j=0; j<3; j++)
       r(i,j)=(*this)(i,j)-m(i,j);
@@ -104,7 +104,7 @@ template <typename T> TMat3D<T> TMat3D<T>::operator-(const TMat3D<T>& m) const {
 }
 
 template <typename T> TMat3D<T> TMat3D<T>::operator*(T a) const {
-  TMat3D<T> r(TMat3D<T>::Key);
+  TMat3D<T> r(TMat3D<T>::NoInit);
   for (int i=0; i<3; i++)
     for (int j=0; j<3; j++)
       r(i,j)=(*this)(i,j)*a;
@@ -112,7 +112,7 @@ template <typename T> TMat3D<T> TMat3D<T>::operator*(T a) const {
 }
 
 template <typename T> template <typename U> TVec3D<T> TMat3D<T>::operator*(const TVec3D<U>& v) const {
-  TVec3D<T> r(TVec3D<T>::Key);
+  TVec3D<T> r(TVec3D<T>::NoInit);
   for (int i=0; i<3; i++) {
     T tmp = (*this)(i,0)*v(0);
     for (int j=1; j<3; j++)
@@ -123,7 +123,7 @@ template <typename T> template <typename U> TVec3D<T> TMat3D<T>::operator*(const
 }
 
 template <typename T> TMat3D<T> TMat3D<T>::operator*(const TMat3D<T>& m) const {
-  TMat3D<T> r(TMat3D<T>::Key);
+  TMat3D<T> r(TMat3D<T>::NoInit);
   for (int j=0; j<3; j++) {
     for (int i=0; i<3; i++) {
       T tmp = (*this)(i,0)*m(0,j);
@@ -221,7 +221,7 @@ template <typename T> void TMat3D<T>::transpose() {
 
 
 template <typename T> TMat3D<T> TMat3D<T>::transposed() const {
-  TMat3D<T> r(TMat3D<T>::Key);
+  TMat3D<T> r(TMat3D<T>::NoInit);
   for (int i=0; i<3; i++) {
     for (int j=0; j<3; j++) {
       r(i,j)=(*this)(j,i);
@@ -231,7 +231,7 @@ template <typename T> TMat3D<T> TMat3D<T>::transposed() const {
 }
 
 template <typename T> TMat3D<T> TMat3D<T>::inverse() const {
-  TMat3D<T> r(TMat3D<T>::Key);
+  TMat3D<T> r(TMat3D<T>::NoInit);
   T d=this->det();
   if (d!=InitatorValues<T>::Zero()) {
     d=1.0/d;
