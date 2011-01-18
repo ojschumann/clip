@@ -74,8 +74,8 @@ void Indexer::run() {
   int loop=0;
   forever {
     int i = candidatePos.fetchAndAddOrdered(1);
-    CandidateGenerator::Candidate c1 = candidates.getCandidate(i);
-    QList<CandidateGenerator::Candidate> cList = candidates.getCandidateList(i);
+    QList<CandidateGenerator::Candidate> cList = candidates.getCandidateList(i+1);
+    CandidateGenerator::Candidate c1 = cList.takeLast();
     for (int j=0; j<cList.size(); j++) {
       if (shouldStop) return;
       if (uniqSolutions.size()>200) return;

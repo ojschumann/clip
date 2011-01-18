@@ -48,10 +48,11 @@ public:
   template <typename U> TVec3D<U> toType() const;
 
 protected:
-  struct KeyClass { };
-  const static KeyClass Key;
+  enum Key {
+    NoInit
+  };
   // Does not initialize
-  inline TVec3D(KeyClass v) {};
+  inline TVec3D(Key) {};
 
   // The REAL Data
   T DATA[3];
