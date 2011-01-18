@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>275</width>
-    <height>340</height>
+    <width>359</width>
+    <height>277</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>ReflexInfo</string>
@@ -18,100 +24,10 @@
     <normaloff>:/icons/icons/info.png</normaloff>:/icons/icons/info.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_6">
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox_5">
-     <property name="title">
-      <string>Position on Detector</string>
-     </property>
-     <property name="flat">
-      <bool>false</bool>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_5">
-      <property name="leftMargin">
-       <number>6</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>6</number>
-      </property>
-      <property name="bottomMargin">
-       <number>6</number>
-      </property>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="det_x"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="det_y"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
+   <property name="sizeConstraint">
+    <enum>QLayout::SetMinAndMaxSize</enum>
+   </property>
    <item row="1" column="0">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Scattered Ray</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <property name="leftMargin">
-       <number>6</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>6</number>
-      </property>
-      <property name="bottomMargin">
-       <number>6</number>
-      </property>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="sr_x"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="sr_y"/>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="sr_z"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QGroupBox" name="groupBox_4">
-     <property name="title">
-      <string>Normal</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <property name="leftMargin">
-       <number>6</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>6</number>
-      </property>
-      <property name="bottomMargin">
-       <number>6</number>
-      </property>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="norm_x"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="norm_y"/>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="norm_z"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="0">
     <widget class="QLabel" name="label">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -124,23 +40,48 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QLineEdit" name="reflex"/>
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="reflex">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="2" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>3</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>angles with</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinAndMaxSize</enum>
+      </property>
       <property name="margin">
-       <number>0</number>
+       <number>3</number>
       </property>
       <property name="spacing">
-       <number>1</number>
+       <number>3</number>
       </property>
       <item row="0" column="0">
-       <widget class="QTableWidget" name="angleTable">
+       <widget class="ResizingTableWidget" name="angleTable">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QHeaderView::Section { border-style: plain; border-color: black; border-width: 0px }</string>
+        </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
@@ -162,6 +103,12 @@
         <property name="selectionMode">
          <enum>QAbstractItemView::NoSelection</enum>
         </property>
+        <property name="cornerButtonEnabled">
+         <bool>false</bool>
+        </property>
+        <attribute name="verticalHeaderDefaultSectionSize">
+         <number>17</number>
+        </attribute>
         <row>
          <property name="text">
           <string>primary beam</string>
@@ -189,7 +136,7 @@
         </column>
         <item row="0" column="0">
          <property name="text">
-          <string>1</string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -197,7 +144,7 @@
         </item>
         <item row="0" column="1">
          <property name="text">
-          <string>1</string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -205,7 +152,7 @@
         </item>
         <item row="1" column="0">
          <property name="text">
-          <string>1</string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -213,7 +160,7 @@
         </item>
         <item row="1" column="1">
          <property name="text">
-          <string>1</string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -221,7 +168,7 @@
         </item>
         <item row="2" column="0">
          <property name="text">
-          <string>1</string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -229,7 +176,7 @@
         </item>
         <item row="2" column="1">
          <property name="text">
-          <string>1</string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -240,107 +187,339 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="2">
+   <item row="2" column="2">
     <widget class="QGroupBox" name="groupBox_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>2</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>scatter</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinAndMaxSize</enum>
+      </property>
       <property name="margin">
-       <number>0</number>
+       <number>3</number>
       </property>
       <property name="spacing">
-       <number>1</number>
+       <number>3</number>
       </property>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Q</string>
+      <item row="0" column="0">
+       <widget class="ResizingTableWidget" name="scatterTable">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="infoQ">
-        <property name="enabled">
+        <property name="styleSheet">
+         <string notr="true">QHeaderView::Section { border-style: plain; border-color: black; border-width: 0px }</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::NoSelection</enum>
+        </property>
+        <property name="cornerButtonEnabled">
          <bool>false</bool>
         </property>
-        <property name="frame">
-         <bool>true</bool>
+        <property name="columnCount">
+         <number>1</number>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
+        <attribute name="verticalHeaderDefaultSectionSize">
+         <number>17</number>
+        </attribute>
+        <row>
+         <property name="text">
+          <string>Q</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>d</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>2T</string>
+         </property>
+        </row>
+        <column>
+         <property name="text">
+          <string/>
+         </property>
+        </column>
+        <item row="0" column="0">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="1" column="0">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="2" column="0">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
        </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>d</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="infoD">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>2T</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="info2T">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Minimum</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>49</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>
    </item>
-   <item row="4" column="0">
+   <item row="3" column="0">
     <widget class="QLabel" name="label_7">
      <property name="text">
       <string>diffracting orders</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="1" colspan="2">
+   <item row="3" column="1" colspan="2">
     <widget class="QLineEdit" name="diffOrders">
      <property name="enabled">
       <bool>false</bool>
      </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="3">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Cursor</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <property name="margin">
+       <number>3</number>
+      </property>
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="ResizingTableWidget" name="cursorTable">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QHeaderView::Section { border-style: plain; border-color: black; border-width: 0px }</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::NoSelection</enum>
+        </property>
+        <property name="showGrid">
+         <bool>false</bool>
+        </property>
+        <property name="cornerButtonEnabled">
+         <bool>false</bool>
+        </property>
+        <attribute name="verticalHeaderDefaultSectionSize">
+         <number>17</number>
+        </attribute>
+        <row>
+         <property name="text">
+          <string>x</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>y</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>z</string>
+         </property>
+        </row>
+        <column>
+         <property name="text">
+          <string>pos</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>image</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>normal</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>scattered</string>
+         </property>
+        </column>
+        <item row="0" column="0">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="0" column="1">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="0" column="2">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="0" column="3">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="1" column="0">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="1" column="1">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="1" column="2">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="1" column="3">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="2" column="0">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="background">
+          <brush brushstyle="NoBrush">
+           <color alpha="0">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </property>
+         <property name="flags">
+          <set>NoItemFlags</set>
+         </property>
+        </item>
+        <item row="2" column="2">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+        <item row="2" column="3">
+         <property name="text">
+          <string> </string>
+         </property>
+         <property name="textAlignment">
+          <set>AlignRight|AlignVCenter</set>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ResizingTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>tools/resizeingtablewidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resources/resources.qrc"/>
  </resources>

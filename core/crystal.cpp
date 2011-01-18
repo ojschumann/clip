@@ -297,7 +297,34 @@ QVector<Reflection> Crystal::doGeneration() {
   return refs;
 }
 
-Crystal::UpdateRef::UpdateRef(Crystal *c) {
+
+Reflection Crystal::makeReflection(const TVec3D<int> &_hkl) const {
+  int _ggt = ggt(_hkl.x(), ggt(_hkl.y(), _hkl.z()));
+  if (_ggt<=1) _ggt = 1;
+
+  TVec3D<int> hkl = hkl / _ggt;
+
+  Vec3D v=MReziprocal*hkl.toType<double>();
+  double Q = 2.0*M_PI*v.norm();
+
+  Reflection r;
+  r.h=hkl.x();
+  r.k=hkl.y();
+  r.l=hkl.z();
+  r.hklSqSum=hkl.norm_sq();
+  r.Q=Q;
+  r.d = 2.0*M_PI/Q;
+  for (int i=1; i<=int(M_1_PI*Qmax*r.d+0.9); i++) {
+    if (!spaceGroup.isExtinct(hkl*i))
+      r.orders.push_back(i);
+  }
+  r.normalLocal=v*r.d;
+  Crystal::UpdateRef updateRef(this);
+  updateRef(r);
+  return r;
+}
+
+Crystal::UpdateRef::UpdateRef(const Crystal *c) {
   MRot = c->MRot;
   Qmin = c->Qmin;
   Qmax = c->Qmax;

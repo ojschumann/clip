@@ -5,6 +5,8 @@
 
 #include "tools/mousepositioninfo.h"
 
+class Reflection;
+
 namespace Ui {
   class MouseInfoDisplay;
 }
@@ -19,7 +21,12 @@ public:
 public slots:
   void showMouseInfo(MousePositionInfo);
 private:
+  void displayReflection(const Reflection& r, double detQMin, double detQMax);
+
   Ui::MouseInfoDisplay *ui;
+
+private slots:
+    void on_reflex_textEdited(QString );
 };
 
 #endif // MOUSEINFODISPLAY_H

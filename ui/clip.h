@@ -23,6 +23,7 @@ public:
   static void clearInstance();
 
   Crystal* getMostRecentCrystal(bool checkProjectors=false);
+  Projector* getMostRecentProjector(bool withCrystal=false);
 private:
   explicit Clip(QWidget *parent = 0);
   Clip(const Clip&);

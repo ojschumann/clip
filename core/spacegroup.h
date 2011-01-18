@@ -38,7 +38,7 @@ public:
   QList< TMat3D<int> > getPointgroup() const;
   QList< TMat3D<int> > getLauegroup() const;
 
-  bool isExtinct(const TVec3D<int>&);
+  bool isExtinct(const TVec3D<int>&) const;
 
 
 signals:

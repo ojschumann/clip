@@ -18,8 +18,12 @@ IndexParser::IndexParser(QString s) {
       indexVector(i) = compactIndex.capturedTexts().at(i+1).toInt();
   } else if (normalIndex.exactMatch(s)) {
     valid = true;
-    for (int i=0; i<3; i++)
+    integral = true;
+    for (int i=0; i<3; i++) {
       indexVector(i) = normalIndex.capturedTexts().at(i+1).toDouble();
+      double t;
+      integral = integral && (std::modf(indexVector(i), &t)<1e-4);
+    }
   }
 }
 

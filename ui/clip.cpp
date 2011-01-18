@@ -111,6 +111,17 @@ Crystal* Clip::getMostRecentCrystal(bool checkProjectors) {
   return NULL;
 }
 
+Projector* Clip::getMostRecentProjector(bool withCrystal) {
+  foreach (QMdiSubWindow* window, ui->mdiArea->subWindowList(QMdiArea::StackingOrder)) {
+    ProjectionPlane* pp;
+    if (((pp=dynamic_cast<ProjectionPlane*>(window->widget()))!=NULL) && (!withCrystal || pp->getProjector()->getCrystal())) {
+      return pp->getProjector();
+    }
+  }
+  return NULL;
+}
+
+
 void Clip::addMdiWindow(QWidget* w) {
   QMdiSubWindow* m = ui->mdiArea->addSubWindow(w);
   m->setAttribute(Qt::WA_DeleteOnClose);

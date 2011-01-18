@@ -41,6 +41,7 @@ public:
 
   int reflectionCount();
   Reflection getReflection(int i);
+  Reflection makeReflection(const TVec3D<int>& hkl) const;
   Reflection getClosestReflection(const Vec3D& normal);
   QVector<Reflection> getReflectionList();
 
@@ -156,7 +157,7 @@ private:
   // update of Reflection Parameters depending on rotation
   class UpdateRef {
   public:
-    UpdateRef(Crystal* _c);
+    UpdateRef(const Crystal* _c);
     void operator()(Reflection&);
   private:
     Mat3D MRot;

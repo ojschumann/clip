@@ -175,7 +175,7 @@ bool Spacegroup::GroupElement::operator==(const Spacegroup::GroupElement& o) con
 }
 
 
-bool Spacegroup::isExtinct(const TVec3D<int>& reflection) {
+bool Spacegroup::isExtinct(const TVec3D<int>& reflection) const {
   for (int i=0; i<extinctionChecks.size(); i++) {
     int s = (reflection*extinctionChecks.at(i).t)%GroupElement::MOD;
     if (s<0) s += GroupElement::MOD;

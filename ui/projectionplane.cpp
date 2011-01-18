@@ -308,6 +308,12 @@ void ProjectionPlane::generateMousePositionInfo(QPointF p) {
   info.valid=true;
   info.projectorPos = p;
   info.imagePos = projector->det2img.map(p);
+  info.imagePos.ry() = 1.0 - info.imagePos.y();
+  if (projector->getLaueImage()) {
+    QSizeF s = projector->getLaueImage()->transformedSize();
+    info.imagePos.rx() *= s.width();
+    info.imagePos.ry() *= s.height();
+  }
   info.normal = projector->det2normal(p);
   info.detQMin = projector->Qmin();
   info.detQMax = projector->Qmax();
