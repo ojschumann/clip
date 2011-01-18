@@ -1,0 +1,40 @@
+ReflectionInfo (port and enhance)
+  including Direction of normal and scattered beam
+  Live info from Mousecursor (new)
+    Position on detector (x, y)
+    Direction of scatter and direction of normal
+    2Theta
+    Image Positon (Pixel x,y) and Image Value (at point, mapped to RGB)
+
+Config
+  Allow to configure colors
+  configurable width of Zonemarker (including zero)
+
+LaueImage
+  Display of Images from Bruker Apex (reduced Wavelength band)
+  implement setting of resolution from ResolutionCalculator
+  Generic Interface for ImageInfo
+    * hasCrystalOrientation / getOrientation
+    * hasResolution / absoluteResolution / pixelSize / ...
+    * DetectorOrientation
+    * detectorDistance
+    * ...
+
+Populate all ToolTips with useful help...
+
+######### Beta Version Line ########################
+
+Refinement
+  Stop if model changes
+
+Allow to "print" to pdf/png/jpeg
+Print with increased linewidth
+
+Mark user defined reflection (like magnetic/incomensurate one)
+
+Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
+  * lock()
+  * setOrientation()
+  * setDetSize()
+  * setCell()
+  * unlock()
