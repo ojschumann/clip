@@ -5,12 +5,15 @@
 #include "core/reflection.h"
 #include <QPointF>
 
+class QObject;
+
 class MousePositionInfo {
 public:
   MousePositionInfo() {
     valid = false;
     scatteredOk=false;
     nearestOk=false;
+    projector=0;
   }
 
   bool valid;
@@ -23,6 +26,7 @@ public:
   double detQMin;
   double detQMax;
   Reflection nearestReflection;
+  QObject* projector;
 };
 
 

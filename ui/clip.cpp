@@ -122,13 +122,13 @@ Projector* Clip::getMostRecentProjector(bool withCrystal) {
   return NULL;
 }
 
-
-void Clip::addMdiWindow(QWidget* w) {
+QMdiSubWindow* Clip::addMdiWindow(QWidget* w) {
   QMdiSubWindow* m = ui->mdiArea->addSubWindow(w);
   m->setAttribute(Qt::WA_DeleteOnClose);
   m->setWindowIcon(w->windowIcon());
   m->show();
   connect(w, SIGNAL(destroyed()), m, SLOT(deleteLater()));
+  return m;
 }
 
 void Clip::setActiveSubWindow(QWidget *window) {
@@ -247,7 +247,11 @@ void Clip::on_actionReflection_Info_triggered() {
   MouseInfoDisplay* info = new MouseInfoDisplay();
   connect(this, SIGNAL(mousePositionInfo(MousePositionInfo)), info, SLOT(showMouseInfo(MousePositionInfo)));
   connect(info, SIGNAL(highlightMarker(Vec3D)), this, SIGNAL(highlightMarker(Vec3D)));
-  addMdiWindow(info);
+  QMdiSubWindow* m = addMdiWindow(info);
+  m->setWindowFlags(m->windowFlags() & ~Qt::WindowMaximizeButtonHint);
+  //m->show();
+  //m->layout()->setSizeConstraint(QLayout::SetFixedSize);
+
 }
 
 void Clip::on_actionRotation_triggered()

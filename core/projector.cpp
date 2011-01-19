@@ -427,14 +427,15 @@ void Projector::setSpotHighlighting(Vec3D hkl) {
 }
 
 void Projector::updateSpotHighlightMarker() {
-  cout << "updatehighight " << endl;
   bool show = (!crystal.isNull() && !spotHighlightHKL.isNull());
   QPointF p;
-  if (show)
-    p = normal2det(crystal->hkl2Reziprocal(spotHighlightHKL).normalized(), show);
+  if (show) {
+    Vec3D v = crystal->hkl2Reziprocal(spotHighlightHKL);
+    p = normal2det(v.normalized(), show);
+    emit spotHighlightChanged(v);
+  }
 
   if (show) {
-    cout << "show" << endl;
     if (spotHighlightItem==0) {
       CircleItem* item = new CircleItem(1.1*getSpotSize());
       item->setColor(Qt::red);
@@ -443,6 +444,7 @@ void Projector::updateSpotHighlightMarker() {
       scene.addItem(spotHighlightItem);
     }
     spotHighlightItem->setPos(p);
+
   } else {
     delete spotHighlightItem;
     spotHighlightItem = 0;

@@ -3,11 +3,11 @@
 
 #include "tools/mousepositioninfo.h"
 
+#include <QObject>
 #include <QWidget>
+#include <QPointer>
 
 #include "tools/vec3D.h"
-
-class Reflection;
 
 namespace Ui {
   class MouseInfoDisplay;
@@ -20,17 +20,23 @@ class MouseInfoDisplay : public QWidget
 public:
   explicit MouseInfoDisplay(QWidget *parent = 0);
   virtual ~MouseInfoDisplay();
+  virtual bool eventFilter(QObject *, QEvent *);
 signals:
   void highlightMarker(Vec3D);
 public slots:
   void showMouseInfo(MousePositionInfo);
-private:
-  void displayReflection(const Reflection& r, double detQMin, double detQMax);
-
-  Ui::MouseInfoDisplay *ui;
-
+  void receiveSpotHightlight(Vec3D);
+protected:
+  virtual void changeEvent(QEvent *);
 private slots:
     void on_reflex_textEdited(QString );
+    void cursorTableVisiblyToggled(bool b);
+private:
+
+  Ui::MouseInfoDisplay *ui;
+  bool parentNeedSizeConstrain;
+
+  QPointer<QObject> lastSender;
 };
 
 #endif // MOUSEINFODISPLAY_H

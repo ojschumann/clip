@@ -167,6 +167,7 @@ signals:
   void markerChanged(AbstractMarkerItem*);
   void markerClicked(AbstractMarkerItem*);
   void markerRemoved(AbstractMarkerItem*);
+  void spotHighlightChanged(Vec3D);
 protected slots:
   virtual void updateImgTransformations();
   void invalidateMarkerCache();

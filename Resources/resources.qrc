@@ -42,6 +42,8 @@
         <file>icons/viewmag+.png</file>
         <file>icons/viewmagfit.png</file>
         <file>icons/zoom.png</file>
+        <file>icons/down-arrow.svg</file>
+        <file>icons/up-arrow.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>DefaultWorkspace.cws</file>

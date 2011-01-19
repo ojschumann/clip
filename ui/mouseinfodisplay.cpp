@@ -3,11 +3,13 @@
 
 #include <QStyledItemDelegate>
 #include <QPainter>
+#include <QEvent>
+#include <QWindowStateChangeEvent>
 #include <iostream>
 
 #include "ui/clip.h"
-#include "core/crystal.h"
-#include "core/projector.h"
+//#include "core/crystal.h"
+//#include "core/projector.h"
 #include "tools/indexparser.h"
 #include "tools/tools.h"
 
@@ -49,7 +51,7 @@ MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
   ui->setupUi(this);
   //ui->angleTable->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing()+4);
 
-  connect(ui->cursorBox, SIGNAL(toggled(bool)), ui->cursorTable, SLOT(setVisible(bool)));
+  connect(ui->cursorBox, SIGNAL(toggled(bool)), this, SLOT(cursorTableVisiblyToggled(bool)));
   //TODO
   //connect(ui->cursorBox, SIGNAL(toggled(bool)), this, SLOT(resize()));
 
@@ -68,6 +70,8 @@ MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
   ui->cursorTable->horizontalHeader()->setStyleSheet("QHeaderView::Section { border-style: plain; border-width: 4px }");
 
   ui->cursorTable->setItemDelegate(new NoBorderDelegate(ui->cursorTable));
+
+  cursorTableVisiblyToggled(ui->cursorBox->isChecked());
 }
 
 
@@ -97,28 +101,54 @@ public:
 };
 
 void MouseInfoDisplay::showMouseInfo(MousePositionInfo info) {
-
-  Macro(ui->cursorTable->item(0,0), info.projectorPos.x(), info.valid);
-  Macro(ui->cursorTable->item(1,0), info.projectorPos.y(), info.valid);
-
-  Macro(ui->cursorTable->item(0,1), info.imagePos.x(), info.valid);
-  Macro(ui->cursorTable->item(1,1), info.imagePos.y(), info.valid);
-
-  for (int i=0; i<3; i++) {
-    Macro(ui->cursorTable->item(i,2), info.normal(i), info.valid);
-    Macro(ui->cursorTable->item(i,3), info.scattered(i), info.valid && info.scatteredOk);
+  if (((lastSender != info.projector) || lastSender.isNull()) && info.projector) {
+    if (!lastSender.isNull())
+      lastSender->disconnect(this);
+    lastSender = info.projector;
+    cout << "Reconnect" << endl;
+    connect(info.projector, SIGNAL(spotHighlightChanged(Vec3D)), this, SLOT(receiveSpotHightlight(Vec3D)));
   }
+
+  if (ui->cursorTable->isVisible()) {
+    Macro(ui->cursorTable->item(0,0), info.projectorPos.x(), info.valid);
+    Macro(ui->cursorTable->item(1,0), info.projectorPos.y(), info.valid);
+
+    Macro(ui->cursorTable->item(0,1), info.imagePos.x(), info.valid);
+    Macro(ui->cursorTable->item(1,1), info.imagePos.y(), info.valid);
+
+    for (int i=0; i<3; i++) {
+      Macro(ui->cursorTable->item(i,2), info.normal(i), info.valid);
+      Macro(ui->cursorTable->item(i,3), info.scattered(i), info.valid && info.scatteredOk);
+    }
+  }
+
 
   if (info.nearestOk && !ui->lockReflection->isChecked()) {
     setPaletteForStatus(ui->reflex, true);
     // Can't set Text in displayReflection, as this is used from on_reflex_textEdited as well
     ui->reflex->setText(info.nearestReflection.toText());
-    displayReflection(info.nearestReflection, info.detQMin, info.detQMax);
     emit highlightMarker(info.nearestReflection.hkl().toType<double>());
+  }
+
+}
+
+void MouseInfoDisplay::receiveSpotHightlight(Vec3D v) {
+  double d = v.norm();
+  v /= d;
+  double TT = 180.0*M_1_PI*acos(qBound(-1.0, v(0), 1.0));
+
+  Macro(ui->scatterTable->item(1,0), 2.0*M_PI, true);
+  Macro(ui->scatterTable->item(1,0), 1.0/d, true);
+  Macro(ui->scatterTable->item(2,0), 180.0-2.0*TT, TT<90.0);
+
+
+  for (int i=0; i<3; i++) {
+    ui->angleTable->item(i, 0)->setText(QString::number(180*M_1_PI*acos(qBound(-1.0, v(i), 1.0)), 'f', 2));
+    ui->angleTable->item(i, 1)->setText(QString::number(180*M_1_PI*acos(qBound(-1.0,-v(i), 1.0)), 'f', 2));
   }
 }
 
-void MouseInfoDisplay::displayReflection(const Reflection &r, double detQMin, double detQMax) {
+/*void MouseInfoDisplay::displayReflection(const Reflection &r, double detQMin, double detQMax) {
 
 
   Macro(ui->scatterTable->item(0,0), r.d, true);
@@ -138,25 +168,45 @@ void MouseInfoDisplay::displayReflection(const Reflection &r, double detQMin, do
   }
   ui->diffOrders->setText(diffOrders);
 }
-
+*/
 void MouseInfoDisplay::on_reflex_textEdited(QString text) {
   IndexParser parser(text);
   setPaletteForStatus(ui->reflex, parser.isValid());
   if (parser.isValid()) {
     emit highlightMarker(parser.index());
   }
-  Projector* p;
-  if (parser.isValid() && ((p = Clip::getInstance()->getMostRecentProjector(true)))) {
-    if (parser.isIntegral()) {
-      Reflection r = p->getCrystal()->makeReflection(parser.index().toType<int>());
-      displayReflection(r, p->Qmin(), p->Qmax());
-    } else {
-      Vec3D n = p->getCrystal()->hkl2Reziprocal(parser.index()).normalized();
-      for (int i=0; i<3; i++) {
-        ui->angleTable->item(i, 0)->setText(QString::number(180*M_1_PI*acos(qBound(-1.0, n(i), 1.0)), 'f', 2));
-        ui->angleTable->item(i, 1)->setText(QString::number(180*M_1_PI*acos(qBound(-1.0,-n(i), 1.0)), 'f', 2));
-      }
-    }
+}
+
+void MouseInfoDisplay::cursorTableVisiblyToggled(bool b) {
+  ui->cursorTable->setVisible(b);
+  ui->cursorBox->updateGeometry();
+  QSize s = minimumSizeHint();
+  setMinimumSize(s);
+  setMaximumSize(s);
+  if (parentWidget()) {
+    s = parentWidget()->minimumSizeHint();
+    parentWidget()->setMinimumSize(s);
+    parentWidget()->setMaximumSize(s);
   }
 }
 
+bool MouseInfoDisplay::eventFilter(QObject *o, QEvent *e) {
+  if (e->type()==QEvent::WindowStateChange) {
+    if (parentWidget() && (parentWidget()->windowState() & Qt::WindowMaximized)) {
+      parentWidget()->showNormal();
+    }
+  }
+  return QWidget::eventFilter(o, e);
+}
+
+void MouseInfoDisplay::changeEvent(QEvent* e) {
+  QWidget::changeEvent(e);
+  if (e->type()==QEvent::ParentChange) {
+    parentNeedSizeConstrain = true;
+    parent()->installEventFilter(this);
+  }
+  if (parentNeedSizeConstrain && parentWidget() && isVisible()) {
+    cursorTableVisiblyToggled(ui->cursorBox->isChecked());
+    parentNeedSizeConstrain = false;
+  }
+}

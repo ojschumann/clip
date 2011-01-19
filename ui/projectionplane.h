@@ -8,6 +8,7 @@
 #include <QPointer>
 #include <QDomElement>
 #include <QPrinter>
+#include <QTimer>
 
 #include "tools/objectstore.h"
 #include "tools/mousepositioninfo.h"
@@ -53,6 +54,7 @@ protected slots:
   void resizeView();
   void slotOpenResolutionCalc();
   void generateMousePositionInfo(QPointF);
+  void generateMousePositionInfoFromView(QPointF p);
   void generateEmptyMousePositionInfo();
   void toggleDisplaySpots();
   void toggleDisplayMarkers();
@@ -79,6 +81,7 @@ protected:
   QPointF mousePressOrigin;
   QPointF lastMousePosition;
   bool inMousePress;
+  QTimer contextMenuTimer;
   // Prevents adding of multiple ZoneMarkers or Rulers. Workaround :-(
   bool addedDragItemOnThisMove;
 

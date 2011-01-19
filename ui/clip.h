@@ -10,6 +10,7 @@ class Projector;
 class ProjectionPlane;
 class Crystal;
 class MousePositionInfo;
+class QMdiSubWindow;
 
 namespace Ui {
   class Clip;
@@ -50,7 +51,7 @@ public slots:
   void slotUpdateWindowMenu();
   // Used by the Windows-Submenu
   void setActiveSubWindow(QWidget *window);
-  void addMdiWindow(QWidget*);
+  QMdiSubWindow* addMdiWindow(QWidget*);
 protected:
   Projector* connectToLastCrystal(Projector*);
   ProjectionPlane* addProjector(Projector*);

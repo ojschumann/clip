@@ -52,7 +52,7 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   connect(projector, SIGNAL(imageLoaded(LaueImage*)), ui->view, SLOT(setImage(LaueImage*)));
   connect(projector, SIGNAL(imageLoaded(LaueImage*)), this, SLOT(imageLoaded(LaueImage*)));
   connect(projector, SIGNAL(imageClosed()), this, SLOT(imageClosed()));
-  connect(ui->view, SIGNAL(mouseMoved(QPointF)), this, SLOT(generateMousePositionInfo(QPointF)));
+  connect(ui->view, SIGNAL(mouseMoved(QPointF)), this, SLOT(generateMousePositionInfoFromView(QPointF)));
   connect(ui->view, SIGNAL(mouseLeft()), this, SLOT(generateEmptyMousePositionInfo()));
 
   QShortcut* shortcut = new QShortcut(Qt::Key_F2, this);
@@ -67,6 +67,10 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   setupToolbar();
 
   zoomRubber=0;
+
+  contextMenuTimer.setInterval(QApplication::startDragTime());
+  contextMenuTimer.setSingleShot(true);
+  connect(&contextMenuTimer, SIGNAL(timeout()), this, SLOT(slotContextMenu()));
 
   // Call as soon as we are displayed
   QTimer::singleShot(0, this, SLOT(resizeView()));
@@ -148,14 +152,14 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
       zoomRubber->show();
     }
   } else if (e->buttons()==Qt::RightButton) {
-    QTimer::singleShot(QApplication::startDragTime(), this, SLOT(slotContextMenu()));
+    //QTimer::singleShot(QApplication::startDragTime(), this, SLOT(slotContextMenu()));
+    contextMenuTimer.start();
   }
   lastMousePosition = mousePressOrigin;
 }
 
 void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
   QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
-
   QPointF dp = (p-mousePressOrigin);
   bool largeMove = hypot(dp.x(), dp.y())>projector->getSpotSize();
   if (e->buttons()==Qt::LeftButton) {
@@ -191,8 +195,6 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
         // Process screen updates. Otherwise on Windows no updates are prosessed if
         // two projectors are active and the mouse moves fast.
         // Otherwise, on Linux this produces stange effects.
-        //if self.doProcessEvent:
-        //    QtGui.qApp.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
       }
     } else if (ui->rotAction->isChecked()) {
@@ -217,6 +219,7 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
       }
     }
   }
+  generateMousePositionInfo(p);
   lastMousePosition = p;
 }
 
@@ -260,6 +263,8 @@ void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
   //ui->view->setDragMode(QGraphicsView::NoDrag);
   lastMousePosition = p;
   inMousePress = e->buttons() != Qt::NoButton;
+  if (e->button()==Qt::RightButton)
+    contextMenuTimer.stop();
 }
 
 
@@ -303,12 +308,21 @@ void ProjectionPlane::on_openImgAction_triggered() {
 
 }
 
+void ProjectionPlane::generateMousePositionInfoFromView(QPointF p) {
+  // Rotation
+  if (!inMousePress)
+    generateMousePositionInfo(p);
+}
+
 void ProjectionPlane::generateMousePositionInfo(QPointF p) {
   MousePositionInfo info;
   info.valid=true;
   info.projectorPos = p;
   info.imagePos = projector->det2img.map(p);
   info.imagePos.ry() = 1.0 - info.imagePos.y();
+
+  info.projector = projector;
+
   if (projector->getLaueImage()) {
     QSizeF s = projector->getLaueImage()->transformedSize();
     info.imagePos.rx() *= s.width();
@@ -405,17 +419,17 @@ void ProjectionPlane::toggleDisplayMarkers() {
 }
 
 void ProjectionPlane::slotContextMenu() {
-  if (inMousePress) {
-    QMenu context(this);
+  QMenu context(this);
 
-    context.addAction("Set Rotation Axis on nearest Reflection", this, SLOT(slotContextSetRotationAxisOnSpot()));
-    context.addAction("Set Rotation Axis exactly here", this, SLOT(slotContextSetRotationAxis()));
-    context.addAction("Clear all Markers", this, SLOT(slotContextClearAll()));
-    context.addAction("Clear all Spot Markers", this, SLOT(slotContextClearSpotMarkers()));
-    context.addAction("Clear all Zone Markers", this, SLOT(slotContextClearZoneMarkers()));
-    context.addAction("Clear all Rulers", this, SLOT(slotContextClearRulers()));
-    context.exec(QCursor::pos());
-  }
+  context.addAction("Set Rotation Axis on nearest Reflection", this, SLOT(slotContextSetRotationAxisOnSpot()));
+  context.addAction("Set Rotation Axis exactly here", this, SLOT(slotContextSetRotationAxis()));
+  context.addAction("Clear all Markers", this, SLOT(slotContextClearAll()));
+  context.addAction("Clear all Spot Markers", this, SLOT(slotContextClearSpotMarkers()));
+  context.addAction("Clear all Zone Markers", this, SLOT(slotContextClearZoneMarkers()));
+  context.addAction("Clear all Rulers", this, SLOT(slotContextClearRulers()));
+  context.exec(QCursor::pos());
+
+  inMousePress = false;
 }
 
 void ProjectionPlane::slotContextSetRotationAxis() {
