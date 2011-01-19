@@ -3,12 +3,16 @@
 
 #include <QStyledItemDelegate>
 #include <QPainter>
+#include <iostream>
 
 #include "ui/clip.h"
 #include "core/crystal.h"
 #include "core/projector.h"
 #include "tools/indexparser.h"
 #include "tools/tools.h"
+
+using namespace std;
+
 
 class NoBorderDelegate: public QStyledItemDelegate {
 public:
@@ -45,6 +49,10 @@ MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
   ui->setupUi(this);
   //ui->angleTable->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing()+4);
 
+  connect(ui->cursorBox, SIGNAL(toggled(bool)), ui->cursorTable, SLOT(setVisible(bool)));
+  //TODO
+  //connect(ui->cursorBox, SIGNAL(toggled(bool)), this, SLOT(resize()));
+
   ui->angleTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->angleTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->angleTable->horizontalHeader()->setMinimumSectionSize(fontMetrics().width("Negative")+8);
@@ -60,26 +68,18 @@ MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
   ui->cursorTable->horizontalHeader()->setStyleSheet("QHeaderView::Section { border-style: plain; border-width: 4px }");
 
   ui->cursorTable->setItemDelegate(new NoBorderDelegate(ui->cursorTable));
-
-
 }
 
 
 MouseInfoDisplay::~MouseInfoDisplay()
 {
+  emit highlightMarker(Vec3D());
   delete ui;
 }
 
 
 class Macro {
 public:
-  Macro(QLineEdit* line, double val, bool enabled) {
-    if (enabled) {
-      line->setText(QString::number(val, 'f', 3));
-    } else {
-      line->setText("");
-    }
-  }
   Macro(QLineEdit* line, QString val, bool enabled) {
     if (enabled) {
       line->setText(val);
@@ -104,25 +104,24 @@ void MouseInfoDisplay::showMouseInfo(MousePositionInfo info) {
   Macro(ui->cursorTable->item(0,1), info.imagePos.x(), info.valid);
   Macro(ui->cursorTable->item(1,1), info.imagePos.y(), info.valid);
 
+  for (int i=0; i<3; i++) {
+    Macro(ui->cursorTable->item(i,2), info.normal(i), info.valid);
+    Macro(ui->cursorTable->item(i,3), info.scattered(i), info.valid && info.scatteredOk);
+  }
 
-  Macro(ui->cursorTable->item(0,2), info.normal.x(), info.valid);
-  Macro(ui->cursorTable->item(1,2), info.normal.y(), info.valid);
-  Macro(ui->cursorTable->item(2,2), info.normal.z(), info.valid);
-
-  Macro(ui->cursorTable->item(0,3), info.scattered.x(), info.valid && info.scatteredOk);
-  Macro(ui->cursorTable->item(1,3), info.scattered.y(), info.valid && info.scatteredOk);
-  Macro(ui->cursorTable->item(2,3), info.scattered.z(), info.valid && info.scatteredOk);
-
-  if (info.nearestOk) {
+  if (info.nearestOk && !ui->lockReflection->isChecked()) {
     setPaletteForStatus(ui->reflex, true);
-    // Don't set Text in displayReflection, as this is used from on_reflex_textEdited as well
+    // Can't set Text in displayReflection, as this is used from on_reflex_textEdited as well
     ui->reflex->setText(info.nearestReflection.toText());
     displayReflection(info.nearestReflection, info.detQMin, info.detQMax);
+    emit highlightMarker(info.nearestReflection.hkl().toType<double>());
   }
 }
 
 void MouseInfoDisplay::displayReflection(const Reflection &r, double detQMin, double detQMax) {
-    Macro(ui->scatterTable->item(0,0), r.d, true);
+
+
+  Macro(ui->scatterTable->item(0,0), r.d, true);
   Macro(ui->scatterTable->item(1,0), r.Qscatter, r.normal.x()>1e-6);
   Macro(ui->scatterTable->item(2,0), 180.0-180.0*M_1_PI*acos(r.scatteredRay.x()), r.normal.x()>1e-6);
   Vec3D n = r.normal;
@@ -142,12 +141,22 @@ void MouseInfoDisplay::displayReflection(const Reflection &r, double detQMin, do
 
 void MouseInfoDisplay::on_reflex_textEdited(QString text) {
   IndexParser parser(text);
-  setPaletteForStatus(ui->reflex, parser.isValid() && parser.isIntegral());
-  if (parser.isValid() && parser.isIntegral()) {
-    Projector* p = Clip::getInstance()->getMostRecentProjector(true);
-    if (p) {
+  setPaletteForStatus(ui->reflex, parser.isValid());
+  if (parser.isValid()) {
+    emit highlightMarker(parser.index());
+  }
+  Projector* p;
+  if (parser.isValid() && ((p = Clip::getInstance()->getMostRecentProjector(true)))) {
+    if (parser.isIntegral()) {
       Reflection r = p->getCrystal()->makeReflection(parser.index().toType<int>());
       displayReflection(r, p->Qmin(), p->Qmax());
+    } else {
+      Vec3D n = p->getCrystal()->hkl2Reziprocal(parser.index()).normalized();
+      for (int i=0; i<3; i++) {
+        ui->angleTable->item(i, 0)->setText(QString::number(180*M_1_PI*acos(qBound(-1.0, n(i), 1.0)), 'f', 2));
+        ui->angleTable->item(i, 1)->setText(QString::number(180*M_1_PI*acos(qBound(-1.0,-n(i), 1.0)), 'f', 2));
+      }
     }
   }
 }
+

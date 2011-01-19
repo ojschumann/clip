@@ -24,7 +24,6 @@ public slots:
   void updateDisplay();
 
 private:
-  static Reorient* instance;
   void gonioAxisChanged();
 
   Vec3D fromNormal();

@@ -1,9 +1,11 @@
 #ifndef MOUSEINFODISPLAY_H
 #define MOUSEINFODISPLAY_H
 
+#include "tools/mousepositioninfo.h"
+
 #include <QWidget>
 
-#include "tools/mousepositioninfo.h"
+#include "tools/vec3D.h"
 
 class Reflection;
 
@@ -18,6 +20,8 @@ class MouseInfoDisplay : public QWidget
 public:
   explicit MouseInfoDisplay(QWidget *parent = 0);
   virtual ~MouseInfoDisplay();
+signals:
+  void highlightMarker(Vec3D);
 public slots:
   void showMouseInfo(MousePositionInfo);
 private:

@@ -80,7 +80,8 @@
          </sizepolicy>
         </property>
         <property name="styleSheet">
-         <string notr="true">QHeaderView::Section { border-style: plain; border-color: black; border-width: 0px }</string>
+         <string notr="true">QHeaderView::Section { border-style: none; border-color: black; border-width: 0px }
+QTableCornerButton::section { border-width: 0px; border-style: none; border-color: black }</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
@@ -217,7 +218,8 @@
          </sizepolicy>
         </property>
         <property name="styleSheet">
-         <string notr="true">QHeaderView::Section { border-style: plain; border-color: black; border-width: 0px }</string>
+         <string notr="true">QHeaderView::Section { border-style: none; border-color: black; border-width: 0px }
+QTableCornerButton::section { border-width: 0px; border-style: none; border-color: black }</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
@@ -319,9 +321,18 @@
     </widget>
    </item>
    <item row="4" column="0" colspan="3">
-    <widget class="QGroupBox" name="groupBox_3">
+    <widget class="QGroupBox" name="cursorBox">
      <property name="title">
       <string>Cursor</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <property name="margin">
@@ -342,7 +353,8 @@
          </sizepolicy>
         </property>
         <property name="styleSheet">
-         <string notr="true">QHeaderView::Section { border-style: plain; border-color: black; border-width: 0px }</string>
+         <string notr="true">QHeaderView::Section { border-style: none; border-color: black; border-width: 0px }
+QTableCornerButton::section { border-width: 0px; border-style: none; border-color: black }</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
@@ -411,7 +423,7 @@
         </column>
         <item row="0" column="0">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -419,7 +431,7 @@
         </item>
         <item row="0" column="1">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -427,7 +439,7 @@
         </item>
         <item row="0" column="2">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -435,7 +447,7 @@
         </item>
         <item row="0" column="3">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -443,7 +455,7 @@
         </item>
         <item row="1" column="0">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -451,7 +463,7 @@
         </item>
         <item row="1" column="1">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -459,7 +471,7 @@
         </item>
         <item row="1" column="2">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -467,7 +479,7 @@
         </item>
         <item row="1" column="3">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -475,7 +487,7 @@
         </item>
         <item row="2" column="0">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="background">
           <brush brushstyle="NoBrush">
@@ -492,7 +504,7 @@
         </item>
         <item row="2" column="2">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -500,7 +512,7 @@
         </item>
         <item row="2" column="3">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="textAlignment">
           <set>AlignRight|AlignVCenter</set>
@@ -509,6 +521,13 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QCheckBox" name="lockReflection">
+     <property name="text">
+      <string>Lock</string>
+     </property>
     </widget>
    </item>
   </layout>

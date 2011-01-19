@@ -33,6 +33,7 @@ signals:
   void projectorRotation(double);
   void windowChanged();
   void mousePositionInfo(MousePositionInfo);
+  void highlightMarker(Vec3D);
 public slots:
   // Menu Slots
   void on_newCrystal_triggered();

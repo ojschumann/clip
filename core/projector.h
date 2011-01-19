@@ -134,6 +134,8 @@ public slots:
   void addRotation(const Mat3D& M);
   void setRotation(const Mat3D& M);
 
+  void setSpotHighlighting(Vec3D hkl);
+
   virtual void decorateScene()=0;
   void setMaxHklSqSum(int m);
   void setTextSizeFraction(double d);
@@ -181,6 +183,7 @@ protected slots:
 
 protected:
   void internalSetWavevectors(double, double);
+  void updateSpotHighlightMarker();
   virtual bool project(const Reflection &r, QPointF &point)=0;
   virtual bool parseXMLElement(QDomElement e);
 
@@ -222,6 +225,9 @@ protected:
   SpotIndicatorGraphicsItem* spotIndicator;
 
   LaueImage* imageData;
+
+  Vec3D spotHighlightHKL;
+  QGraphicsItem* spotHighlightItem;
 };
 
 

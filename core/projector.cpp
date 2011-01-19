@@ -38,7 +38,9 @@ Projector::Projector(QObject *parent):
     scene(this),
     imageItemsPlane(new QGraphicsPixmapItem()),
     spotIndicator(new SpotIndicatorGraphicsItem()),
-    imageData(0)
+    imageData(0),
+    spotHighlightHKL(),
+    spotHighlightItem(0)
 {
   imageItemsPlane->setFlag(QGraphicsItem::ItemIsMovable, false);
 
@@ -219,6 +221,9 @@ void Projector::doProjection() {
       }
     }
   }
+
+  updateSpotHighlightMarker();
+
   // set the spotsize (just in case)
   spotIndicator->setSpotsize(getSpotSize());
   // indicate that the coordinates have changed.
@@ -411,6 +416,37 @@ bool Projector::isProjectionEnabled() const {
 
 void Projector::setHQPrintMode(bool b) {
   spotIndicator->setCachedPainting(!b);
+}
+
+void Projector::setSpotHighlighting(Vec3D hkl) {
+  cout << "sethighight " << hkl.x() << " " << hkl.y() << " " << hkl.z() << endl;
+  if (spotHighlightHKL != hkl ) {
+    spotHighlightHKL = hkl;
+    updateSpotHighlightMarker();
+  }
+}
+
+void Projector::updateSpotHighlightMarker() {
+  cout << "updatehighight " << endl;
+  bool show = (!crystal.isNull() && !spotHighlightHKL.isNull());
+  QPointF p;
+  if (show)
+    p = normal2det(crystal->hkl2Reziprocal(spotHighlightHKL).normalized(), show);
+
+  if (show) {
+    cout << "show" << endl;
+    if (spotHighlightItem==0) {
+      CircleItem* item = new CircleItem(1.1*getSpotSize());
+      item->setColor(Qt::red);
+      item->setLineWidth(3);
+      spotHighlightItem = item;
+      scene.addItem(spotHighlightItem);
+    }
+    spotHighlightItem->setPos(p);
+  } else {
+    delete spotHighlightItem;
+    spotHighlightItem = 0;
+  }
 }
 
 // ----------------------- Handling of Spot Markers -------------
