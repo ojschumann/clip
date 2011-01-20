@@ -343,7 +343,7 @@ template <typename T> void TMat3D<T>::givens(double a, double b, double &c, doub
 }
 
 
-template <typename T> void TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
+template <typename T> int TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
 
   upperBidiagonal(L,R);
   L.transpose();
@@ -356,6 +356,53 @@ template <typename T> void TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
 
     // Givens rotation
     // TODO: Could be done without the whole matrix multiplications!!! See GSL
+
+    TMat3D<T> X(*this);
+    // Step one
+    double lambda = hypot(X(0,0), X(0,1));
+    double c = X(0,0)/lambda;
+    double s = X(0,1)/lambda;
+    X(0,0)=lambda;
+    X(0,1)=0.0;
+    X(1,0) = -X(1,1)*s;
+    X(1,1) *= c;
+    //Step two
+    lambda = hypot(X(0,0), X(1,0));
+    c = X(0,0)/lambda;
+    s = X(1,0)/lambda;
+    X(0,0)=lambda;
+    X(1,0)=0.0;
+    for (int i=1; i<3; i++) {
+      X(i,0)=s*X(i,1);
+      X(i,1)*=c;
+    }
+    //step three
+    lambda = hypot(X(0,1), X(0,2));
+    c = X(0,1)/lambda;
+    s = X(0,2)/lambda;
+    X(0,1)=lambda;
+    X(0,2)=0.0;
+    double a = X(1,1)*c+X(1,2)*s;
+    double b = X(1,2)*c-X(1,1)*s;
+    X(1,1) = a;
+    X(1,2) = b;
+    X(2,1)=s*X(2,2);
+    X(2,2)*=c;
+    //step four
+    lambda = hypot(X(1,1), X(2,1));
+    c = X(1,1)/lambda;
+    s = X(2,1)/lambda;
+    X(1,1)=lambda;
+    X(2,1)=0.0;
+    a = X(2,1)*c+X(2,2)*s;
+    b = X(2,2)*c-X(2,1)*s;
+    X(2,1) = a;
+    X(2,2) = b;
+
+
+
+
+
     for (int n=0; n<2; n++) {
       double c,s;
       givens((*this)(0,n),(*this)(0,n+1), c, s);
@@ -394,6 +441,7 @@ template <typename T> void TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
   } while (maxLoops-- and sumDiag<1e20*sumOffdiag);
   L.transpose();
   R.transpose();
+  return maxLoops;
 };    
 
 template <typename T> template <typename U> TMat3D<U> TMat3D<T>::toType() {

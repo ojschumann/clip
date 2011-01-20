@@ -103,9 +103,6 @@ QRectF SpotIndicatorGraphicsItem::boundingRect() const {
 
 void SpotIndicatorGraphicsItem::Worker::run() {
   forever {
-    /*spotIndicator->mutex.lock();
-    spotIndicator->workerStart.wait(&spotIndicator->mutex);
-    spotIndicator->mutex.unlock();*/
     spotIndicator->workerPermission.acquire();
     if (shouldStop) {
       spotIndicator->workerSync.release(1);
