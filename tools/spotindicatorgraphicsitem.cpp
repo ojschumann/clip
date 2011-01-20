@@ -22,7 +22,7 @@ SpotIndicatorGraphicsItem::~SpotIndicatorGraphicsItem() {
   for (int i=0; i<workers.size(); i++) {
     workers.at(i)->shouldStop=true;
   }
-  workerStart.wakeAll();
+  workerPermission.release(workers.size());
   workerSync.acquire(workers.size());
   for (int i=0; i<workers.size(); i++) {
     for (int loop=0; !workers[i]->wait(250); loop++) {
@@ -38,13 +38,13 @@ SpotIndicatorGraphicsItem::~SpotIndicatorGraphicsItem() {
 void SpotIndicatorGraphicsItem::updateCache() {
   if (cacheNeedsUpdate) {
     workN = 0;
-    workerStart.wakeAll();
+    workerPermission.release(workers.size());
     cache->fill(QColor(0,0,0,0));
     workerSync.acquire(workers.size());
 
-    QPainter p2(cache);
+    QPainter p(cache);
     foreach (Worker* worker, workers) {
-      p2.drawImage(QPoint(0,0), *worker->localCache);
+      p.drawImage(QPoint(0,0), *worker->localCache);
     }
     cacheNeedsUpdate=false;
   }
@@ -103,10 +103,10 @@ QRectF SpotIndicatorGraphicsItem::boundingRect() const {
 
 void SpotIndicatorGraphicsItem::Worker::run() {
   forever {
-    spotIndicator->mutex.lock();
+    /*spotIndicator->mutex.lock();
     spotIndicator->workerStart.wait(&spotIndicator->mutex);
-    spotIndicator->mutex.unlock();
-
+    spotIndicator->mutex.unlock();*/
+    spotIndicator->workerPermission.acquire();
     if (shouldStop) {
       spotIndicator->workerSync.release(1);
       if (!localCache)
@@ -135,7 +135,7 @@ void SpotIndicatorGraphicsItem::Worker::run() {
 
     }
     painter.end();
-    spotIndicator->workerSync.release(1);
+    spotIndicator->workerSync.release();
 
   }
 

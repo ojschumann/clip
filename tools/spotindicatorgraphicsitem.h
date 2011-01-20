@@ -30,8 +30,7 @@ protected:
   double spotSize;
   QTransform transform;
 
-  QMutex mutex;
-  QWaitCondition workerStart;
+  QSemaphore workerPermission;
   QSemaphore workerSync;
   QAtomicInt workN;
 
