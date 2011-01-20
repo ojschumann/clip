@@ -46,14 +46,12 @@ protected:
 
 MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MouseInfoDisplay)
+    ui(new Ui::MouseInfoDisplay),
+    lastVector()
 {
   ui->setupUi(this);
-  //ui->angleTable->verticalHeader()->setDefaultSectionSize(fontMetrics().lineSpacing()+4);
 
   connect(ui->cursorBox, SIGNAL(toggled(bool)), this, SLOT(cursorTableVisiblyToggled(bool)));
-  //TODO
-  //connect(ui->cursorBox, SIGNAL(toggled(bool)), this, SLOT(resize()));
 
   ui->angleTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->angleTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
@@ -77,7 +75,7 @@ MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
 
 MouseInfoDisplay::~MouseInfoDisplay()
 {
-  emit highlightMarker(Vec3D());
+  doEmitHighlightMarker(Vec3D(), true);
   delete ui;
 }
 
@@ -107,6 +105,11 @@ void MouseInfoDisplay::showMouseInfo(MousePositionInfo info) {
     lastSender = info.projector;
     cout << "Reconnect" << endl;
     connect(info.projector, SIGNAL(spotHighlightChanged(Vec3D)), this, SLOT(receiveSpotHightlight(Vec3D)));
+    if (ui->lockReflection->isChecked()) {
+      IndexParser parser(ui->reflex->text());
+      if (parser.isValid())
+        emit highlightMarker(parser.index());
+    }
   }
 
   if (ui->cursorTable->isVisible()) {
@@ -136,10 +139,9 @@ void MouseInfoDisplay::receiveSpotHightlight(Vec3D v) {
   double d = v.norm();
   v /= d;
   double TT = 180.0*M_1_PI*acos(qBound(-1.0, v(0), 1.0));
-
-  Macro(ui->scatterTable->item(1,0), 2.0*M_PI, true);
+  Macro(ui->scatterTable->item(0,0), 2.0*M_PI*d/v(0), v(0)>1e-4);
   Macro(ui->scatterTable->item(1,0), 1.0/d, true);
-  Macro(ui->scatterTable->item(2,0), 180.0-2.0*TT, TT<90.0);
+  Macro(ui->scatterTable->item(2,0), 180.0-2.0*TT, v(0)>1e-4);
 
 
   for (int i=0; i<3; i++) {
@@ -173,7 +175,14 @@ void MouseInfoDisplay::on_reflex_textEdited(QString text) {
   IndexParser parser(text);
   setPaletteForStatus(ui->reflex, parser.isValid());
   if (parser.isValid()) {
-    emit highlightMarker(parser.index());
+    doEmitHighlightMarker(parser.index());
+  }
+}
+
+void MouseInfoDisplay::doEmitHighlightMarker(const Vec3D &v, bool force) {
+  if ((v!=lastVector) || force) {
+    lastVector = v;
+    emit highlightMarker(v);
   }
 }
 
@@ -188,6 +197,8 @@ void MouseInfoDisplay::cursorTableVisiblyToggled(bool b) {
     parentWidget()->setMinimumSize(s);
     parentWidget()->setMaximumSize(s);
   }
+  ui->cursorTable->updateGeometry();
+  ui->cursorTable->adjustSize();
 }
 
 bool MouseInfoDisplay::eventFilter(QObject *o, QEvent *e) {

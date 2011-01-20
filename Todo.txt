@@ -19,10 +19,14 @@ Populate all ToolTips with useful help...
 Refinement
   Stop if model changes
 
-Allow to "print" to pdf/png/jpeg
-Print with increased linewidth
-
-Mark user defined reflection (like magnetic/incomensurate one)
+Printing
+  Allow to "print" to pdf/png/jpeg
+  Print with increased linewidth of spot indicators
+  Insert Text-Object to Print
+    Filename of Image and other Image Infos
+    Table of Crystal Info
+    Table of Markers
+    custom description
 
 Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
   * lock()
@@ -30,3 +34,9 @@ Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
   * setDetSize()
   * setCell()
   * unlock()
+
+Implement a faster MonochromeScaler
+
+Mat3D improve speed of svd (direct multiplication of givens matrices)
+
+ResolutionCalculator -> Implement ...

@@ -419,11 +419,10 @@ void Projector::setHQPrintMode(bool b) {
 }
 
 void Projector::setSpotHighlighting(Vec3D hkl) {
-  cout << "sethighight " << hkl.x() << " " << hkl.y() << " " << hkl.z() << endl;
-  if (spotHighlightHKL != hkl ) {
+  //if (spotHighlightHKL != hkl ) {
     spotHighlightHKL = hkl;
     updateSpotHighlightMarker();
-  }
+  //}
 }
 
 void Projector::updateSpotHighlightMarker() {
@@ -432,6 +431,7 @@ void Projector::updateSpotHighlightMarker() {
   if (show) {
     Vec3D v = crystal->hkl2Reziprocal(spotHighlightHKL);
     p = normal2det(v.normalized(), show);
+    //TODO: emit including scattering orders
     emit spotHighlightChanged(v);
   }
 

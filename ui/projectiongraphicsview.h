@@ -21,7 +21,7 @@ signals:
   void mouseMoved(QPointF);
   void mouseLeft();
 public slots:
-  void retakeMouseEvent() { viewIgnoresThisMouseEvent = false; };
+  void retakeMouseEvent() { viewIgnoresThisMouseEvent = false; }
   void setImage(LaueImage*);
 protected:
   void paintEvent(QPaintEvent*);

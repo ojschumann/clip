@@ -42,7 +42,14 @@ QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
 ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ProjectionPlane),
-    projector(p)
+    projector(p),
+    projectorConfig(0),
+    imageToolbox(0),
+    mousePressOrigin(),
+    lastMousePosition(),
+    inMousePress(false),
+    zoomRubber(0),
+    zoomSteps()
 {
   ui->setupUi(this);
   projector->setParent(this); // Ensures, that projector is deleted at end
@@ -65,8 +72,6 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   ui->view->setTransform(QTransform(1,0,0,-1,0,0));
 
   setupToolbar();
-
-  zoomRubber=0;
 
   contextMenuTimer.setInterval(QApplication::startDragTime());
   contextMenuTimer.setSingleShot(true);

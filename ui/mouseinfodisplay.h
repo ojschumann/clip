@@ -29,13 +29,14 @@ public slots:
 protected:
   virtual void changeEvent(QEvent *);
 private slots:
-    void on_reflex_textEdited(QString );
-    void cursorTableVisiblyToggled(bool b);
+  void on_reflex_textEdited(QString );
+  void cursorTableVisiblyToggled(bool b);
 private:
+  void doEmitHighlightMarker(const Vec3D& v, bool force=false);
 
   Ui::MouseInfoDisplay *ui;
   bool parentNeedSizeConstrain;
-
+  Vec3D lastVector;
   QPointer<QObject> lastSender;
 };
 
