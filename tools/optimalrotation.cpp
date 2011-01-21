@@ -19,7 +19,8 @@ Mat3D OptimalRotation::getOptimalRotation() {
   if (!valid) {
     Mat3D L,R;
     optRot = stack;
-    optRot.svd(L,R);
+    //optRot.svd(L,R);
+    optRot.fastsvd(L, R);
     double d=L.det()*R.det();
     if (d<0.0) {
       Mat3D T;

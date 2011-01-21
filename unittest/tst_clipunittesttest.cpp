@@ -186,6 +186,15 @@ int main () {
     unsigned long long t2 = rdtsctime();
     int loops2 = 512-Mb.fastsvd(Lb, Rb);
     unsigned long long t3 = rdtsctime();
+
+    Mat3D rMa = La * Ma * Ra;
+    Mat3D rMb = Lb * Mb * Rb;
+
+    if ((rMa-M).sqSum()>1e-8) cout << "error on MA" << endl;
+    if ((rMb-M).sqSum()>1e-8) cout << "error on MB" << endl;
+    //if (fabs((La*Ra).det()-1.0)>1e-8) cout << "error on Det Ma" << endl;
+    if (fabs((Lb*Rb).det()-1.0)>1e-8) cout << "error on Det Mb " << (Lb*Rb).det() << endl;
+
     dtsum += t2-t1;
     double v = 1.0*(t2-t1)/loops1;
     m1 += v;

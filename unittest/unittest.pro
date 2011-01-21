@@ -18,8 +18,6 @@ TEMPLATE = app
 SOURCES += tst_clipunittesttest.cpp \
            ../tools/mat3d.cpp
 
-HEADERS += ../tools/mat3d.h
-
 QMAKE_CXXFLAGS += -I.. -I../..
 QMAKE_CXXFLAGS += -std=gnu++0x
 

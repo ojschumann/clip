@@ -5,6 +5,7 @@
 #include <QMetaType>
 #include <iostream>
 #include <QTime>
+#include <algorithm>
 
 #include "core/crystal.h"
 #include "core/projector.h"

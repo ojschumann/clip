@@ -4,12 +4,11 @@
 
 #include <vector>
 #include <tools/init3D.h>
+
 using namespace std;
 
 
 template <typename T> class TVec3D;
-
-
 
 template <typename T> class TMat3D {
   friend class TVec3D<T>;
@@ -74,6 +73,6 @@ protected:
 typedef TMat3D<double> Mat3D;
 
 
-#include<tools/mat3d.cpp>
+//#include<tools/mat3d.cpp>
 
 #endif

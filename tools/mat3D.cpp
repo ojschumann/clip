@@ -1,7 +1,10 @@
 #ifndef __TMAT3D_CPP__
 #define __TMAT3D_CPP__
 
-#ifdef __TMAT3D_H__
+#include "tools/mat3D.h"
+#include "tools/vec3D.h"
+
+//#ifdef __TMAT3D_H__
 
 #include <cmath>
 #include <stdio.h>
@@ -61,7 +64,7 @@ template <typename T> TMat3D<T>::TMat3D(TVec3D<T> axis, T angle) {
 template <typename T> TMat3D<T>::TMat3D(vector<T> m) {
   for (int i=0; i<3; i++) {
     for (int j=0; j<9; j+=3)
-      (*this)(i,j)=m(j+i);
+      (*this)(i,j)=m[j+i];
   }
 }
 
@@ -271,8 +274,8 @@ template <typename T> TMat3D<T> TMat3D<T>::QR() {
   TMat3D<T> Q;
   for (int n=0; n<2; n++) {
     TVec3D<T> u;
-    for (int i=0; i<3-n; i++) u[2-i]=(*this)(2-i,n);
-    u[n]+=u.norm();
+    for (int i=0; i<3-n; i++) u(2-i)=(*this)(2-i,n);
+    u(n)+=u.norm();
     u.normalize();
     TMat3D<T> Qt(u^u);
     Qt*=2.0;
@@ -287,8 +290,8 @@ template <typename T> TMat3D<T> TMat3D<T>::QL() {
   TMat3D<T> Q;
   for (int n=0; n<2; n++) {
     TVec3D<T> u;
-    for (int i=0; i<3-n; i++) u[i]=(*this)(i,2-n);
-    u[2-n]+=u.norm();
+    for (int i=0; i<3-n; i++) u(i)=(*this)(i,2-n);
+    u(2-n)+=u.norm();
     u.normalize();
     TMat3D<T> Qt(u^u);
     Qt*=2.0;
@@ -342,25 +345,46 @@ template <typename T> void TMat3D<T>::givens(double a, double b, double &c, doub
   }
 }
 
+template <typename T> void MACRO(T& a, T& b, T& c, T& s) {
+  double _a = fabs(a);
+  double _b = fabs(b);
+  double lambda;
+  if (_a>_b) {
+    lambda = _b/_a;
+    lambda = _a*sqrt(1.0+lambda*lambda);
+  } else {
+    lambda = _a/_b;
+    lambda = _b*sqrt(1.0+lambda*lambda);
+  }
+  //double lambda  = hypot(_a, _b);
+  //double lambda  = sqrt(_a*_a+_b*_b);
+  c = a/lambda;
+  s = b/lambda;
+  a = lambda;
+  b = 0.0;
+}
+
 
 template <typename T> int TMat3D<T>::fastsvd(TMat3D<T>& L, TMat3D<T>& R) {
 
   upperBidiagonal(L,R);
+
+  if ((L*R).det()<0) cout << "deterror on upperBidiagonal" << endl;
 
   int maxLoops=512;
   double sumDiag=0.0;
   double sumOffdiag=0.0;
 
   do {
-    double lambda;
-    double c,s;
-    double a, b;
+    T c,s;
+    T a, b;
 
-    lambda = hypot((*this)(0,0), (*this)(0,1));
+    MACRO((*this)(0,0), (*this)(0,1), c, s);
+    /*lambda = hypot((*this)(0,0), (*this)(0,1));
     c = (*this)(0,0)/lambda;
     s = (*this)(0,1)/lambda;
     (*this)(0,0)=lambda;
-    (*this)(0,1)=0.0;
+    (*this)(0,1)=0.0;*/
     (*this)(1,0) = (*this)(1,1)*s;
     (*this)(1,1) *= c;
     for (int i=0; i<3; i++) {
@@ -370,11 +394,7 @@ template <typename T> int TMat3D<T>::fastsvd(TMat3D<T>& L, TMat3D<T>& R) {
       R(1, i)=b*c-a*s;
     }
 
-    lambda = hypot((*this)(0,0), (*this)(1,0));
-    c = (*this)(0,0)/lambda;
-    s = (*this)(1,0)/lambda;
-    (*this)(0,0)=lambda;
-    (*this)(1,0)=0.0;
+    MACRO((*this)(0,0), (*this)(1,0), c, s);
     for (int i=1; i<3; i++) {
       (*this)(0,i)=s*(*this)(1,i);
       (*this)(1,i)*=c;
@@ -386,11 +406,8 @@ template <typename T> int TMat3D<T>::fastsvd(TMat3D<T>& L, TMat3D<T>& R) {
       L(i, 1)=b*c-a*s;
     }
 
-    lambda = hypot((*this)(0,1), (*this)(0,2));
-    c = (*this)(0,1)/lambda;
-    s = (*this)(0,2)/lambda;
-    (*this)(0,1)=lambda;
-    (*this)(0,2)=0.0;
+
+    MACRO((*this)(0,1), (*this)(0,2), c, s);
     a = (*this)(1,1)*c+(*this)(1,2)*s;
     b = (*this)(1,2)*c-(*this)(1,1)*s;
     (*this)(1,1) = a;
@@ -404,13 +421,9 @@ template <typename T> int TMat3D<T>::fastsvd(TMat3D<T>& L, TMat3D<T>& R) {
       R(2, i)=b*c-a*s;
     }
 
-    lambda = hypot((*this)(1,1), (*this)(2,1));
-    c = (*this)(1,1)/lambda;
-    s = (*this)(2,1)/lambda;
-    (*this)(1,1)=lambda;
-    (*this)(2,1)=0.0;
-    a = (*this)(2,1)*c+(*this)(2,2)*s;
-    b = (*this)(2,2)*c-(*this)(2,1)*s;
+    MACRO((*this)(1,1), (*this)(2,1), c, s);
+    a = (*this)(1,2)*c+(*this)(2,2)*s;
+    b = (*this)(2,2)*c-(*this)(1,2)*s;
     (*this)(1,2) = a;
     (*this)(2,2) = b;
     for (int i=0; i<3; i++) {
@@ -426,6 +439,7 @@ template <typename T> int TMat3D<T>::fastsvd(TMat3D<T>& L, TMat3D<T>& R) {
     for (int i=0; i<2; i++) sumOffdiag+=fabs((*this)(i,i+1));
 
   } while (maxLoops-- and sumDiag<1e20*sumOffdiag);
+  TMat3D<T> XX = L * (*this) * R;
   return maxLoops;
 }
 
@@ -493,5 +507,11 @@ template <typename T> template <typename U> TMat3D<U> TMat3D<T>::toType() {
               static_cast<U>((*this)(2,2)));
 }
 
-#endif
+template class TMat3D<double>;
+template class TMat3D<int>;
+template TMat3D<double> TMat3D<int>::toType();
+template TVec3D<double> TMat3D<double>::operator*(const TVec3D<double>& v) const;
+template TVec3D<int> TMat3D<int>::operator*(const TVec3D<int>& v) const;
+template TVec3D<double> TMat3D<double>::operator*(const TVec3D<int>& v) const;
+//#endif
 #endif
