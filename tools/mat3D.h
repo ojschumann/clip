@@ -56,6 +56,7 @@ public:
   TMat3D<T> QL();
   void upperBidiagonal(TMat3D<T>& L, TMat3D<T>& R);
   int svd(TMat3D<T>& L, TMat3D<T>& R);
+  int fastsvd(TMat3D<T>& L, TMat3D<T>& R);
 
 protected:
   enum Key {

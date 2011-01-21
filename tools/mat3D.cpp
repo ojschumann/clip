@@ -343,8 +343,95 @@ template <typename T> void TMat3D<T>::givens(double a, double b, double &c, doub
 }
 
 
-template <typename T> int TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
+template <typename T> int TMat3D<T>::fastsvd(TMat3D<T>& L, TMat3D<T>& R) {
 
+  upperBidiagonal(L,R);
+
+  int maxLoops=512;
+  double sumDiag=0.0;
+  double sumOffdiag=0.0;
+
+  do {
+    double lambda;
+    double c,s;
+    double a, b;
+
+    lambda = hypot((*this)(0,0), (*this)(0,1));
+    c = (*this)(0,0)/lambda;
+    s = (*this)(0,1)/lambda;
+    (*this)(0,0)=lambda;
+    (*this)(0,1)=0.0;
+    (*this)(1,0) = (*this)(1,1)*s;
+    (*this)(1,1) *= c;
+    for (int i=0; i<3; i++) {
+      a = R(0, i);
+      b = R(1, i);
+      R(0, i)=a*c+b*s;
+      R(1, i)=b*c-a*s;
+    }
+
+    lambda = hypot((*this)(0,0), (*this)(1,0));
+    c = (*this)(0,0)/lambda;
+    s = (*this)(1,0)/lambda;
+    (*this)(0,0)=lambda;
+    (*this)(1,0)=0.0;
+    for (int i=1; i<3; i++) {
+      (*this)(0,i)=s*(*this)(1,i);
+      (*this)(1,i)*=c;
+    }
+    for (int i=0; i<3; i++) {
+      a = L(i, 0);
+      b = L(i, 1);
+      L(i, 0)=a*c+b*s;
+      L(i, 1)=b*c-a*s;
+    }
+
+    lambda = hypot((*this)(0,1), (*this)(0,2));
+    c = (*this)(0,1)/lambda;
+    s = (*this)(0,2)/lambda;
+    (*this)(0,1)=lambda;
+    (*this)(0,2)=0.0;
+    a = (*this)(1,1)*c+(*this)(1,2)*s;
+    b = (*this)(1,2)*c-(*this)(1,1)*s;
+    (*this)(1,1) = a;
+    (*this)(1,2) = b;
+    (*this)(2,1)=s*(*this)(2,2);
+    (*this)(2,2)*=c;
+    for (int i=0; i<3; i++) {
+      a = R(1, i);
+      b = R(2, i);
+      R(1, i)=a*c+b*s;
+      R(2, i)=b*c-a*s;
+    }
+
+    lambda = hypot((*this)(1,1), (*this)(2,1));
+    c = (*this)(1,1)/lambda;
+    s = (*this)(2,1)/lambda;
+    (*this)(1,1)=lambda;
+    (*this)(2,1)=0.0;
+    a = (*this)(2,1)*c+(*this)(2,2)*s;
+    b = (*this)(2,2)*c-(*this)(2,1)*s;
+    (*this)(1,2) = a;
+    (*this)(2,2) = b;
+    for (int i=0; i<3; i++) {
+      a = L(i, 1);
+      b = L(i, 2);
+      L(i, 1)=a*c+b*s;
+      L(i, 2)=b*c-a*s;
+    }
+
+    sumDiag=0.0;
+    sumOffdiag=0.0;
+    for (int i=0; i<3; i++) sumDiag+=fabs((*this)(i,i));
+    for (int i=0; i<2; i++) sumOffdiag+=fabs((*this)(i,i+1));
+
+  } while (maxLoops-- and sumDiag<1e20*sumOffdiag);
+  return maxLoops;
+}
+
+
+
+template <typename T> int TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
   upperBidiagonal(L,R);
   L.transpose();
 
@@ -353,64 +440,14 @@ template <typename T> int TMat3D<T>::svd(TMat3D<T>& L, TMat3D<T>& R) {
   double sumOffdiag=0.0;
 
   do {
-
-    // Givens rotation
-    // TODO: Could be done without the whole matrix multiplications!!! See GSL
-
-    TMat3D<T> X(*this);
-    // Step one
-    double lambda = hypot(X(0,0), X(0,1));
-    double c = X(0,0)/lambda;
-    double s = X(0,1)/lambda;
-    X(0,0)=lambda;
-    X(0,1)=0.0;
-    X(1,0) = -X(1,1)*s;
-    X(1,1) *= c;
-    //Step two
-    lambda = hypot(X(0,0), X(1,0));
-    c = X(0,0)/lambda;
-    s = X(1,0)/lambda;
-    X(0,0)=lambda;
-    X(1,0)=0.0;
-    for (int i=1; i<3; i++) {
-      X(i,0)=s*X(i,1);
-      X(i,1)*=c;
-    }
-    //step three
-    lambda = hypot(X(0,1), X(0,2));
-    c = X(0,1)/lambda;
-    s = X(0,2)/lambda;
-    X(0,1)=lambda;
-    X(0,2)=0.0;
-    double a = X(1,1)*c+X(1,2)*s;
-    double b = X(1,2)*c-X(1,1)*s;
-    X(1,1) = a;
-    X(1,2) = b;
-    X(2,1)=s*X(2,2);
-    X(2,2)*=c;
-    //step four
-    lambda = hypot(X(1,1), X(2,1));
-    c = X(1,1)/lambda;
-    s = X(2,1)/lambda;
-    X(1,1)=lambda;
-    X(2,1)=0.0;
-    a = X(2,1)*c+X(2,2)*s;
-    b = X(2,2)*c-X(2,1)*s;
-    X(2,1) = a;
-    X(2,2) = b;
-
-
-
-
-
     for (int n=0; n<2; n++) {
-      double c,s;
+      double s,c;
       givens((*this)(0,n),(*this)(0,n+1), c, s);
       TMat3D<T> G1;
       G1(n,n)=c;
       G1(n+1,n+1)=c;
       G1(n+1,n)=-s;
-      G1(n,n+1)=s;
+      G1(n,n+1)= s;
 
       (*this)*=G1;
       R*=G1;

@@ -164,14 +164,14 @@ int main () {
   int N = 0;
   double m1 = 0.0;
   double m2 = 0.0;
+  double m3 = 0.0;
   unsigned long long dtsum = 0;
   unsigned long loopsum = 0;
 
   double sigma = 0;
   double mean = 0;
   do {
-    Mat3D Q1;
-    Mat3D Q2;
+    Mat3D La, Lb, Ra, Rb;
     Mat3D M;
 
     for (int i=0; i<3; i++) {
@@ -179,20 +179,25 @@ int main () {
         M(i,j) = qrand()%19 - 9;
       }
     }
+    Mat3D Ma = M;
+    Mat3D Mb = M;
     unsigned long long t1 = rdtsctime();
-    int loops = 511-M.svd(Q1, Q2);
-    unsigned long long dt = rdtsctime() - t1;
-    dtsum += dt;
-    double v = 1.0*dt/loops;
+    int loops1 = 512-Ma.svd(La, Ra);
+    unsigned long long t2 = rdtsctime();
+    int loops2 = 512-Mb.fastsvd(Lb, Rb);
+    unsigned long long t3 = rdtsctime();
+    dtsum += t2-t1;
+    double v = 1.0*(t2-t1)/loops1;
     m1 += v;
     m2 += v*v;
-    loopsum += loops;
+    m3 += 1.0*(t3-t2)/loops2;
+    loopsum += loops1;
     N++;
     mean = m1 / N;
     double sqmean = m2 / N;
     sigma = sqrt((sqmean - mean*mean)/N);
     if (N%1000==0) {
-      QString s = QString("%1 %2 %3 %4 %5\n").arg(mean).arg(sigma).arg(N).arg(dtsum).arg(loopsum);
+      QString s = QString("%1 %2 %3 %4 %5 %6\n").arg(mean).arg(sigma).arg(N).arg(dtsum).arg(loopsum).arg(m3/N);
       OutputDebugStringA(qPrintable(s));
     }
   } while (N<1000 || sigma>0.0005*mean);
