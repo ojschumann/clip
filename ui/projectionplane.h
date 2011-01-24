@@ -56,8 +56,6 @@ protected slots:
   void generateMousePositionInfo(QPointF);
   void generateMousePositionInfoFromView(QPointF p);
   void generateEmptyMousePositionInfo();
-  void toggleDisplaySpots();
-  void toggleDisplayMarkers();
   void slotContextMenu();
   void slotContextSetRotationAxis();
   void slotContextSetRotationAxisOnSpot();

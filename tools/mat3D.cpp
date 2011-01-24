@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <type_traits>
 
+#include "defs.h"
 
 using namespace std;
 
@@ -302,28 +303,43 @@ template <typename T> TMat3D<T> TMat3D<T>::QL() {
   return Q;
 }
 
-// L and R need to be unit matrices
+
+// Performs the transformation to an upper bidiagonal matrices via housholder transforms
+// Transformations always have det==1 !!!
 template <typename T> void TMat3D<T>::upperBidiagonal(TMat3D<T>& L, TMat3D<T>& R) {
   for (int n=0; n<2; n++) {
     TVec3D<T> u;
     for (int i=0; i<3-n; i++) u(2-i)=(*this)(2-i,n);
-    u(n)+=u.norm();
-    u.normalize();
-    TMat3D<T> Tx(u^u);
-    Tx*=2.0;
-    for (int i=0; i<3; i++) Tx(i,i)-=InitatorValues<T>::One();
-    lmult(Tx);
-    L*=Tx;
-
-    if (n<1) {
-      for (int i=0; i<3; i++) u(i)=(i<=n)?InitatorValues<T>::Zero():(*this)(n,i);
-      u(n+1)+=u.norm();
+    double alpha = u.norm();
+    if (alpha>0) {
+      if (u(n)>0) {
+        u(n)+=alpha;
+      } else {
+        u(n)-=alpha;
+      }
       u.normalize();
-      Tx=u^u;
-      Tx*=2.0;
-      for (int i=0; i<3; i++) Tx(i,i)-=InitatorValues<T>::One();
-      (*this)*=Tx;
-      R.lmult(Tx);
+      TMat3D<T> HouseholderReflection(u^u);
+      HouseholderReflection*=2.0;
+      for (int i=0; i<3; i++) HouseholderReflection(i,i)-=InitatorValues<T>::One();
+      lmult(HouseholderReflection);
+      L*=HouseholderReflection;
+    }
+    if (n==0) {
+      for (int i=0; i<3; i++) u(i)=(i<=n)?InitatorValues<T>::Zero():(*this)(n,i);
+      alpha = u.norm();
+      if (alpha>0) {
+        if (u(n+1)>0) {
+          u(n+1)+=u.norm();
+        } else {
+          u(n+1)-=u.norm();
+        }
+        u.normalize();
+        TMat3D<T> HouseholderReflection=u^u;
+        HouseholderReflection*=2.0;
+        for (int i=0; i<3; i++) HouseholderReflection(i,i)-=InitatorValues<T>::One();
+        (*this)*=HouseholderReflection;
+        R.lmult(HouseholderReflection);
+      }
     }
   }
 }
@@ -346,18 +362,7 @@ template <typename T> void TMat3D<T>::givens(double a, double b, double &c, doub
 }
 
 template <typename T> void MACRO(T& a, T& b, T& c, T& s) {
-  double _a = fabs(a);
-  double _b = fabs(b);
-  double lambda;
-  if (_a>_b) {
-    lambda = _b/_a;
-    lambda = _a*sqrt(1.0+lambda*lambda);
-  } else {
-    lambda = _a/_b;
-    lambda = _b*sqrt(1.0+lambda*lambda);
-  }
-  //double lambda  = hypot(_a, _b);
-  //double lambda  = sqrt(_a*_a+_b*_b);
+  double lambda  = fasthypot(a, b);
   c = a/lambda;
   s = b/lambda;
   a = lambda;

@@ -1,6 +1,8 @@
 Config
   Allow to configure colors
   configurable width of Zonemarker (including zero)
+  Default Projector and Crystal xml
+  Save Position/Size switch
 
 LaueImage
   # Display of Images from Bruker Apex (reduced Wavelength band)
@@ -15,6 +17,10 @@ LaueImage
 Populate all ToolTips with useful help...
 
 ######### Beta Version Line ########################
+
+Scattering orders for reflection info
+
+ResolutionCalculator -> Implement ...
 
 Refinement
   Stop if model changes
@@ -35,8 +41,6 @@ Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
   * setCell()
   * unlock()
 
+
 Implement a faster MonochromeScaler
 
-Mat3D improve speed of svd (direct multiplication of givens matrices)
-
-ResolutionCalculator -> Implement ...

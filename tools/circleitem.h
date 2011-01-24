@@ -10,11 +10,12 @@ public:
   explicit CircleItem(double r, QGraphicsItem *parent = 0);
   virtual ~CircleItem();
 
+  QRectF boundingRect() const;
+  QPainterPath shape() const;
+  bool contains(const QPointF &point) const;
 protected:
   QVariant itemChange(GraphicsItemChange change, const QVariant & value );
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-  QRectF boundingRect() const;
-  QPainterPath shape() const;
 signals:
   void positionChanged();
   void itemClicked();

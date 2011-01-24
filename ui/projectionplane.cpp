@@ -30,6 +30,7 @@
 #include "image/laueimage.h"
 #include "image/dataproviderfactory.h"
 
+#include "defs.h"
 #include "tools/spotitem.h"
 #include "tools/zoneitem.h"
 #include "tools/ruleritem.h"
@@ -61,12 +62,6 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   connect(projector, SIGNAL(imageClosed()), this, SLOT(imageClosed()));
   connect(ui->view, SIGNAL(mouseMoved(QPointF)), this, SLOT(generateMousePositionInfoFromView(QPointF)));
   connect(ui->view, SIGNAL(mouseLeft()), this, SLOT(generateEmptyMousePositionInfo()));
-
-  QShortcut* shortcut = new QShortcut(Qt::Key_F2, this);
-  connect (shortcut, SIGNAL(activated()), this, SLOT(toggleDisplaySpots()));
-  shortcut = new QShortcut(Qt::Key_F3, this);
-  connect (shortcut, SIGNAL(activated()), this, SLOT(toggleDisplayMarkers()));
-
 
   ui->view->setScene(projector->getScene());
   ui->view->setTransform(QTransform(1,0,0,-1,0,0));
@@ -166,7 +161,7 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
 void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
   QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
   QPointF dp = (p-mousePressOrigin);
-  bool largeMove = hypot(dp.x(), dp.y())>projector->getSpotSize();
+  bool largeMove = fasthypot(dp.x(), dp.y())>projector->getSpotSize();
   if (e->buttons()==Qt::LeftButton) {
     if (ui->zoomAction->isChecked()) {
       zoomRubber->setGeometry(QRect(ui->view->mapFromScene(mousePressOrigin), ui->view->mapFromScene(p)).normalized());
@@ -231,7 +226,7 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
 void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
   QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
   QPointF dp = (p-mousePressOrigin);
-  bool largeMove = hypot(dp.x(), dp.y()) > projector->getSpotSize();
+  bool largeMove = fasthypot(dp.x(), dp.y()) > projector->getSpotSize();
   if (e->button()==Qt::LeftButton) {
     if (ui->zoomAction->isChecked()) {
       if (largeMove) zoomSteps.append(QRectF(mousePressOrigin, p).normalized());
@@ -413,14 +408,6 @@ void ProjectionPlane::imageClosed() {
   setWindowTitle(projector->displayName());
   ui->imgToolBar->setVisible(false);
   resizeView();
-}
-
-void ProjectionPlane::toggleDisplaySpots() {
-  projector->enableSpots(!projector->spotsEnabled());
-}
-
-void ProjectionPlane::toggleDisplayMarkers() {
-  projector->enableMarkers(!projector->markersEnabled());
 }
 
 void ProjectionPlane::slotContextMenu() {

@@ -79,8 +79,6 @@ void IndexDisplay::on_startButton_clicked()
     solutions.clear();
     indexRunning = true;
 
-    indexer->multithreaded = ui->checkBox->isChecked();
-
     QThreadPool::globalInstance()->start(indexer);
   }
 }

@@ -233,6 +233,9 @@ void Clip::addActions() {
   separatorAct = new QAction(this);
   separatorAct->setSeparator(true);
 
+  addAction(ui->actionToggleMarkerEnabled);
+  addAction(ui->actionToggleSpotsEnabled);
+
 }
 
 
@@ -363,4 +366,14 @@ void Clip::on_actionSave_Workspace_triggered() {
   }
 }
 
+void Clip::on_actionToggleSpotsEnabled_triggered() {
+  Projector* p = getMostRecentProjector();
+  if (p)
+    p->enableSpots(!p->spotsEnabled());
+}
 
+void Clip::on_actionToggleMarkerEnabled_triggered() {
+  Projector* p = getMostRecentProjector();
+  if (p)
+    p->enableMarkers(!p->markersEnabled());
+}

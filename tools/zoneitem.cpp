@@ -270,10 +270,13 @@ void ZoneItem::updateOptimalZone() {
   if (hasCrossingSpotMarkers) {
     M+= u^u;
     M+= v^v;
-    Mat3D Q1, Q2;
+    Mat3D Q1, Q2, MF, L,R;
+    MF=M;
     M.svd(Q1, Q2);
-
+    MF.fastsvd(L, R);
     Vec3D zp = Q2.transposed()*Vec3D(0,0,1);
+    Vec3D zpf = R.transposed()*Vec3D(0,0,1);
+
     z = zp;
   }
 

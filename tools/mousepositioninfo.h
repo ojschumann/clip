@@ -14,6 +14,8 @@ public:
     scatteredOk=false;
     nearestOk=false;
     projector=0;
+    detQMin=0.0;
+    detQMax=0.0;
   }
 
   bool valid;

@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include "defs.h"
 #include "tools/ruleritem.h"
 
 
@@ -37,13 +38,13 @@ QVariant RulerModel::data ( const QModelIndex & index, int role = Qt::DisplayRol
     } else if (index.column()==1) {
       return QVariant(QString::number(imgY*dy, 'f', 2));
     } else if (index.column()==2) {
-      return QVariant(QString::number(hypot(imgX*dx, imgY*dy), 'f', 2));
+      return QVariant(QString::number(fasthypot(imgX*dx, imgY*dy), 'f', 2));
     } else if (index.column()==3) {
       QVariant v = rulers.at(index.row())->data(0);
       v.convert(QVariant::String);
       return v;
     } else if (index.column()==4 && hRes>0 && vRes>0) {
-      return QVariant(QString::number(hypot(hRes*dx, vRes*dy), 'f', 2));
+      return QVariant(QString::number(fasthypot(hRes*dx, vRes*dy), 'f', 2));
     }
   } else if (role==Qt::EditRole) {
     if (index.column()==3) {

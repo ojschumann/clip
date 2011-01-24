@@ -6,6 +6,7 @@
 #include <iostream>
 #include <typeinfo>
 
+#include "defs.h"
 #include "ui/laueplanecfg.h"
 #include "core/reflection.h"
 #include "core/projectorfactory.h"
@@ -42,15 +43,13 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent):
 };
 
 Projector& LauePlaneProjector::operator=(const Projector& _o) {
-  Projector::operator =(_o);
-  try {
-    const LauePlaneProjector& o = dynamic_cast<const LauePlaneProjector&>(_o);
-    setDetSize(o.dist(), o.width(), o.height());
-    setDetOrientation(o.omega(), o.chi(), o.phi());
-    setDetOffset(o.xOffset(), o.yOffset());
-  }
-  catch (const bad_cast& e) {
-    cerr << e.what() << endl;
+  LauePlaneProjector const* o = dynamic_cast<LauePlaneProjector const*>(&_o);
+  if (o) {
+    Projector::operator =(_o);
+    setDetSize(o->dist(), o->width(), o->height());
+    setDetOrientation(o->omega(), o->chi(), o->phi());
+    setDetOffset(o->xOffset(), o->yOffset());
+  } else {
     cerr << "Copy operator on LauePlaneProjector " << endl;
   }
   return *this;
@@ -274,7 +273,7 @@ void LauePlaneProjector::resizePBMarker() {
   CircleItem* marker=dynamic_cast<CircleItem*>(decorationItems[2]);
 
   QPointF p=handle->pos();
-  double l=hypot(p.x(), p.y());
+  double l=fasthypot(p.x(), p.y());
 
   marker->setRadius(l);
 }
@@ -367,9 +366,9 @@ void LauePlaneProjector::doImgRotation(const QTransform& t) {
     QTransform Tinv = t.inverted();
     QPointF c = Tinv.map(QPointF(0,0));
     QPointF x = Tinv.map(QPointF(1,0));
-    double dw = hypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
+    double dw = fasthypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
     x = Tinv.map(QPointF(0,1));
-    double dh = hypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
+    double dh = fasthypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
     setDetSize(dist(), dw, dh);
   }
 }

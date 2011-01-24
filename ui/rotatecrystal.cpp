@@ -41,6 +41,10 @@ RotateCrystal::~RotateCrystal()
   delete ui;
 }
 
+QSize RotateCrystal::sizeHint() const {
+  return minimumSizeHint();
+}
+
 void RotateCrystal::rotAxisChanged() {
   resetSum();
   loadAxisFromCrystal();

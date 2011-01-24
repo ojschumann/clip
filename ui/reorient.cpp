@@ -15,7 +15,6 @@ Reorient::Reorient(QWidget *parent) :
     ui(new Ui::Reorient)
 {
   ui->setupUi(this);
-
   gonioAxis << Vec3D() << Vec3D();
   gonioEdits << ui->axis1Edit << ui->axis2Edit;
   gonioCombos << ui->axis1Combo << ui->axis2Combo;
@@ -38,6 +37,10 @@ void Reorient::windowChanged() {
     connect(c, SIGNAL(orientationChanged()), this, SLOT(updateDisplay()), Qt::UniqueConnection);
   }
   updateDisplay();
+}
+
+QSize Reorient::sizeHint() const {
+  return minimumSizeHint();
 }
 
 Vec3D Reorient::fromNormal() {

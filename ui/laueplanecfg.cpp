@@ -19,6 +19,7 @@ LauePlaneCfg::LauePlaneCfg(LauePlaneProjector* p, QWidget *parent) :
   connect(p, SIGNAL(projectionParamsChanged()), this, SLOT(slotLoadParams()));
 
   connect(ui->detSpotsEnabled, SIGNAL(toggled(bool)), projector, SLOT(enableSpots(bool)));
+  connect(ui->detMarkersEnabled, SIGNAL(toggled(bool)), projector, SLOT(enableMarkers(bool)));
   connect(ui->renderAntialias, SIGNAL(toggled(bool)), this, SLOT(slotUpdateRenderHints()));
   connect(ui->renderAntialiasText, SIGNAL(toggled(bool)), this, SLOT(slotUpdateRenderHints()));
 
@@ -72,6 +73,7 @@ void LauePlaneCfg::slotLoadParams() {
   ui->detDy->setValue(projector->yOffset());
 
   ui->detSpotsEnabled->setChecked(projector->spotsEnabled());
+  ui->detMarkersEnabled->setChecked(projector->markersEnabled());
 
   QList<QGraphicsView*> l = projector->getScene()->views();
   if (l.size()) {

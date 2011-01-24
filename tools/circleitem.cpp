@@ -4,6 +4,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <iostream>
 
+#include "defs.h"
+
 using namespace std;
 
 CircleItem::CircleItem(double r, QGraphicsItem *parent) :
@@ -11,6 +13,7 @@ CircleItem::CircleItem(double r, QGraphicsItem *parent) :
 {
   skipNextPosChange=false;
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+  setFlag(QGraphicsItem::ItemClipsToShape, false);
   setRadius(r);
   lineWidth = 1.0;
 }
@@ -36,6 +39,12 @@ QPainterPath CircleItem::shape() const {
   return path;
 }
 
+bool CircleItem::contains(const QPointF &point) const {
+  QPointF dp = pos()-point;
+  double r = fasthypot(dp.x(), dp.y());
+  return r<radius;
+}
+
 QVariant CircleItem::itemChange(GraphicsItemChange change, const QVariant & value ) {
   if (change==ItemPositionHasChanged) {
     if (not skipNextPosChange) {
@@ -55,8 +64,8 @@ void CircleItem::setPosNoSig(const QPointF &p) {
 }
 
 void CircleItem::setRadius(double r) {
+  prepareGeometryChange();
   radius=r;
-  update();
 }
 
 void CircleItem::setColor(QColor c) {

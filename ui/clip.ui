@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>556</width>
-    <height>384</height>
+    <width>628</width>
+    <height>465</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,8 +32,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>556</width>
-     <height>18</height>
+     <width>628</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -124,6 +124,22 @@
   <action name="actionSave_Workspace">
    <property name="text">
     <string>Save Workspace</string>
+   </property>
+  </action>
+  <action name="actionToggleSpotsEnabled">
+   <property name="text">
+    <string>toggleSpotsEnabled</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
+  </action>
+  <action name="actionToggleMarkerEnabled">
+   <property name="text">
+    <string>toggleMarkerEnabled</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
    </property>
   </action>
  </widget>

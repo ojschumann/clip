@@ -2,6 +2,7 @@
 #define PROPAGATINGGRAPHICSOBJECT_H
 
 #include <QGraphicsObject>
+#include <QVariant>
 
 class PropagatingGraphicsObject : public QGraphicsObject
 {

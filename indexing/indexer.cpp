@@ -21,7 +21,6 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
     QObject(),
     QRunnable(),
     candidatePos(0),
-    loopCounter(0),
     candidates(_MReal, _MReziprocal),
     MReal(_MReal),
     MReziprocal(_MReziprocal),
@@ -63,8 +62,7 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
 
 
 void Indexer::run() {
-  if (multithreaded)
-    QThreadPool::globalInstance()->tryStart(this);
+  QThreadPool::globalInstance()->tryStart(this);
 
   ThreadLocalData localData;
   localData.markers = globalMarkers;
@@ -78,18 +76,10 @@ void Indexer::run() {
     CandidateGenerator::Candidate c1 = cList.takeLast();
     for (int j=0; j<cList.size(); j++) {
       if (shouldStop) return;
-      if (uniqSolutions.size()>200) return;
       // Be nice to the GUI Thread
       loop++;
       if ((loop%10000)==0)
         QThread::yieldCurrentThread();
-
-      int testNr = loopCounter.fetchAndAddRelaxed(1);
-      if (testNr%10000==0) {
-        int dt = loopTimer.restart();
-        cout << testNr << " " << loop << " " << dt << " " << 10000000.0/dt << " " << 1000.0*testNr/runTimer.elapsed() << endl;
-      }
-
 
       CandidateGenerator::Candidate c2 = cList.at(j);
 

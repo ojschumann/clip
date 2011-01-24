@@ -161,6 +161,7 @@ void ClipUnitTestTest::benchmarkMatrixSVD() {
 #include <Winbase.h>
 
 int main () {
+  qsrand(time(0));
   int N = 0;
   double m1 = 0.0;
   double m2 = 0.0;
@@ -176,6 +177,7 @@ int main () {
 
     for (int i=0; i<3; i++) {
       for (int j=0; j<3; j++) {
+        //M(i,j) = 1.0-2.0*qrand()/RAND_MAX;
         M(i,j) = qrand()%19 - 9;
       }
     }
@@ -193,7 +195,9 @@ int main () {
     if ((rMa-M).sqSum()>1e-8) cout << "error on MA" << endl;
     if ((rMb-M).sqSum()>1e-8) cout << "error on MB" << endl;
     //if (fabs((La*Ra).det()-1.0)>1e-8) cout << "error on Det Ma" << endl;
-    if (fabs((Lb*Rb).det()-1.0)>1e-8) cout << "error on Det Mb " << (Lb*Rb).det() << endl;
+    if (fabs((Lb*Rb).det()-1.0)>1e-8) cout << "error on Det Mb " << (Lb*Rb).det() << " " << (Lb*Rb).det()-1.0 << endl;
+    //if (Mb(2,2)<0) cout << "Mb value low " << Mb(2,2) << endl;
+
 
     dtsum += t2-t1;
     double v = 1.0*(t2-t1)/loops1;
@@ -209,7 +213,7 @@ int main () {
       QString s = QString("%1 %2 %3 %4 %5 %6\n").arg(mean).arg(sigma).arg(N).arg(dtsum).arg(loopsum).arg(m3/N);
       OutputDebugStringA(qPrintable(s));
     }
-  } while (N<1000 || sigma>0.0005*mean);
+  } while (N<1000 || sigma>0.00005*mean);
   mean = m1 / N;
   double sqmean = m2 / N;
   sigma = sqrt((sqmean - mean*mean)/N);

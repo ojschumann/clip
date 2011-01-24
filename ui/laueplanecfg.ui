@@ -315,16 +315,16 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QCheckBox" name="detPrimaryMarkerEnabled">
+         <widget class="QCheckBox" name="detSpotsEnabled">
           <property name="text">
-           <string>Primary Beam Marker</string>
+           <string>Projected Spots</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="detSpotsEnabled">
+         <widget class="QCheckBox" name="detMarkersEnabled">
           <property name="text">
-           <string>Projected Spots</string>
+           <string>Spot &amp;&amp; Zone Markers</string>
           </property>
          </widget>
         </item>

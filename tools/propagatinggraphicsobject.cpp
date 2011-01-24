@@ -1,8 +1,15 @@
 #include "propagatinggraphicsobject.h"
 
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
+
+
 PropagatingGraphicsObject::PropagatingGraphicsObject(QGraphicsItem *parent) :
     QGraphicsObject(parent)
 {
+  setFlag(ItemSendsGeometryChanges);
   propagatePositionChange = true;
   propagateTransformChange = true;
 
@@ -19,6 +26,18 @@ QVariant PropagatingGraphicsObject::itemChange(GraphicsItemChange change, const 
     foreach (QGraphicsItem* item, childItems())
       item->setPos(item->pos()+dp);
     return QVariant(pos());
+#if QT_VERSION >= 0x040700 // Rotation and scaling reported seperately
+  } else if (propagateTransformChange  && (change == ItemRotationChange)) {
+    double newRotation = value.toDouble();
+    foreach (QGraphicsItem* item, childItems())
+      item->setRotation(newRotation);
+    return QVariant(rotation());
+  } else if (propagateTransformChange  && (change == ItemScaleChange)) {
+    double newScale = value.toDouble();
+    foreach (QGraphicsItem* item, childItems())
+      item->setScale(newScale);
+    return QVariant(scale());
+#endif
   }
   return QGraphicsItem::itemChange(change, value);
 }

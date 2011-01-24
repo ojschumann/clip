@@ -69,6 +69,8 @@ private:
   QSignalMapper *windowMapper;
 
 private slots:
+    void on_actionToggleMarkerEnabled_triggered();
+    void on_actionToggleSpotsEnabled_triggered();
     void on_actionSave_Workspace_triggered();
     void on_actionOpen_Workspace_triggered();
     void on_actionReorientation_triggered();

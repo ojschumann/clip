@@ -16,7 +16,6 @@ public:
   void mouseMoveEvent(QMouseEvent *);
   void mouseReleaseEvent(QMouseEvent *);
   void leaveEvent(QEvent *);
-  int getFrames();
 signals:
   void mouseMoved(QPointF);
   void mouseLeft();
@@ -24,13 +23,10 @@ public slots:
   void retakeMouseEvent() { viewIgnoresThisMouseEvent = false; }
   void setImage(LaueImage*);
 protected:
-  void paintEvent(QPaintEvent*);
   void drawBackground(QPainter *painter, const QRectF &rect);
   QPointer<LaueImage> image;
 
   bool viewIgnoresThisMouseEvent;
-  // TODO: Only for debugging!
-  int frames;
 
 };
 

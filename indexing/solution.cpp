@@ -32,7 +32,7 @@ double Solution::allIndexMean() const {
   if (indexMean<0) {
     double tmpIndexMean = 0.0;
     foreach (TVec3D<int> idx, markerIdx) {
-      tmpIndexMean += abs(idx.x()) + abs(idx.y()) + abs(idx.z());
+      tmpIndexMean += qAbs(idx.x()) + qAbs(idx.y()) + qAbs(idx.z());
     }
     tmpIndexMean /= 3.0*markerIdx.size();
     const_cast<Solution*>(this)->indexMean = tmpIndexMean;

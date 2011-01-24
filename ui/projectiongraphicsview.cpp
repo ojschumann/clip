@@ -10,7 +10,6 @@ using namespace std;
 ProjectionGraphicsView::ProjectionGraphicsView(QWidget *parent) :
     QGraphicsView(parent) {
   viewIgnoresThisMouseEvent=false;
-  frames=0;
 }
 
 void ProjectionGraphicsView::dragEnterEvent(QDragEnterEvent *e) {
@@ -45,17 +44,6 @@ void ProjectionGraphicsView::mouseReleaseEvent(QMouseEvent *e) {
 
 void ProjectionGraphicsView::leaveEvent(QEvent *) {
   emit mouseLeft();
-}
-
-int ProjectionGraphicsView::getFrames() {
-  int f = frames;
-  frames = 0;
-  return f;
-}
-
-void ProjectionGraphicsView::paintEvent(QPaintEvent *e) {
-  QGraphicsView::paintEvent(e);
-  frames++;
 }
 
 void ProjectionGraphicsView::setImage(LaueImage * img) {

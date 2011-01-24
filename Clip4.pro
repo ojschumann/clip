@@ -181,7 +181,8 @@ HEADERS  += ui/clip.h \
     refinement/fitparametergroup.h \
     refinement/fitparametertreeitem.h \
     ui/hkltool.h \
-    tools/resizeingtablewidget.h
+    tools/resizeingtablewidget.h \
+    win_version.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -202,8 +203,9 @@ RESOURCES += \
     resources/resources.qrc
 
 win32 {
-    RC_FILE = resources/icons/clip.rc
+    RC_FILE = resources/clip.rc
 }
 
 OTHER_FILES += \
-    Todo.txt
+    Todo.txt \
+    Resources/clip.rc

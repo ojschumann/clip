@@ -1,5 +1,6 @@
 #include "abstractmarkeritem.h"
 
+#include "defs.h"
 #include "core/projector.h"
 #include "core/crystal.h"
 
@@ -116,7 +117,7 @@ void AbstractProjectorMarkerItem::calcDetectorDeviation() {
     QPointF p = projector->normal2det(getMarkerNormal(), ok1);
     p -= projector->normal2det(projector->getCrystal()->hkl2Reziprocal(getIntegerIndex().toType<double>()).normalized(), ok2);
     if (ok1 && ok2) {
-      detectorPositionDeviation = hypot(p.x(), p.y());
+      detectorPositionDeviation = fasthypot(p.x(), p.y());
     }
   } else {
     double score = 0.0;
@@ -133,7 +134,7 @@ void AbstractProjectorMarkerItem::calcDetectorDeviation() {
       QPointF pZone = projector->normal2det(v, ok);
       if (ok) {
         QPointF dp = pSpot - pZone;
-        score += hypot(dp.x(), dp.y());
+        score += fasthypot(dp.x(), dp.y());
         N++;
       }
     }

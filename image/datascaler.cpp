@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 
+#include "defs.h"
 #include "image/dataprovider.h"
 #include "image/BezierCurve.h"
 #include "tools/xmltools.h"
@@ -61,8 +62,8 @@ QSizeF DataScaler::transformSize(const QSizeF &s) {
   QPointF center = T.map(QPointF(0,0));
   QPointF ex = T.map(QPointF(1,0));
   QPointF ey = T.map(QPointF(0,1));
-  double w = hypot((ex.x()-center.x())*s.width(), (ex.y()-center.y())*s.height());
-  double h = hypot((ey.x()-center.x())*s.width(), (ey.y()-center.y())*s.height());
+  double w = fasthypot((ex.x()-center.x())*s.width(), (ex.y()-center.y())*s.height());
+  double h = fasthypot((ey.x()-center.x())*s.width(), (ey.y()-center.y())*s.height());
   return QSizeF(w,h);
 }
 
