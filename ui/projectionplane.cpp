@@ -341,6 +341,15 @@ void ProjectionPlane::generateMousePositionInfo(QPointF p) {
 
 void ProjectionPlane::generateEmptyMousePositionInfo() {
   MousePositionInfo info;
+  info.nearestReflection.h = 0;
+  info.nearestReflection.k = 0;
+  info.nearestReflection.l = 0;
+  info.nearestReflection.d = 0;
+  info.nearestReflection.Q = 0;
+  info.nearestReflection.Qscatter = 0;
+  info.nearestReflection.lowestDiffOrder = 0;
+  info.nearestReflection.highestDiffOrder = 0;
+  info.nearestReflection.hklSqSum = 0;
   emit mousePositionInfo(info);
 }
 

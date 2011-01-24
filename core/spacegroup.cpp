@@ -138,6 +138,7 @@ void Spacegroup::GroupElement::normalize() {
   }
 }
 
+// TODO: convert to QString toString();
 void Spacegroup::GroupElement::print() const {
   QStringList l;
   TMat3D<int> O(M);
@@ -192,8 +193,6 @@ bool Spacegroup::isExtinct(const TVec3D<int>& reflection) const {
 template <class T> void Spacegroup::addToGroup(QList<T> &group, const T& e) {
   if (!group.contains(e)) {
     group << e;
-    //cout << "Generator: ";
-    //e.print();
     for (int i=0; i<group.size(); i++) {
       addToGroup(group, e*group[i]);
       addToGroup(group, group[i]*e);
@@ -359,8 +358,6 @@ bool Spacegroup::generateGroup(QString hall) {
       translationPart += TVec3D<int>(GroupElement::MOD/4, GroupElement::MOD/4, GroupElement::MOD/4);
 
     GroupElement e(rotationPart, translationPart);
-    cout << "Generator: ";
-    e.print();
     addToGroup(tmpGroup, GroupElement(rotationPart, translationPart));
     precedingN = N;
     precedingDirection = direction;

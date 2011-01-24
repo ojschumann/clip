@@ -70,12 +70,6 @@ void NelderMead::run() {
       rateLimiter.restart();
     }
     if (lastScore/worker->bestScore()>1.001) {
-      /*QList<double> deltas = worker->parameterRelativeDelta();
-      QList<double>::iterator iter = std::max_element(deltas.begin(), deltas.end());
-
-      cout << noImprovmentLoops << " " << worker->bestScore() << " " << lastScore-worker->bestScore() << " ";
-      cout << (lastScore-worker->bestScore())/worker->bestScore() << " " << *iter << "  ";
-      cout << qPrintable(worker->parameterName(iter-deltas.begin())) << endl;*/
       noImprovmentLoops = 0;
     }
     QList<double> deltas = worker->parameterRelativeDelta();

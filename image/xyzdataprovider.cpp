@@ -12,11 +12,9 @@ using namespace std;
 XYZDataProvider::XYZDataProvider(QObject *parent) :
     DataProvider(parent)
 {
-  cout << "init XYZDataProvider" << endl;
 }
 
 XYZDataProvider::~XYZDataProvider() {
-  cout << "delete XYZDataProvider" << endl;
 }
 
 
@@ -25,8 +23,6 @@ QStringList XYZDataProvider::Factory::fileFormatFilters() {
 }
 
 DataProvider* XYZDataProvider::Factory::getProvider(QString filename, QObject *parent) {
-  cout << "XyzDP tries to load " << qPrintable(filename) << endl;
-
   QFile imgFile(filename);
 
   if (!imgFile.open(QFile::ReadOnly)) return NULL;

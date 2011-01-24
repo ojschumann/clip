@@ -147,8 +147,8 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
     R = optRot.getOptimalRotation();
   }
 
-  if (loops>5)
-    cout << "Loops " << loops << endl;
+  //if (loops>5)
+  //  cout << "Loops " << loops << endl;
 
   Solution solution;
   solution.bestRotation = R;
@@ -169,7 +169,6 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
   duplicate = symmetryEquivalentSolutionPresent(bestinv, solution.hklDeviation, n);
   if (!duplicate) {
     uniqSolutions << solution;
-    //cout << c1.index(0) << "," << c1.index(1) << "," << c1.index(2) << " + " << c2.index(0) << "," << c2.index(1) << "," << c2.index(2) << endl;
     emit publishSolution(solution);
   }
   uniqLock.unlock();

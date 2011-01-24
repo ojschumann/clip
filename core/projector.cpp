@@ -46,6 +46,7 @@ Projector::Projector(QObject *parent):
 
   scene.addItem(spotIndicator);
   scene.addItem(imageItemsPlane);
+  scene.setItemIndexMethod(QGraphicsScene::NoIndex);
 
   spotIndicator->stackBefore(imageItemsPlane);
   spotIndicator->setCachedPainting(false);

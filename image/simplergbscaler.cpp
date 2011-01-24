@@ -10,13 +10,11 @@ SimpleRGBScaler::SimpleRGBScaler(DataProvider* dp, QObject *parent) :
   data = static_cast<QRgb const*>(dp->getData());
   datawidth = dp->size().width();
   dataheight = dp->size().height();
-  cout << "Init SimpleRGBScaler" << endl;
 }
 
 SimpleRGBScaler::SimpleRGBScaler(const SimpleRGBScaler &): DataScaler(0)  {}
 
 SimpleRGBScaler::~SimpleRGBScaler() {
-  cout << "delete SimpleRGBScaler" << endl;
 }
 
 DataScaler* SimpleRGBScaler::getScaler(DataProvider *dp, QObject* parent) {

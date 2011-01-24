@@ -8,7 +8,6 @@ using namespace std;
 
 DataProviderFactory::DataProviderFactory()
 {
-    cout << "init DataProviderFactory" << endl;
 }
 
 DataProviderFactory::DataProviderFactory(const DataProviderFactory &) {};
@@ -17,7 +16,6 @@ DataProviderFactory::~DataProviderFactory() {
   foreach (DataProvider::ImageFactoryClass* item, imageLoaders.values()) {
     delete item;
   }
-  cout << "delete DataProviderFactory" << endl;
 }
 
 DataProviderFactory& DataProviderFactory::getInstance() {
@@ -27,7 +25,6 @@ DataProviderFactory& DataProviderFactory::getInstance() {
 
 DataProvider* DataProviderFactory::loadImage(const QString &filename, QObject* parent) {
   foreach (int key, imageLoaders.uniqueKeys()) {
-    cout << "Searching in key " << key << endl;
     foreach (DataProvider::ImageFactoryClass* loader, imageLoaders.values(key)) {
       DataProvider* dp = loader->getProvider(filename, parent);
       if (dp) return dp;

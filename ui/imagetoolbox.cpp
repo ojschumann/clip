@@ -29,12 +29,10 @@ ImageToolbox::ImageToolbox(Projector* p, QWidget *parent):
   } else {
     deleteLater();
   }
-  cout << "init ImageToolbox" << endl;
 }
 
 ImageToolbox::~ImageToolbox()
 {
-  cout << "delete imageToolbox" << endl;
   delete ui;
 }
 

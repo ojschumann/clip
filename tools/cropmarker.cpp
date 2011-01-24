@@ -162,7 +162,6 @@ void CropMarker::mousePressEvent(QGraphicsSceneMouseEvent *e) {
     }
     for (int i=handles.size(); i--; ) {
       if (items.contains(handles.at(i))) {
-        cout << "i=" << i << endl;
         pressedOnHandle = i;
         e->accept();
         return;
@@ -229,7 +228,6 @@ void CropMarker::mouseMoveEvent(QGraphicsSceneMouseEvent *e) {
   } else if (pressedOnHandle==8) {
     double lastAngle = atan2(e->lastPos().y(), e->lastPos().x());
     double thisAngle = atan2(e->pos().y(), e->pos().x());
-    cout << 180.0*M_1_PI*(thisAngle-lastAngle) << endl;
     setRotation(rotation()+180.0*M_1_PI*(thisAngle-lastAngle));
     setCursors();
   } else {

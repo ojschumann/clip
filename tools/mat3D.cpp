@@ -374,8 +374,6 @@ template <typename T> int TMat3D<T>::fastsvd(TMat3D<T>& L, TMat3D<T>& R) {
 
   upperBidiagonal(L,R);
 
-  if ((L*R).det()<0) cout << "deterror on upperBidiagonal" << endl;
-
   int maxLoops=512;
   double sumDiag=0.0;
   double sumOffdiag=0.0;

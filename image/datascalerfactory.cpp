@@ -4,13 +4,11 @@
 using namespace std;
 
 DataScalerFactory::DataScalerFactory() {
-    cout << "init DataScalerFactory" << endl;
 }
 
 DataScalerFactory::DataScalerFactory(const DataScalerFactory &) {};
 
 DataScalerFactory::~DataScalerFactory() {
-  cout << "delete DataScalerFactory" << endl;
 }
 
 DataScalerFactory& DataScalerFactory::getInstance() {

@@ -218,8 +218,6 @@ void CrystalDisplay::loadFromXML(QDomElement base) {
   if (element.isNull()) return;
   for (QDomElement e=element.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
     if (e.tagName()==XML_CrystalDisplay_Geometry) {
-      QTextStream ts(stdout);
-      e.save(ts, 1);
       if (QWidget* p = dynamic_cast<QWidget*>(parent()))
         p->setGeometry(TagToRect(e, p->geometry()));
     }

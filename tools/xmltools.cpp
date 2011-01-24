@@ -75,7 +75,6 @@ QRect TagToRect(QDomElement element, QRect defaultValue, bool* _ok) {
   int y = readInt(element, "y", ok, defaultValue.y());
   int w = readInt(element, "width", ok, defaultValue.width());
   int h = readInt(element, "height", ok, defaultValue.height());
-  cout << "TtR " << x << " " << y << " " << w << " " << h << endl;
   if (_ok) *_ok = ok;
   return QRect(x,y,w,h);
 }

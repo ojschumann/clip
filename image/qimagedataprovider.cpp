@@ -14,11 +14,9 @@ QImageDataProvider::QImageDataProvider(const QImage& img, QObject *parent) :
     DataProvider(parent),
     data(img)
 {
-  cout << "init QImageDataProvider" << endl;
 }
 
 QImageDataProvider::~QImageDataProvider() {
-  cout << "delete QImageDataProvider" << endl;
 }
 
 QStringList QImageDataProvider::Factory::fileFormatFilters() {
@@ -30,7 +28,6 @@ QStringList QImageDataProvider::Factory::fileFormatFilters() {
 }
 
 DataProvider* QImageDataProvider::Factory::getProvider(QString filename, QObject* parent) {
-  cout << "QImageDP tries to load " << qPrintable(filename) << endl;
   QImage img(filename);
   if (!img.isNull()) {
     QMap<QString, QVariant> headerData;
@@ -39,7 +36,6 @@ DataProvider* QImageDataProvider::Factory::getProvider(QString filename, QObject
         headerData.insert(key, QVariant(img.text(key)));
     }
     headerData.insert("Size", QString("%1x%2").arg(img.width()).arg(img.height()));
-    cout << "Image headers: " << qPrintable(img.text()) << endl;
     QImageDataProvider* provider = new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied), parent);
     provider->insertFileInformation(filename);
     provider->providerInformation.unite(headerData);

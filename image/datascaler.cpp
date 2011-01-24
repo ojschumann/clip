@@ -14,7 +14,6 @@ DataScaler::DataScaler(DataProvider* dp, QObject *parent) :
     QObject(parent),
     provider(dp), cache(0), sourceRect()
 {
-  cout << "init DataScaler" << endl;
   for (int n=0; n<4; n++) {
     BezierCurve* curve = new BezierCurve();
     transferCurves << curve;
@@ -27,7 +26,6 @@ DataScaler::~DataScaler() {
   for (int n=0; n<4; n++)
     delete transferCurves[n];
   transferCurves.clear();
-  cout << "delete DataScaler" << endl;
 }
 
 #include "tools/debug.h"
@@ -77,7 +75,6 @@ QSizeF DataScaler::transformedAbsoluteSize() {
 }
 
 void DataScaler::updateContrastMapping() {
-  cout << "DataScaler::updateContrastMapping()" << endl;
 }
 
 QImage DataScaler::getImage(const QSize &size, const QPolygonF &_sourceRect) {

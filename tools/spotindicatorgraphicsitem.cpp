@@ -6,7 +6,11 @@
 
 using namespace std;
 
-SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem(): QGraphicsItem(), workerSync(0) {
+SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem():
+    QGraphicsItem(),
+    workerPermission(0),
+    workerSync(0)
+{
   setCacheMode(NoCache);
   cacheNeedsUpdate = true;
   setCachedPainting();

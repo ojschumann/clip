@@ -13,11 +13,9 @@ using namespace std;
 DataProvider::DataProvider(QObject *parent) :
     QObject(parent)
 {
-  cout << "init DataProvider" << endl;
 }
 
 DataProvider::~DataProvider() {
-  cout << "delete DataProvider" << endl;
 }
 
 DataProvider* DataProvider::openDevice() {

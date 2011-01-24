@@ -40,8 +40,7 @@ QPainterPath CircleItem::shape() const {
 }
 
 bool CircleItem::contains(const QPointF &point) const {
-  QPointF dp = pos()-point;
-  double r = fasthypot(dp.x(), dp.y());
+  double r = fasthypot(point.x(), point.y());
   return r<radius;
 }
 

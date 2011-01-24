@@ -18,9 +18,7 @@ using namespace std;
 LaueImage::LaueImage(QObject *parent) :
     QObject(parent), provider(0), scaler(0)
 {
-  cout << "init LaueImage" << endl;
   connect(&watcher, SIGNAL(finished()), this, SLOT(doneOpenFile()));
-
 }
 
 
@@ -46,7 +44,6 @@ QPair<DataProvider*, DataScaler*> LaueImage::doOpenFile(QString filename, QDomEl
 }
 
 void LaueImage::doneOpenFile() {
-  cout << "Done with open" << endl;
   DataProvider* dp = watcher.result().first;
   DataScaler* ds = watcher.result().second;
   if (dp && ds) {
@@ -66,7 +63,6 @@ void LaueImage::doneOpenFile() {
 LaueImage::~LaueImage() {
   delete scaler;
   delete provider;
-  cout << "delete LaueImage" << endl;
 }
 
 QImage LaueImage::getScaledImage(const QSize& requestedSize, const QPolygonF& r) {

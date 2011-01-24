@@ -16,11 +16,9 @@ using namespace std;
 BasDataProvider::BasDataProvider(QObject *parent) :
     DataProvider(parent)
 {
-  cout << "init BasDataProvider" << endl;
 }
 
 BasDataProvider::~BasDataProvider() {
-  cout << "delete BasDataProvider" << endl;
 }
 
 
@@ -29,8 +27,6 @@ QStringList BasDataProvider::Factory::fileFormatFilters() {
 }
 
 DataProvider* BasDataProvider::Factory::getProvider(QString filename, QObject *parent) {
-  cout << "BasDP tries to load " << qPrintable(filename) << endl;
-
   QFileInfo info(filename);
 
   // Return if file does not exist
@@ -137,7 +133,6 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, QObject *p
     }
   }
 
-  cout << "Open OK" << endl;
   BasDataProvider* provider = new BasDataProvider(parent);
   provider->insertFileInformation(filename);
   provider->providerInformation.unite(headerData);

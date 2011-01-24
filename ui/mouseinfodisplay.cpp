@@ -106,7 +106,6 @@ void MouseInfoDisplay::showMouseInfo(MousePositionInfo info) {
     if (!lastSender.isNull())
       lastSender->disconnect(this);
     lastSender = info.projector;
-    cout << "Reconnect" << endl;
     connect(info.projector, SIGNAL(spotHighlightChanged(Vec3D)), this, SLOT(receiveSpotHightlight(Vec3D)));
     if (ui->lockReflection->isChecked()) {
       IndexParser parser(ui->reflex->text());

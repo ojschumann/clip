@@ -82,15 +82,10 @@ QPolygonF getPath(const QPointF& from, const QPointF& to, QRectF on, bool clockw
   int quadrant = int(M_2_PI*(atan2(from.y()-0.5, from.x()-0.5)+5*M_PI/4))%4;
   int quadrant_to = int(M_2_PI*(atan2(to.y()-0.5, to.x()-0.5)+5*M_PI/4))%4;
 
-  //cout << "GetPath:" << quadrant << " " << quadrant_to << " ";
-  //cout << M_2_PI*(atan2(from.y()-0.5, from.x()-0.5)+5*M_PI/4) << " ";
-  //cout << M_2_PI*(atan2(to.y()-0.5, to.x()-0.5)+5*M_PI/4) << endl;
-
   QPolygonF corners;
   corners << on.topLeft() << on.topRight() << on.bottomRight() << on.bottomLeft();
 
   while (quadrant!=quadrant_to) {
-    //cout << "Quadrant " << quadrant << endl;
     if (clockwise) {
       path << corners[quadrant];
       quadrant = (quadrant+1)%4;
@@ -133,7 +128,6 @@ void ZoneItem::updatePolygon() {
     QList<QPolygonF> polys;
     polys << generatePolygon(z*(-1), u) << generatePolygon(z, v);
 
-    //cout << "Generate Border Points" << endl;
     QList<QPointF> borderPoints;
     QRectF sImgRect = imgRect.adjusted(0.0001, 0.0001, -0.0001, -0.0001);
     foreach (QPolygonF q, polys) {
@@ -142,18 +136,6 @@ void ZoneItem::updatePolygon() {
     }
     qSort(borderPoints.begin(), borderPoints.end(), PointSort);
 
-    //cout << "Clear Border Points " << borderPoints.size() <<  endl;
-    if (borderPoints.size()%2==1) {
-      cout << "odd borderpointsize..." << endl;
-      foreach (QPointF p, borderPoints) {
-        cout << "(" << p.x() << "," << p.y() << ")" << endl;
-      }
-      cout << "Polys.size()=" << polys.size() << endl;
-      foreach (QPolygonF p, polys) {
-        cout << "(" << p.first().x() << "," << p.first().y() << ") -> ";
-        cout << "(" << p.last().x() << "," << p.last().y() << ")" << endl;
-      }
-    }
     while (borderPoints.size()>1) {
       QPointF p = borderPoints.takeFirst();
       QPointF q;
@@ -198,7 +180,6 @@ void ZoneItem::updatePolygon() {
     }
 
 
-    ////cout << "Search closed Items" << endl;
     QList<QPolygonF> closedItems;
     QPolygonF bigPoly;
     foreach (QPolygonF p, polys)
@@ -210,7 +191,6 @@ void ZoneItem::updatePolygon() {
     if (!bigPoly.isEmpty())
       zonePolys << bigPoly;
 
-    //cout << "Search containing Items" << endl;
     for (int n=0; n<closedItems.size(); n++) {
       for (int m=0; m<closedItems.size(); m++) {
         if (m==n) continue;
@@ -228,13 +208,11 @@ void ZoneItem::updatePolygon() {
         }
       }
     }
-    //cout << "Fill items to zonePolys" << endl;
     foreach (QPolygonF p, closedItems) {
       if (!p.empty())
         zonePolys<< p;
     }
 
-    //cout << "Finished" << endl;
   }
 
 
@@ -268,16 +246,12 @@ void ZoneItem::updateOptimalZone() {
   }
 
   if (hasCrossingSpotMarkers) {
-    M+= u^u;
-    M+= v^v;
-    Mat3D Q1, Q2, MF, L,R;
-    MF=M;
-    M.svd(Q1, Q2);
-    MF.fastsvd(L, R);
-    Vec3D zp = Q2.transposed()*Vec3D(0,0,1);
-    Vec3D zpf = R.transposed()*Vec3D(0,0,1);
+    M += u^u;
+    M += v^v;
+    Mat3D L,R;
 
-    z = zp;
+    M.fastsvd(L, R);
+    z = R.transposed()*Vec3D(0,0,1);
   }
 
   if (z!=zoneNormal) {

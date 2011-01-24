@@ -18,13 +18,11 @@ template <typename T> SimpleMonochromScaler<T>::SimpleMonochromScaler(DataProvid
   datawidth = dp->size().width();
   dataheight = dp->size().height();
   makeValueIndex();
-  cout << "init SimpleMonochromeScaler" << endl;
 }
 
 template <typename T> SimpleMonochromScaler<T>::SimpleMonochromScaler(const SimpleMonochromScaler &): AbstractMonoScaler(0)  {}
 
 template <typename T> SimpleMonochromScaler<T>::~SimpleMonochromScaler() {
-  cout << "delete SimpleMonochromeScaler" << endl;
 }
 
 template <typename T> DataScaler* SimpleMonochromScaler<T>::getScaler(DataProvider *dp, QObject* parent) {
@@ -42,7 +40,6 @@ template <typename T> QRgb SimpleMonochromScaler<T>::getRGB(const QPointF &p) {
   }
 }
 
-#include <QTime>
 
 
 
@@ -55,7 +52,6 @@ template <typename T> void SimpleMonochromScaler<T>::makeValueIndex() {
   // store the index of each pixel for every pixel value
   set<UniqueHelper> indexSet;
   std::tr1::unordered_set<UniqueHelper, hash> uniqueSet;
-  QTime time=QTime::currentTime();
   // loop over all pixel
   for (int i=0; i<provider->pixelCount(); i++) {
     // Try to insert pixel, res containes an iterator to the element and
@@ -63,11 +59,8 @@ template <typename T> void SimpleMonochromScaler<T>::makeValueIndex() {
     uniqueSet.insert(UniqueHelper(*mydata)).first->addIndex(i);
     mydata++;
   }
-  cout << "uset time = " << time.msecsTo(QTime::currentTime()) << endl;
   foreach (UniqueHelper u, uniqueSet) indexSet.insert(u);
-  cout << "uset time = " << time.msecsTo(QTime::currentTime()) << endl;
 
-  time=QTime::currentTime();
 
   // indexSet.size() is now the number of distinct pixel values
   unmappedPixelValues.resize(indexSet.size());
@@ -91,9 +84,7 @@ template <typename T> void SimpleMonochromScaler<T>::makeValueIndex() {
       imagePosToPixelValue[i]=n;
     n++;
   }
-  cout << "map time = " << time.msecsTo(QTime::currentTime()) << endl;
 
-  cout << "setSize: " << indexSet.size() << " " << provider->pixelCount() <<   " t="  << time.msecsTo(QTime::currentTime()) << endl;
   updateContrastMapping();
 }
 
@@ -120,16 +111,15 @@ template <typename T> void SimpleMonochromScaler<T>::updateContrastMapping() {
   emit histogramChanged(channels[0], channels[1], channels[2]);
 }
 
-#include <QCheckBox>
 template <typename T> QList<QWidget*> SimpleMonochromScaler<T>::toolboxPages() {
   QList<QWidget*> pages;
 
-  QCheckBox* b = new QCheckBox("Histogram Equilisation");
+  /*QCheckBox* b = new QCheckBox("Histogram Equilisation");
   b->setChecked(histogramEqualisation);
   b->setObjectName("Scaler");
   connect(b, SIGNAL(toggled(bool)), this, SLOT(setHistogramEqualisation(bool)));
   pages << b;
-
+  */
   return pages;
 }
 

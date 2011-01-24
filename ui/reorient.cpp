@@ -93,25 +93,18 @@ bool Reorient::calcRotationAngles(double &angle1, double &angle2) {
   Vec3D nto = toNormal();
   if (nto.isNull()) return false;
 
-  cout << "rotate (" << nfrom(0) <<"," << nfrom(1) << "," << nfrom(2) << ") to (";
-  cout << nto(0) <<"," << nto(1) << "," << nto(2) << ") via x1=(";
-  cout << gonioAxis.at(0)(0) <<"," << gonioAxis.at(0)(1) << "," << gonioAxis.at(0)(2) << ") and x2=(";
-  cout << gonioAxis.at(1)(0) <<"," << gonioAxis.at(1)(1) << "," << gonioAxis.at(1)(2) << ")" << endl;
-
   // Calculates a line u1+lambda*u2 in 3d-space, that is the intersection of the
   // two planes with normal Vector
   // gonioAxis[0] and gonioAxis[1] and that contain nFrom and nTo, respectively
   Vec3D u1, u2;
   if (!calcLine(nfrom, nto, u1, u2)) return false;
 
-  cout << "Line: (" << u1(0) << "," << u1(1) << "," << u1(2) << ") + l*(" << u2(0) << "," << u2(1) << "," << u2(2) << ")" << endl;
 
   double score = -1;
   // check the up to two points of intersection of the line with the unit sphere
   foreach (Vec3D v, calcPossibleIntermediatePositions(u1, u2)) {
     double aChi=calcRotationAngle(nfrom, v, gonioAxis.at(0));
     double aPhi=calcRotationAngle(v, nto, gonioAxis.at(1));
-    cout << "inter: (" << v(0) << "," << v(1) << "," << v(2) << ") " << 180.0*M_1_PI*aChi << " " << 180.0*M_1_PI*aPhi << endl;
     if ((score<0) || (score > (aChi*aChi+aPhi*aPhi))) {
       angle1 = aChi;
       angle2 = aPhi;

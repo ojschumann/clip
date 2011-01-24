@@ -20,8 +20,6 @@ Populate all ToolTips with useful help...
 
 Scattering orders for reflection info
 
-ResolutionCalculator -> Implement ...
-
 Refinement
   Stop if model changes
 

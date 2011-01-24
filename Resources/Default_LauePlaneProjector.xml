@@ -1,5 +1,5 @@
 <ProjectionPlane projectortype="LauePlaneProjector">
-  <Geometry width="331" height="384"/>
+  <Geometry width="350" height="405"/>
   <Projector>
     <DetSize width="150" dist="30" height="150"/>
   </Projector>

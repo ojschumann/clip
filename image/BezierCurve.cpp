@@ -170,14 +170,11 @@ int BezierCurve::getCurveParamIdx(float x) {
   QList<CurveParams>::const_iterator iter=qLowerBound(params.constBegin(), params.constEnd(), cp);
   if (iter==params.constEnd())
     iter--;
-  //cout << "iterpos " << iter-params.constBegin() << endl;
   return qMax(0,iter-params.constBegin());
 }
 
 BezierCurve::CurveParams BezierCurve::getCurveParam(float x) {
-  //cout << "get Curve Param for " << x << endl;
   int p=getCurveParamIdx(x);
-  //cout << "is Param " << p << "/" << params.size() << endl;
   return params[p];
 }
 

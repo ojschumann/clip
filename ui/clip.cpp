@@ -146,10 +146,12 @@ void Clip::setActiveSubWindow(QWidget *window) {
   }
 }
 
+#include "win_version.h"
+
 void Clip::on_actionAbout_triggered(bool) {
   QString message("This is the Cologne Laue Indexation Program (CLIP)\n");
   message += "a program to index and refine laue exposures.\n\n";
-  message += "Version 4.0alpha\n";
+  message += "Version " + QString(VER_PRODUCTVERSION_STR) + "\n";
   message += "Mercurial ID: " + QString(HG_REPRO_ID) + " Revision: " + HG_REPRO_REV + "\n";
   message += "Mercurial Date: " + QString(HG_REPRO_DATE) + "\n";
   message += "Build Date: " + QString(BUILD_DATE) +" " + QString(BUILD_TIME) + "\n\n";
