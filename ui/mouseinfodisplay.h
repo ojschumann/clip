@@ -21,6 +21,7 @@ public:
   explicit MouseInfoDisplay(QWidget *parent = 0);
   virtual ~MouseInfoDisplay();
   virtual bool eventFilter(QObject *, QEvent *);
+  virtual QSize sizeHint() const;
 signals:
   void highlightMarker(Vec3D);
 public slots:

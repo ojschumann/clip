@@ -79,6 +79,9 @@ MouseInfoDisplay::~MouseInfoDisplay()
   delete ui;
 }
 
+QSize MouseInfoDisplay::sizeHint() const {
+  return minimumSizeHint();
+}
 
 class Macro {
 public:
@@ -189,16 +192,11 @@ void MouseInfoDisplay::doEmitHighlightMarker(const Vec3D &v, bool force) {
 void MouseInfoDisplay::cursorTableVisiblyToggled(bool b) {
   ui->cursorTable->setVisible(b);
   ui->cursorBox->updateGeometry();
-  QSize s = minimumSizeHint();
-  setMinimumSize(s);
-  setMaximumSize(s);
+  updateGeometry();
   if (parentWidget()) {
-    s = parentWidget()->minimumSizeHint();
-    parentWidget()->setMinimumSize(s);
-    parentWidget()->setMaximumSize(s);
+    parentWidget()->updateGeometry();
+    parentWidget()->adjustSize();
   }
-  ui->cursorTable->updateGeometry();
-  ui->cursorTable->adjustSize();
 }
 
 bool MouseInfoDisplay::eventFilter(QObject *o, QEvent *e) {
