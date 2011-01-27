@@ -47,6 +47,9 @@
         </item>
         <item row="0" column="1">
          <widget class="QDoubleSpinBox" name="detDist">
+          <property name="toolTip">
+           <string>Crystal - film distance</string>
+          </property>
           <property name="minimum">
            <double>1.000000000000000</double>
           </property>
@@ -70,6 +73,9 @@
         </item>
         <item row="1" column="1">
          <widget class="QDoubleSpinBox" name="detWidth">
+          <property name="toolTip">
+           <string>Width of the film</string>
+          </property>
           <property name="minimum">
            <double>10.000000000000000</double>
           </property>
@@ -93,6 +99,9 @@
         </item>
         <item row="2" column="1">
          <widget class="QDoubleSpinBox" name="detHeight">
+          <property name="toolTip">
+           <string>Height of the film</string>
+          </property>
           <property name="minimum">
            <double>10.000000000000000</double>
           </property>
@@ -116,6 +125,9 @@
         </item>
         <item row="3" column="1">
          <widget class="QDoubleSpinBox" name="detMinQ">
+          <property name="toolTip">
+           <string>Minimal wavevector</string>
+          </property>
           <property name="suffix">
            <string/>
           </property>
@@ -142,6 +154,9 @@
         </item>
         <item row="4" column="1">
          <widget class="QDoubleSpinBox" name="detMaxQ">
+          <property name="toolTip">
+           <string>Maximal Wavevector</string>
+          </property>
           <property name="decimals">
            <number>3</number>
           </property>
@@ -162,6 +177,14 @@
         </item>
         <item row="5" column="1">
          <widget class="QDoubleSpinBox" name="detOmega">
+          <property name="toolTip">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Orientation of the scattering plane in degrees&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0° is transmission geometry, 180° backscattering geometry.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="minimum">
            <double>-360.000000000000000</double>
           </property>

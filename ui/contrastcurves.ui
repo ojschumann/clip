@@ -43,6 +43,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Select the color channel for editing</string>
+       </property>
        <item>
         <property name="text">
          <string>Value</string>
@@ -73,6 +76,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Use one of the predefined transfer curves</string>
+       </property>
        <item>
         <property name="text">
          <string/>
@@ -82,6 +88,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="loadButton">
+       <property name="toolTip">
+        <string>Load a transfer curve file from disk</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -93,6 +102,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="saveButton">
+       <property name="toolTip">
+        <string>Save the actual transfer curve to disk</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>

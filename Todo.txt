@@ -1,3 +1,5 @@
+Check, what happens if no imageprovider could load a file
+
 Config
   Allow to configure colors
   configurable width of Zonemarker (including zero)

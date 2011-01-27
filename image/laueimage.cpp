@@ -28,18 +28,17 @@ void LaueImage::startOpenFile(QString filename, QDomElement base) {
 
 QPair<DataProvider*, DataScaler*> LaueImage::doOpenFile(QString filename, QDomElement base) {
   DataProvider* dp = DataProviderFactory::getInstance().loadImage(filename);
-  DataScaler* ds = NULL;
-  if (dp) {
-    ds  = DataScalerFactory::getInstance().getScaler(dp);
+  DataScaler* ds = dp ? DataScalerFactory::getInstance().getScaler(dp) : NULL;
+  if (ds && dp) {
+    if (!base.isNull()) {
+      dp->loadFromXML(base);
+      ds->loadFromXML(base);
+      loadCurvesFromXML(base, ds);
+    }
+    // dp and ds are created in this thread, but should live in the thread of LaueImage
+    dp->moveToThread(thread());
+    ds->moveToThread(thread());
   }
-  if (ds && dp && !base.isNull()) {
-    dp->loadFromXML(base);
-    ds->loadFromXML(base);
-    loadCurvesFromXML(base, ds);
-  }
-  // dp and ds are created in this thread, but should live in the thread of LaueImage
-  dp->moveToThread(thread());
-  ds->moveToThread(thread());
   return qMakePair(dp, ds);
 }
 
@@ -53,16 +52,16 @@ void LaueImage::doneOpenFile() {
     scaler->setParent(this);
     connect(scaler, SIGNAL(imageContentsChanged()), this, SIGNAL(imageContentsChanged()));
     connect(scaler, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), this, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)));
-    emit openFinished(this);
   } else {
     if (dp) delete dp;
     if (ds) delete ds;
   }
+  emit openFinished(this);
 }
 
 LaueImage::~LaueImage() {
-  delete scaler;
-  delete provider;
+  if (scaler) delete scaler;
+  if (provider) delete provider;
 }
 
 QImage LaueImage::getScaledImage(const QSize& requestedSize, const QPolygonF& r) {
