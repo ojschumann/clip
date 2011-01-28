@@ -34,6 +34,7 @@
 #include "tools/spotitem.h"
 #include "tools/zoneitem.h"
 #include "tools/ruleritem.h"
+#include "tools/cropmarker.h"
 
 // List of all projectors. Sort of a hack ;-)
 // Used to synchronize the Mousemode
@@ -403,7 +404,11 @@ void ProjectionPlane::slotOpenResolutionCalc() {
 }
 
 void ProjectionPlane::on_actionCrop_triggered() {
-  projector->showCropMarker();
+  if (projector->getCropMarker()) {
+    projector->getCropMarker()->doPublishCrop();
+  } else {
+    projector->showCropMarker();
+  }
 }
 
 void ProjectionPlane::imageLoaded(LaueImage *img) {

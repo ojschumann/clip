@@ -180,6 +180,10 @@ void CropMarker::mouseReleaseEvent(QGraphicsSceneMouseEvent *e) {
 
 
 void CropMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e) {
+  doPublishCrop();
+}
+
+void CropMarker::doPublishCrop() {
   QPolygonF rect;
   double w = size.width()/2;
   double h = size.height()/2;

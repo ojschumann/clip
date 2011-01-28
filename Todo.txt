@@ -1,4 +1,6 @@
-Check, what happens if no imageprovider could load a file
+Crop marker
+  # Handle Cursor generation
+  # Larger resize handles (size of cursor?)
 
 Config
   Allow to configure colors
@@ -44,3 +46,5 @@ Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
 
 Implement a faster MonochromeScaler
 
+Mode CropMarker to ProjectionPlane. Handling could be entirely done here, might be a cleaner design.
+Check is other functions could be moved as well.

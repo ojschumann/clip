@@ -109,7 +109,7 @@
     <string>Zoom</string>
    </property>
    <property name="toolTip">
-    <string>Zoom</string>
+    <string>Zoom mode. Left click and drag zooms in the projection plane. Press right mouse-button to unzoom.</string>
    </property>
   </action>
   <action name="panAction">
@@ -123,6 +123,9 @@
    <property name="text">
     <string>Pan</string>
    </property>
+   <property name="toolTip">
+    <string>Pan mode. Left click and drag changes the orientation in a way, that the reciprocal position under the mouse curser stayes the same.</string>
+   </property>
   </action>
   <action name="rotAction">
    <property name="checkable">
@@ -134,6 +137,9 @@
    </property>
    <property name="text">
     <string>Rotation</string>
+   </property>
+   <property name="toolTip">
+    <string>Rotation mode. Left click and drag rotates the crystal around the set rotation axis. Use the context menu, that appears on right mouse click or the rotation tool from the Tools menu to set the rotation axis.</string>
    </property>
   </action>
   <action name="markAction">
@@ -147,6 +153,9 @@
    <property name="text">
     <string>Mark</string>
    </property>
+   <property name="toolTip">
+    <string>Spot mark mode. Left click insert a spot marker at the actual mouse position.</string>
+   </property>
   </action>
   <action name="infoAction">
    <property name="checkable">
@@ -159,6 +168,9 @@
    <property name="text">
     <string>Info</string>
    </property>
+   <property name="toolTip">
+    <string>Info mode. Left click insert a info marker at the actual mouse position.</string>
+   </property>
   </action>
   <action name="configAction">
    <property name="icon">
@@ -167,6 +179,9 @@
    </property>
    <property name="text">
     <string>Configure</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the configuration window for this projector.</string>
    </property>
   </action>
   <action name="openImgAction">
@@ -177,6 +192,9 @@
    <property name="text">
     <string>Open Image</string>
    </property>
+   <property name="toolTip">
+    <string>Opens an image file</string>
+   </property>
   </action>
   <action name="closeImgAction">
    <property name="icon">
@@ -185,6 +203,9 @@
    </property>
    <property name="text">
     <string>Close Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Close the cloaded image</string>
    </property>
   </action>
   <action name="rulerAction">
@@ -198,6 +219,9 @@
    <property name="text">
     <string>Measure Resolution</string>
    </property>
+   <property name="toolTip">
+    <string>Ruler insert mode. Left click and drag insert a ruler with control points at drag start and drag end position. That is used by the reolutionclaculator tool in the Image Toolbox to calculate the absolute pixel size of the image.</string>
+   </property>
   </action>
   <action name="rotCWAction">
    <property name="icon">
@@ -206,6 +230,9 @@
    </property>
    <property name="text">
     <string>Clockwise Rotation</string>
+   </property>
+   <property name="toolTip">
+    <string>Clockwise rotation of the image and all markers.</string>
    </property>
   </action>
   <action name="rotCCWAction">
@@ -216,6 +243,9 @@
    <property name="text">
     <string>Counter Clockwise Rotation</string>
    </property>
+   <property name="toolTip">
+    <string>Counter clockwise rotation of the image and all markers.</string>
+   </property>
   </action>
   <action name="flipHAction">
    <property name="icon">
@@ -225,6 +255,9 @@
    <property name="text">
     <string>Flip Horizontally</string>
    </property>
+   <property name="toolTip">
+    <string>Horizontally flip of the image and all markers.</string>
+   </property>
   </action>
   <action name="flipVAction">
    <property name="icon">
@@ -233,6 +266,9 @@
    </property>
    <property name="text">
     <string>Flip Vertically</string>
+   </property>
+   <property name="toolTip">
+    <string>Vertically of the image and all markers.</string>
    </property>
   </action>
   <action name="imageToolboxAction">
@@ -244,7 +280,7 @@
     <string>Image Toolbox</string>
    </property>
    <property name="toolTip">
-    <string>Contrast Enhancement, Resolution Calculation and Cropping of a loaded Image</string>
+    <string>Contrast Enhancement, Resolution Calculation and Cropping of a loaded image</string>
    </property>
   </action>
   <action name="markZonesAction">
@@ -258,6 +294,9 @@
    <property name="text">
     <string>Mark Zones</string>
    </property>
+   <property name="toolTip">
+    <string>Zone mark mode. Left click and drag insert a zone marker with control points at drag start and drag end position.</string>
+   </property>
   </action>
   <action name="actionCrop">
    <property name="icon">
@@ -267,6 +306,9 @@
    <property name="text">
     <string>Crop</string>
    </property>
+   <property name="toolTip">
+    <string>Shows the crop marker. If the crop marker is correctly positioned, a further click on this button or a double click inside the crop marker performed the cropping.</string>
+   </property>
   </action>
   <action name="actionPrint">
    <property name="icon">
@@ -275,6 +317,9 @@
    </property>
    <property name="text">
     <string>Print</string>
+   </property>
+   <property name="toolTip">
+    <string>Print the actiual projector view.</string>
    </property>
   </action>
  </widget>

@@ -605,6 +605,7 @@ void Projector::setCrop(QPolygonF rect) {
   if (QTransform::quadToSquare(det2img.map(rect), t)) {
     doImgRotation(t);
   }
+  delCropMarker();
 }
 
 CropMarker* Projector::getCropMarker() {

@@ -14,6 +14,7 @@ public:
   explicit CropMarker(const QPointF& pCenter, double _dx, double _dy, double _angle, double handleSize, QGraphicsItem  *parent = 0);
   QPolygonF getRect();
   virtual void setImgTransform(const QTransform &);
+  void doPublishCrop();
 
 signals:
   void cancelCrop();

@@ -199,7 +199,7 @@ protected:
   ItemStore<ZoneItem> zoneMarkerStore;
   // Ruler Item
   ItemStore<RulerItem> rulerStore;
-  // Info Items. These will be set on Mousepress from Python and be deleted on orientation change or slot!
+  // Info Items. These will be set on Mousepress and deleted on orientation change or slot
   ItemStore<QGraphicsRectItem> infoStore;
   // The Crop Marker
   QPointer<CropMarker> cropMarker;
