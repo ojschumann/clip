@@ -10,7 +10,7 @@ TARGET = Clip
 TEMPLATE = app
 
 win32 {
-#        CONFIG += console
+        CONFIG += console
 }
 
 DEFFILE = $(OBJECTS_DIR)/defs.o

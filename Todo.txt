@@ -1,3 +1,5 @@
+F2 & F3 does't change the active projector
+
 Crop marker
   # Handle Cursor generation
   # Larger resize handles (size of cursor?)

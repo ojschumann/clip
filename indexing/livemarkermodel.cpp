@@ -126,7 +126,9 @@ QVariant LiveMarkerModel::data(const QModelIndex &index, int role) const {
       TVec3D<int> n = markers.at(index.row())->getIntegerIndex();
       return QVariant(n(col-1));
     } else if (col==4 || col==5 || col==6) {
-      Vec3D n = markers.at(index.row())->getRationalIndex();
+      // TODO Change
+      //Vec3D n = markers.at(index.row())->getRationalIndex();
+      Vec3D n = markers.at(index.row())->getMarkerNormal();
       return QVariant(QString::number(n(col-4), 'f', 2));
     } else if (col==7) {
       return QVariant(QString::number(markers.at(index.row())->getAngularDeviation(), 'f', 2));
