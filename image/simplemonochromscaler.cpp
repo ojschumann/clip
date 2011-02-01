@@ -131,5 +131,7 @@ template <typename T> void SimpleMonochromScaler<T>::setHistogramEqualisation(bo
 }
 
 template class SimpleMonochromScaler<float>;
+template class SimpleMonochromScaler<unsigned int>;
 
 bool SimpleMonochromScaler_Float = DataScalerFactory::registerDataScaler(DataProvider::Float32, &SimpleMonochromScaler<float>::getScaler);
+bool SimpleMonochromScaler_Int = DataScalerFactory::registerDataScaler(DataProvider::UInt32, &SimpleMonochromScaler<unsigned int>::getScaler);

@@ -10,7 +10,7 @@ TARGET = Clip
 TEMPLATE = app
 
 win32 {
-#        CONFIG += console
+        CONFIG += console
 }
 
 DEFFILE = $(OBJECTS_DIR)/defs.o
@@ -108,7 +108,8 @@ SOURCES += main.cpp\
     refinement/fitparametergroup.cpp \
     refinement/fitparametertreeitem.cpp \
     ui/hkltool.cpp \
-    tools/resizeingtablewidget.cpp
+    tools/resizeingtablewidget.cpp \
+    image/brukerprovider.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -182,7 +183,8 @@ HEADERS  += ui/clip.h \
     refinement/fitparametertreeitem.h \
     ui/hkltool.h \
     tools/resizeingtablewidget.h \
-    win_version.h
+    win_version.h \
+    image/brukerprovider.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

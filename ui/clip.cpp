@@ -113,7 +113,9 @@ Crystal* Clip::getMostRecentCrystal(bool checkProjectors) {
 }
 
 Projector* Clip::getMostRecentProjector(bool withCrystal) {
-  foreach (QMdiSubWindow* window, ui->mdiArea->subWindowList(QMdiArea::StackingOrder)) {
+  QList<QMdiSubWindow*> mdiWindows = ui->mdiArea->subWindowList(QMdiArea::StackingOrder);
+  while (!mdiWindows.empty()) {
+    QMdiSubWindow* window = mdiWindows.takeLast();
     ProjectionPlane* pp;
     if (((pp=dynamic_cast<ProjectionPlane*>(window->widget()))!=NULL) && (!withCrystal || pp->getProjector()->getCrystal())) {
       return pp->getProjector();

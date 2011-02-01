@@ -37,10 +37,10 @@ DataProvider* XYZDataProvider::Factory::getProvider(QString filename, QObject *p
   in >> tmp;
   int height = tmp;
 
+  if ((2*width*height+4)!=imgFile.size()) return NULL;
   QVector<float> pixelData;
   pixelData.reserve(width*height);
 
-  if ((2*width*height+4)!=imgFile.size()) return NULL;
 
   for (int i=0; i<width*height; i++) {
     in >> tmp;

@@ -1,5 +1,3 @@
-F2 & F3 does't change the active projector
-
 Crop marker
   # Handle Cursor generation
   # Larger resize handles (size of cursor?)
@@ -22,7 +20,7 @@ LaueImage
 
 Populate all ToolTips with useful help...
 
-######### Beta Version Line ########################
+######### Release Version Line ########################
 
 Scattering orders for reflection info
 
@@ -48,5 +46,5 @@ Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
 
 Implement a faster MonochromeScaler
 
-Mode CropMarker to ProjectionPlane. Handling could be entirely done here, might be a cleaner design.
+Move CropMarker handling to ProjectionPlane. Handling could be entirely done here, might be a cleaner design.
 Check is other functions could be moved as well.
