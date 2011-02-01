@@ -88,7 +88,6 @@ protected:
   static QList<ProjectionPlane*> allPlanes;
 
 private slots:
-  void on_actionTestAuto_triggered();
   void on_actionPrint_triggered();
   void on_actionCrop_triggered();
   void on_imageToolboxAction_triggered();
