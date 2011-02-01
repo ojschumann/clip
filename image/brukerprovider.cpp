@@ -27,7 +27,7 @@ QStringList BrukerProvider::Factory::fileFormatFilters() {
 }
 
 
-template <typename T> QVector<unsigned int> readArrayFromSfrm(QFile& f, int len) {
+template <typename T> QVector<unsigned int> readArrayFromSfrmTmpl(QFile& f, int len) {
   T val;
   QVector<unsigned int> data;
   data.reserve(len);
@@ -40,6 +40,24 @@ template <typename T> QVector<unsigned int> readArrayFromSfrm(QFile& f, int len)
     data << val;
   }
   return data;
+}
+
+QVector<unsigned int> readArrayFromSfrm(QFile& f, int len, int bytes) {
+  if (bytes==1) {
+    return readArrayFromSfrmTmpl<quint8>(f, len);
+  } else if (bytes==2) {
+    return readArrayFromSfrmTmpl<quint16>(f, len);
+  } else if (bytes==4) {
+    return readArrayFromSfrmTmpl<quint32>(f, len);
+  }
+  return QVector<unsigned int>();
+}
+
+int padTo(int value, int pad) {
+  int v = value%pad;
+  if (v!=0)
+    value += pad - v;
+  return value;
 }
 
 DataProvider* BrukerProvider::Factory::getProvider(QString filename, QObject *parent) {
@@ -58,7 +76,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, QObject *pa
     QString key = headerfield.left(7).simplified();
     QString value = headerfield.right(72).simplified();
     if (data[0]==char(0x1a) && data[1]==char(0x04)) {
-      // padded -> end of header
+      // padded -> indicates end of header
       break;
     } else if (key=="HDRBLKS") {
       headerSize = 512*value.toInt();
@@ -95,17 +113,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, QObject *pa
   int bytesPerPixel = byteCounts.at(0).toInt(&ok);
   if (!ok) return NULL;
 
-  int bytesPerUnderflow = 0;
-  int numberUnderflow = 0;
-  if (headerData["FORMAT"].toInt()>=100) {
-    if (byteCounts.size()<2) return NULL;
-    bytesPerUnderflow = byteCounts.at(1).toInt(&ok);
-    if (!ok) return NULL;
-
-    if (overflowNumbers.size()<1) return NULL;
-    numberUnderflow = overflowNumbers.at(0).toInt(&ok);
-    if (!ok) return NULL;
-  }
+  int dataSize = cols*rows*bytesPerPixel;
 
   int bytesPerUnderflow = 0;
   int numberUnderflow = 0;
@@ -120,20 +128,16 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, QObject *pa
     if (!ok) return NULL;
   }
 
-  int underflowTableSize = (bytesPerUnderflow * numberUnderflow);
-  if (underflowTableSize%16!=0)
-    underflowTableSize += 16 - underflowTableSize%16;
+  int underflowTableSize = padTo(bytesPerUnderflow * numberUnderflow, 16);
 
-
-  int overflowSize = 0;
+  int overflowTableSize = 0;
   if (headerData["FORMAT"].toInt()<100) {
-    // TODO Parse this strange thing
     if (overflowNumbers.size()!=1) return NULL;
-    overflowSize = 16*overflowNumbers.at(0).toInt(&ok);
+    overflowTableSize = 16*overflowNumbers.at(0).toInt(&ok);
     if (!ok) return NULL;
   } else {
     int twoByteOverflowCount = 0;
-    int foutByteOverflowCount = 0;
+    int fourByteOverflowCount = 0;
     if (overflowNumbers.size()!=3) return NULL;
     if (bytesPerPixel==1) {
       twoByteOverflowCount = overflowNumbers.at(1).toInt(&ok);
@@ -143,40 +147,56 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, QObject *pa
       fourByteOverflowCount = overflowNumbers.at(2).toInt(&ok);
       if (!ok) return NULL;
     }
-
-
-
-
+    overflowTableSize  = padTo(2*twoByteOverflowCount, 16);
+    overflowTableSize += padTo(4*fourByteOverflowCount, 16);
   }
 
-
-
+  if ((headerSize+dataSize+underflowTableSize+overflowTableSize)!=imgFile.size())
+    return NULL;
 
 
   QVector<unsigned int> pixelData;
-  pixelData.reserve(rows*cols);
-  imgFile.seek(512*headerData["HDRBLKS"].toInt());
+  imgFile.seek(headerSize);
+  pixelData = readArrayFromSfrm(imgFile, rows*cols, bytesPerPixel);
 
-  for (int n=0; n<cols*rows; n++) {
+  //TODO: check underflowdata
+  if (headerData["FORMAT"].toInt()<100) {
+    // TODO implementold overflow format
+  } else {
+    int twoByteOverflowCount = overflowNumbers.at(1).toInt();
+    int fourByteOverflowCount = overflowNumbers.at(2).toInt();
+    QVector<unsigned int> overflowData;
+    int sigVal;
     if (bytesPerPixel==1) {
-      quint8 val;
-      in >> val;
-      pixelData << val;
+      sigVal = 0xFF;
+      imgFile.seek(headerSize+dataSize+underflowTableSize);
+      overflowData = readArrayFromSfrm(imgFile, twoByteOverflowCount, 2);
+
+      QVector<unsigned int> fourByteOverflowData;
+      imgFile.seek(headerSize+dataSize+underflowTableSize+padTo(2*twoByteOverflowCount, 16));
+      fourByteOverflowData = readArrayFromSfrm(imgFile, fourByteOverflowCount, 4);
+      int i=0;
+      for (int n=0; n<overflowData.size(); n++) {
+        if (overflowData.at(n)==0xFFFF) {
+          overflowData[n]=fourByteOverflowData.at(i++);
+        }
+      }
+      qDebug() << i << " " << fourByteOverflowCount;
     } else if (bytesPerPixel==2) {
-      quint16 val;
-      in >> val;
-      pixelData << val;
-    } else if (bytesPerPixel==4) {
-      quint32 val;
-      in >> val;
-      pixelData << val;
+      sigVal = 0xFFFF;
+      imgFile.seek(headerSize+dataSize+underflowTableSize);
+      overflowData = readArrayFromSfrm(imgFile, fourByteOverflowCount, 4);
     }
+    int i=0;
+    for (int n=0; n<pixelData.size(); n++) {
+      if (pixelData.at(n)==sigVal) {
+        pixelData[n]=overflowData.at(i++);
+      }
+    }
+    qDebug() << i << " " << twoByteOverflowCount;
   }
 
-  for (int n=0; n<cols*rows; n++) {
-  if ((bytesPerPixel==1 && pixelData.last()==0xFF) || (bytesPerPixel==2 && pixelData.last()==0xFFFF)) {
-    qDebug() << "Overflow " << n;
-  }
+
 
 
   BrukerProvider* provider = new BrukerProvider(parent);
