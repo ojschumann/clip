@@ -1,6 +1,7 @@
 Crop marker
   # Handle Cursor generation
   # Larger resize handles (size of cursor?)
+  # Omit jump of primary beam marker
 
 Config
   Allow to configure colors
@@ -9,7 +10,6 @@ Config
   Save Position/Size switch
 
 LaueImage
-  # Display of Images from Bruker Apex (reduced Wavelength band)
   # implement setting of resolution from ResolutionCalculator
   # Generic Interface for ImageInfo
     * hasCrystalOrientation / getOrientation
@@ -17,8 +17,6 @@ LaueImage
     * DetectorOrientation
     * detectorDistance
     * ...
-
-Populate all ToolTips with useful help...
 
 ######### Release Version Line ########################
 

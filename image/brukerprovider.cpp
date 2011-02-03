@@ -182,7 +182,8 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, QObject *pa
     // Read underflow table
     imgFile.seek(headerSize+dataSize);
     QList<unsigned int> underflowData = readArrayFromSfrm(imgFile, qMax(0, numberUnderflow), bytesPerUnderflow).toList();
-    int baselineOffset = numberUnderflow>=0 ? headerData["NEXP"].toString().split(' ').at(2).toInt(&ok) : 0;
+    //int baselineOffset = numberUnderflow>=0 ? headerData["NEXP"].toString().split(' ').at(2).toInt(&ok) : 0;
+    int baselineOffset = headerData["NEXP"].toString().split(' ').at(2).toInt(&ok);
     if (!ok) return NULL;
 
     // Read overflow tables (up to two)

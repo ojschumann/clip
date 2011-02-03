@@ -292,6 +292,7 @@ void LauePlaneProjector::movedPBMarker() {
   } else if (omega()<89.5) {
     q=scattered2det(Vec3D(-1,0,0), b);
   }
+  qDebug() << "movedPbMarker" << p << q;
   if (b) {
     setDetOffset(xOffset()+(p.x()-q.x())*dist(), yOffset()+(p.y()-q.y())*dist());
   }
@@ -308,6 +309,7 @@ void LauePlaneProjector::updatePBPos() {
     }
     if (b) {
       CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
+      qDebug() << "updatePbPos" << center->scenePos() << q;
       center->setPosNoSig(det2img.map(q));
     }
   }
@@ -358,7 +360,6 @@ double LauePlaneProjector::yOffset() const {
 }
 
 void LauePlaneProjector::doImgRotation(const QTransform& t) {
-  Projector::doImgRotation(t);
   if (getLaueImage() && getLaueImage()->hasAbsoluteSize()) {
     QSizeF imgSize = getLaueImage()->transformedAbsoluteSize();
     setDetSize(dist(), imgSize.width(), imgSize.height());
@@ -371,6 +372,7 @@ void LauePlaneProjector::doImgRotation(const QTransform& t) {
     double dh = fasthypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
     setDetSize(dist(), dw, dh);
   }
+  Projector::doImgRotation(t);
 }
 
 void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
