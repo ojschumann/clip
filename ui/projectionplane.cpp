@@ -182,6 +182,7 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
         }
       }
       QMouseEvent e_again(QEvent::MouseButtonPress, ui->view->viewport()->mapFromGlobal(QCursor::pos()), Qt::LeftButton, e->buttons(), e->modifiers());
+      inMousePress = false;
       ui->view->mousePressEvent(&e_again);
     } else if (ui->panAction->isChecked()) {
       bool b1, b2;

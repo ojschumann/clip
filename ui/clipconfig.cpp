@@ -2,7 +2,10 @@
 #include "ui_clipconfig.h"
 
 #include <QSettings>
+#include <QLabel>
+#include <QFormLayout>
 #include <QAbstractTableModel>
+#include <QPushButton>
 
 class ColorModel: public QAbstractTableModel {
 public:
@@ -48,6 +51,13 @@ ClipConfig::ClipConfig(QWidget *parent) :
   ui->tableView->setModel(new ColorModel);
   ui->tableView->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   ui->tableView->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+
+  QFormLayout* layout = new QFormLayout(ui->scrollArea->widget());
+
+  QStringList colorNames = QStringList() << "Spot Marker" << "Zone Marker Lines" << "Zone Marker Background" << "Spot Indicators";
+  foreach (QString s, colorNames) {
+    layout->addRow(s, new QPushButton("test"));
+  }
 }
 
 ClipConfig::~ClipConfig()
