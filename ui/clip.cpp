@@ -19,7 +19,7 @@
 #include "core/crystal.h"
 #include "core/projectorfactory.h"
 #include "tools/xmllistiterators.h"
-
+#include "ui/clipconfig.h"
 
 Clip::Clip(QWidget *parent) :
     QMainWindow(parent),
@@ -380,4 +380,9 @@ void Clip::on_actionToggleMarkerEnabled_triggered() {
   Projector* p = getMostRecentProjector();
   if (p)
     p->enableMarkers(!p->markersEnabled());
+}
+
+void Clip::on_actionConfiguration_triggered()
+{
+  addMdiWindow(new ClipConfig);
 }

@@ -166,7 +166,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, QObject *pa
     int twoByteOverflowCount = overflowNumbers.at(1).toInt();
     int fourByteOverflowCount = overflowNumbers.at(2).toInt();
     QVector<unsigned int> overflowData;
-    int sigVal;
+    unsigned int sigVal;
     if (bytesPerPixel==1) {
       sigVal = 0xFF;
       imgFile.seek(headerSize+dataSize+underflowTableSize);

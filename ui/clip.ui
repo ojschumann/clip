@@ -54,6 +54,8 @@
     <addaction name="actionReflection_Info"/>
     <addaction name="actionRotation"/>
     <addaction name="actionReorientation"/>
+    <addaction name="separator"/>
+    <addaction name="actionConfiguration"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -140,6 +142,11 @@
    </property>
    <property name="shortcut">
     <string>F3</string>
+   </property>
+  </action>
+  <action name="actionConfiguration">
+   <property name="text">
+    <string>Configuration</string>
    </property>
   </action>
  </widget>

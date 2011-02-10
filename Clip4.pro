@@ -109,7 +109,8 @@ SOURCES += main.cpp\
     refinement/fitparametertreeitem.cpp \
     ui/hkltool.cpp \
     tools/resizeingtablewidget.cpp \
-    image/brukerprovider.cpp
+    image/brukerprovider.cpp \
+    ui/clipconfig.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -184,7 +185,8 @@ HEADERS  += ui/clip.h \
     ui/hkltool.h \
     tools/resizeingtablewidget.h \
     win_version.h \
-    image/brukerprovider.h
+    image/brukerprovider.h \
+    ui/clipconfig.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -199,7 +201,8 @@ FORMS    += ui/clip.ui \
     ui/rotatecrystal.ui \
     ui/reorient.ui \
     ui/fitdisplay.ui \
-    ui/hkltool.ui
+    ui/hkltool.ui \
+    ui/clipconfig.ui
 
 RESOURCES += \
     resources/resources.qrc
