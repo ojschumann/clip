@@ -110,7 +110,10 @@ SOURCES += main.cpp\
     ui/hkltool.cpp \
     tools/resizeingtablewidget.cpp \
     image/brukerprovider.cpp \
-    ui/clipconfig.cpp
+    ui/clipconfig.cpp \
+    config/configstore.cpp \
+    config/colorbutton.cpp \
+    config/colorconfigitem.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -186,7 +189,10 @@ HEADERS  += ui/clip.h \
     tools/resizeingtablewidget.h \
     win_version.h \
     image/brukerprovider.h \
-    ui/clipconfig.h
+    ui/clipconfig.h \
+    config/configstore.h \
+    config/colorbutton.h \
+    config/colorconfigitem.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

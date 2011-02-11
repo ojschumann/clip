@@ -4,13 +4,16 @@
 #include <QGraphicsView>
 #include <iostream>
 
+#include "config/configstore.h"
+
 using namespace std;
 
 SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem():
-    QGraphicsItem(),
+    QGraphicsObject(),
     workerPermission(0),
     workerSync(0)
 {
+  ConfigStore::getInstance()->ensureColor(ConfigStore::SpotIndicators, this, SLOT(setColor(QColor)));
   setCacheMode(NoCache);
   cacheNeedsUpdate = true;
   setCachedPainting();
@@ -37,6 +40,12 @@ SpotIndicatorGraphicsItem::~SpotIndicatorGraphicsItem() {
   }
   workers.clear();
   delete cache;
+}
+
+void SpotIndicatorGraphicsItem::setColor(QColor c) {
+  spotColor = c;
+  cacheNeedsUpdate = true;
+  update();
 }
 
 void SpotIndicatorGraphicsItem::updateCache() {
@@ -75,7 +84,7 @@ void SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsIte
     p->drawPixmap(QPoint(0,0), *cache);
     p->restore();
   } else {
-    p->setPen(Qt::green);
+    p->setPen(spotColor);
     for (int i=0; i<coordinates.size(); i++) {
       p->drawEllipse(coordinates.at(i), spotSize, spotSize);
     }
@@ -128,7 +137,7 @@ void SpotIndicatorGraphicsItem::Worker::run() {
     QList<QGraphicsView*> l = spotIndicator->scene()->views();
     if (l.size())
       painter.setRenderHints(l.at(0)->renderHints());
-    painter.setPen(Qt::green);
+    painter.setPen(spotIndicator->spotColor);
     int i;
     int maxCoo = spotIndicator->coordinates.size();
     while ((i=spotIndicator->workN.fetchAndAddOrdered(1))<maxCoo) {

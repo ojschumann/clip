@@ -4,35 +4,14 @@
 #include <QSettings>
 #include <QLabel>
 #include <QFormLayout>
-#include <QPushButton>
 #include <QColorDialog>
+#include <iostream>
 
+#include "config/colorbutton.h"
+#include "config/configstore.h"
 
-ClipConfig::ColorConfigButton::ColorConfigButton(QString name, QColor defaultColor): _name(name) {
-  QSettings settings;
+using namespace std;
 
-  _button = new QToolButton;
-  setColor(settings.value(name, defaultColor).value<QColor>());
-}
-
-QColor ClipConfig::ColorConfigButton::color() const {
-  return _color;
-}
-
-QString ClipConfig::ColorConfigButton::name() const {
-  return _name;
-}
-
-QToolButton* ClipConfig::ColorConfigButton::button() const {
-  return _button;
-}
-
-void ClipConfig::ColorConfigButton::setColor(const QColor &c) {
-  _color = c;
-  QPixmap pixmap(_button->iconSize());
-  pixmap.fill(_color);
-  _button->setIcon(QIcon(pixmap));
-}
 
 
 ClipConfig::ClipConfig(QWidget *parent) :
@@ -41,34 +20,37 @@ ClipConfig::ClipConfig(QWidget *parent) :
 {
   ui->setupUi(this);
 
+  ConfigStore* config = ConfigStore::getInstance();
+
   QFormLayout* layout = new QFormLayout(ui->scrollArea->widget());
 
-  colorButtons << ColorConfigButton("Spot Marker", QColor(255, 128, 0))
-      << ColorConfigButton("Zone Marker Lines", QColor(0, 0, 0))
-      << ColorConfigButton("Zone Marker background", QColor(255, 128, 0, 128))
-      << ColorConfigButton("Spot Indicators", QColor(0, 255, 0));
 
-  for (int n=0; n<colorButtons.size(); n++) {
-    layout->addRow(colorButtons.at(n).name(), colorButtons.at(n).button());
-    colorButtonMapper.setMapping(colorButtons.at(n).button(), n);
-    connect(colorButtons.at(n).button(), SIGNAL(clicked()), &colorButtonMapper, SLOT(map()));
+  for (int n=0; n<config->colorCount(); n++) {
+    ColorButton* button = new ColorButton(config->color(n), this);
+    layout->addRow(config->colorName(n), button);
+    config->ensureColor(n, button, SLOT(setColor(QColor)));
+    connect(button, SIGNAL(clicked()), &colorButtonMapper, SLOT(map()));
+    colorButtonMapper.setMapping(button, n);
   }
   connect(&colorButtonMapper, SIGNAL(mapped(int)), this, SLOT(colorButtonPressed(int)));
-}
-
-ClipConfig* ClipConfig::getInstance() {
-  static ClipConfig instance;
-  return &instance;
-}
-
-void ClipConfig::colorButtonPressed(int id) {
-  colorButtons[id].setColor(QColorDialog::getColor(colorButtons.at(id).color(),
-                                                   this,
-                                                   QString("Choose color for %1").arg(colorButtons.at(id).name()),
-                                                   QColorDialog::ShowAlphaChannel));
 }
 
 ClipConfig::~ClipConfig()
 {
   delete ui;
+}
+
+
+void ClipConfig::colorButtonPressed(int id) {
+  ConfigStore* config = ConfigStore::getInstance();
+  QColor initialColor = config->color(id);
+  QColorDialog dialog(initialColor, this);
+  dialog.setWindowTitle(QString("Select Color for %1").arg(config->colorName(id)));
+  dialog.setOption(QColorDialog::ShowAlphaChannel);
+  config->setColorChanger(id, &dialog, SIGNAL(currentColorChanged(QColor)));
+  if (dialog.exec()==QDialog::Accepted) {
+    config->setColor(id, dialog.currentColor());
+  } else {
+    config->setColor(id, initialColor);
+  }
 }

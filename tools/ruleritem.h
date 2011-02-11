@@ -22,6 +22,7 @@ public:
   void highlight(bool);
   bool isHighlighted();
 public slots:
+  void setColor(const QColor& c);
   void setHandleSize(double);
 signals:
   void positionChanged();
@@ -33,6 +34,7 @@ protected:
   double radius;
 private:
   RulerItem(const RulerItem& o) {}
+  QColor rulerColor;
 };
 
 #endif // RULERITEM_H

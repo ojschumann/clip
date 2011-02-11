@@ -20,6 +20,7 @@
 #include "core/projectorfactory.h"
 #include "tools/xmllistiterators.h"
 #include "ui/clipconfig.h"
+#include "config/configstore.h"
 
 Clip::Clip(QWidget *parent) :
     QMainWindow(parent),
@@ -57,6 +58,7 @@ Clip* Clip::getInstance() {
 }
 
 void Clip::clearInstance() {
+  ConfigStore::clearInstance();
   if (instance) {
     delete instance;
     instance = 0;
@@ -124,9 +126,9 @@ Projector* Clip::getMostRecentProjector(bool withCrystal) {
   return NULL;
 }
 
-QMdiSubWindow* Clip::addMdiWindow(QWidget* w) {
+QMdiSubWindow* Clip::addMdiWindow(QWidget* w, bool deleteOnClose) {
   QMdiSubWindow* m = ui->mdiArea->addSubWindow(w);
-  m->setAttribute(Qt::WA_DeleteOnClose);
+  m->setAttribute(Qt::WA_DeleteOnClose, deleteOnClose);
   m->setWindowIcon(w->windowIcon());
   m->show();
   connect(w, SIGNAL(destroyed()), m, SLOT(deleteLater()));
@@ -382,7 +384,6 @@ void Clip::on_actionToggleMarkerEnabled_triggered() {
     p->enableMarkers(!p->markersEnabled());
 }
 
-void Clip::on_actionConfiguration_triggered()
-{
-  addMdiWindow(new ClipConfig);
+void Clip::on_actionConfiguration_triggered() {
+  addMdiWindow(new ClipConfig(this));
 }

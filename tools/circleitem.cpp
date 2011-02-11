@@ -77,6 +77,11 @@ void CircleItem::setLineWidth(double lw) {
   update();
 }
 
+void CircleItem::doUpdate() {
+  update();
+}
+
+
 #include <iostream>
 using namespace std;
 void CircleItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {

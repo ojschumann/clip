@@ -23,6 +23,7 @@
 #include "image/laueimage.h"
 #include "tools/spotindicatorgraphicsitem.h"
 #include "tools/xmltools.h"
+#include "config/configstore.h"
 
 using namespace std;
 
@@ -439,7 +440,7 @@ void Projector::updateSpotHighlightMarker() {
   if (show) {
     if (spotHighlightItem==0) {
       CircleItem* item = new CircleItem(1.1*getSpotSize());
-      item->setColor(Qt::red);
+      ConfigStore::getInstance()->ensureColor(ConfigStore::SpotIndicatorHighlight, item, SLOT(setColor(QColor)));
       item->setLineWidth(3);
       spotHighlightItem = item;
       scene.addItem(spotHighlightItem);
@@ -455,9 +456,6 @@ void Projector::updateSpotHighlightMarker() {
 // ----------------------- Handling of Spot Markers -------------
 void Projector::addSpotMarker(const QPointF& p) {
   SpotItem* item = new SpotItem(this, getSpotSize(), imageItemsPlane);
-  item->setFlag(QGraphicsItem::ItemIsMovable, true);
-  item->setCursor(QCursor(Qt::SizeAllCursor));
-  item->setColor(QColor(0xFF,0xAA,0x33));
   item->setVisible(showMarkers);
   connect(this, SIGNAL(spotSizeChanged(double)), item, SLOT(setRadius(double)));
   item->setPos(det2img.map(p));

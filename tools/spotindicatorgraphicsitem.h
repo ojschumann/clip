@@ -1,18 +1,21 @@
 #ifndef SPOTINDICATORGRAPHICSITEM_H
 #define SPOTINDICATORGRAPHICSITEM_H
 
-#include <QGraphicsItem>
+#include <QGraphicsObject>
 #include <QMutex>
 #include <QWaitCondition>
 #include <QSemaphore>
 #include <QThread>
 
-class SpotIndicatorGraphicsItem: public QGraphicsItem {
+class SpotIndicatorGraphicsItem: public QGraphicsObject {
+  Q_OBJECT
 public:
   SpotIndicatorGraphicsItem();
   virtual ~SpotIndicatorGraphicsItem();
 private:
   SpotIndicatorGraphicsItem(const SpotIndicatorGraphicsItem&);
+public slots:
+  void setColor(QColor);
 public:
   virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
   virtual QRectF boundingRect() const;
@@ -25,6 +28,8 @@ protected:
   bool cacheNeedsUpdate;
   bool cachedPainting;
   void updateCache();
+
+  QColor spotColor;
 
   QPixmap* cache;
   double spotSize;

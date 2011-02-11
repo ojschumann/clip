@@ -6,8 +6,9 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 
-
 #include "tools/circleitem.h"
+#include "config/configstore.h"
+
 
 CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _angle, double _handleSize, QGraphicsItem *parent):
     QGraphicsObject(parent)
@@ -42,6 +43,9 @@ CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _a
 
   positionHandles();
   setCursors();
+
+  ConfigStore::getInstance()->ensureColor(ConfigStore::CropMarkerOutline, this, SLOT(setOutlineColor(QColor)));
+  ConfigStore::getInstance()->ensureColor(ConfigStore::CropMarkerInterior, this, SLOT(setInteriorColor(QColor)));
 }
 
 void CropMarker::positionHandles() {
@@ -94,7 +98,7 @@ void CropMarker::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
   QPen pen = painter->pen();
   pen.setStyle(Qt::DashLine);
-  pen.setColor(Qt::red);
+  pen.setColor(outlineColor);
   painter->setPen(pen);
 
   QPolygonF p;
@@ -111,7 +115,7 @@ void CropMarker::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
   p << handles.at(8)->rect().bottomRight();
   painter->drawPolyline(p);
 
-  pen.setColor(Qt::gray);
+  pen.setColor(interiorColor);
   painter->setPen(pen);
   painter->drawLine(QPointF( -w, h-d), QPointF(  w,  h-d));
   painter->drawLine(QPointF( -w, d-h), QPointF(  w,  d-h));
@@ -132,6 +136,16 @@ QPainterPath CropMarker::shape() const {
 
 void CropMarker::setHandleSize(double s) {
   handleSize = s;
+  update();
+}
+
+void CropMarker::setOutlineColor(const QColor& c) {
+  outlineColor = c;
+  update();
+}
+
+void CropMarker::setInteriorColor(const QColor& c) {
+  interiorColor = c;
   update();
 }
 

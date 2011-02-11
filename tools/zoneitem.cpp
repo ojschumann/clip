@@ -8,6 +8,7 @@
 #include "core/projector.h"
 #include "tools/circleitem.h"
 #include "tools/xmltools.h"
+#include "config/configstore.h"
 
 using namespace std;
 
@@ -24,7 +25,7 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updatePolygon()));
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updateOptimalZone()));
   foreach (CircleItem* item, l) {
-    item->setColor(Qt::red);
+    ConfigStore::getInstance()->ensureColor(ConfigStore::ZoneMarkerHandles, item, SLOT(setColor(QColor)));
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
     connect(item, SIGNAL(itemClicked()),     this, SIGNAL(itemClicked()));
@@ -38,6 +39,9 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
   updateOptimalZone();
   startHandle->setPos(p1);
   endHandle->setPos(p2);
+
+  ConfigStore::getInstance()->ensureColor(ConfigStore::ZoneMarkerLine, this, SLOT(colorChanged()));
+  ConfigStore::getInstance()->ensureColor(ConfigStore::ZoneMarkerBackground, this, SLOT(colorChanged()));
 }
 
 
@@ -56,15 +60,17 @@ QPainterPath ZoneItem::shape() const {
 }
 
 void ZoneItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
+  ConfigStore* config = ConfigStore::getInstance();
+
   p->setPen(Qt::NoPen);
-  p->setBrush(QBrush(QColor(255, 128, 0, 128)));
+  p->setBrush(QBrush(config->color(ConfigStore::ZoneMarkerBackground)));
   foreach (QPolygonF poly, zonePolys)
     p->drawPolygon(poly);
 
   QPen pen;
   pen.setWidthF(highlighted?2.0:1.0);
   pen.setCosmetic(true);
-  pen.setColor(Qt::black);
+  pen.setColor(config->color(ConfigStore::ZoneMarkerLine));
   pen.setStyle(Qt::DashLine);
   p->setPen(pen);
   foreach (QPolygonF poly, zoneLines)
@@ -376,4 +382,8 @@ void ZoneItem::loadFromXML(QDomElement base) {
       setEnd(TagToPoint(e, getEnd()));
     }
   }
+}
+
+void ZoneItem::colorChanged() {
+  update();
 }

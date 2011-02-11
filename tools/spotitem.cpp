@@ -3,6 +3,7 @@
 #include <QPainter>
 
 #include "core/projector.h"
+#include "config/configstore.h"
 
 SpotItem::SpotItem(Projector *p, double r, QGraphicsItem *parent):
   CircleItem(r, parent),
@@ -10,6 +11,12 @@ SpotItem::SpotItem(Projector *p, double r, QGraphicsItem *parent):
 {
   highlight(false);
   connect(this, SIGNAL(positionChanged()), this, SLOT(slotInvalidateCache()));
+
+  setFlag(QGraphicsItem::ItemIsMovable, true);
+  setCursor(QCursor(Qt::SizeAllCursor));
+  ConfigStore::getInstance()->ensureColor(ConfigStore::SpotMarker, this, SLOT(setColor(QColor)));
+  ConfigStore::getInstance()->ensureColor(ConfigStore::SpotMarkerHighlight, this, SLOT(doUpdate()));
+  ConfigStore::getInstance()->ensureColor(ConfigStore::SpotMarkerHighlightBg, this, SLOT(doUpdate()));
 }
 
 
@@ -37,11 +44,12 @@ void SpotItem::slotSetMaxSearchIndex(int n) {
 
 void SpotItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
   if (isHighlighted) {
+    ConfigStore* config = ConfigStore::getInstance();
     painter->setPen(Qt::NoPen);
-    painter->setBrush(QBrush(QColor(QColor(0xFF,0x33,0x33, 0x80))));
+    painter->setBrush(QBrush(config->color(ConfigStore::SpotMarkerHighlightBg)));
     painter->drawEllipse(QPointF(0,0), 2*radius, 2*radius);
     painter->setBrush(Qt::NoBrush);
-    painter->setPen(Qt::black);
+    painter->setPen(config->color(ConfigStore::SpotMarkerHighlight));
     painter->drawEllipse(QPointF(0,0), radius, radius);
   } else {
     CircleItem::paint(painter, option, widget);

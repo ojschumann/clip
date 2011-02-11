@@ -24,6 +24,7 @@ public slots:
   void setRadius(double);
   void setColor(QColor);
   void setLineWidth(double);
+  void doUpdate();
 protected:
   void mousePressEvent(QGraphicsSceneMouseEvent *event);
   double radius;

@@ -3,6 +3,7 @@
 #include <QCursor>
 #include <iostream>
 #include "tools/circleitem.h"
+#include "config/configstore.h"
 
 using namespace std;
 
@@ -20,16 +21,22 @@ RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, double r, QGraphicsIt
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
   QList<CircleItem*> l = QList<CircleItem*>() << startHandle << endHandle;
   foreach (CircleItem* item, l) {
-    item->setColor(Qt::red);
+    ConfigStore::getInstance()->ensureColor(ConfigStore::RulerHandles, item, SLOT(setColor(QColor)));
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
     connect(item, SIGNAL(itemClicked()),     this, SIGNAL(itemClicked()));
     connect(item, SIGNAL(positionChanged()), this, SIGNAL(positionChanged()));
   }
+  ConfigStore::getInstance()->ensureColor(ConfigStore::Ruler, this, SLOT(setColor(QColor)));
 }
 
 RulerItem::~RulerItem() {
 
+}
+
+void RulerItem::setColor(const QColor &c) {
+  rulerColor = c;
+  update();
 }
 
 QRectF RulerItem::boundingRect() const {
@@ -46,7 +53,7 @@ QPainterPath RulerItem::shape() const {
 
 void RulerItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
   if (startHandle->pos()!=endHandle->pos()) {
-    QPen pen(QColor(255, 128, 0));
+    QPen pen(ConfigStore::getInstance()->color(ConfigStore::Ruler));
     if (highlighted) {
       pen.setWidthF(2.5);
     } else {

@@ -22,7 +22,8 @@ signals:
 public slots:
   void promoteToRectangle() {};
   void setHandleSize(double);
-
+  void setOutlineColor(const QColor& c);
+  void setInteriorColor(const QColor& c);
 protected slots:
 
 protected:
@@ -44,6 +45,8 @@ protected:
   double handleSize;
 
   QList<QGraphicsRectItem*> handles;
+  QColor outlineColor;
+  QColor interiorColor;
 };
 
 #endif // CROPMARKER_H

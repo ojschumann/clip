@@ -13,6 +13,7 @@
 #include "image/laueimage.h"
 #include "tools/circleitem.h"
 #include "tools/xmltools.h"
+#include "config/configstore.h"
 
 using namespace std;
 
@@ -232,17 +233,18 @@ void LauePlaneProjector::decorateScene() {
 
   CircleItem* center=new CircleItem(getSpotSize(), imageItemsPlane);
 
-  center->setColor(Qt::red);
+
+  ConfigStore::getInstance()->ensureColor(ConfigStore::PrimaryBeamMarker, center, SLOT(setColor(QColor)));
   center->setFlag(QGraphicsItem::ItemIsMovable, true);
   center->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
   center->setCursor(Qt::SizeAllCursor);
   center->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
 
   CircleItem* marker=new CircleItem(0.1, center);
-  marker->setColor(Qt::red);
+  ConfigStore::getInstance()->ensureColor(ConfigStore::PrimaryBeamMarker, marker, SLOT(setColor(QColor)));
 
   CircleItem* handle=new CircleItem(getSpotSize(), center);
-  handle->setColor(Qt::red);
+  ConfigStore::getInstance()->ensureColor(ConfigStore::PrimaryBeamMarker, handle, SLOT(setColor(QColor)));
   handle->setPos(0.2, 0);
   handle->setFlag(QGraphicsItem::ItemIsMovable, true);
   handle->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);

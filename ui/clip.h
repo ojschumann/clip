@@ -51,7 +51,7 @@ public slots:
   void slotUpdateWindowMenu();
   // Used by the Windows-Submenu
   void setActiveSubWindow(QWidget *window);
-  QMdiSubWindow* addMdiWindow(QWidget*);
+  QMdiSubWindow* addMdiWindow(QWidget*, bool deleteOnClose = true);
 protected:
   Projector* connectToLastCrystal(Projector*);
   ProjectionPlane* addProjector(Projector*);

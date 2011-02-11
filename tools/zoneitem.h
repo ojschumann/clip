@@ -32,6 +32,7 @@ public:
 
 public slots:
   void slotSetMaxSearchIndex(int);
+  void colorChanged();
 private slots:
   void updatePolygon();
   void updateOptimalZone();

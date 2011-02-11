@@ -1,12 +1,10 @@
 #include <QtGui/QApplication>
 #include <ui/clip.h>
 
-#include <tools/mat3D.h>
-#include <tools/vec3D.h>
 #include <QTime>
 #include <iostream>
 #include <cmath>
-#include <image/dataproviderfactory.h>
+
 
 
 using namespace std;
