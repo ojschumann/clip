@@ -16,13 +16,6 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QTableView" name="tableView">
-      <property name="selectionMode">
-       <enum>QAbstractItemView::NoSelection</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
      <widget class="QScrollArea" name="scrollArea">
       <property name="widgetResizable">
        <bool>true</bool>
@@ -32,8 +25,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>439</width>
-         <height>193</height>
+         <width>441</width>
+         <height>395</height>
         </rect>
        </property>
       </widget>
@@ -47,7 +40,7 @@
      <x>0</x>
      <y>0</y>
      <width>461</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

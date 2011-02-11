@@ -4,60 +4,68 @@
 #include <QSettings>
 #include <QLabel>
 #include <QFormLayout>
-#include <QAbstractTableModel>
 #include <QPushButton>
+#include <QColorDialog>
 
-class ColorModel: public QAbstractTableModel {
-public:
-  ColorModel(QObject* parent=0);
-  int rowCount(const QModelIndex &parent) const;
-  int columnCount(const QModelIndex &parent) const;
-  QVariant data(const QModelIndex &index, int role) const;
-private:
-  QList<QColor> colors;
-  QStringList colorNames;
-};
 
-ColorModel::ColorModel(QObject *parent): QAbstractTableModel(parent) {
-  colorNames = QStringList() << "Spot Marker" << "Zone Marker Lines" << "Zone Marker Background" << "Spot Indicators";
-  colors << QSettings().value(colorNames.at(ClipConfig::Spotmarker), QColor(0, 255, 0)).value<QColor>();
-  colors << QSettings().value(colorNames.at(ClipConfig::ZoneMarkerLine), QColor(255, 255, 0)).value<QColor>();
-  colors << QSettings().value(colorNames.at(ClipConfig::ZoneMarkerBackground), QColor(255, 0, 255)).value<QColor>();
-  colors << QSettings().value(colorNames.at(ClipConfig::SpotIndicators), QColor(0, 255, 255)).value<QColor>();
+ClipConfig::ColorConfigButton::ColorConfigButton(QString name, QColor defaultColor): _name(name) {
+  QSettings settings;
+
+  _button = new QToolButton;
+  setColor(settings.value(name, defaultColor).value<QColor>());
 }
 
-int ColorModel::rowCount(const QModelIndex &parent) const {
-  return colors.size();
+QColor ClipConfig::ColorConfigButton::color() const {
+  return _color;
 }
 
-int ColorModel::columnCount(const QModelIndex &parent) const {
-  return 2;
+QString ClipConfig::ColorConfigButton::name() const {
+  return _name;
 }
 
-QVariant ColorModel::data(const QModelIndex &index, int role) const {
-  if ((role==Qt::DisplayRole) && (index.column()==0)) {
-    return QVariant(colorNames.at(index.row()));
-  } else if ((role==Qt::DecorationRole) && (index.column()==1)) {
-    return QVariant(colors.at(index.row()));
-  }
-  return QVariant();
+QToolButton* ClipConfig::ColorConfigButton::button() const {
+  return _button;
 }
+
+void ClipConfig::ColorConfigButton::setColor(const QColor &c) {
+  _color = c;
+  QPixmap pixmap(_button->iconSize());
+  pixmap.fill(_color);
+  _button->setIcon(QIcon(pixmap));
+}
+
 
 ClipConfig::ClipConfig(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ClipConfig)
 {
   ui->setupUi(this);
-  ui->tableView->setModel(new ColorModel);
-  ui->tableView->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-  ui->tableView->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
 
   QFormLayout* layout = new QFormLayout(ui->scrollArea->widget());
 
-  QStringList colorNames = QStringList() << "Spot Marker" << "Zone Marker Lines" << "Zone Marker Background" << "Spot Indicators";
-  foreach (QString s, colorNames) {
-    layout->addRow(s, new QPushButton("test"));
+  colorButtons << ColorConfigButton("Spot Marker", QColor(255, 128, 0))
+      << ColorConfigButton("Zone Marker Lines", QColor(0, 0, 0))
+      << ColorConfigButton("Zone Marker background", QColor(255, 128, 0, 128))
+      << ColorConfigButton("Spot Indicators", QColor(0, 255, 0));
+
+  for (int n=0; n<colorButtons.size(); n++) {
+    layout->addRow(colorButtons.at(n).name(), colorButtons.at(n).button());
+    colorButtonMapper.setMapping(colorButtons.at(n).button(), n);
+    connect(colorButtons.at(n).button(), SIGNAL(clicked()), &colorButtonMapper, SLOT(map()));
   }
+  connect(&colorButtonMapper, SIGNAL(mapped(int)), this, SLOT(colorButtonPressed(int)));
+}
+
+ClipConfig* ClipConfig::getInstance() {
+  static ClipConfig instance;
+  return &instance;
+}
+
+void ClipConfig::colorButtonPressed(int id) {
+  colorButtons[id].setColor(QColorDialog::getColor(colorButtons.at(id).color(),
+                                                   this,
+                                                   QString("Choose color for %1").arg(colorButtons.at(id).name()),
+                                                   QColorDialog::ShowAlphaChannel));
 }
 
 ClipConfig::~ClipConfig()
