@@ -60,6 +60,7 @@ public slots:
   void updatePBPos();
   virtual void doImgRotation(const QTransform& t);
   virtual void loadParmetersFromImage(LaueImage*);
+  void saveParametersAsDefault();
 protected:
   double maxCos(Vec3D n) const;
   virtual bool parseXMLElement(QDomElement e);

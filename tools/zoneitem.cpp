@@ -42,6 +42,8 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
 
   ConfigStore::getInstance()->ensureColor(ConfigStore::ZoneMarkerLine, this, SLOT(colorChanged()));
   ConfigStore::getInstance()->ensureColor(ConfigStore::ZoneMarkerBackground, this, SLOT(colorChanged()));
+  setWidth(ConfigStore::getInstance()->getZoneMarkerWidth());
+  connect(ConfigStore::getInstance(), SIGNAL(zoneMarkerWidthChanged(double)), this, SLOT(setWidth(double)));
 }
 
 
@@ -126,8 +128,8 @@ void ZoneItem::updatePolygon() {
       n.normalize();
     }
 
-    // Rotate u 1 deg out of plane
-    Mat3D R = Mat3D(z%n, M_PI*1.0/180);
+    // Rotate u markerWidth deg out of plane
+    Mat3D R = Mat3D(z%n, markerWidth);
     v = R*n;
     u = R.transposed()*n;
 
@@ -149,7 +151,7 @@ void ZoneItem::updatePolygon() {
       bool ok;
       QPolygonF cornerPath = getPath(p, borderPoints.first(), imgRect, true, via);
       Vec3D v = projector->det2normal(projector->img2det.map(via), ok);
-      if (!ok || fabs(v*z)>sin(M_PI/180)) {
+      if (!ok || fabs(v*z)>sin(markerWidth)) {
         cornerPath = getPath(p, borderPoints.last(), imgRect, false, via);
         q = borderPoints.takeLast();
       } else {
@@ -245,7 +247,7 @@ void ZoneItem::updateOptimalZone() {
   bool hasCrossingSpotMarkers = false;
 
   foreach (Vec3D s, projector->getSpotMarkerNormals()) {
-    if (fabs(s*z)<sin(M_PI/180)) {
+    if (fabs(s*z)<sin(markerWidth)) {
       M += s^s;
       hasCrossingSpotMarkers = true;
     }
@@ -362,6 +364,12 @@ void ZoneItem::slotSetMaxSearchIndex(int n) {
   setMaxSearchIndex(n);
 }
 
+void ZoneItem::setWidth(double v) {
+  markerWidth = v*M_PI/360;
+  updatePolygon();
+  updateOptimalZone();
+  update();
+}
 
 const char XML_ZoneMarker_element[] = "Marker";
 const char XML_ZoneMarker_start[] = "StartHandle";

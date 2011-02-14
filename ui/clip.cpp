@@ -75,7 +75,7 @@ void Clip::on_newCrystal_triggered() {
 
 
 void Clip::on_newLaue_triggered() {
-  addProjector(new LauePlaneProjector())->loadDefault();
+  addProjector(new LauePlaneProjector());
 }
 
 void Clip::on_newStereo_triggered() {

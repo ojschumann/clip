@@ -24,7 +24,6 @@ ClipConfig::ClipConfig(QWidget *parent) :
 
   QFormLayout* layout = new QFormLayout(ui->scrollArea->widget());
 
-
   for (int n=0; n<config->colorCount(); n++) {
     ColorButton* button = new ColorButton(config->color(n), this);
     layout->addRow(config->colorName(n), button);
@@ -33,6 +32,9 @@ ClipConfig::ClipConfig(QWidget *parent) :
     colorButtonMapper.setMapping(button, n);
   }
   connect(&colorButtonMapper, SIGNAL(mapped(int)), this, SLOT(colorButtonPressed(int)));
+
+  ui->zoneMarkerWidth->setValue(config->getZoneMarkerWidth());
+  connect(ui->zoneMarkerWidth, SIGNAL(valueChanged(double)), config, SLOT(setZoneMarkerWidth(double)));
 }
 
 ClipConfig::~ClipConfig()

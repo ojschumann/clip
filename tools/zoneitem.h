@@ -33,6 +33,7 @@ public:
 public slots:
   void slotSetMaxSearchIndex(int);
   void colorChanged();
+  void setWidth(double v);
 private slots:
   void updatePolygon();
   void updateOptimalZone();
@@ -49,6 +50,7 @@ protected:
   QList<QPolygonF> zoneLines;
   QList<QPolygonF> zonePolys;
   Vec3D zoneNormal;
+  double markerWidth;
 };
 
 #endif // ZONEITEM_H

@@ -37,9 +37,12 @@ public:
   void setColor(int t, const QColor& color);
   void ensureColor(int t, const QObject* receiver, const char * method);
   void setColorChanger(int t, const QObject * sender, const char * signal);
-
+  double getZoneMarkerWidth() const;
+public slots:
+  void setZoneMarkerWidth(double);
 signals:
   void colorChanged(int, QColor);
+  void zoneMarkerWidthChanged(double);
   void tmpColorChanged(QColor);
 
 private:
@@ -47,7 +50,7 @@ private:
   virtual ~ConfigStore();
 
   QList<ColorConfigItem*> colors;
-
+  double zoneMarkerWidth;
   static ConfigStore* instance;
 
 };

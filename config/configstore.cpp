@@ -32,6 +32,7 @@ ConfigStore::ConfigStore(QObject *parent) :
       << new ColorConfigItem("Crop Marker Interior",       QColor(0x80, 0x80, 0x80), this)
       << new ColorConfigItem("Primary Beam Marker",        QColor(0xFF, 0x00, 0x00), this);
 
+  zoneMarkerWidth = 1.0;
 }
 
 ConfigStore::~ConfigStore() {
@@ -79,4 +80,13 @@ void ConfigStore::ensureColor(int t, const QObject* receiver, const char *method
 
 void ConfigStore::setColorChanger(int t, const QObject *sender, const char *signal) {
   connect(sender, signal, colors.at(t), SLOT(setColor(QColor)));
+}
+
+void ConfigStore::setZoneMarkerWidth(double v) {
+  zoneMarkerWidth = v;
+  emit zoneMarkerWidthChanged(v);
+}
+
+double ConfigStore::getZoneMarkerWidth() const {
+  return zoneMarkerWidth;
 }

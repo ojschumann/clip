@@ -2,6 +2,7 @@
 
 #include <QCursor>
 #include <QPointF>
+#include <QSettings>
 #include <cmath>
 #include <iostream>
 #include <typeinfo>
@@ -24,12 +25,15 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent):
     orientationGroup(this),
     shiftGroup(this)
 {
-  internalSetWavevectors(0.0, 2.0*M_PI);
-  setDetSize(30.0, 110.0, 140.0);
-  setDetOrientation(180.0, 0, 0);
+  QSettings settings;
+  settings.beginGroup(projectorName());
+  internalSetWavevectors(settings.value("Qmin", 0.0).toInt(), settings.value("Qmax", 2.0*M_PI).toInt());
+  setDetSize(settings.value("detDist", 30.0).toInt(), settings.value("detWidth", 110.0).toInt(), settings.value("detHeight", 140.0).toInt());
+  setDetOrientation(settings.value("detOmega", 180.0).toInt(), settings.value("detChi", 0).toInt(), settings.value("detPhi", 0).toInt());
   detDx=1.0;
   detDy=1.0;
-  setDetOffset(0.0, 0.0);
+  setDetOffset(settings.value("detDX", 0.0).toInt(), settings.value("detDY", 0.0).toInt());
+  settings.endGroup();
 
   addParameterGroup(&distGroup);
   addParameterGroup(&orientationGroup);
@@ -596,6 +600,20 @@ double LauePlaneProjector::OrientationGroup::upperBound(int member) const {
   return 380;
 }
 
-
+void LauePlaneProjector::saveParametersAsDefault() {
+  QSettings settings;
+  settings.beginGroup(projectorName());
+  settings.setValue("Qmin", Qmin());
+  settings.setValue("Qmax", Qmax());
+  settings.setValue("detDist", dist());
+  settings.setValue("detWidth", width());
+  settings.setValue("detHeight", height());
+  settings.setValue("detOmega", omega());
+  settings.setValue("detChi", chi());
+  settings.setValue("detPhi", phi());
+  settings.setValue("detDX", xOffset());
+  settings.setValue("detDY", yOffset());
+  settings.endGroup();
+}
 
 bool LauePlaneProjector_registered = ProjectorFactory::registerProjector("LauePlaneProjector", &LauePlaneProjector::getInstance);

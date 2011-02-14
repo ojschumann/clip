@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>461</width>
+    <width>401</width>
     <height>436</height>
    </rect>
   </property>
@@ -15,7 +15,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+    <item row="1" column="0">
      <widget class="QScrollArea" name="scrollArea">
       <property name="widgetResizable">
        <bool>true</bool>
@@ -25,11 +25,24 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>441</width>
-         <height>395</height>
+         <width>381</width>
+         <height>369</height>
         </rect>
        </property>
       </widget>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QDoubleSpinBox" name="zoneMarkerWidth">
+      <property name="decimals">
+       <number>3</number>
+      </property>
+      <property name="maximum">
+       <double>5.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.100000000000000</double>
+      </property>
      </widget>
     </item>
    </layout>
@@ -39,7 +52,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>461</width>
+     <width>401</width>
      <height>21</height>
     </rect>
    </property>

@@ -14,6 +14,7 @@ LauePlaneCfg::LauePlaneCfg(LauePlaneProjector* p, QWidget *parent) :
   connect(p, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
   connect(ui->maxRefLabel, SIGNAL(valueChanged(int)), p, SLOT(setMaxHklSqSum(int)));
+  connect(ui->setDefault, SIGNAL(clicked()), p, SLOT(saveParametersAsDefault()));
   connect(ui->detMinQ, SIGNAL(valueChanged(double)), this, SLOT(slotSetQRange()));
   connect(ui->detMaxQ, SIGNAL(valueChanged(double)), this, SLOT(slotSetQRange()));
   connect(p, SIGNAL(projectionParamsChanged()), this, SLOT(slotLoadParams()));
