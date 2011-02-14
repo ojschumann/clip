@@ -84,6 +84,11 @@ ProjectionPlane::~ProjectionPlane() {
   delete ui;
 }
 
+QSize ProjectionPlane::sizeHint() const {
+  cout << "pp::Sizehint" << endl;
+  return projector->projectorSizeHint();
+}
+
 void ProjectionPlane::setupToolbar() {
   // Handling for MouseDrags
   QActionGroup* actionGroup = new QActionGroup(this);
@@ -153,7 +158,6 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
       zoomRubber->show();
     }
   } else if (e->buttons()==Qt::RightButton) {
-    //QTimer::singleShot(QApplication::startDragTime(), this, SLOT(slotContextMenu()));
     contextMenuTimer.start();
   }
   lastMousePosition = mousePressOrigin;

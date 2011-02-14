@@ -164,12 +164,16 @@ QWidget* StereoProjector::configWidget() {
   return new StereoCfg(this);
 }
 
-QString StereoProjector::projectorName() {
+QString StereoProjector::projectorName() const {
   return QString("StereoProjector");
 }
 
 QString StereoProjector::displayName() {
   return QString("Stereographic Projection");
+}
+
+QSize StereoProjector::projectorSizeHint() const {
+  return QSize(200, 200);
 }
 
 void StereoProjector::setDetOrientation(const Mat3D& M) {

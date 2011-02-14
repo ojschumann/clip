@@ -74,8 +74,9 @@ public:
   virtual QWidget* configWidget()=0;
   LaueImage* getLaueImage();
 
-  virtual QString projectorName()=0;
+  virtual QString projectorName() const = 0;
   virtual QString displayName()=0;
+  virtual QSize projectorSizeHint() const = 0;
   virtual QString FitObjectName();
 
   double Qmin() const;

@@ -27,7 +27,8 @@ public:
   virtual Vec3D det2normal(const QPointF&, bool& b) const;
 
   virtual QWidget* configWidget();
-  virtual QString projectorName();
+  virtual QString projectorName() const;
+  QSize projectorSizeHint() const;
   virtual QString displayName();
   double dist() const;
   double width() const;

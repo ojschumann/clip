@@ -36,6 +36,7 @@ public:
   virtual void dropEvent(QDropEvent *);
 
   Projector* getProjector() { return projector; }
+  QSize sizeHint() const;
 
 public slots:
   void saveToXML(QDomElement base);

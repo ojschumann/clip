@@ -21,8 +21,9 @@ public:
   virtual Vec3D det2normal(const QPointF&) const;
   virtual Vec3D det2normal(const QPointF&, bool& b) const;
 
-  virtual QString projectorName();
+  virtual QString projectorName() const;
   virtual QString displayName();
+  virtual QSize projectorSizeHint() const;
   //virtual double TTmax() const;
 
   virtual QDomElement saveToXML(QDomElement base);

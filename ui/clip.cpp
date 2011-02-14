@@ -79,7 +79,7 @@ void Clip::on_newLaue_triggered() {
 }
 
 void Clip::on_newStereo_triggered() {
-  addProjector(new StereoProjector())->loadDefault();
+  addProjector(new StereoProjector());
 }
 
 ProjectionPlane* Clip::addProjector(Projector* p) {
