@@ -3,6 +3,7 @@
 #include <cmath>
 #include <QtGui/QGraphicsEllipseItem>
 #include <iostream>
+#include <QSettings>
 
 #include "ui/stereocfg.h"
 #include "tools/vec3D.h"
@@ -16,6 +17,21 @@ StereoProjector::StereoProjector(QObject* parent):
     Projector(parent),
     localCoordinates() {
   internalSetWavevectors(0, M_PI);
+
+  QSettings settings;
+  settings.beginGroup(projectorName());
+  internalSetWavevectors(settings.value("Qmin", 0.0).toDouble(), settings.value("Qmax", M_PI).toDouble());
+  setMaxHklSqSum(settings.value("maxHKLSqSum", 3).toInt());
+  setTextSizeFraction(settings.value("textSizeFraction", 10.0).toDouble());
+  setSpotSizeFraction(settings.value("spotSizeFraction",  1.0).toDouble());
+  for (int i=0; i<3; i++) {
+    for (int j=0; j<3; j++) {
+      localCoordinates(i,j)=settings.value(QString("Frame%1%2").arg(i).arg(j), (i==j)?1.0:0.0).toDouble();
+    }
+  }
+
+  settings.endGroup();
+
   scene.setSceneRect(QRectF(-1.0, -1.0, 2.0, 2.0));
   connect(this, SIGNAL(textSizeChanged(double)), this, SLOT(decorateScene()));
 }
@@ -173,7 +189,8 @@ QString StereoProjector::displayName() {
 }
 
 QSize StereoProjector::projectorSizeHint() const {
-  return QSize(200, 200);
+  QSettings settings;
+  return settings.value(QString("%1/windowSize").arg(projectorName()), QSize(200, 250)).toSize();
 }
 
 void StereoProjector::setDetOrientation(const Mat3D& M) {
@@ -216,6 +233,18 @@ bool StereoProjector::parseXMLElement(QDomElement e) {
     return Projector::parseXMLElement(e);
   }
   return ok;
+}
+
+void StereoProjector::saveParametersAsDefault() {
+  QSettings settings;
+  settings.beginGroup(projectorName());
+  for (int i=0; i<3; i++) {
+    for (int j=0; j<3; j++) {
+      settings.setValue(QString("Frame%1%2").arg(i).arg(j), localCoordinates(i,j));
+    }
+  }
+  settings.endGroup();
+  Projector::saveParametersAsDefault();
 }
 
 bool StereoProjector_registered = ProjectorFactory::registerProjector("StereoProjector", &StereoProjector::getInstance);

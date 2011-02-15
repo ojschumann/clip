@@ -14,9 +14,9 @@
 #include <QLabel>
 #include <QMenu>
 #include <QCursor>
-#include <QSettings>
 #include <QShortcut>
 #include <QPrintDialog>
+#include <QSettings>
 
 #include "ui/clip.h"
 #include "ui/imagetoolbox.h"
@@ -35,10 +35,6 @@
 #include "tools/zoneitem.h"
 #include "tools/ruleritem.h"
 #include "tools/cropmarker.h"
-
-// List of all projectors. Sort of a hack ;-)
-// Used to synchronize the Mousemode
-QList<ProjectionPlane*> ProjectionPlane::allPlanes = QList<ProjectionPlane*>();
 
 
 ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
@@ -61,6 +57,7 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   connect(projector, SIGNAL(imageLoaded(LaueImage*)), ui->view, SLOT(setImage(LaueImage*)));
   connect(projector, SIGNAL(imageLoaded(LaueImage*)), this, SLOT(imageLoaded(LaueImage*)));
   connect(projector, SIGNAL(imageClosed()), this, SLOT(imageClosed()));
+  connect(projector, SIGNAL(projectorSavesDefault()), this, SLOT(saveParametersAsProjectorDefault()));
   connect(ui->view, SIGNAL(mouseMoved(QPointF)), this, SLOT(generateMousePositionInfoFromView(QPointF)));
   connect(ui->view, SIGNAL(mouseLeft()), this, SLOT(generateEmptyMousePositionInfo()));
 
@@ -76,16 +73,19 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   // Call as soon as we are displayed
   QTimer::singleShot(0, this, SLOT(resizeView()));
 
-  allPlanes << this;
+  QSettings settings;
+  settings.beginGroup(projector->projectorName());
+  ui->view->setRenderHint(QPainter::Antialiasing,     settings.value("renderItem", true).toBool());
+  ui->view->setRenderHint(QPainter::TextAntialiasing, settings.value("renderText", true).toBool());
+  settings.endGroup();
+
 }
 
 ProjectionPlane::~ProjectionPlane() {
-  allPlanes.removeAll(this);
   delete ui;
 }
 
 QSize ProjectionPlane::sizeHint() const {
-  cout << "pp::Sizehint" << endl;
   return projector->projectorSizeHint();
 }
 
@@ -289,15 +289,6 @@ void ProjectionPlane::dropEvent(QDropEvent *e) {
     }
   }
 }
-
-void ProjectionPlane::slotChangeMouseDragMode() {
-  foreach(ProjectionPlane* plane, allPlanes) {
-    plane->ui->zoomAction->setChecked(ui->zoomAction->isChecked());
-    plane->ui->panAction->setChecked(ui->panAction->isChecked());
-    plane->ui->rotAction->setChecked(ui->rotAction->isChecked());
-  }
-}
-
 
 void ProjectionPlane::on_openImgAction_triggered() {
   QString formatfilters = "Images ("+DataProviderFactory::getInstance().registeredImageFormats().replaceInStrings(QRegExp("^"), "*.").join(" ")+");;All Files (*)";
@@ -545,10 +536,10 @@ bool ProjectionPlane::loadFromXML(QDomElement base) {
   return true;
 }
 
-void ProjectionPlane::loadDefault() {
-  QDomDocument doc = readXMLFile(QString(":/Default_%1.xml").arg(projector->projectorName()));
-  if (!doc.isNull()) {
-    loadFromXML(doc.documentElement());
-  }
+void ProjectionPlane::saveParametersAsProjectorDefault() {
+  QSettings settings;
+  settings.beginGroup(projector->projectorName());
+  settings.setValue("windowSize", static_cast<QWidget*>(parent())->size());
+  settings.setValue("renderItem", (ui->view->renderHints() & QPainter::Antialiasing) != 0);
+  settings.setValue("renderText", (ui->view->renderHints() & QPainter::TextAntialiasing) != 0);
 }
-

@@ -28,11 +28,14 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent):
   QSettings settings;
   settings.beginGroup(projectorName());
   internalSetWavevectors(settings.value("Qmin", 0.0).toDouble(), settings.value("Qmax", 2.0*M_PI).toDouble());
-  setDetSize(settings.value("detDist", 30.0).toDouble(), settings.value("detWidth", 110.0).toDouble(), settings.value("detHeight", 140.0).toDouble());
+  setDetSize(settings.value("detDist", 30.0).toDouble(), settings.value("detWidth", 150.0).toDouble(), settings.value("detHeight", 150.0).toDouble());
   setDetOrientation(settings.value("detOmega", 180.0).toDouble(), settings.value("detChi", 0).toDouble(), settings.value("detPhi", 0).toDouble());
   detDx=1.0;
   detDy=1.0;
   setDetOffset(settings.value("detDX", 0.0).toDouble(), settings.value("detDY", 0.0).toDouble());
+  setMaxHklSqSum(settings.value("maxHKLSqSum", 3).toInt());
+  setTextSizeFraction(settings.value("textSizeFraction", 10.0).toDouble());
+  setSpotSizeFraction(settings.value("spotSizeFraction",  1.0).toDouble());
   settings.endGroup();
 
   addParameterGroup(&distGroup);
@@ -608,8 +611,6 @@ double LauePlaneProjector::OrientationGroup::upperBound(int member) const {
 void LauePlaneProjector::saveParametersAsDefault() {
   QSettings settings;
   settings.beginGroup(projectorName());
-  settings.setValue("Qmin", Qmin());
-  settings.setValue("Qmax", Qmax());
   settings.setValue("detDist", dist());
   settings.setValue("detWidth", width());
   settings.setValue("detHeight", height());
@@ -618,10 +619,8 @@ void LauePlaneProjector::saveParametersAsDefault() {
   settings.setValue("detPhi", phi());
   settings.setValue("detDX", xOffset());
   settings.setValue("detDY", yOffset());
-  if (parent()->isWidgetType()) {
-    settings.setValue("windowSize", static_cast<QWidget*>(parent())->size());
-  }
   settings.endGroup();
+  Projector::saveParametersAsDefault();
 }
 
 bool LauePlaneProjector_registered = ProjectorFactory::registerProjector("LauePlaneProjector", &LauePlaneProjector::getInstance);

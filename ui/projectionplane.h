@@ -41,8 +41,6 @@ public:
 public slots:
   void saveToXML(QDomElement base);
   bool loadFromXML(QDomElement base);
-  void loadDefault();
-
 
 signals:
   void info(QString, int);
@@ -51,7 +49,6 @@ signals:
   void rotationFromProjector(double);
 protected slots:
   void renderPrintout(QPrinter*);
-  void slotChangeMouseDragMode();
   void resizeView();
   void slotOpenResolutionCalc();
   void generateMousePositionInfo(QPointF);
@@ -66,6 +63,7 @@ protected slots:
   void slotContextClearAll();
   void imageLoaded(LaueImage*);
   void imageClosed();
+  void saveParametersAsProjectorDefault();
 protected:
 
   void setupToolbar();
@@ -86,7 +84,6 @@ protected:
 
   QRubberBand* zoomRubber;
   QList<QRectF> zoomSteps;
-  static QList<ProjectionPlane*> allPlanes;
 
 private slots:
   void on_actionPrint_triggered();

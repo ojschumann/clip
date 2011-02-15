@@ -32,6 +32,7 @@ public slots:
   virtual void decorateScene();
   void setDetOrientation(const Mat3D& M);
   Mat3D getDetOrientation();
+  void saveParametersAsDefault();
 protected:
   virtual bool project(const Reflection &r, QPointF &);
   virtual bool parseXMLElement(QDomElement);

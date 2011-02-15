@@ -14,6 +14,7 @@ StereoCfg::StereoCfg(StereoProjector* p, QWidget *parent) :
   connect(ui->detTextSize, SIGNAL(valueChanged(double)), p, SLOT(setTextSizeFraction(double)));
   connect(ui->detSpotSize, SIGNAL(valueChanged(double)), p, SLOT(setSpotSizeFraction(double)));
   connect(ui->maxRefLabel, SIGNAL(valueChanged(int)), p, SLOT(setMaxHklSqSum(int)));
+  connect(ui->setDefault, SIGNAL(clicked()), p, SLOT(saveParametersAsDefault()));
   connect(ui->detMinQ, SIGNAL(valueChanged(double)), this, SLOT(slotSetQRange()));
   connect(ui->detMaxQ, SIGNAL(valueChanged(double)), this, SLOT(slotSetQRange()));
   connect(p, SIGNAL(projectionParamsChanged()), this, SLOT(slotLoadParams()));
@@ -64,8 +65,9 @@ void StereoCfg::slotLoadParams() {
 
   QList<QGraphicsView*> l = projector->getScene()->views();
   if (l.size()) {
-    ui->renderAntialias->setChecked(l.at(0)->renderHints()&QPainter::Antialiasing);
-    ui->renderAntialiasText->setChecked(l.at(0)->renderHints()&QPainter::TextAntialiasing);
+    QPainter::RenderHints hints = l.at(0)->renderHints();
+    ui->renderAntialias->setChecked((hints&QPainter::Antialiasing) != 0);
+    ui->renderAntialiasText->setChecked((hints&QPainter::TextAntialiasing) != 0);
   }
 
 }

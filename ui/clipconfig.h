@@ -2,7 +2,6 @@
 #define CLIPCONFIG_H
 
 #include <QMainWindow>
-#include <QColor>
 #include <QSignalMapper>
 #include <QToolButton>
 

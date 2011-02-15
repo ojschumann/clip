@@ -153,6 +153,7 @@ public slots:
   void closeImage();
 
   virtual void doImgRotation(const QTransform&);
+  virtual void saveParametersAsDefault();
 signals:
   void projectedPointsUpdated();
   void wavevectorsUpdated();
@@ -169,6 +170,7 @@ signals:
   void markerClicked(AbstractMarkerItem*);
   void markerRemoved(AbstractMarkerItem*);
   void spotHighlightChanged(Vec3D);
+  void projectorSavesDefault();
 protected slots:
   virtual void updateImgTransformations();
   void invalidateMarkerCache();

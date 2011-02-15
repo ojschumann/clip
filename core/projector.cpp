@@ -12,6 +12,7 @@
 #include <QThreadPool>
 #include <QGraphicsView>
 #include <QMetaObject>
+#include <QSettings>
 
 #include "tools/circleitem.h"
 #include "tools/ruleritem.h"
@@ -58,7 +59,7 @@ Projector::Projector(QObject *parent):
   enableProjection();
   updateImgTransformations();
 
-  internalSetWavevectors(0.0, 1.0*M_1_PI);
+  internalSetWavevectors(0.0, 1.0*M_PI);
   setMaxHklSqSum(3);
   setTextSizeFraction(10.0);
   setSpotSizeFraction(1.0);
@@ -767,6 +768,17 @@ bool Projector::parseXMLElement(QDomElement e) {
   return ok;
 }
 
+void Projector::saveParametersAsDefault() {
+  QSettings settings;
+  settings.beginGroup(projectorName());
+  settings.setValue("Qmin", Qmin());
+  settings.setValue("Qmax", Qmax());
+  settings.setValue("maxHKLSqSum", getMaxHklSqSum());
+  settings.setValue("textSizeFraction", getTextSizeFraction());
+  settings.setValue("spotSizeFraction", getSpotSizeFraction());
+  settings.endGroup();
+  emit projectorSavesDefault();
+}
 
 int QPointFVector_ID = qRegisterMetaType<QVector<QPointF> >("QVector<QPointF>");
 int QGraphicsItemList_ID = qRegisterMetaType<QList<QGraphicsItem*> >("QList<QGraphicsItem*>");
