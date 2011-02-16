@@ -69,8 +69,7 @@ void Clip::clearInstance() {
 
 void Clip::on_newCrystal_triggered() {
   CrystalDisplay* crystalDisplay = new CrystalDisplay();
-  addMdiWindow(crystalDisplay);
-  crystalDisplay->loadDefault();
+  addMdiWindow(crystalDisplay)->systemMenu()->addAction("Save as Default", crystalDisplay->getCrystal(), SLOT(saveParametersAsDefault()));
 }
 
 
@@ -325,7 +324,7 @@ bool Clip::loadWorkspaceFile(QString filename) {
     QDomElement e = crystalConnection.elementsByTagName(XML_Clip_ConnectedCrystal).at(0).toElement();
     if (e.isNull()) continue;
     CrystalDisplay* crystalDisplay = new CrystalDisplay();
-    addMdiWindow(crystalDisplay);
+    addMdiWindow(crystalDisplay)->systemMenu()->addAction("Save as Default", crystalDisplay->getCrystal(), SLOT(saveParametersAsDefault()));
     crystalDisplay->loadFromXML(e);
     e = crystalConnection.elementsByTagName(XML_Clip_ConnectedProjectors).at(0).toElement();
     for (e=e.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {

@@ -86,6 +86,7 @@ public slots:
   void setRotationAxis(const Vec3D& axis, RotationAxisType type=LabSystem);
   void slotSetSGConstrains();
   void generateReflections();
+  void saveParametersAsDefault();
 
 
 private slots:

@@ -334,7 +334,7 @@ QString LauePlaneProjector::projectorName() const {
 
 QSize LauePlaneProjector::projectorSizeHint() const {
   QSettings settings;
-  return settings.value(QString("%1/windowSize").arg(projectorName()), QSize(350, 350)).toSize();
+  return settings.value(QString("%1/windowSize").arg(projectorName()), QSize(340, 375)).toSize();
 }
 
 QString LauePlaneProjector::displayName() {

@@ -4,23 +4,13 @@
    <ConnectedCrystal>
     <CrystalDisplay>
       <Crystal>
-        <Spacegroup symbol="P1"/>
-        <Cell beta="90" gamma="90" alpha="90" a="4" b="4" c="4"/>
-        <Orientation phi="0" omega="0" chi="0"/>
-        <RotationAxis x="1" y="0" z="0" type="0"/>
       </Crystal>
     </CrystalDisplay>
    </ConnectedCrystal>
    <ConnectedProjectors>
     <ProjectionPlane projectortype="LauePlaneProjector">
-      <Geometry width="350" height="405"/>
       <ZoomSteps/>
       <Projector>
-        <DetSize width="150" dist="30" height="150"/>
-        <DetOrientation Chi="0" Phi="0" Omega="180"/>
-        <DetOffset xOffset="0" yOffset="0"/>
-        <QRange Qmax="6.283" Qmin="0"/>
-        <Display textSize="7" spotSize="1" spotsEnabled="1" maxHKLSum="3"/>
       </Projector>
     </ProjectionPlane>
    </ConnectedProjectors>

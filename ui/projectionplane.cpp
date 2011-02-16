@@ -86,6 +86,7 @@ ProjectionPlane::~ProjectionPlane() {
 }
 
 QSize ProjectionPlane::sizeHint() const {
+  qDebug() << "pp::sizehine" << projector->projectorSizeHint() << size();
   return projector->projectorSizeHint();
 }
 
@@ -539,7 +540,7 @@ bool ProjectionPlane::loadFromXML(QDomElement base) {
 void ProjectionPlane::saveParametersAsProjectorDefault() {
   QSettings settings;
   settings.beginGroup(projector->projectorName());
-  settings.setValue("windowSize", static_cast<QWidget*>(parent())->size());
+  settings.setValue("windowSize", size());
   settings.setValue("renderItem", (ui->view->renderHints() & QPainter::Antialiasing) != 0);
   settings.setValue("renderText", (ui->view->renderHints() & QPainter::TextAntialiasing) != 0);
 }

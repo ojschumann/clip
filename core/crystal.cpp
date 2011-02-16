@@ -5,6 +5,7 @@
 #include <QMetaObject>
 #include <QtConcurrentMap>
 #include <QtConcurrentRun>
+#include <QSettings>
 
 #include "defs.h"
 #include "core/crystal.h"
@@ -66,8 +67,21 @@ Crystal::Crystal(QObject* parent):
     cellGroup(this),
     orientationGroup(this)
 {
-  spaceGroup.setGroupSymbol("P1");
-  internalSetCell(4.0, 4.0, 4.0, 90.0, 90.0, 90.0);
+  QSettings settings;
+  settings.beginGroup("Crystal");
+  spaceGroup.setGroupSymbol(settings.value("Spacegroup", "P1").toString());
+  internalSetCell(settings.value("CellA", 4.0).toDouble(),
+                  settings.value("CellB", 4.0).toDouble(),
+                  settings.value("CellC", 4.0).toDouble(),
+                  settings.value("CellAlpha", 90.0).toDouble(),
+                  settings.value("CellBeta", 90.0).toDouble(),
+                  settings.value("CellGamma", 90.0).toDouble());
+  setEulerAngles(settings.value("EulerOmega", 00.0).toDouble(),
+                 settings.value("EulerChi", 00.0).toDouble(),
+                 settings.value("EulerPhi", 00.0).toDouble());
+
+  settings.endGroup();
+
   Qmin=0.0;
   Qmax=1.0;
   predictionFactor = 1.0;
@@ -827,4 +841,22 @@ double Crystal::OrientationGroup::lowerBound(int member) const {
 
 double Crystal::OrientationGroup::upperBound(int member) const {
   return 10;
+}
+
+void Crystal::saveParametersAsDefault() {
+  QSettings settings;
+  double omega, chi, phi;
+  calcEulerAngles(omega, chi, phi);
+  settings.beginGroup("Crystal");
+  settings.setValue("Spacegroup", spaceGroup.groupSymbol());
+  settings.setValue("CellA", a);
+  settings.setValue("CellB", b);
+  settings.setValue("CellC", c);
+  settings.setValue("CellAlpha", alpha);
+  settings.setValue("CellBeta", beta);
+  settings.setValue("CellGamma", gamma);
+  settings.setValue("EulerOmega", omega);
+  settings.setValue("EulerChi", chi);
+  settings.setValue("EulerPhi", phi);
+  settings.endGroup();
 }

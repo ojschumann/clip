@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPointer>
 #include <QDomElement>
+
 #include "ui/hkltool.h"
 
 class Crystal;
@@ -39,8 +40,6 @@ public slots:
   void slotRotationChanged();
   void slotSpacegroupChanged(QString);
   void slotLoadCellFromCrystal();
-  void slotLoadCrystalData();
-  void slotSaveCrystalData();
   void slotStartIndexing();
   void slotSetSGConstrains();
 

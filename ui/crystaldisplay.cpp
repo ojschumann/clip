@@ -156,14 +156,6 @@ void CrystalDisplay::slotSetSGConstrains() {
   }
 }
 
-void CrystalDisplay::slotLoadCrystalData() {
-
-}
-
-void CrystalDisplay::slotSaveCrystalData() {
-
-}
-
 void CrystalDisplay::slotStartIndexing() {
   if (hklTool.isNull()) {
     hklTool = new HKLTool(crystal);
