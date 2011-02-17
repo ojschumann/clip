@@ -38,8 +38,14 @@ public:
   void ensureColor(int t, const QObject* receiver, const char * method);
   void setColorChanger(int t, const QObject * sender, const char * signal);
   double getZoneMarkerWidth() const;
+  bool loadPositionFromWorkspace();
+  bool loadSizeFromWorkspace();
+  QString initialWorkspaceFile();
 public slots:
   void setZoneMarkerWidth(double);
+  void setLoadPositionFromWorkspace(bool);
+  void setLoadSizeFromWorkspace(bool);
+  void setInitialWorkspaceFile(QString);
 signals:
   void colorChanged(int, QColor);
   void zoneMarkerWidthChanged(double);
@@ -51,7 +57,10 @@ private:
 
   QList<ColorConfigItem*> colors;
   double zoneMarkerWidth;
+  bool loadPositionFromCWS;
+  bool loadSizeFromCWS;
   static ConfigStore* instance;
+  QString initialCWSFile;
 
 };
 

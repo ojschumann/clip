@@ -5,6 +5,8 @@
 #include <QRect>
 #include <QFile>
 
+#include "config/configstore.h"
+
 QDomDocument readXMLFile(QString filename) {
   QDomDocument doc;
   QFile file(filename);
@@ -67,14 +69,22 @@ QRectF TagToRect(QDomElement element, QRectF defaultValue, bool* _ok) {
   return QRectF(x,y,w,h);
 }
 
-#include <iostream>
-using namespace std;
-QRect TagToRect(QDomElement element, QRect defaultValue, bool* _ok) {
+QRect TagToRect(QDomElement element, QRect defaultValue, bool obeyGeometryReadSettings, bool* _ok) {
   bool ok = true;
-  int x = readInt(element, "x", ok, defaultValue.x());
-  int y = readInt(element, "y", ok, defaultValue.y());
-  int w = readInt(element, "width", ok, defaultValue.width());
-  int h = readInt(element, "height", ok, defaultValue.height());
+  int x = defaultValue.x();
+  int y = defaultValue.y();
+  int w = defaultValue.width();
+  int h = defaultValue.height();
+
+  if (!obeyGeometryReadSettings || ConfigStore::getInstance()->loadPositionFromWorkspace()) {
+    x=readInt(element, "x", ok, defaultValue.x());
+    y=readInt(element, "y", ok, defaultValue.y());
+  }
+  if (!obeyGeometryReadSettings || ConfigStore::getInstance()->loadSizeFromWorkspace()) {
+    w=readInt(element, "width", ok, defaultValue.width());
+    h=readInt(element, "height", ok, defaultValue.height());
+  }
+
   if (_ok) *_ok = ok;
   return QRect(x,y,w,h);
 }

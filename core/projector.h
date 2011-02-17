@@ -42,7 +42,6 @@ public:
 
   virtual Projector& operator=(const Projector& o);
 
-
   // Functions for transformations in the different Coordinate systems
 
   static Vec3D normal2scattered(const Vec3D&);

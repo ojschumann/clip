@@ -1,5 +1,7 @@
 #include "configstore.h"
 
+#include <QSettings>
+
 ConfigStore::ConfigStore(QObject *parent) :
     QObject(parent)
 {
@@ -32,11 +34,20 @@ ConfigStore::ConfigStore(QObject *parent) :
       << new ColorConfigItem("Crop Marker Interior",       QColor(0x80, 0x80, 0x80), this)
       << new ColorConfigItem("Primary Beam Marker",        QColor(0xFF, 0x00, 0x00), this);
 
-  zoneMarkerWidth = 1.0;
+
+  QSettings settings;
+  zoneMarkerWidth = settings.value("ZoneMarkerWidth", 1.0).toDouble();
+  loadPositionFromCWS = settings.value("LoadPositionFromWorkspace", true).toBool();
+  loadSizeFromCWS = settings.value("LoadSizeFromWorkspace", true).toBool();
+  initialCWSFile = settings.value("InitialWorkspaceFile", "").toString();
 }
 
 ConfigStore::~ConfigStore() {
-
+  QSettings settings;
+  settings.setValue("ZoneMarkerWidth", zoneMarkerWidth);
+  settings.setValue("LoadPositionFromWorkspace", loadPositionFromCWS);
+  settings.setValue("LoadSizeFromWorkspace", loadSizeFromCWS);
+  settings.setValue("InitialWorkspaceFile", initialCWSFile);
 }
 
 ConfigStore* ConfigStore::instance = 0;
@@ -89,4 +100,28 @@ void ConfigStore::setZoneMarkerWidth(double v) {
 
 double ConfigStore::getZoneMarkerWidth() const {
   return zoneMarkerWidth;
+}
+
+void ConfigStore::setLoadPositionFromWorkspace(bool b) {
+  loadPositionFromCWS = b;
+}
+
+bool ConfigStore::loadPositionFromWorkspace() {
+  return loadPositionFromCWS;
+}
+
+void ConfigStore::setLoadSizeFromWorkspace(bool b) {
+  loadSizeFromCWS = b;
+}
+
+bool ConfigStore::loadSizeFromWorkspace() {
+  return loadSizeFromCWS;
+}
+
+void ConfigStore::setInitialWorkspaceFile(QString s) {
+  initialCWSFile = s;
+}
+
+QString ConfigStore::initialWorkspaceFile() {
+  return initialCWSFile;
 }

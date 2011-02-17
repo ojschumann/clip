@@ -23,6 +23,9 @@ protected slots:
 private:
   Ui::ClipConfig *ui;
   QSignalMapper colorButtonMapper;
+
+private slots:
+    void on_toolButton_clicked();
 };
 
 #endif // CLIPCONFIG_H

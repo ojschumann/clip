@@ -2,10 +2,6 @@ Crop marker
   # Handle Cursor generation
   # Larger resize handles (size of cursor?)
 
-Config
-  Default Projector and Crystal xml
-  Save Position/Size switch
-
 LaueImage
   # implement setting of resolution from ResolutionCalculator
 
@@ -24,14 +20,6 @@ Printing
     Table of Crystal Info
     Table of Markers
     custom description
-
-Lock/Unlock Crystal and Projector for large updates (fit, LoadFromXML)
-  * lock()
-  * setOrientation()
-  * setDetSize()
-  * setCell()
-  * unlock()
-
 
 Implement a faster MonochromeScaler
 

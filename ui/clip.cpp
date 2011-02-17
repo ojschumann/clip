@@ -87,7 +87,7 @@ ProjectionPlane* Clip::addProjector(Projector* p) {
   connect(pp, SIGNAL(rotationFromProjector(double)), this, SIGNAL(projectorRotation(double)));
   connect(pp, SIGNAL(mousePositionInfo(MousePositionInfo)), this, SIGNAL(mousePositionInfo(MousePositionInfo)));
   connect(this, SIGNAL(highlightMarker(Vec3D)), p, SLOT(setSpotHighlighting(Vec3D)));
-  addMdiWindow(pp);
+  addMdiWindow(pp)->systemMenu()->addAction("Save as Default", p, SLOT(saveParametersAsDefault()));
   return pp;
 }
 
@@ -299,7 +299,11 @@ void Clip::on_actionOpen_Workspace_triggered() {
 
 void Clip::loadInitialWorkspace() {
   // Needs to be a slot, because the windows are not placed correctly otherwise
-  loadWorkspaceFile(":/DefaultWorkspace.cws");
+  QString filename = ConfigStore::getInstance()->initialWorkspaceFile();
+  QFileInfo fInfo(filename);
+  if (!fInfo.isReadable())
+    filename = ":/DefaultWorkspace.cws";
+  loadWorkspaceFile(filename);
 }
 
 

@@ -1,10 +1,12 @@
 #include "clipconfig.h"
 #include "ui_clipconfig.h"
 
-#include <QSettings>
 #include <QLabel>
+#include <QSettings>
 #include <QFormLayout>
 #include <QColorDialog>
+#include <QFileInfo>
+#include <QFileDialog>
 #include <iostream>
 
 #include "config/colorbutton.h"
@@ -22,11 +24,14 @@ ClipConfig::ClipConfig(QWidget *parent) :
 
   ConfigStore* config = ConfigStore::getInstance();
 
-  QFormLayout* layout = new QFormLayout(ui->scrollArea->widget());
+  QFormLayout* leftLayout = new QFormLayout();
+  QFormLayout* rightLayout = new QFormLayout();
+  static_cast<QGridLayout*>(ui->colorFrame->layout())->addLayout(leftLayout, 0, 0);
+  static_cast<QGridLayout*>(ui->colorFrame->layout())->addLayout(rightLayout, 0, 1);
 
   for (int n=0; n<config->colorCount(); n++) {
     ColorButton* button = new ColorButton(config->color(n), this);
-    layout->addRow(config->colorName(n), button);
+    ((2*n>config->colorCount())?rightLayout:leftLayout)->addRow(config->colorName(n), button);
     config->ensureColor(n, button, SLOT(setColor(QColor)));
     connect(button, SIGNAL(clicked()), &colorButtonMapper, SLOT(map()));
     colorButtonMapper.setMapping(button, n);
@@ -35,6 +40,15 @@ ClipConfig::ClipConfig(QWidget *parent) :
 
   ui->zoneMarkerWidth->setValue(config->getZoneMarkerWidth());
   connect(ui->zoneMarkerWidth, SIGNAL(valueChanged(double)), config, SLOT(setZoneMarkerWidth(double)));
+
+  ui->loadSize->setChecked(config->loadSizeFromWorkspace());
+  connect(ui->loadSize, SIGNAL(toggled(bool)), config, SLOT(setLoadSizeFromWorkspace(bool)));
+
+  ui->loadPosition->setChecked(config->loadPositionFromWorkspace());
+  connect(ui->loadPosition, SIGNAL(toggled(bool)), config, SLOT(setLoadPositionFromWorkspace(bool)));
+
+  ui->initailCWSFile->setText(config->initialWorkspaceFile());
+  connect(ui->initailCWSFile, SIGNAL(textChanged(QString)), config, SLOT(setInitialWorkspaceFile(QString)));
 }
 
 ClipConfig::~ClipConfig()
@@ -54,5 +68,16 @@ void ClipConfig::colorButtonPressed(int id) {
     config->setColor(id, dialog.currentColor());
   } else {
     config->setColor(id, initialColor);
+  }
+}
+
+void ClipConfig::on_toolButton_clicked()
+{
+  QSettings settings;
+  QString filename = QFileDialog::getOpenFileName(this, "Set Initial Workspace File", settings.value("LastDirectory").toString(),
+                                                  "Clip Workspace Data (*.cws);;All Files (*)");
+  QFileInfo finfo(filename);
+  if (finfo.exists()) {
+    ui->initailCWSFile->setText(filename);
   }
 }

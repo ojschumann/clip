@@ -547,10 +547,10 @@ void Projector::zoneMarkerRemoved(int n) {
   emit markerRemoved(zoneMarkerStore.at(n));
 }
 void Projector::deleteMarker(AbstractMarkerItem* item) {
-  if (ZoneItem* zi=dynamic_cast<ZoneItem*>(item)) {
-    zoneMarkers().del(zi);
-  } else if (SpotItem* si=dynamic_cast<SpotItem*>(item)) {
-    spotMarkers().del(si);
+  if (item->getType()==AbstractMarkerItem::ZoneMarker) {
+    zoneMarkers().del(static_cast<ZoneItem*>(item));
+  } else if (item->getType()==AbstractMarkerItem::SpotMarker) {
+    spotMarkers().del(static_cast<SpotItem*>(item));
   }
 }
 
