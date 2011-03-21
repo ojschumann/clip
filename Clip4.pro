@@ -18,6 +18,7 @@ win32 {
   DEFFILE = $(OBJECTS_DIR)\defs.o
   PATH += C:/Program Files (x86)/TortoiseHg
   PATH += C:/Programme/TortoiseHG
+  PATH += C:/Program Files/TortoiseHg
 }
 
 defs.commands = -\$(DEL_FILE) $$DEFFILE
@@ -70,6 +71,7 @@ SOURCES += main.cpp\
     image/dataproviderfactory.cpp \
     image/qimagedataprovider.cpp \
     image/basdataprovider.cpp \
+    image/mwdataprovider.cpp \
     image/datascaler.cpp \
     image/datascalerfactory.cpp \
     image/simplergbscaler.cpp \
@@ -149,6 +151,7 @@ HEADERS  += ui/clip.h \
     image/dataproviderfactory.h \
     image/qimagedataprovider.h \
     image/basdataprovider.h \
+    image/mwdataprovider.h \
     image/datascaler.h \
     image/datascalerfactory.h \
     image/simplergbscaler.h \
