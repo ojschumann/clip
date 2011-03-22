@@ -113,7 +113,8 @@ SOURCES += main.cpp\
     ui/clipconfig.cpp \
     config/configstore.cpp \
     config/colorbutton.cpp \
-    config/colorconfigitem.cpp
+    config/colorconfigitem.cpp \
+    ui/printdialog.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -192,7 +193,8 @@ HEADERS  += ui/clip.h \
     ui/clipconfig.h \
     config/configstore.h \
     config/colorbutton.h \
-    config/colorconfigitem.h
+    config/colorconfigitem.h \
+    ui/printdialog.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -208,7 +210,8 @@ FORMS    += ui/clip.ui \
     ui/reorient.ui \
     ui/fitdisplay.ui \
     ui/hkltool.ui \
-    ui/clipconfig.ui
+    ui/clipconfig.ui \
+    ui/printdialog.ui
 
 RESOURCES += \
     resources/resources.qrc

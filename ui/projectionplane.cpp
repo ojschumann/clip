@@ -478,13 +478,17 @@ void ProjectionPlane::renderPrintout(QPrinter* printer) {
   projector->setHQPrintMode(false);
 }
 
+#include "ui/printdialog.h"
+
 void ProjectionPlane::on_actionPrint_triggered()
 {
-  QPrintDialog printDialog(this);
+  PrintDialog* d = new PrintDialog(this);
+  d->show();
+  /*QPrintDialog printDialog(this);
   if (printDialog.exec()==QDialog::Accepted) {
     renderPrintout(printDialog.printer());
 
-  }
+  }*/
 }
 
 const char XML_ProjectionPlane_Element[] = "ProjectionPlane";
