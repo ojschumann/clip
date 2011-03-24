@@ -18,6 +18,7 @@ ConfigStore::ConfigStore(QObject *parent) :
     CropMarkerOutline = 10,
     CropMarkerInterior = 11,
     PrimaryBeamMarker = 12,
+    HKLIndicator = 13
 */
 
   colors << new ColorConfigItem("Spot Marker",             QColor(0xFF, 0x80, 0x00), this)
@@ -32,7 +33,8 @@ ConfigStore::ConfigStore(QObject *parent) :
       << new ColorConfigItem("Rulers Handles",             QColor(0xFF, 0x00, 0x00), this)
       << new ColorConfigItem("Crop Marker Outline",        QColor(0xFF, 0x00, 0x00), this)
       << new ColorConfigItem("Crop Marker Interior",       QColor(0x80, 0x80, 0x80), this)
-      << new ColorConfigItem("Primary Beam Marker",        QColor(0xFF, 0x00, 0x00), this);
+      << new ColorConfigItem("Primary Beam Marker",        QColor(0xFF, 0x00, 0x00), this)
+      << new ColorConfigItem("HKL Indicator",              QColor(0x00, 0x00, 0x00), this);
 
 
   QSettings settings;

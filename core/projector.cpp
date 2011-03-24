@@ -25,6 +25,7 @@
 #include "tools/spotindicatorgraphicsitem.h"
 #include "tools/xmltools.h"
 #include "config/configstore.h"
+#include "tools/colortextitem.h"
 
 using namespace std;
 
@@ -185,6 +186,7 @@ ItemStore<QGraphicsRectItem>& Projector::infoItems() {
   return infoStore;
 }
 
+
 void Projector::doProjection() {
   if (crystal.isNull() or !isProjectionEnabled())
     return;
@@ -212,10 +214,12 @@ void Projector::doProjection() {
       spotIndicator->coordinates << p;
       // If hklSum is below limit, add a textitem to the scene
       if (refs.at(i).hklSqSum<=maxHklSqSum) {
-        QGraphicsTextItem* t = new QGraphicsTextItem();
+        //QGraphicsTextItem* t = new QGraphicsTextItem();
+        QGraphicsTextItem* t = new ColorTextItem();
         t->setTransform(QTransform(1,0,0,-1,0,0));
         t->setHtml(refs.at(i).toHtml());
         t->setPos(p);
+        ConfigStore::getInstance()->ensureColor(ConfigStore::HKLIndicator, t, SLOT(setColor(QColor)));
         QRectF r=t->boundingRect();
         double s=getTextSize()/std::min(r.width(), r.height());
         t->scale(s,s);

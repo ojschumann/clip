@@ -116,7 +116,8 @@ SOURCES += main.cpp\
     config/configstore.cpp \
     config/colorbutton.cpp \
     config/colorconfigitem.cpp \
-    ui/printdialog.cpp
+    ui/printdialog.cpp \
+    tools/colortextitem.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -197,7 +198,8 @@ HEADERS  += ui/clip.h \
     config/configstore.h \
     config/colorbutton.h \
     config/colorconfigitem.h \
-    ui/printdialog.h
+    ui/printdialog.h \
+    tools/colortextitem.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

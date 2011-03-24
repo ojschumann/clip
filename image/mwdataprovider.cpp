@@ -52,52 +52,40 @@ DataProvider* MWDataProvider::Factory::getProvider(QString filename, QObject *pa
   if (!hs2File.open(QFile::ReadOnly)) return NULL;
 
   QMap<QString, QVariant> headerData;
-  headerData.insert("OriginalFilename",info.filePath());
-  headerData.insert("IP-Size",1);
-  int xpxsize = 300000/256; // x-pixel size in microns
+  double xpxsize = 300000./256; // x-pixel size in microns
   headerData.insert("X-PixelSizeUM",xpxsize);
-  int ypxsize = 300000/256; // y-pixel size in microns
+  double ypxsize = 300000./256; // y-pixel size in microns
   headerData.insert("Y-PixelSizeUM",ypxsize);
-/*
-  if suffix=="hs2" {
-    int bpp = 16;
-  else
-    int bpp = 8;
-  }
-*/
-  int bpp = 16;
-  headerData.insert("BitsPerPixel",bpp);
+
+  headerData.insert("BitsPerPixel", 16);
   headerData.insert("Width",256);  //pixels
   headerData.insert("Height",256); //pixels
-  headerData.insert("Sensitivity",1);
-  headerData.insert("Latitude",0);
-  headerData.insert("Exposure Date",0);
-  headerData.insert("UnixTime",0);
-  headerData.insert("OverflowPixels",0);
-  headerData.insert("Comment","");
 
-  quint64 unixtime = headerData["UnixTime"].toULongLong();
-  QDateTime date;
-  date.setTime_t(unixtime);
-  headerData["UnixTime"] = QVariant(QString("%1 (%2)").arg(unixtime).arg(date.toString(Qt::DefaultLocaleLongDate)));
-
-  int pixelCount = headerData["Width"].toInt()*headerData["Height"].toInt();
-  //int bytesPerPixel = (headerData["BitsPerPixel"].toInt()>8)?2:1;
-
-
+  int pixelCount = 256*256;
 
   QVector<float> pixelData(pixelCount);
-
+  QList<int> overflowPixelPosition;
+  quint16 maxValue=0;
   QDataStream in(&hs2File);
-  in.setByteOrder(QDataStream::BigEndian);
+  in.setByteOrder(QDataStream::LittleEndian);
   quint16 pixel;
   for (int i=0; i<pixelCount; i++) {
+    // Flip x coordinate
+    int j = (i&0xFF00) | (0xFF-(i&0xFF));
     in >> pixel;
-    pixelData[i]=1.0*pixel;
-    // Multiwire NortStar displays high intensity spots as dark spots on a white background
-    // flipping the 16-bit value ensures Clip does the same.
-    //pixelData[i]=65535.0-1.0*pixel; //2^16-1 - pixel value
+    if (pixel==0xFFFF) {
+      overflowPixelPosition << j;
+    } else if (pixel>maxValue) {
+      maxValue = pixel;
+    }
+    pixelData[j]=log(1.0+pixel);
   }
+
+  // set overflowed pixels to only slightly brighter than second highest value
+  for (int i=0; i<overflowPixelPosition.size(); i++) {
+    pixelData[overflowPixelPosition[i]] = log(2.0+maxValue);
+  }
+
 
   /*
   There is more useful data stored after the image, however I'm not sure of it's exact format 
@@ -105,6 +93,14 @@ DataProvider* MWDataProvider::Factory::getProvider(QString filename, QObject *pa
   distance is stored in every hs2 file; if this was read automatically it could save on one
   small annoyance.
   */
+
+
+  headerData.insert("Sample Description", QString(hs2File.read(52)));
+  headerData.insert("Experimenter", QString(hs2File.read(52)));
+  headerData.insert("Comment", QString(hs2File.read(52)));
+  hs2File.seek(hs2File.pos()+256);
+  headerData.insert("OriginalFilename", QString(hs2File.read(52)));
+
 
   MWDataProvider* provider = new MWDataProvider(parent);
   provider->insertFileInformation(filename);

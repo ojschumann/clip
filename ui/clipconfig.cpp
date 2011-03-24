@@ -31,7 +31,7 @@ ClipConfig::ClipConfig(QWidget *parent) :
 
   for (int n=0; n<config->colorCount(); n++) {
     ColorButton* button = new ColorButton(config->color(n), this);
-    ((2*n>config->colorCount())?rightLayout:leftLayout)->addRow(config->colorName(n), button);
+    ((2*n>=config->colorCount())?rightLayout:leftLayout)->addRow(config->colorName(n), button);
     config->ensureColor(n, button, SLOT(setColor(QColor)));
     connect(button, SIGNAL(clicked()), &colorButtonMapper, SLOT(map()));
     colorButtonMapper.setMapping(button, n);

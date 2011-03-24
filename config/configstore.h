@@ -25,7 +25,8 @@ public:
     RulerHandles = 9,
     CropMarkerOutline = 10,
     CropMarkerInterior = 11,
-    PrimaryBeamMarker = 12
+    PrimaryBeamMarker = 12,
+    HKLIndicator = 13
   };
 
   static ConfigStore* getInstance();
