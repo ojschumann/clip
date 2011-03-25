@@ -100,6 +100,9 @@ DataProvider* MWDataProvider::Factory::getProvider(QString filename, QObject *pa
   headerData.insert("Comment", QString(hs2File.read(52)));
   hs2File.seek(hs2File.pos()+256);
   headerData.insert("OriginalFilename", QString(hs2File.read(52)));
+  // Sample-detector distance in mm possibly at 787 as float
+  // Detector width and height in cm possible at 779 and 783 as float
+  // Colimator diameter in mm at 775 as float?
 
 
   MWDataProvider* provider = new MWDataProvider(parent);

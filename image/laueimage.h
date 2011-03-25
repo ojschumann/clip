@@ -17,6 +17,13 @@ class LaueImage : public QObject
 {
   Q_OBJECT
 public:
+  enum AImageData {
+    AbsoluteWidth,
+    AbsoluteHeight,
+    PlaneDetectorSampleDistance,
+    PlaneDetectorOmega
+  };
+
   explicit LaueImage(QObject *parent = 0);
   virtual ~LaueImage();
 

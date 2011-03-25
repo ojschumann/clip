@@ -7,7 +7,6 @@
 #include <QVariant>
 #include <QDomElement>
 
-class DataScaler;
 
 class DataProvider : public QObject
 {
