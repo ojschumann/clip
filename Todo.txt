@@ -2,6 +2,7 @@ Crop marker
   # Handle Cursor generation
   # Larger resize handles (size of cursor?)
 
+  DefaultWorkspace
 LaueImage
   # implement setting of resolution from ResolutionCalculator
   # Generic Interface for ImageInfo
@@ -11,7 +12,6 @@ LaueImage
     * detectorDistance
     * ...
 
-######### Release Version Line ########################
 
 Scattering orders for reflection info
 

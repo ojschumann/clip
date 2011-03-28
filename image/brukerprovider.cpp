@@ -11,6 +11,8 @@
 #include <QtDebug>
 #include "tools/xmltools.h"
 
+#include "image/imagedatastore.h"
+
 using namespace std;
 
 BrukerProvider::BrukerProvider(QObject *parent) :

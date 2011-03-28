@@ -66,7 +66,7 @@ CrystalDisplay::~CrystalDisplay()
 
 
 QSize CrystalDisplay::sizeHint() const {
-  // sizeHint results in a compact window
+  // returning minimumSizeHint results in a compact window
   return minimumSizeHint();
 }
 

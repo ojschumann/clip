@@ -105,8 +105,10 @@ DataProvider* MWDataProvider::Factory::getProvider(QString filename, ImageDataSt
   // Colimator diameter in mm at 775 as float?
   // Detector width and height in cm possible at 779 and 783 as float
   // Sample-detector distance in mm possibly at 787 as float
-  hs2File.seek(hs2File.pos()+779-256-4*52);
+  hs2File.seek(hs2File.pos()+775-256-4*52);
   float colDia, dist, width, height;
+  in.setFloatingPointPrecision(QDataStream::SinglePrecision);
+  in.setByteOrder(QDataStream::BigEndian);
   in >> colDia >> width >> height >> dist;
 
   store->setData(ImageDataStore::Width, 256.0);

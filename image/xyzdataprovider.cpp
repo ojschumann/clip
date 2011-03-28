@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "image/dataproviderfactory.h"
+#include "image/imagedatastore.h"
 
 using namespace std;
 
