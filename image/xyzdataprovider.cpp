@@ -22,7 +22,7 @@ QStringList XYZDataProvider::Factory::fileFormatFilters() {
   return QStringList() << "raw" << "xyz";
 }
 
-DataProvider* XYZDataProvider::Factory::getProvider(QString filename, QObject *parent) {
+DataProvider* XYZDataProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject *parent) {
   QFile imgFile(filename);
 
   if (!imgFile.open(QFile::ReadOnly)) return NULL;
@@ -46,6 +46,9 @@ DataProvider* XYZDataProvider::Factory::getProvider(QString filename, QObject *p
     in >> tmp;
     pixelData << static_cast<float>(tmp);
   }
+
+  store->setData(ImageDataStore::Width, width);
+  store->setData(ImageDataStore::Height, height);
 
   XYZDataProvider* provider = new XYZDataProvider(parent);
   provider->pixelData = pixelData;

@@ -10,6 +10,7 @@
 #include <cmath>
 
 #include "tools/xmltools.h"
+#include "image/imagedatastore.h"
 
 using namespace std;
 /*
@@ -34,7 +35,7 @@ QStringList MWDataProvider::Factory::fileFormatFilters() {
   return QStringList() << "hs2";
 }
 
-DataProvider* MWDataProvider::Factory::getProvider(QString filename, QObject *parent) {
+DataProvider* MWDataProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject *parent) {
   //load in information about the file
   QFileInfo info(filename);
 
@@ -100,10 +101,19 @@ DataProvider* MWDataProvider::Factory::getProvider(QString filename, QObject *pa
   headerData.insert("Comment", QString(hs2File.read(52)));
   hs2File.seek(hs2File.pos()+256);
   headerData.insert("OriginalFilename", QString(hs2File.read(52)));
-  // Sample-detector distance in mm possibly at 787 as float
-  // Detector width and height in cm possible at 779 and 783 as float
-  // Colimator diameter in mm at 775 as float?
 
+  // Colimator diameter in mm at 775 as float?
+  // Detector width and height in cm possible at 779 and 783 as float
+  // Sample-detector distance in mm possibly at 787 as float
+  hs2File.seek(hs2File.pos()+779-256-4*52);
+  float colDia, dist, width, height;
+  in >> colDia >> width >> height >> dist;
+
+  store->setData(ImageDataStore::Width, 256.0);
+  store->setData(ImageDataStore::Height, 256.0);
+  store->setData(ImageDataStore::PhysicalWidth, 10.0*width);
+  store->setData(ImageDataStore::PhysicalHeight, 10.0*height);
+  store->setData(ImageDataStore::PlaneDetectorToSampleDistance, dist);
 
   MWDataProvider* provider = new MWDataProvider(parent);
   provider->insertFileInformation(filename);
@@ -130,11 +140,6 @@ int MWDataProvider::pixelCount() {
 
 DataProvider::Format MWDataProvider::format() {
   return Float32;
-}
-
-QSizeF MWDataProvider::absoluteSize() {
-  QSize s(size());
-  return QSizeF(0.001*s.width()*providerInformation["X-PixelSizeUM"].toDouble(), 0.001*s.height()*providerInformation["Y-PixelSizeUM"].toDouble());
 }
 
 

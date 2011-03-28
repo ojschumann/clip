@@ -6,6 +6,7 @@
 #include <QImageReader>
 
 #include "image/dataproviderfactory.h"
+#include "image/imagedatastore.h"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ QStringList QImageDataProvider::Factory::fileFormatFilters() {
   return formats;
 }
 
-DataProvider* QImageDataProvider::Factory::getProvider(QString filename, QObject* parent) {
+DataProvider* QImageDataProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject *parent) {
   QImage img(filename);
   if (!img.isNull()) {
     QMap<QString, QVariant> headerData;
@@ -35,6 +36,10 @@ DataProvider* QImageDataProvider::Factory::getProvider(QString filename, QObject
       if (key!="")
         headerData.insert(key, QVariant(img.text(key)));
     }
+
+    store->setData(ImageDataStore::Width, img.width());
+    store->setData(ImageDataStore::Height, img.height());
+
     headerData.insert("Size", QString("%1x%2").arg(img.width()).arg(img.height()));
     QImageDataProvider* provider = new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied), parent);
     provider->insertFileInformation(filename);

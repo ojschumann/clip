@@ -321,11 +321,13 @@ void ProjectionPlane::generateMousePositionInfo(QPointF p) {
 
   info.projector = projector;
 
+  /*
+   TODO: Get original pixel image position (and pixel value)
   if (projector->getLaueImage()) {
     QSizeF s = projector->getLaueImage()->transformedSize();
     info.imagePos.rx() *= s.width();
     info.imagePos.ry() *= s.height();
-  }
+  }*/
   info.normal = projector->det2normal(p);
   info.detQMin = projector->Qmin();
   info.detQMax = projector->Qmax();
@@ -411,7 +413,7 @@ void ProjectionPlane::on_actionCrop_triggered() {
 void ProjectionPlane::imageLoaded(LaueImage *img) {
   setWindowTitle(projector->displayName()+": "+img->name());
   ui->imgToolBar->setVisible(true);
-  ui->rulerAction->setVisible(!projector->getLaueImage()->hasAbsoluteSize());
+  ui->rulerAction->setVisible(!projector->getLaueImage()->data()->hasData(ImageDataStore::AbsoluteWidth));
   resizeView();
 }
 

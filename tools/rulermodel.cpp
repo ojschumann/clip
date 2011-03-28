@@ -31,8 +31,8 @@ QVariant RulerModel::data ( const QModelIndex & index, int role = Qt::DisplayRol
     RulerItem* r = rulers.at(index.row());
     double dx = fabs(r->getStart().x()-r->getEnd().x());
     double dy = fabs(r->getStart().y()-r->getEnd().y());
-    double imgX = image->transformedSize().width();
-    double imgY = image->transformedSize().height();
+    double imgX = image->data()->getData(ImageDataStore::Width);
+    double imgY = image->data()->getData(ImageDataStore::Height);
     if (index.column()==0) {
       return QVariant(QString::number(imgX*dx, 'f', 2));
     } else if (index.column()==1) {

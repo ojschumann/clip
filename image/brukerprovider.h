@@ -13,7 +13,7 @@ public:
   public:
     Factory() {}
     QStringList fileFormatFilters();
-    DataProvider* getProvider(QString, QObject* = 0);
+    DataProvider* getProvider(QString, ImageDataStore*, QObject* = 0);
   };
 
   virtual ~BrukerProvider();
@@ -23,7 +23,6 @@ public:
   virtual int bytesCount();
   virtual int pixelCount();
   virtual Format format();
-  virtual QSizeF absoluteSize();
 private:
   explicit BrukerProvider(QObject *parent = 0);
 signals:

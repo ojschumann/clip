@@ -374,9 +374,9 @@ double LauePlaneProjector::yOffset() const {
 }
 
 void LauePlaneProjector::doImgRotation(const QTransform& t) {
-  if (getLaueImage() && getLaueImage()->hasAbsoluteSize()) {
-    QSizeF imgSize = getLaueImage()->transformedAbsoluteSize();
-    setDetSize(dist(), imgSize.width(), imgSize.height());
+  Projector::doImgRotation(t);
+  if (getLaueImage()) {
+    loadParmetersFromImage(getLaueImage());
   } else {
     QTransform Tinv = t.inverted();
     QPointF c = Tinv.map(QPointF(0,0));
@@ -386,18 +386,26 @@ void LauePlaneProjector::doImgRotation(const QTransform& t) {
     double dh = fasthypot((x.x()-c.x())*detWidth, (x.y()-c.y())*detHeight);
     setDetSize(dist(), dw, dh);
   }
-  Projector::doImgRotation(t);
 }
 
 void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
-  QSizeF imgSize;
-  if (img->hasAbsoluteSize()) {
-    imgSize = img->transformedAbsoluteSize();
+  double d = dist();
+  double w = width();
+  double h = height();
+
+  if (img->data()->hasData(ImageDataStore::PlaneDetectorToSampleDistance))
+    d = img->data()->getData(ImageDataStore::PlaneDetectorToSampleDistance);
+
+  if (img->data()->hasData(ImageDataStore::PhysicalWidth) && img->data()->hasData(ImageDataStore::PhysicalHeight)) {
+    w = img->data()->getData(ImageDataStore::PhysicalWidth);
+    h = img->data()->getData(ImageDataStore::PhysicalHeight);
   } else {
-    imgSize = img->transformedSize();
-    imgSize *= sqrt(width()*height()/(imgSize.width()*imgSize.height()));
+    double scale = sqrt(w*h/(img->data()->getData(ImageDataStore::Width)*img->data()->getData(ImageDataStore::Height)));
+    w = scale * img->data()->getData(ImageDataStore::Width);
+    h = scale * img->data()->getData(ImageDataStore::Height);
   }
-  setDetSize(dist(), imgSize.width(), imgSize.height());
+
+  setDetSize(d, w, h);
 }
 
 const char XML_LPP_DetSize[] = "DetSize";

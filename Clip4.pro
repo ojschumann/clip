@@ -117,7 +117,8 @@ SOURCES += main.cpp\
     config/colorbutton.cpp \
     config/colorconfigitem.cpp \
     ui/printdialog.cpp \
-    tools/colortextitem.cpp
+    tools/colortextitem.cpp \
+    image/imagedatastore.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -199,7 +200,8 @@ HEADERS  += ui/clip.h \
     config/colorbutton.h \
     config/colorconfigitem.h \
     ui/printdialog.h \
-    tools/colortextitem.h
+    tools/colortextitem.h \
+    image/imagedatastore.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

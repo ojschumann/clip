@@ -10,6 +10,7 @@
 #include <cmath>
 
 #include "tools/xmltools.h"
+#include "image/imagedatastore.h"
 
 using namespace std;
 
@@ -26,7 +27,7 @@ QStringList BasDataProvider::Factory::fileFormatFilters() {
   return QStringList() << "img" << "inf";
 }
 
-DataProvider* BasDataProvider::Factory::getProvider(QString filename, QObject *parent) {
+DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataStore* store, QObject *parent) {
   QFileInfo info(filename);
 
   // Return if file does not exist
@@ -133,6 +134,13 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, QObject *p
     }
   }
 
+  double w = headerData["Width"].toInt();
+  double h = headerData["Height"].toInt();
+  store->setData(ImageDataStore::Width, w);
+  store->setData(ImageDataStore::Height, h);
+  store->setData(ImageDataStore::PhysicalWidth, 0.001*w*headerData["X-PixelSizeUM"].toInt());
+  store->setData(ImageDataStore::PhysicalHeight, 0.001*h*headerData["Y-PixelSizeUM"].toInt());
+
   BasDataProvider* provider = new BasDataProvider(parent);
   provider->insertFileInformation(filename);
   provider->providerInformation.unite(headerData);
@@ -159,11 +167,5 @@ int BasDataProvider::pixelCount() {
 DataProvider::Format BasDataProvider::format() {
   return Float32;
 }
-
-QSizeF BasDataProvider::absoluteSize() {
-  QSize s(size());
-  return QSizeF(0.001*s.width()*providerInformation["X-PixelSizeUM"].toDouble(), 0.001*s.height()*providerInformation["Y-PixelSizeUM"].toDouble());
-}
-
 
 bool BasRegisterOK = DataProviderFactory::registerImageLoader(0, new BasDataProvider::Factory());

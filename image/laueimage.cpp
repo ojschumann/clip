@@ -1,4 +1,5 @@
 #include "laueimage.h"
+
 #include <QImage>
 #include <QPixmap>
 #include <QApplication>
@@ -7,16 +8,16 @@
 
 #include "ui/clip.h"
 #include "image/dataproviderfactory.h"
-#include "ui/imagetoolbox.h"
 #include "image/datascalerfactory.h"
 #include "tools/xmltools.h"
 #include "tools/zipiterator.h"
 #include "image/BezierCurve.h"
+#include "image/imagedatastore.h"
 
 using namespace std;
 
 LaueImage::LaueImage(QObject *parent) :
-    QObject(parent), provider(0), scaler(0)
+    QObject(parent), provider(0), scaler(0), dataStore()
 {
   connect(&watcher, SIGNAL(finished()), this, SLOT(doneOpenFile()));
 }
@@ -27,8 +28,8 @@ void LaueImage::startOpenFile(QString filename, QDomElement base) {
 }
 
 QPair<DataProvider*, DataScaler*> LaueImage::doOpenFile(QString filename, QDomElement base) {
-  DataProvider* dp = DataProviderFactory::getInstance().loadImage(filename);
-  DataScaler* ds = dp ? DataScalerFactory::getInstance().getScaler(dp) : NULL;
+  DataProvider* dp = DataProviderFactory::getInstance().loadImage(filename, &dataStore, this);
+  DataScaler* ds = dp ? DataScalerFactory::getInstance().getScaler(dp, this) : NULL;
   if (ds && dp) {
     if (!base.isNull()) {
       dp->loadFromXML(base);
@@ -48,8 +49,11 @@ void LaueImage::doneOpenFile() {
   if (dp && ds) {
     provider = dp;
     scaler = ds;
-    provider->setParent(this);
-    scaler->setParent(this);
+    //provider->setParent(this);
+    //scaler->setParent(this);
+    if (provider->parent()!=this) {
+      cout << "boese..." << endl;
+    }
     connect(scaler, SIGNAL(imageContentsChanged()), this, SIGNAL(imageContentsChanged()));
     connect(scaler, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), this, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)));
   } else {
@@ -79,26 +83,6 @@ void LaueImage::addTransform(const QTransform &t) {
 
 void LaueImage::resetAllTransforms() {
   scaler->resetAllTransforms();
-}
-
-bool LaueImage::hasAbsoluteSize() {
-  return !provider->absoluteSize().isEmpty();
-}
-
-QSize LaueImage::originalSize() {
-  return provider->size();
-}
-
-QSizeF LaueImage::originalAbsoluteSize() {
-  return provider->absoluteSize();
-}
-
-QSizeF LaueImage::transformedSize() {
-  return scaler->transformedSize();
-}
-
-QSizeF LaueImage::transformedAbsoluteSize() {
-  return scaler->transformedAbsoluteSize();
 }
 
 QString LaueImage::name() {
@@ -154,3 +138,6 @@ void LaueImage::loadCurvesFromXML(QDomElement base, DataScaler* ds) {
     p.first->loadFromXML(curves, p.second);
   }
 }
+
+
+

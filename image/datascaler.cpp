@@ -55,7 +55,6 @@ void DataScaler::addTransform(const QTransform & t) {
 }
 
 QSizeF DataScaler::transformSize(const QSizeF &s) {
-
   QTransform T = sqareToRaw*initialTransform().inverted();
   QPointF center = T.map(QPointF(0,0));
   QPointF ex = T.map(QPointF(1,0));
@@ -63,15 +62,6 @@ QSizeF DataScaler::transformSize(const QSizeF &s) {
   double w = fasthypot((ex.x()-center.x())*s.width(), (ex.y()-center.y())*s.height());
   double h = fasthypot((ey.x()-center.x())*s.width(), (ey.y()-center.y())*s.height());
   return QSizeF(w,h);
-}
-
-QSizeF DataScaler::transformedSize() {
-  return transformSize(provider->size());
-}
-
-QSizeF DataScaler::transformedAbsoluteSize() {
-  if (provider->absoluteSize().isEmpty()) return QSizeF();
-  return transformSize(provider->absoluteSize());
 }
 
 void DataScaler::updateContrastMapping() {

@@ -24,8 +24,6 @@ public:
   QImage getImage(const QSize& size, const QPolygonF& from);
   QList<BezierCurve*> getTransferCurves() { return transferCurves; }
 
-  QSizeF transformedSize();
-  QSizeF transformedAbsoluteSize();
 signals:
   void imageContentsChanged();
   void histogramChanged(QVector<int>, QVector<int>, QVector<int>);

@@ -13,7 +13,7 @@ public:
   static bool registerImageLoader(int, DataProvider::ImageFactoryClass*);
   static bool registerDeviceOpener(int, DeviceOpener);
 
-  DataProvider* loadImage(const QString&, QObject* = 0);
+  DataProvider* loadImage(const QString&, ImageDataStore*, QObject* = 0);
 
   QStringList registeredImageFormats();
 

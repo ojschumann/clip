@@ -23,10 +23,10 @@ DataProviderFactory& DataProviderFactory::getInstance() {
   return instance;
 }
 
-DataProvider* DataProviderFactory::loadImage(const QString &filename, QObject* parent) {
+DataProvider* DataProviderFactory::loadImage(const QString &filename, ImageDataStore* store, QObject* parent) {
   foreach (int key, imageLoaders.uniqueKeys()) {
     foreach (DataProvider::ImageFactoryClass* loader, imageLoaders.values(key)) {
-      DataProvider* dp = loader->getProvider(filename, parent);
+      DataProvider* dp = loader->getProvider(filename, store, parent);
       if (dp) return dp;
     }
   }

@@ -60,7 +60,7 @@ int padTo(int value, int pad) {
   return value;
 }
 
-DataProvider* BrukerProvider::Factory::getProvider(QString filename, QObject *parent) {
+DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject *parent) {
   QFile imgFile(filename);
 
   if (!imgFile.open(QFile::ReadOnly)) return NULL;
@@ -207,8 +207,8 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, QObject *pa
     qDebug() << i << " " << twoByteOverflowCount;
   }
 
-
-
+  store->setData(ImageDataStore::Width, rows);
+  store->setData(ImageDataStore::Height, cols);
 
   BrukerProvider* provider = new BrukerProvider(parent);
   provider->insertFileInformation(filename);
@@ -236,12 +236,6 @@ int BrukerProvider::pixelCount() {
 
 DataProvider::Format BrukerProvider::format() {
   return UInt32;
-}
-
-QSizeF BrukerProvider::absoluteSize() {
-  return QSize();
-  QSize s(size());
-  return QSizeF(0.001*s.width()*providerInformation["X-PixelSizeUM"].toDouble(), 0.001*s.height()*providerInformation["Y-PixelSizeUM"].toDouble());
 }
 
 

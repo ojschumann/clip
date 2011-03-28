@@ -10,19 +10,13 @@
 
 #include "image/dataprovider.h"
 #include "image/datascaler.h"
-
-class ImageToolbox;
+#include "image/imagedatastore.h"
 
 class LaueImage : public QObject
 {
   Q_OBJECT
 public:
-  enum AImageData {
-    AbsoluteWidth,
-    AbsoluteHeight,
-    PlaneDetectorSampleDistance,
-    PlaneDetectorOmega
-  };
+
 
   explicit LaueImage(QObject *parent = 0);
   virtual ~LaueImage();
@@ -37,21 +31,18 @@ public:
 
   bool isValid() { return (provider!=0) && (scaler!=0); }
 
-  bool hasAbsoluteSize();
-  QSize originalSize();
-  QSizeF originalAbsoluteSize(); // in mm
-  QSizeF transformedSize();
-  QSizeF transformedAbsoluteSize(); // in mm
-
   QString name();
   QList<QWidget*> toolboxPages();
   QList<BezierCurve*> getTransferCurves();
   QImage getScaledImage(const QSize& , const QPolygonF&);
+
+  ImageDataStore* data() { return &dataStore; }
 signals:
   void imageContentsChanged();
   void histogramChanged(QVector<int>, QVector<int>, QVector<int>);
   void openFinished(LaueImage*);
   void openFailed(LaueImage*);
+
 public slots:
   void addTransform(const QTransform&);
   void resetAllTransforms();
@@ -63,6 +54,8 @@ private:
   DataProvider* provider;
   DataScaler* scaler;
   QFutureWatcher< QPair<DataProvider*, DataScaler*> > watcher;
+
+  ImageDataStore dataStore;
 
 };
 

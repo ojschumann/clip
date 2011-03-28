@@ -7,6 +7,8 @@
 #include <QVariant>
 #include <QDomElement>
 
+class ImageDataStore;
+
 
 class DataProvider : public QObject
 {
@@ -25,7 +27,7 @@ public:
   public:
     ImageFactoryClass() {}
     virtual QStringList fileFormatFilters()=0;
-    virtual DataProvider* getProvider(QString, QObject* = 0)=0;
+    virtual DataProvider* getProvider(QString, ImageDataStore*, QObject* = 0)=0;
   };
 
   static DataProvider* loadImage(const QString&);
@@ -40,7 +42,6 @@ public:
   virtual int bytesCount()=0;
   virtual int pixelCount()=0;
   virtual QSize size()=0;
-  virtual QSizeF absoluteSize() { return QSizeF(); }
   virtual Format format()=0;
   virtual QString name();
   virtual QList<QWidget*> toolboxPages();
