@@ -1,0 +1,34 @@
+Crop marker
+  # Handle Cursor generation
+  # Larger resize handles (size of cursor?)
+
+  DefaultWorkspace
+LaueImage
+  # implement setting of resolution from ResolutionCalculator
+  # Generic Interface for ImageInfo
+    * hasCrystalOrientation / getOrientation
+    * hasResolution / absoluteResolution / pixelSize / ...
+    * DetectorOrientation
+    * detectorDistance
+    * ...
+
+
+Scattering orders for reflection info
+
+Refinement
+  Stop if model changes
+
+Printing
+  Allow to "print" to pdf/png/jpeg
+  Print with increased linewidth of spot indicators
+  Insert Text-Object to Print
+    Filename of Image and other Image Infos
+    Table of Crystal Info
+    Table of Markers
+    custom description
+
+Implement a faster MonochromeScaler
+
+Check: Move CropMarker handling to ProjectionPlane. Handling could be entirely done here, might be a cleaner design.
+Check is other functions could be moved as well.
+

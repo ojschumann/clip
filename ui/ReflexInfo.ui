@@ -1,0 +1,307 @@
+<ui version="4.0" >
+ <class>ReflexInfo</class>
+ <widget class="QWidget" name="ReflexInfo" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>284</width>
+    <height>215</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>ReflexInfo</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset resource="icons/icons.qrc" >
+    <normaloff>:/info.png</normaloff>:/info.png</iconset>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3" >
+   <property name="margin" >
+    <number>3</number>
+   </property>
+   <property name="spacing" >
+    <number>3</number>
+   </property>
+   <item row="0" column="0" >
+    <widget class="QLabel" name="label" >
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text" >
+      <string>Reflection</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="3" >
+    <widget class="QLineEdit" name="reflex" />
+   </item>
+   <item row="1" column="0" colspan="3" >
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="title" >
+      <string>angles with</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout" >
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <property name="spacing" >
+       <number>1</number>
+      </property>
+      <item row="1" column="0" >
+       <widget class="QLabel" name="label_2" >
+        <property name="text" >
+         <string>primary beam</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" >
+       <widget class="QLabel" name="label_3" >
+        <property name="text" >
+         <string>horizontal axis</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" >
+       <widget class="QLabel" name="label_4" >
+        <property name="text" >
+         <string>vertical axis</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" >
+       <widget class="QLineEdit" name="axX" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <widget class="QLineEdit" name="axY" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" >
+       <widget class="QLineEdit" name="axZ" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" >
+       <widget class="QLineEdit" name="axMX" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2" >
+       <widget class="QLineEdit" name="axMY" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2" >
+       <widget class="QLineEdit" name="axMZ" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" >
+       <widget class="QLabel" name="label_9" >
+        <property name="sizePolicy" >
+         <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize" >
+         <size>
+          <width>49</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text" >
+         <string>opposite</string>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <spacer name="horizontalSpacer" >
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType" >
+         <enum>QSizePolicy::Minimum</enum>
+        </property>
+        <property name="sizeHint" stdset="0" >
+         <size>
+          <width>49</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="3" >
+    <widget class="QGroupBox" name="groupBox_2" >
+     <property name="title" >
+      <string>scatter</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2" >
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <property name="spacing" >
+       <number>1</number>
+      </property>
+      <item row="1" column="0" >
+       <widget class="QLabel" name="label_5" >
+        <property name="text" >
+         <string>Q</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" >
+       <widget class="QLineEdit" name="infoQ" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="frame" >
+         <bool>true</bool>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" >
+       <widget class="QLabel" name="label_6" >
+        <property name="text" >
+         <string>d</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <widget class="QLineEdit" name="infoD" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" >
+       <widget class="QLabel" name="label_8" >
+        <property name="text" >
+         <string>2T</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" >
+       <widget class="QLineEdit" name="info2T" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <spacer name="horizontalSpacer_2" >
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType" >
+         <enum>QSizePolicy::Minimum</enum>
+        </property>
+        <property name="sizeHint" stdset="0" >
+         <size>
+          <width>49</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2" >
+    <widget class="QLabel" name="label_7" >
+     <property name="text" >
+      <string>diffracting orders</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2" colspan="2" >
+    <widget class="QLineEdit" name="diffOrders" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="icons/icons.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>reflex</sender>
+   <signal>editingFinished()</signal>
+   <receiver>ReflexInfo</receiver>
+   <slot>updateDisplay()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>123</x>
+     <y>12</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>257</x>
+     <y>13</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>updateDisplay()</slot>
+ </slots>
+</ui>
