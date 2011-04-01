@@ -19,7 +19,6 @@ void ProjectionGraphicsView::dragEnterEvent(QDragEnterEvent *e) {
 }
 
 void ProjectionGraphicsView::mousePressEvent(QMouseEvent *e) {
-  qDebug() << "lala" << mapToScene(e->pos());
   QGraphicsView::mousePressEvent(e);
   viewIgnoresThisMouseEvent = (e->button()!=Qt::LeftButton) || !e->isAccepted();
   e->setAccepted(!viewIgnoresThisMouseEvent);

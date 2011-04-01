@@ -166,6 +166,7 @@ void LauePlaneProjector::setDetOffset(double dx, double dy) {
   dy/=dist();
   detDx=dx;
   detDy=dy;
+  qDebug() << "NewDetOffset" << dx << dy;
   updatePrimaryBeamPos();
   emit projectionParamsChanged();
 }
@@ -324,16 +325,7 @@ void LauePlaneProjector::updatePrimaryBeamPos() {
   }
 }
 
-#include <QTimer>
 void LauePlaneProjector::doImgRotation(const QTransform& t) {
-  qDebug() << "LaueplaneProjector::doImgRotation begin";
-  CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
-  qDebug() << center->pos();
-  Projector::doImgRotation(t);
-  qDebug() << center->pos();
-
-
-  QPointF p,q;
 
   QTransform Tinv = t.inverted();
   QPointF c = Tinv.map(QPointF(0,0));
@@ -341,20 +333,9 @@ void LauePlaneProjector::doImgRotation(const QTransform& t) {
   QPointF ey = Tinv.map(QPointF(0,1));
   double dw = fasthypot((ex.x()-c.x())*detWidth, (ex.y()-c.y())*detHeight);
   double dh = fasthypot((ey.x()-c.x())*detWidth, (ey.y()-c.y())*detHeight);
-  //setDetSize(dist(), dw, dh);
 
-  detWidth=dw;
-  detHeight=dh;
-
-  scene.setSceneRect(QRectF(-0.5*detWidth/detDist, -0.5*detHeight/detDist, detWidth/detDist, detHeight/detDist));
-  emit projectionRectSizeChanged();
-  //QTimer::singleShot(0, this, SIGNAL(projectionRectSizeChanged()));
-  emit projectionParamsChanged();
-  scene.update();
-
-  qDebug() << center->pos();
-  qDebug() << "LaueplaneProjector::doImgRotation end";
-
+  setDetSize(dist(), dw, dh);
+  Projector::doImgRotation(t);
 }
 
 QWidget* LauePlaneProjector::configWidget() {

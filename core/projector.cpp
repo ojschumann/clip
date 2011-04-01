@@ -583,13 +583,12 @@ QPair<QPointF, QPointF> Projector::getRulerCoordinates(int n) {
 // ------------ Handling of Crop Marker ---------------
 void Projector::showCropMarker() {
   if (cropMarker.isNull()) {
-    //cropMarker = new CropMarker(QPointF(0.1, 0.1), 0.8, 0.8, 0.0, getSpotSize(), imageItemsPlane);
     cropMarker = new CropMarker(QPointF(0.1, 0.1), 0.8, 0.8, 0.0, getSpotSize());
     scene.addItem(cropMarker);
 
     connect(this, SIGNAL(spotSizeChanged(double)), cropMarker, SLOT(setHandleSize(double)));
-    connect(cropMarker.data(), SIGNAL(cancelCrop()), this, SLOT(delCropMarker()), Qt::QueuedConnection);
-    connect(cropMarker.data(), SIGNAL(publishCrop(QPolygonF)), this, SLOT(setCrop(QPolygonF)));
+    //connect(cropMarker.data(), SIGNAL(cancelCrop()), this, SLOT(delCropMarker()), Qt::QueuedConnection);
+    connect(cropMarker.data(), SIGNAL(publishCrop(QPolygonF)), this, SLOT(setCrop(QPolygonF)), Qt::QueuedConnection);
     //cropMarker->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
   } else {
     cropMarker->show();
@@ -598,18 +597,21 @@ void Projector::showCropMarker() {
 
 void Projector::delCropMarker() {
   if (!cropMarker.isNull()) {
-    scene.removeItem(cropMarker);
-    cropMarker.data()->deleteLater();
+    scene.removeItem(cropMarker.data());
+    delete cropMarker;
   }
 }
 
 void Projector::setCrop(QPolygonF rect) {
+  delCropMarker();
   QTransform t;
   if (QTransform::quadToSquare(det2img.map(rect), t)) {
     doImgRotation(t);
   }
-  //delCropMarker();
-  QTimer::singleShot(500, this, SLOT(delCropMarker()));
+  // We were called by the crop marker. If we delete it, we are in deep trouble.
+  // This will result in very strange errors (like a jump if you move the primary beam marker)
+  // delCropMarker();
+
 }
 
 CropMarker* Projector::getCropMarker() {
@@ -791,4 +793,4 @@ void Projector::saveParametersAsDefault() {
 
 int QPointFVector_ID = qRegisterMetaType<QVector<QPointF> >("QVector<QPointF>");
 int QGraphicsItemList_ID = qRegisterMetaType<QList<QGraphicsItem*> >("QList<QGraphicsItem*>");
-
+int QPolygonF_ID = qRegisterMetaType<QPolygonF>("QPolygonF");

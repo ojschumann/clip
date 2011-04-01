@@ -5,8 +5,8 @@
 #include <cmath>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
+#include <QTimer>
 
-#include "tools/circleitem.h"
 #include "config/configstore.h"
 
 
@@ -46,6 +46,10 @@ CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _a
 
   ConfigStore::getInstance()->ensureColor(ConfigStore::CropMarkerOutline, this, SLOT(setOutlineColor(QColor)));
   ConfigStore::getInstance()->ensureColor(ConfigStore::CropMarkerInterior, this, SLOT(setInteriorColor(QColor)));
+}
+
+CropMarker::~CropMarker() {
+
 }
 
 void CropMarker::positionHandles() {
@@ -182,7 +186,8 @@ void CropMarker::mousePressEvent(QGraphicsSceneMouseEvent *e) {
       }
     }
   } else if (e->buttons()==Qt::RightButton) {
-    emit cancelCrop();
+    //emit cancelCrop();
+    QTimer::singleShot(0, this, SLOT(deleteLater()));
   }
   QGraphicsObject::mousePressEvent(e);
 }
@@ -195,6 +200,7 @@ void CropMarker::mouseReleaseEvent(QGraphicsSceneMouseEvent *e) {
 
 void CropMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *e) {
   doPublishCrop();
+  e->accept();
 }
 
 void CropMarker::doPublishCrop() {
