@@ -9,6 +9,8 @@
 #include "refinement/fitparameter.h"
 #include "refinement/fitparametergroup.h"
 
+#include "eigen/Eigen/Dense"
+
 NMWorker::NMWorker(Crystal* c, QObject* parent):
     QObject(parent),
     liveCrystal(c)
@@ -198,6 +200,29 @@ void NMWorker::doOneIteration() {
       qSort(simplex);
     }
   }
+
+  const int N = parameters.size();
+  Eigen::MatrixXd M(N, N);
+  Eigen::VectorXd Y(N);
+
+  for (int i=0; i<N; i++) {
+    for (int j=0; j<N; j++) {
+      M(i,j) = simplex[i+1].coordinates[j]-simplex[0].coordinates[j];
+    }
+    Y(i) = simplex[i+1].score - simplex[0].score;
+  }
+
+  Eigen::VectorXd x = M.fullPivLu().solve(Y);
+  cout << "Ableitung";
+  for (int i=0; i<N; i++) {
+    cout << " " << x(i);
+  }
+  cout << endl;
+  cout << "Fehler";
+  for (int i=0; i<N; i++) {
+    cout << " " << simplex[0].score/fabs(x(i))/sqrt(1.0+N);
+  }
+  cout << endl;
 }
 
 
