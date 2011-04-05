@@ -603,15 +603,13 @@ void Projector::delCropMarker() {
 }
 
 void Projector::setCrop(QPolygonF rect) {
+  // Del Crop marker before Transform is strictly nessesary, otherwise strange things happen.
+  // possible a Memory leak effect
   delCropMarker();
   QTransform t;
   if (QTransform::quadToSquare(det2img.map(rect), t)) {
     doImgRotation(t);
   }
-  // We were called by the crop marker. If we delete it, we are in deep trouble.
-  // This will result in very strange errors (like a jump if you move the primary beam marker)
-  // delCropMarker();
-
 }
 
 CropMarker* Projector::getCropMarker() {
