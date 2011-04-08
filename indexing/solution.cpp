@@ -53,3 +53,4 @@ double Solution::allIndexRMS() const {
 }
 
 int Solution_ID = qRegisterMetaType<Solution>("Solution");
+int QListSolution_ID = qRegisterMetaType< QList<Solution> >("QList<Solution>");

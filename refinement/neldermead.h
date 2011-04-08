@@ -28,9 +28,9 @@ public slots:
 signals:
   void finished();
   void bestSolutionScore(double);
-  void bestSolution(QList<double>);
+  void bestSolution(QList<double>, QList<double>);
 protected slots:
-  void setBestSolutionToLiveCrystal(QList<double>);
+  void setBestSolutionToLiveCrystal(QList<double>, QList<double>);
 protected:
   class Worker;
   void run();

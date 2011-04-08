@@ -114,6 +114,19 @@ void SolutionModel::addSolution(Solution s) {
   emit solutionNumberChanged(solutions.size());
 }
 
+void SolutionModel::addSolutions(QList<Solution> newSolutions) {
+  QList<double> solutionScore = getSortDataList();
+  foreach (Solution s, newSolutions) {
+    double solScore = getSortData(s);
+    int idx=qLowerBound(solutionScore, solScore)-solutionScore.begin();
+    beginInsertRows(QModelIndex(),idx,idx);
+    solutionScore.insert(idx, solScore);
+    solutions.insert(idx, s);
+    endInsertRows();
+  }
+  emit solutionNumberChanged(solutions.size());
+}
+
 void SolutionModel::clear() {
   solutions.clear();
   emit solutionNumberChanged(solutions.size());

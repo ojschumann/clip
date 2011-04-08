@@ -13,8 +13,8 @@ public:
   virtual ~FitParameterGroup();
   QList<FitParameter*> parameters() const { return groupParameters; }
   void notifyCached() { valuesCached = true; }
-  virtual void notifySetEnabled(int member, bool b) {};
-  virtual void notifySetChangeable(int member, bool b) {};
+  virtual void notifySetEnabled(int member, bool b) {}
+  virtual void notifySetChangeable(int member, bool b) {}
   void setValue();
   FitObject* getFitObject() { return fitObject; }
   virtual double value(int member) const = 0;

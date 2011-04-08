@@ -72,6 +72,7 @@ void IndexDisplay::on_startButton_clicked()
                                    ui->maxIndex->value(),
                                    crystal->getSpacegroup()->getLauegroup());
     connect(indexer, SIGNAL(publishSolution(Solution)), &solutions, SLOT(addSolution(Solution)));
+    connect(indexer, SIGNAL(publishMultiSolutions(QList<Solution>)), &solutions, SLOT(addSolutions(QList<Solution>)));
     connect(indexer, SIGNAL(destroyed()), this, SLOT(indexerDestroyed()));
     connect(indexer, SIGNAL(nextMajorIndex(int)), this, SLOT(showMajorIndex(int)));
     connect(indexer, SIGNAL(progressInfo(int)), this, SLOT(setProgress(int)));

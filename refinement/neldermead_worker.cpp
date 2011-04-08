@@ -27,23 +27,35 @@ double NMWorker::score() {
   foreach (FitParameter* p, parameters) {
     p->setValue();
   }
+
   double score=0;
+
   foreach (MarkerInfo m, markers) score += m.score(spotTransferMatrix, zoneTransferMatrix);
   //foreach (MarkerInfo m, markers) score += m.marker->getIndexDeviationScore();
   //foreach (MarkerInfo m, markers) score += m.marker->getAngularDeviation();
   //foreach (MarkerInfo m, markers) score += m.marker->getDetectorPositionScore();
+
+
   return score;
 }
 
 double NMWorker::score(Vertex &v) {
+  v.score = score_c(v);
+  return v.score;
+}
+
+double NMWorker::score_c(const Vertex &v) {
   for (int n=0; n<v.size(); n++)
     parameters.at(n)->prepareValue(v.at(n));
-  v.score = score();
-  return v.score;
+  return score();
 }
 
 double NMWorker::bestScore() {
   return simplex.first().score;
+}
+
+double NMWorker::worstScore() {
+  return simplex.last().score;
 }
 
 QList<double> NMWorker::bestSolution() {
@@ -200,29 +212,70 @@ void NMWorker::doOneIteration() {
       qSort(simplex);
     }
   }
+  calcDeviation();
+}
+
+QList<double> NMWorker::calcDeviation() {
 
   const int N = parameters.size();
-  Eigen::MatrixXd M(N, N);
-  Eigen::VectorXd Y(N);
 
+  // Taylor series of the score is s(dx) = s0 + g^t*dx + 1/2*dx^t * J * dx
+  // where g is the gradient vector, J is the Jacobian Matrix and dx is the difference to the origin point
+  // If the actual Vertex coordinates are taken:
+  // dx_i = simplex[i+1].coordinates()-simples[0].coordinates()
+  // if DX is the NxN Matrix of these vectors, the series is
+  // s(x) = s0 + g^t*DX*x + 1/2 x^t * DX^t * J * DX * x
+  // with x unit vectors...
+  // let let u^t = g^t*DX => u = DX^t*g and D = DX^t*H*DX
+  // => s(x) = u^t*x + 1/2 x^t*D*x
+  // and
+  // s(0) = s0
+  // s(e_i) = s0 + u_i + 1/2*D_ii := a_i
+  // s(1/2 * e_i) = s0 + 1/2*u_i + 1/8 * D_ii := b_i
+  // s(1/2 * (e_i + e_j)) = s0 + 1/2 u_i + 1/2 u_j + 1/8 * (D_ii+D_jj+2*D_ij) := c_ij
+  // =>
+  // 4*b_i - a_i - 3*s0 = u_i
+  // 2*(a_i - u_i - s0) = D_ii
+  // 4*c_ij - 4*s0 - 2*u_i - 2*u_j - 1/2 * ( D_ii + D_jj) = D_ij
+  // =>
+  // g = DX^-1^t * u
+  // J = DX^-1^t * D * DX^-1
+
+  Eigen::VectorXd u(N);
+  Eigen::MatrixXd D(N, N);
+  Eigen::MatrixXd DX(N, N);
+
+  double s0 = simplex[0].score;
   for (int i=0; i<N; i++) {
-    for (int j=0; j<N; j++) {
-      M(i,j) = simplex[i+1].coordinates[j]-simplex[0].coordinates[j];
+    double a_i = simplex[i+1].score;
+    double b_i = score_c((simplex[i+1] + simplex[0]) * 0.5);
+
+    u(i) = 4.0*b_i - a_i - 3.0*s0;
+    D(i,i) = 2.0*(a_i - u(i) - s0);
+    for (int j=0; j<i; j++) {
+      double c_ij = score_c((simplex[i+1] + simplex[j+1]) * 0.5);
+      D(i,j) = 4.0*c_ij - 4.0*s0 - 2.0*(u(i)+u(j)) - 0.5*(D(i,i) + D(j,j));
+      D(j,i) = D(i,j);
     }
-    Y(i) = simplex[i+1].score - simplex[0].score;
+    for (int j=0; j<N; j++) {
+      DX(j,i) = simplex[i+1].coordinates[j] - simplex[0].coordinates[j];
+    }
   }
 
-  Eigen::VectorXd x = M.fullPivLu().solve(Y);
-  cout << "Ableitung";
+  Eigen::MatrixXd DXi = DX.inverse();
+  Eigen::MatrixXd J = DXi.transpose() * D * DXi;
+  Eigen::VectorXd g = DXi.transpose() * u;
+
+  Eigen::MatrixXd eps = J.inverse();
+
+  QList<double> res;
   for (int i=0; i<N; i++) {
-    cout << " " << x(i);
+    res << sqrt(fabs(s0*eps(i,i)));
+    qDebug() << res.last();
   }
-  cout << endl;
-  cout << "Fehler";
-  for (int i=0; i<N; i++) {
-    cout << " " << simplex[0].score/fabs(x(i))/sqrt(1.0+N);
-  }
-  cout << endl;
+  qDebug() << "";
+  return res;
+
 }
 
 

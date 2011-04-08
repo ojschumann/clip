@@ -25,6 +25,7 @@ signals:
   void solutionNumberChanged(int);
 public slots:
   void addSolution(Solution s);
+  void addSolutions(QList<Solution> newSolutions);
   void clear();
 
 private:
