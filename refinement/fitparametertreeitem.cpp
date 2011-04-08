@@ -31,6 +31,13 @@ QVariant FitParameterTreeItem::data(int column, int role) const {
     } else if (role==Qt::EditRole) {
       return QVariant(QString::number(parameter->value()));
     }
+  } else if (column==2) {
+    if (role==Qt::DisplayRole) {
+      if (parameter->error()>0.0) {
+        int digits = std::max(0, -static_cast<int>(floor(log10(parameter->epsilon()))));
+        return QVariant(QString::number(parameter->error(), 'f', digits));
+      }
+    }
   }
   return QVariant();
 }

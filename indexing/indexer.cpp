@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <cmath>
 #include <QtAlgorithms>
+#include <QDebug>
 
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
@@ -35,6 +36,7 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
   }
 
   shouldStop=false;
+  runningThreads = 0;
 
   foreach (AbstractMarkerItem* m, crystalMarkers)
     globalMarkers << Marker(m->getMarkerNormal(), m->getType(), _maxHKL);
@@ -56,30 +58,49 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
 
   connect(&candidates, SIGNAL(nextMajorIndex(int)), this, SIGNAL(nextMajorIndex(int)));
   connect(&candidates, SIGNAL(progessInfo(int)), this, SIGNAL(progressInfo(int)));
-  loopTimer.start();
-  runTimer.start();
 }
 
+Indexer::~Indexer() {
+  shouldStop = true;
+  while (runningThreads.fetchAndAddOrdered(0)>0) {
+    cout << "wait on threads" << endl;
+  }
+}
 
 void Indexer::run() {
+  runningThreads.ref();
   QThreadPool::globalInstance()->tryStart(this);
 
   ThreadLocalData localData;
+  localData.solutionsPublishedInRateCycle = 0;
+  localData.publishSingleSolution = true;
   localData.markers = globalMarkers;
   for (int i=0; i<localData.markers.size(); i++)
     localData.markers[i].setMatrices(localData.spotNormalToIndex, localData.zoneNormalToIndex, MReziprocal, MReal);
 
-  int loop=0;
+  QTime nice;
+  nice.start();
   forever {
     int i = candidatePos.fetchAndAddOrdered(1);
     QList<CandidateGenerator::Candidate> cList = candidates.getCandidateList(i+1);
     CandidateGenerator::Candidate c1 = cList.takeLast();
     for (int j=0; j<cList.size(); j++) {
-      if (shouldStop) return;
-      // Be nice to the GUI Thread
-      loop++;
-      if ((loop%10000)==0)
+      if (shouldStop) {
+        runningThreads.deref();
+        return;
+      }
+      if (nice.elapsed()>100) {
+        // Be nice to the GUI Thread
         QThread::yieldCurrentThread();
+        nice.restart();
+        localData.publishSingleSolution = ((localData.solutionsPublishedInRateCycle + localData.unpublishedSolutions.size()) <= 10);
+        if (localData.unpublishedSolutions.size()>0) {
+          qDebug() << "publish multi solutions" << localData.solutionsPublishedInRateCycle << localData.unpublishedSolutions.size();
+          publishMultiSolutions(localData.unpublishedSolutions);
+          localData.unpublishedSolutions.clear();
+        }
+        localData.solutionsPublishedInRateCycle = 0;
+      }
 
       CandidateGenerator::Candidate c2 = cList.at(j);
 
@@ -88,6 +109,7 @@ void Indexer::run() {
       checkPossibleAngles(c1.spot(), c2.zone(), spotZoneAngles, localData);
     }
   }
+  runningThreads.deref();
 }
 
 void Indexer::checkPossibleAngles(const CandidateGenerator::Candidate& c1, const CandidateGenerator::Candidate& c2, QList<AngleInfo> angles, ThreadLocalData& localData) {
@@ -144,11 +166,13 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
     }
     Mat3D T = optRot.getOptimalRotation();
     if (optRot.getOptimalRotation()==R) break;
+    if (shouldStop) return;
+    if (loops>25) {
+      cout << "FlipFlop ?" << endl;
+      return;
+    }
     R = optRot.getOptimalRotation();
   }
-
-  //if (loops>5)
-  //  cout << "Loops " << loops << endl;
 
   Solution solution;
   solution.bestRotation = R;
@@ -169,7 +193,12 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
   duplicate = symmetryEquivalentSolutionPresent(bestinv, solution.hklDeviation, n);
   if (!duplicate) {
     uniqSolutions << solution;
-    emit publishSolution(solution);
+    if (localData.publishSingleSolution && (localData.solutionsPublishedInRateCycle<5)) {
+      localData.solutionsPublishedInRateCycle++;
+      emit publishSolution(solution);
+    } else {
+      localData.unpublishedSolutions << solution;
+    }
   }
   uniqLock.unlock();
 }
@@ -216,6 +245,7 @@ bool Indexer::AngleInfo::operator<(const AngleInfo& o) const {
 }
 
 void Indexer::stop() {
+  cout << "Indexer stop" << endl;
   //QMutexLocker lock(&indexMutex);
   shouldStop=true;
 }

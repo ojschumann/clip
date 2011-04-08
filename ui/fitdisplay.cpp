@@ -32,6 +32,7 @@ FitDisplay::FitDisplay(Crystal* c, QWidget *parent):
 {
   ui->setupUi(this);
   ui->parameterView->setItemDelegateForColumn(0, new NoEditDelegate(this));
+  ui->parameterView->setItemDelegateForColumn(2, new NoEditDelegate(this));
 
   foreach (FitObject* o, mainFitObject->getFitObjects()) {
     fitObjectAdded(o);

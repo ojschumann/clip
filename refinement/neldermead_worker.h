@@ -13,9 +13,11 @@ public:
   void doOneIteration();
   QList<double> parameterDelta();
   QList<double> parameterRelativeDelta();
+  QList<double> calcDeviation();
   QString parameterName(int n);
   QList<double> bestSolution();
   double bestScore();
+  double worstScore();
 
   void restart();
 protected slots:
@@ -56,6 +58,7 @@ protected:
 
   double score();
   double score(Vertex&);
+  double score_c(const Vertex&);
 
   // Crystal, that is used in the UI
   Crystal* liveCrystal;

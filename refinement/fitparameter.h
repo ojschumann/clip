@@ -13,12 +13,13 @@ public:
   virtual ~FitParameter() {}
   QString name() const { return _name; }
   double value() const { return group.value(memberId); }
+  double error() const { return errorValue; }
   void prepareValue(double);
   double getCachedValue() const;
   FitParameterGroup* getGroup() { return &group; }
   FitObject* getFitObject() { return group.getFitObject(); }
 
-  void setValue() { group.setValue(); hasCachedValue=false; }
+  void setValue(double e=-1) { errorValue=e; group.setValue(); hasCachedValue=false; emitValueChanged(); }
   double lowerBound() const { return group.lowerBound(memberId); }
   double upperBound() const { return group.upperBound(memberId); }
   double epsilon() const { return group.epsilon(memberId); }
@@ -38,6 +39,7 @@ protected:
   bool enabled;
   bool changeable;
   FitParameterGroup& group;
+  double errorValue;
   double cachedValue;
   bool hasCachedValue;
 };

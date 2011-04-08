@@ -31,6 +31,7 @@ public:
   };
 
   Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& MReal, const Mat3D& MReziprocal, double _maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup);
+  virtual ~Indexer();
 
   void run();
 public slots:
@@ -38,6 +39,7 @@ public slots:
 
 signals:
   void publishSolution(Solution s);
+  void publishMultiSolutions(QList<Solution> s);
   void progressInfo(int);
   void nextMajorIndex(int);
 
@@ -46,17 +48,19 @@ protected:
     QList<Marker> markers;
     Mat3D spotNormalToIndex;
     Mat3D zoneNormalToIndex;
+    int solutionsPublishedInRateCycle;
+    bool publishSingleSolution;
+    QList<Solution> unpublishedSolutions;
   };
 
   void checkGuess(const CandidateGenerator::Candidate&, const CandidateGenerator::Candidate&, const AngleInfo &, ThreadLocalData&);
   void checkPossibleAngles(const CandidateGenerator::Candidate&, const CandidateGenerator::Candidate&, QList<AngleInfo>, ThreadLocalData&);
 
   QAtomicInt candidatePos;
-  QTime loopTimer;
-  QTime runTimer;
   CandidateGenerator candidates;
 
   bool shouldStop;
+  QAtomicInt runningThreads;
 
   QList<AngleInfo> spotSpotAngles;
   QList<AngleInfo> spotZoneAngles;

@@ -86,7 +86,6 @@ ProjectionPlane::~ProjectionPlane() {
 }
 
 QSize ProjectionPlane::sizeHint() const {
-  qDebug() << "pp::sizehine" << projector->projectorSizeHint() << size();
   return projector->projectorSizeHint();
 }
 

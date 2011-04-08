@@ -9,6 +9,7 @@ FitParameter::FitParameter(QString n, int id, FitParameterGroup &g):
   setChangeable(true);
   cachedValue = value();
   hasCachedValue=false;
+  errorValue = -1.0;
 }
 
 void FitParameter::prepareValue(double v) {
