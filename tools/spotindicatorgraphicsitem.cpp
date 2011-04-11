@@ -57,7 +57,8 @@ void SpotIndicatorGraphicsItem::updateCache() {
 
     QPainter p(cache);
     foreach (Worker* worker, workers) {
-      p.drawImage(QPoint(0,0), *worker->localCache);
+      if (worker->localCache)
+        p.drawImage(QPoint(0,0), *worker->localCache);
     }
     cacheNeedsUpdate=false;
   }

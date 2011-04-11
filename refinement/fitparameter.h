@@ -24,9 +24,9 @@ public:
   double upperBound() const { return group.upperBound(memberId); }
   double epsilon() const { return group.epsilon(memberId); }
   bool isEnabled() const { return enabled && changeable; }
-  void setEnabled(bool b) {enabled = b; emit enabledStateChanged(this, b); group.notifySetEnabled(memberId, b);}
+  void setEnabled(bool b) {enabled = b; errorValue = -1; emit enabledStateChanged(this, b); group.notifySetEnabled(memberId, b);}
   bool isChangeable() const { return changeable; }
-  void setChangeable(bool b) { changeable=b; emit changeableStateChanged(this, b); group.notifySetChangeable(memberId, b);}
+  void setChangeable(bool b) { changeable=b; errorValue = -1; emit changeableStateChanged(this, b); group.notifySetChangeable(memberId, b);}
 public slots:
   void emitValueChanged() { emit valueChanged(this, value()); }
 signals:

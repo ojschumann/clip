@@ -6,12 +6,7 @@ Crop marker
 LaueImage
   # implement setting of resolution from ResolutionCalculator
 
-Stop thread on deletion of window (indexing / refinement)
-
 Scattering orders for reflection info
-
-Refinement
-  Stop if model changes
 
 Printing
   Allow to "print" to pdf/png/jpeg

@@ -52,6 +52,7 @@ FitDisplay::FitDisplay(Crystal* c, QWidget *parent):
 
 FitDisplay::~FitDisplay()
 {
+  fitter->stop();
   delete ui;
 }
 
