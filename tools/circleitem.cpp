@@ -5,7 +5,7 @@
 #include <QtDebug>
 #include <iostream>
 
-#include "defs.h"
+#include "tools/tools.h"
 
 using namespace std;
 
@@ -47,7 +47,6 @@ bool CircleItem::contains(const QPointF &point) const {
 
 QVariant CircleItem::itemChange(GraphicsItemChange change, const QVariant & value ) {
   if (change==ItemPositionHasChanged) {
-    qDebug() << "itemChange" << value.toPointF() << skipNextPosChange;
     if (not skipNextPosChange) {
       emit positionChanged();
     } else {

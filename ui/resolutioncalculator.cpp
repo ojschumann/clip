@@ -3,27 +3,46 @@
 
 #include <cmath>
 #include <QShortcut>
+#include <QStyledItemDelegate>
 
 #include <tools/rulermodel.h>
 #include <QAbstractTableModel>
 #include "tools/ruleritem.h"
 #include "tools/itemstore.h"
+#include "tools/numberedit.h"
 #include "tools/mat3D.h"
 #include "tools/vec3D.h"
 #include "image/laueimage.h"
 
+
+class NumberEditDelegate: public QStyledItemDelegate {
+public:
+  NumberEditDelegate(QObject* parent=0): QStyledItemDelegate(parent) {}
+  virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+    NumberEdit* n = new NumberEdit(parent, true);
+    n->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    n->setMinimum(0.0);
+    n->setMaximum(1000.0);
+    return n;
+  }
+};
+
 ResolutionCalculator::ResolutionCalculator(ItemStore<RulerItem>& r, LaueImage* img, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ResolutionCalculator),
-    rulers(r)
+    rulers(r),
+    resolutionsLocked(false),
+    image(img)
 {
   ui->setupUi(this);
 
-  ui->rulerView->verticalHeader()->setDefaultSectionSize(ui->rulerView->fontMetrics().height());
+  ui->rulerView->verticalHeader()->setDefaultSectionSize(ui->rulerView->fontMetrics().lineSpacing());
   ui->rulerView->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
   model = new RulerModel(rulers, img);
   ui->rulerView->setModel(model);
+  ui->rulerView->setItemDelegate(new NumberEditDelegate);
+
   connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SLOT(slotCalcResolution()));
   connect(ui->rulerView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(slotSelectionChanged()));
   connect(&r, SIGNAL(itemClicked(int)), ui->rulerView, SLOT(selectRow(int)));
@@ -53,35 +72,43 @@ void ResolutionCalculator::deletePressed() {
 }
 
 void ResolutionCalculator::slotCalcResolution() {
-  double AA=0.0;
-  double AB=0.0;
-  double BB=0.0;
-  double LA=0.0;
-  double LB=0.0;
+  Mat3D M;
+  Vec3D v;
+  M.zero();
+  M(2,2)=1;
+  QSizeF s = image->data()->getTransformedSizeData(ImageDataStore::PixelSize);
 
   for (int n=0; n<rulers.size(); n++) {
-    QVariant v = rulers.at(n)->data(0);
-    if (v.convert(QVariant::Double)) {
-      double l = v.toDouble();
+    bool ok;
+    double l = rulers.at(n)->data(0).toDouble(&ok);
+    if (ok && (l>0.0)) {
       RulerItem* r = dynamic_cast<RulerItem*>(rulers.at(n));
-      double dx = r->getStart().x()-r->getEnd().x();
-      double dy = r->getStart().y()-r->getEnd().y();
-      AA += dx*dx*dx*dx;
-      AB += dx*dx*dy*dy;
-      BB += dy*dy*dy*dy;
-      LA += l*l*dx*dx;
-      LB += l*l*dy*dy;
+      double dx = (r->getStart().x()-r->getEnd().x())*s.width();
+      double dy = (r->getStart().y()-r->getEnd().y())*s.height();
+      M(0,0) += dx*dx*dx*dx;
+      M(1,0) += dx*dx*dy*dy;
+      M(1,1) += dy*dy*dy*dy;
+      v(0) += l*l*dx*dx;
+      v(1) += l*l*dy*dy;
     }
   }
-  Mat3D M(AA, AB, 0, AB, BB, 0, 0, 0, 1);
+
+  if (resolutionsLocked) {
+    M(0, 0) += M(1, 1);
+    M(1, 0) *= 2;
+    M(1, 1) = M(0, 0);
+    v(0) += v(1);
+    v(1) = v(0);
+  }
+  M(0, 1) = M(1, 0);
   if (fabs(M.det())>1e-6) {
-    Vec3D v(LA, LB, 0);
     v = M.inverse()*v;
     double hRes = sqrt(fabs(v(0)));
     double vRes = sqrt(fabs(v(1)));
-    ui->HResDisplay->setText(QString::number(hRes, 'f', 2));
-    ui->VResDisplay->setText(QString::number(vRes, 'f', 2));
+    ui->HResDisplay->setText(QString::number(1.0/hRes, 'f', 2));
+    ui->VResDisplay->setText(QString::number(1.0/vRes, 'f', 2));
     model->setResolution(hRes, vRes);
+    qDebug() << s.width()*hRes << s.height()*vRes;
   }  else {
     ui->HResDisplay->setText("");
     ui->VResDisplay->setText("");
@@ -98,4 +125,11 @@ void ResolutionCalculator::on_acceptButton_clicked()
 void ResolutionCalculator::on_cancelButton_clicked()
 {
   rulers.clear();
+}
+
+void ResolutionCalculator::on_pushButton_clicked()
+{
+  resolutionsLocked = ! resolutionsLocked;
+  ui->pushButton->setIcon(QIcon(resolutionsLocked ? ":/icons/icons/lock.png" : ":/icons/icons/unlock.png"));
+  slotCalcResolution();
 }

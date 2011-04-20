@@ -9,8 +9,8 @@ QT       += core gui opengl xml
 TARGET = Clip
 TEMPLATE = app
 
-win32 {
-        CONFIG += console
+win32:debug {
+     CONFIG += console
 }
 
 DEFFILE = $(OBJECTS_DIR)/defs.o
@@ -32,6 +32,9 @@ DEFINES += __HG_REPRO_DATE__="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --templat
 
 
 QMAKE_CXXFLAGS += -std=gnu++0x
+
+# Eigen linear Algebra library
+LIBS += -L../eigen
 
 QMAKE_CXXFLAGS_DEBUG += -pg
 QMAKE_LFLAGS_DEBUG += -pg
@@ -193,7 +196,6 @@ HEADERS  += ui/clip.h \
     refinement/fitparametertreeitem.h \
     ui/hkltool.h \
     tools/resizeingtablewidget.h \
-    win_version.h \
     image/brukerprovider.h \
     ui/clipconfig.h \
     config/configstore.h \

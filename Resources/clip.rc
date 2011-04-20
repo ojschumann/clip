@@ -3,7 +3,7 @@
 //http://stackoverflow.com/questions/2784697/setting-application-info-in-qt
 
 #include <windows.h>
-#include "../win_version.h"
+#include "../defs.h"
 
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION     VER_FILEVERSION

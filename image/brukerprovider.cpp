@@ -209,8 +209,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
     qDebug() << i << " " << twoByteOverflowCount;
   }
 
-  store->setData(ImageDataStore::Width, rows);
-  store->setData(ImageDataStore::Height, cols);
+  store->setData(ImageDataStore::PixelSize, QSizeF(rows, cols));
 
   BrukerProvider* provider = new BrukerProvider(parent);
   provider->insertFileInformation(filename);

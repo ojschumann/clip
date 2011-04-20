@@ -6,7 +6,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "defs.h"
+#include "tools/tools.h"
 
 Spacegroup::SpacegroupSymbolInfo::SpacegroupSymbolInfo(int _ITnr, QString _nrMod, QString _HM, QString _HMmod, QString _Hall) {
   spacegroupNumber = _ITnr;

@@ -44,6 +44,8 @@
         <file>icons/zoom.png</file>
         <file>icons/down-arrow.svg</file>
         <file>icons/up-arrow.svg</file>
+        <file>icons/unlock.png</file>
+        <file>icons/lock.png</file>
     </qresource>
     <qresource prefix="/">
         <file>DefaultWorkspace.cws</file>

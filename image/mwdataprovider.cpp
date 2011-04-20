@@ -111,10 +111,8 @@ DataProvider* MWDataProvider::Factory::getProvider(QString filename, ImageDataSt
   in.setByteOrder(QDataStream::BigEndian);
   in >> colDia >> width >> height >> dist;
 
-  store->setData(ImageDataStore::Width, 256.0);
-  store->setData(ImageDataStore::Height, 256.0);
-  store->setData(ImageDataStore::PhysicalWidth, 10.0*width);
-  store->setData(ImageDataStore::PhysicalHeight, 10.0*height);
+  store->setData(ImageDataStore::PixelSize, QSizeF(256.0, 256.0));
+  store->setData(ImageDataStore::PhysicalSize, QSizeF(10.0*width, 10.0*height));
   store->setData(ImageDataStore::PlaneDetectorToSampleDistance, dist);
 
   MWDataProvider* provider = new MWDataProvider(parent);

@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QGraphicsView>
+#include <QDebug>
 #include <iostream>
 
 #include "config/configstore.h"
@@ -33,7 +34,7 @@ SpotIndicatorGraphicsItem::~SpotIndicatorGraphicsItem() {
   workerSync.acquire(workers.size());
   for (int i=0; i<workers.size(); i++) {
     for (int loop=0; !workers[i]->wait(250); loop++) {
-      cout << "Worker " << i << " still running since " << loop << " loops" << endl;
+      qDebug() << "Worker" << i << "still running since" << loop << "loops";
       if (loop>5) workers[i]->terminate();
     }
     delete workers[i];
@@ -57,8 +58,11 @@ void SpotIndicatorGraphicsItem::updateCache() {
 
     QPainter p(cache);
     foreach (Worker* worker, workers) {
-      if (worker->localCache)
+      if (worker->localCache) {
         p.drawImage(QPoint(0,0), *worker->localCache);
+      } else {
+        qDebug() << "No chache for Worker";
+      }
     }
     cacheNeedsUpdate=false;
   }

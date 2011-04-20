@@ -7,11 +7,13 @@ class NumberEdit : public QDoubleSpinBox
 {
   Q_OBJECT
 public:
-  explicit NumberEdit(QWidget *parent = 0);
+  explicit NumberEdit(QWidget *parent = 0, bool _emptyValid = false);
   virtual QValidator::State validate( QString & text, int & pos ) const;
 signals:
 
 public slots:
+private:
+  bool emptyValid;
 
 };
 

@@ -48,8 +48,7 @@ DataProvider* XYZDataProvider::Factory::getProvider(QString filename, ImageDataS
     pixelData << static_cast<float>(tmp);
   }
 
-  store->setData(ImageDataStore::Width, width);
-  store->setData(ImageDataStore::Height, height);
+  store->setData(ImageDataStore::PixelSize, QSizeF(width, height));
 
   XYZDataProvider* provider = new XYZDataProvider(parent);
   provider->pixelData = pixelData;

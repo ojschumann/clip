@@ -28,8 +28,8 @@ void LaueImage::startOpenFile(QString filename, QDomElement base) {
 }
 
 QPair<DataProvider*, DataScaler*> LaueImage::doOpenFile(QString filename, QDomElement base) {
-  DataProvider* dp = DataProviderFactory::getInstance().loadImage(filename, &dataStore, this);
-  DataScaler* ds = dp ? DataScalerFactory::getInstance().getScaler(dp, this) : NULL;
+  DataProvider* dp = DataProviderFactory::getInstance().loadImage(filename, &dataStore);
+  DataScaler* ds = dp ? DataScalerFactory::getInstance().getScaler(dp) : NULL;
   if (ds && dp) {
     if (!base.isNull()) {
       dp->loadFromXML(base);
@@ -49,11 +49,10 @@ void LaueImage::doneOpenFile() {
   if (dp && ds) {
     provider = dp;
     scaler = ds;
-    //provider->setParent(this);
-    //scaler->setParent(this);
-    if (provider->parent()!=this) {
-      cout << "boese..." << endl;
-    }
+    // ds and dp were created in another thread and thus without parent.
+    // Set us as their parent
+    provider->setParent(this);
+    scaler->setParent(this);
     connect(scaler, SIGNAL(imageContentsChanged()), this, SIGNAL(imageContentsChanged()));
     connect(scaler, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), this, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)));
   } else {
@@ -79,6 +78,7 @@ QList<BezierCurve*> LaueImage::getTransferCurves() {
 
 void LaueImage::addTransform(const QTransform &t) {
   scaler->addTransform(t);
+  dataStore.addTransform(t);
 }
 
 void LaueImage::resetAllTransforms() {

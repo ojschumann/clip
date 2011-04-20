@@ -12,6 +12,7 @@
 #include "core/reflection.h"
 #include "core/projectorfactory.h"
 #include "image/laueimage.h"
+#include "tools/tools.h"
 #include "tools/circleitem.h"
 #include "tools/xmltools.h"
 #include "config/configstore.h"
@@ -166,7 +167,6 @@ void LauePlaneProjector::setDetOffset(double dx, double dy) {
   dy/=dist();
   detDx=dx;
   detDy=dy;
-  qDebug() << "NewDetOffset" << dx << dy;
   updatePrimaryBeamPos();
   emit projectionParamsChanged();
 }
@@ -319,23 +319,17 @@ void LauePlaneProjector::updatePrimaryBeamPos() {
     }
     if (b) {
       CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
-      qDebug() << "updatePbPos" << center->pos() << det2img.map(q);
       center->setPosNoSig(det2img.map(q));
     }
   }
 }
 
 void LauePlaneProjector::doImgRotation(const QTransform& t) {
+  QSizeF s = transformSize(QSizeF(detWidth, detHeight), t.inverted());
 
-  QTransform Tinv = t.inverted();
-  QPointF c = Tinv.map(QPointF(0,0));
-  QPointF ex = Tinv.map(QPointF(1,0));
-  QPointF ey = Tinv.map(QPointF(0,1));
-  double dw = fasthypot((ex.x()-c.x())*detWidth, (ex.y()-c.y())*detHeight);
-  double dh = fasthypot((ey.x()-c.x())*detWidth, (ey.y()-c.y())*detHeight);
-
-  setDetSize(dist(), dw, dh);
+  setDetSize(dist(), s.width(), s.height());
   Projector::doImgRotation(t);
+
 }
 
 QWidget* LauePlaneProjector::configWidget() {
@@ -394,15 +388,17 @@ void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
   double h = height();
 
   if (img->data()->hasData(ImageDataStore::PlaneDetectorToSampleDistance))
-    d = img->data()->getData(ImageDataStore::PlaneDetectorToSampleDistance);
+    d = img->data()->getData(ImageDataStore::PlaneDetectorToSampleDistance).toDouble();
 
-  if (img->data()->hasData(ImageDataStore::PhysicalWidth) && img->data()->hasData(ImageDataStore::PhysicalHeight)) {
-    w = img->data()->getData(ImageDataStore::PhysicalWidth);
-    h = img->data()->getData(ImageDataStore::PhysicalHeight);
+  if (img->data()->hasData(ImageDataStore::PhysicalSize)) {
+    QSizeF s = img->data()->getData(ImageDataStore::PhysicalSize).toSizeF();
+    w = s.width();
+    h = s.height();
   } else {
-    double scale = sqrt(w*h/(img->data()->getData(ImageDataStore::Width)*img->data()->getData(ImageDataStore::Height)));
-    w = scale * img->data()->getData(ImageDataStore::Width);
-    h = scale * img->data()->getData(ImageDataStore::Height);
+    QSizeF s = img->data()->getData(ImageDataStore::PixelSize).toSizeF();
+    double scale = sqrt(w*h/(s.width()*s.height()));
+    w = scale * s.width();
+    h = scale * s.height();
   }
 
   setDetSize(d, w, h);

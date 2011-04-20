@@ -7,7 +7,7 @@
 #include <QtConcurrentRun>
 #include <QSettings>
 
-#include "defs.h"
+#include "tools/tools.h"
 #include "core/crystal.h"
 #include "core/projector.h"
 #include "tools/optimalrotation.h"

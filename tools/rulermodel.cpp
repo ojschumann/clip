@@ -2,8 +2,11 @@
 
 #include <cmath>
 
-#include "defs.h"
+#include "tools/tools.h"
 #include "tools/ruleritem.h"
+
+
+
 
 
 RulerModel::RulerModel(ItemStore<RulerItem>& r, LaueImage* img, QObject* parent):
@@ -31,8 +34,9 @@ QVariant RulerModel::data ( const QModelIndex & index, int role = Qt::DisplayRol
     RulerItem* r = rulers.at(index.row());
     double dx = fabs(r->getStart().x()-r->getEnd().x());
     double dy = fabs(r->getStart().y()-r->getEnd().y());
-    double imgX = image->data()->getData(ImageDataStore::Width);
-    double imgY = image->data()->getData(ImageDataStore::Height);
+    QSizeF s = image->data()->getTransformedSizeData(ImageDataStore::PixelSize);
+    double imgX = s.width();
+    double imgY = s.height();
     if (index.column()==0) {
       return QVariant(QString::number(imgX*dx, 'f', 2));
     } else if (index.column()==1) {
@@ -41,10 +45,13 @@ QVariant RulerModel::data ( const QModelIndex & index, int role = Qt::DisplayRol
       return QVariant(QString::number(fasthypot(imgX*dx, imgY*dy), 'f', 2));
     } else if (index.column()==3) {
       QVariant v = rulers.at(index.row())->data(0);
+      bool ok;
+      double d = v.toDouble(&ok);
+      if (ok && d==0.0) return QVariant();
       v.convert(QVariant::String);
       return v;
     } else if (index.column()==4 && hRes>0 && vRes>0) {
-      return QVariant(QString::number(fasthypot(hRes*dx, vRes*dy), 'f', 2));
+      return QVariant(QString::number(fasthypot(hRes*dx*imgX, vRes*dy*imgY), 'f', 2));
     }
   } else if (role==Qt::EditRole) {
     if (index.column()==3) {

@@ -5,7 +5,7 @@
 #include <iomanip>
 
 #include "core/spacegroup.h"
-#include "defs.h"
+#include "tools/tools.h"
 
 using namespace std;
 

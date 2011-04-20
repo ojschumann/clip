@@ -30,7 +30,7 @@
 #include "image/laueimage.h"
 #include "image/dataproviderfactory.h"
 
-#include "defs.h"
+#include "tools/tools.h"
 #include "tools/spotitem.h"
 #include "tools/zoneitem.h"
 #include "tools/ruleritem.h"
@@ -412,7 +412,7 @@ void ProjectionPlane::on_actionCrop_triggered() {
 void ProjectionPlane::imageLoaded(LaueImage *img) {
   setWindowTitle(projector->displayName()+": "+img->name());
   ui->imgToolBar->setVisible(true);
-  ui->rulerAction->setVisible(!projector->getLaueImage()->data()->hasData(ImageDataStore::PhysicalWidth));
+  ui->rulerAction->setVisible(!projector->getLaueImage()->data()->hasData(ImageDataStore::PhysicalSize));
   resizeView();
 }
 

@@ -136,10 +136,8 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
 
   double w = headerData["Width"].toInt();
   double h = headerData["Height"].toInt();
-  store->setData(ImageDataStore::Width, w);
-  store->setData(ImageDataStore::Height, h);
-  store->setData(ImageDataStore::PhysicalWidth, 0.001*w*headerData["X-PixelSizeUM"].toInt());
-  store->setData(ImageDataStore::PhysicalHeight, 0.001*h*headerData["Y-PixelSizeUM"].toInt());
+  store->setData(ImageDataStore::PixelSize, QSizeF(w, h));
+  store->setData(ImageDataStore::PhysicalSize, QSizeF(0.001*w*headerData["X-PixelSizeUM"].toInt(), 0.001*h*headerData["Y-PixelSizeUM"].toInt()));
 
   BasDataProvider* provider = new BasDataProvider(parent);
   provider->insertFileInformation(filename);

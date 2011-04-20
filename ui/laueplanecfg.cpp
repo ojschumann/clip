@@ -24,8 +24,8 @@ LauePlaneCfg::LauePlaneCfg(LauePlaneProjector* p, QWidget *parent) :
   connect(ui->renderAntialias, SIGNAL(toggled(bool)), this, SLOT(slotUpdateRenderHints()));
   connect(ui->renderAntialiasText, SIGNAL(toggled(bool)), this, SLOT(slotUpdateRenderHints()));
 
-  QList<QPair<QDoubleSpinBox*, QByteArray> > l;
-  QPair<QDoubleSpinBox*, QByteArray> pair;
+  QList<QPair<NumberEdit*, QByteArray> > l;
+  QPair<NumberEdit*, QByteArray> pair;
 
   l << qMakePair(ui->detDist, QByteArray(SLOT(setDist(double))));
   l << qMakePair(ui->detWidth, QByteArray(SLOT(setWidth(double))));

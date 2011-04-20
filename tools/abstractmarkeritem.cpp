@@ -1,6 +1,6 @@
 #include "abstractmarkeritem.h"
 
-#include "defs.h"
+#include "tools/tools.h"
 #include "core/projector.h"
 #include "core/crystal.h"
 

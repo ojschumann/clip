@@ -1,20 +1,21 @@
 #include "numberedit.h"
 
-NumberEdit::NumberEdit(QWidget *parent) :
-    QDoubleSpinBox(parent)
+#include <QDebug>
+
+NumberEdit::NumberEdit(QWidget *parent, bool _emptyValid) :
+    QDoubleSpinBox(parent), emptyValid(_emptyValid)
 {
 }
 
 
 QValidator::State NumberEdit::validate( QString & text, int & pos ) const {
+  if (emptyValid && text.isEmpty()) return QValidator::Acceptable;
   QValidator::State state = QDoubleSpinBox::validate(text, pos);
-  if (state == QValidator::Invalid && pos >0 && pos-1<text.size()) {
+  QChar decimalPoint = QLocale().decimalPoint();
+  text.replace(QRegExp("[\\.,]"), decimalPoint);
+  if (state == QValidator::Invalid && pos>0 && pos-1<text.size()) {
     QString s(text);
-    QChar decimalPoint = QLocale().decimalPoint();
-    QRegExp decimalPointRegExp("[\\.,]");
     bool changedString=false;
-
-    s.replace(decimalPointRegExp, decimalPoint);
 
     // Stange thing entered...
     QChar justEntered = s[pos-1];

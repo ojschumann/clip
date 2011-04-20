@@ -28,10 +28,13 @@ private:
   Ui::ResolutionCalculator *ui;
   ItemStore<RulerItem>& rulers;
   RulerModel* model;
-
+  bool resolutionsLocked;
+  LaueImage* image;
 private slots:
+    void on_pushButton_clicked();
     void on_cancelButton_clicked();
     void on_acceptButton_clicked();
+
 };
 
 #endif // RESOLUTIONCALCULATOR_H

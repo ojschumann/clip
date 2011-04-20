@@ -617,7 +617,6 @@ CropMarker* Projector::getCropMarker() {
 }
 
 void Projector::updateImgTransformations() {
-  qDebug() << "updateImageTransform()";
   const QRectF r=scene.sceneRect();
   det2img.reset();
   if (r.isEmpty()) {

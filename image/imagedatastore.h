@@ -3,31 +3,36 @@
 
 #include <QObject>
 #include <QMap>
+#include <QTransform>
+#include <QVariant>
 
 class ImageDataStore : public QObject
 {
   Q_OBJECT
 public:
   enum DataType {
-    PhysicalWidth,
-    PhysicalHeight,
-    Width,
-    Height,
-    PlaneDetectorToSampleDistance
+    PhysicalSize,
+    PixelSize,
+    PlaneDetectorToSampleDistance,
   };
   explicit ImageDataStore(QObject *parent = 0);
 
   bool hasData(DataType d) const;
-  double getData(DataType d) const;
+  QVariant getData(DataType d) const;
+  QSizeF getTransformedSizeData(DataType d) const;
+  void setTransformedSizeData(DataType d, const QSizeF& s);
 
 public slots:
-  void setData(DataType d, double v);
+  void setData(DataType d, QVariant v);
+  void addTransform(const QTransform& t);
 
 signals:
-  void dataChanged(DataType, double);
+  void dataChanged(DataType, QVariant);
+  void transformChanged();
 
 private:
-  QMap<DataType, double> dataStore;
+  QMap<DataType, QVariant> dataStore;
+  QTransform imageTransform;
 
 };
 
