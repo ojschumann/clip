@@ -36,6 +36,9 @@ ResolutionCalculator::ResolutionCalculator(ItemStore<RulerItem>& r, LaueImage* i
 {
   ui->setupUi(this);
 
+  hRes = -1.0;
+  vRes = -1.0;
+
   ui->rulerView->verticalHeader()->setDefaultSectionSize(ui->rulerView->fontMetrics().lineSpacing());
   ui->rulerView->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
@@ -44,13 +47,13 @@ ResolutionCalculator::ResolutionCalculator(ItemStore<RulerItem>& r, LaueImage* i
   ui->rulerView->setItemDelegate(new NumberEditDelegate);
 
   connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SLOT(slotCalcResolution()));
+  connect(image->data(), SIGNAL(transformChanged()), this, SLOT(slotCalcResolution()));
   connect(ui->rulerView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(slotSelectionChanged()));
   connect(&r, SIGNAL(itemClicked(int)), ui->rulerView, SLOT(selectRow(int)));
   QShortcut* deleteShortcut = new QShortcut(Qt::Key_Delete, ui->rulerView);
   connect(deleteShortcut, SIGNAL(activated()), this, SLOT(deletePressed()));
 
   slotCalcResolution();
-
 }
 
 ResolutionCalculator::~ResolutionCalculator()
@@ -103,22 +106,27 @@ void ResolutionCalculator::slotCalcResolution() {
   M(0, 1) = M(1, 0);
   if (fabs(M.det())>1e-6) {
     v = M.inverse()*v;
-    double hRes = sqrt(fabs(v(0)));
-    double vRes = sqrt(fabs(v(1)));
+    hRes = sqrt(fabs(v(0)));
+    vRes = sqrt(fabs(v(1)));
     ui->HResDisplay->setText(QString::number(1.0/hRes, 'f', 2));
     ui->VResDisplay->setText(QString::number(1.0/vRes, 'f', 2));
-    model->setResolution(hRes, vRes);
-    qDebug() << s.width()*hRes << s.height()*vRes;
   }  else {
     ui->HResDisplay->setText("");
     ui->VResDisplay->setText("");
-    model->setResolution(-1,-1);
+    hRes = -1;
+    vRes = -1;
   }
+  model->setResolution(hRes, vRes);
 }
 
 void ResolutionCalculator::on_acceptButton_clicked()
 {
-  //TODO: Do something usefull...
+  if ((hRes>0) && (vRes>0)) {
+    QSizeF s = image->data()->getTransformedSizeData(ImageDataStore::PixelSize);
+    s.rwidth() *= hRes;
+    s.rheight() *= vRes;
+    image->data()->setTransformedSizeData(ImageDataStore::PhysicalSize, s);
+  }
   rulers.clear();
 }
 

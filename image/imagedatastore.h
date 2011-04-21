@@ -27,7 +27,7 @@ public slots:
   void addTransform(const QTransform& t);
 
 signals:
-  void dataChanged(DataType, QVariant);
+  void dataChanged(ImageDataStore::DataType, QVariant);
   void transformChanged();
 
 private:

@@ -149,8 +149,6 @@ void Clip::setActiveSubWindow(QWidget *window) {
   }
 }
 
-#include "win_version.h"
-
 void Clip::on_actionAbout_triggered(bool) {
   QString message("This is the Cologne Laue Indexation Program (CLIP)\n");
   message += "a program to index and refine laue exposures.\n\n";

@@ -4,6 +4,8 @@
 #include "core/projector.h"
 #include "refinement/fitparametergroup.h"
 
+#include "image/imagedatastore.h"
+
 class LauePlaneProjector: public Projector {
   Q_OBJECT
 public:
@@ -62,6 +64,7 @@ public slots:
   virtual void doImgRotation(const QTransform& t);
   virtual void loadParmetersFromImage(LaueImage*);
   virtual void saveParametersAsDefault();
+  void loadNewPhysicalImageSize(ImageDataStore::DataType=ImageDataStore::PhysicalSize);
 protected:
   double maxCos(Vec3D n) const;
   virtual bool parseXMLElement(QDomElement e);

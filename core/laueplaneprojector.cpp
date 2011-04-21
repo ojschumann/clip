@@ -325,9 +325,11 @@ void LauePlaneProjector::updatePrimaryBeamPos() {
 }
 
 void LauePlaneProjector::doImgRotation(const QTransform& t) {
-  QSizeF s = transformSize(QSizeF(detWidth, detHeight), t.inverted());
-
-  setDetSize(dist(), s.width(), s.height());
+  if (!getLaueImage() || !getLaueImage()->data()->hasData(ImageDataStore::PhysicalSize)) {
+    qDebug() << "calcSelf";
+    QSizeF s = transformSize(QSizeF(detWidth, detHeight), t.inverted());
+    setDetSize(dist(), s.width(), s.height());
+  }
   Projector::doImgRotation(t);
 
 }
@@ -383,6 +385,9 @@ double LauePlaneProjector::yOffset() const {
 
 
 void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
+  connect(img->data(), SIGNAL(dataChanged(ImageDataStore::DataType,QVariant)), this, SLOT(loadNewPhysicalImageSize(ImageDataStore::DataType)));
+  connect(img->data(), SIGNAL(transformChanged()), this, SLOT(loadNewPhysicalImageSize()));
+
   double d = dist();
   double w = width();
   double h = height();
@@ -625,6 +630,13 @@ void LauePlaneProjector::saveParametersAsDefault() {
   settings.setValue("detDY", yOffset());
   settings.endGroup();
   Projector::saveParametersAsDefault();
+}
+
+void LauePlaneProjector::loadNewPhysicalImageSize(ImageDataStore::DataType t) {
+  if ((t==ImageDataStore::PhysicalSize) && getLaueImage() && getLaueImage()->data()->hasData(ImageDataStore::PhysicalSize)) {
+    QSizeF s = getLaueImage()->data()->getTransformedSizeData(t);
+    setDetSize(dist(), s.width(), s.height());
+  }
 }
 
 bool LauePlaneProjector_registered = ProjectorFactory::registerProjector("LauePlaneProjector", &LauePlaneProjector::getInstance);

@@ -30,6 +30,8 @@ private:
   RulerModel* model;
   bool resolutionsLocked;
   LaueImage* image;
+  double hRes;
+  double vRes;
 private slots:
     void on_pushButton_clicked();
     void on_cancelButton_clicked();

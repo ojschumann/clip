@@ -53,6 +53,8 @@ QVariant RulerModel::data ( const QModelIndex & index, int role = Qt::DisplayRol
     } else if (index.column()==4 && hRes>0 && vRes>0) {
       return QVariant(QString::number(fasthypot(hRes*dx*imgX, vRes*dy*imgY), 'f', 2));
     }
+  } else if (role==Qt::TextAlignmentRole) {
+    return QVariant(Qt::AlignRight);
   } else if (role==Qt::EditRole) {
     if (index.column()==3) {
       QVariant v = rulers.at(index.row())->data(0);
