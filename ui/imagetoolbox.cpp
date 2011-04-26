@@ -18,10 +18,7 @@ ImageToolbox::ImageToolbox(Projector* p, QWidget *parent):
     connect(projector->getLaueImage(), SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
     ui->tabWidget->addTab(new ContrastCurves(projector->getLaueImage()), "Contrast");
-
-    if (!projector->getLaueImage()->data()->hasData(ImageDataStore::PhysicalSize)) {
-      ui->tabWidget->addTab(new ResolutionCalculator(projector->rulers(), projector->getLaueImage()), "Resolution");
-    }
+    ui->tabWidget->addTab(new ResolutionCalculator(projector->rulers(), projector->getLaueImage()), "Resolution");
 
     foreach (QWidget* page, projector->getLaueImage()->toolboxPages()) {
       ui->tabWidget->addTab(page, page->objectName());

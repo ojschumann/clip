@@ -61,7 +61,6 @@ public slots:
   void resizePBMarker();
   void movedPrimaryBeamMarker();
   void updatePrimaryBeamPos();
-  virtual void doImgRotation(const QTransform& t);
   virtual void loadParmetersFromImage(LaueImage*);
   virtual void saveParametersAsDefault();
   void loadNewPhysicalImageSize(ImageDataStore::DataType=ImageDataStore::PhysicalSize);

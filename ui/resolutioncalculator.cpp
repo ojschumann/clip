@@ -62,6 +62,10 @@ ResolutionCalculator::~ResolutionCalculator()
   delete model;
 }
 
+QSize ResolutionCalculator::sizeHint() const {
+  return minimumSizeHint();
+}
+
 void ResolutionCalculator::slotSelectionChanged() {
   QItemSelectionModel* selection = ui->rulerView->selectionModel();
   for (int n=0; n<rulers.size(); n++) {
@@ -110,9 +114,13 @@ void ResolutionCalculator::slotCalcResolution() {
     vRes = sqrt(fabs(v(1)));
     ui->HResDisplay->setText(QString::number(1.0/hRes, 'f', 2));
     ui->VResDisplay->setText(QString::number(1.0/vRes, 'f', 2));
+    ui->HSizeDisplay->setText(QString::number(s.width()*hRes, 'f', 2));
+    ui->VSizeDisplay->setText(QString::number(s.height()*vRes, 'f', 2));
   }  else {
     ui->HResDisplay->setText("");
     ui->VResDisplay->setText("");
+    ui->HSizeDisplay->setText("");
+    ui->VSizeDisplay->setText("");
     hRes = -1;
     vRes = -1;
   }

@@ -135,6 +135,9 @@ void LauePlaneProjector::setDetSize(double dist, double width, double height) {
 
     emit projectionRectSizeChanged();
     emit projectionParamsChanged();
+
+    if (getLaueImage())
+      getLaueImage()->data()->setTransformedSizeData(ImageDataStore::PhysicalSize, QSizeF(detWidth, detHeight));
   }
 }
 
@@ -324,16 +327,6 @@ void LauePlaneProjector::updatePrimaryBeamPos() {
   }
 }
 
-void LauePlaneProjector::doImgRotation(const QTransform& t) {
-  if (!getLaueImage() || !getLaueImage()->data()->hasData(ImageDataStore::PhysicalSize)) {
-    qDebug() << "calcSelf";
-    QSizeF s = transformSize(QSizeF(detWidth, detHeight), t.inverted());
-    setDetSize(dist(), s.width(), s.height());
-  }
-  Projector::doImgRotation(t);
-
-}
-
 QWidget* LauePlaneProjector::configWidget() {
   return new LauePlaneCfg(this);
 }
@@ -404,6 +397,7 @@ void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
     double scale = sqrt(w*h/(s.width()*s.height()));
     w = scale * s.width();
     h = scale * s.height();
+    img->data()->setTransformedSizeData(ImageDataStore::PhysicalSize, QSizeF(w, h));
   }
 
   setDetSize(d, w, h);
