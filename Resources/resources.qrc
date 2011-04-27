@@ -52,5 +52,6 @@
         <file>DefaultCrystal.xml</file>
         <file>Default_LauePlaneProjector.xml</file>
         <file>Default_StereoProjector.xml</file>
+        <file>AboutMessage.txt</file>
     </qresource>
 </RCC>

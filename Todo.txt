@@ -5,12 +5,10 @@ Crop marker
 Scattering orders for reflection info
 
 Printing
-  Allow to "print" to pdf/png/jpeg
+  Allow to "print" to printer/pdf/png/jpeg
   Print with increased linewidth of spot indicators
   Insert Text-Object to Print
-    Filename of Image and other Image Infos
-    Table of Crystal Info
-    Table of Markers
+    Table with Crystal Info, Projector Info and Image Info
     custom description
 
 Implement a faster MonochromeScaler

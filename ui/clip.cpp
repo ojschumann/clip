@@ -1,3 +1,26 @@
+/**********************************************************************
+  Copyright (C) 2010 Olaf J. Schumann
+
+  This file is part of the Cologne Laue Indexation Program.
+  For more information, see <http://clip.berlios.de>
+
+  Clip is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Clip is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see http://www.gnu.org/licenses/
+  or write to the Free Software Foundation, Inc., 51 Franklin Street,
+  Fifth Floor, Boston, MA 02110-1301, USA.
+ **********************************************************************/
+
+
 #include "clip.h"
 #include "ui_clip.h"
 
@@ -150,15 +173,16 @@ void Clip::setActiveSubWindow(QWidget *window) {
 }
 
 void Clip::on_actionAbout_triggered(bool) {
-  QString message("This is the Cologne Laue Indexation Program (CLIP)\n");
-  message += "a program to index and refine laue exposures.\n\n";
-  message += "Version " + QString(VER_PRODUCTVERSION_STR) + "\n";
-  message += "Mercurial ID: " + QString(HG_REPRO_ID) + " Revision: " + HG_REPRO_REV + "\n";
-  message += "Mercurial Date: " + QString(HG_REPRO_DATE) + "\n";
-  message += "Build Date: " + QString(BUILD_DATE) +" " + QString(BUILD_TIME) + "\n\n";
-  message += "Copyright (C) 2010 O.J.Schumann (o.j.schumann@gmail.com)\n";
-  message += "Clip is licensed under the terms of the GNU General Public License.";
+  QFile f(":/AboutMessage.txt");
+  f.open(QIODevice::ReadOnly);
+  QString message = QString(f.readAll());
 
+  message.replace("</VER_PRODUCTVERSION_STR>", QString(VER_PRODUCTVERSION_STR));
+  message.replace("</HG_REPRO_ID>", QString(HG_REPRO_ID));
+  message.replace("</HG_REPRO_REV>", QString(HG_REPRO_REV));
+  message.replace("</HG_REPRO_DATE>", QString(HG_REPRO_DATE));
+  message.replace("</BUILD_DATE>", QString(BUILD_DATE));
+  message.replace("</BUILD_TIME>", QString(BUILD_TIME));
 
   QMessageBox::about(this, "Cologne Laue Indexation Program", message);
 }

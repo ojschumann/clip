@@ -231,4 +231,6 @@ win32 {
 
 OTHER_FILES += \
     Todo.txt \
-    Resources/clip.rc
+    Resources/clip.rc \
+    Resources/AboutMessage.txt \
+    README.txt

@@ -1,3 +1,25 @@
+/**********************************************************************
+  Copyright (C) 2010 Olaf J. Schumann
+
+  This file is part of the Cologne Laue Indexation Program.
+  For more information, see <http://clip.berlios.de>
+
+  Clip is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Clip is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see http://www.gnu.org/licenses/
+  or write to the Free Software Foundation, Inc., 51 Franklin Street,
+  Fifth Floor, Boston, MA 02110-1301, USA.
+ **********************************************************************/
+
 #include "core/laueplaneprojector.h"
 
 #include <QCursor>
@@ -116,7 +138,7 @@ Vec3D LauePlaneProjector::det2normal(const QPointF& p)  const {
   return scattered2normal(det2scattered(p));
 }
 
-Vec3D LauePlaneProjector::det2normal(const QPointF& p, bool& b)  const {
+Vec3D LauePlaneProjector::det2normal(const QPointF &p, bool &b)  const {
   Vec3D v(det2scattered(p, b));
   if (b) {
     return scattered2normal(v,b);
@@ -629,7 +651,8 @@ void LauePlaneProjector::saveParametersAsDefault() {
 void LauePlaneProjector::loadNewPhysicalImageSize(ImageDataStore::DataType t) {
   if ((t==ImageDataStore::PhysicalSize) && getLaueImage() && getLaueImage()->data()->hasData(ImageDataStore::PhysicalSize)) {
     QSizeF s = getLaueImage()->data()->getTransformedSizeData(t);
-    setDetSize(dist(), s.width(), s.height());
+    if ((fabs(s.width()-width())>1e-3) || (fabs(s.height()-height())>1e-3))
+      setDetSize(dist(), s.width(), s.height());
   }
 }
 
