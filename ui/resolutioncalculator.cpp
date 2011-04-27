@@ -26,9 +26,10 @@
 #include <cmath>
 #include <QShortcut>
 #include <QStyledItemDelegate>
-
-#include <tools/rulermodel.h>
 #include <QAbstractTableModel>
+#include <Eigen/Dense>
+
+#include "tools/rulermodel.h"
 #include "tools/ruleritem.h"
 #include "tools/itemstore.h"
 #include "tools/numberedit.h"
@@ -101,12 +102,10 @@ void ResolutionCalculator::deletePressed() {
 }
 
 void ResolutionCalculator::slotCalcResolution() {
-  Mat3D M;
-  Vec3D v;
-  M.zero();
-  M(2,2)=1;
+  Eigen::Matrix2d M = Eigen::Matrix2d::Zero();
+  Eigen::Vector2d v = Eigen::Vector2d::Zero();
   QSizeF s = image->data()->getTransformedSizeData(ImageDataStore::PixelSize);
-
+  // TOTO: Port to Eigen
   for (int n=0; n<rulers.size(); n++) {
     bool ok;
     double l = rulers.at(n)->data(0).toDouble(&ok);

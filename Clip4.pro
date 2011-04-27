@@ -34,7 +34,7 @@ DEFINES += __HG_REPRO_DATE__="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --templat
 QMAKE_CXXFLAGS += -std=gnu++0x
 
 # Eigen linear Algebra library
-LIBS += -L../eigen
+INCLUDEPATH += ../eigen
 
 QMAKE_CXXFLAGS_DEBUG += -pg
 QMAKE_LFLAGS_DEBUG += -pg

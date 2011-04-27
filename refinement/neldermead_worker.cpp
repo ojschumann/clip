@@ -31,7 +31,7 @@
 #include "refinement/fitparameter.h"
 #include "refinement/fitparametergroup.h"
 
-#include "eigen/Eigen/Dense"
+#include <Eigen/Dense>
 
 NMWorker::NMWorker(Crystal* c, QObject* parent):
     QObject(parent),
