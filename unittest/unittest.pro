@@ -21,4 +21,3 @@ SOURCES += tst_clipunittesttest.cpp \
 QMAKE_CXXFLAGS += -I.. -I../..
 QMAKE_CXXFLAGS += -std=gnu++0x
 
-
