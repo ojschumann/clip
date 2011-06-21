@@ -1,5 +1,6 @@
 <p>This is the <b>Cologne Laue Indexation Program</b> (CLIP)<br>
 a program to index and refine laue exposures.<br><br>
+It is dedicated to my late dad.<br><br>
 Version: </VER_PRODUCTVERSION_STR> <br>
 Mercurial ID: </HG_REPRO_ID> Revision: </HG_REPRO_REV><br>
 Mercurial Date: </HG_REPRO_DATE><br>

@@ -156,15 +156,26 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
     }
   }
 
-  double w = headerData["Width"].toInt();
-  double h = headerData["Height"].toInt();
+  int w = headerData["Width"].toInt();
+  int h = headerData["Height"].toInt();
+  int pixX = headerData["X-PixelSizeUM"].toInt();
+  int pixY = headerData["Y-PixelSizeUM"].toInt();
   store->setData(ImageDataStore::PixelSize, QSizeF(w, h));
-  store->setData(ImageDataStore::PhysicalSize, QSizeF(0.001*w*headerData["X-PixelSizeUM"].toInt(), 0.001*h*headerData["Y-PixelSizeUM"].toInt()));
+  store->setData(ImageDataStore::PhysicalSize, QSizeF(0.001*w*pixX, 0.001*h*pixY));
+
+  headerData.insert("Size", QString("%1x%2 pixels").arg(w).arg(h));
+  headerData.insert("PixelSize", QString("%1x%2 µm").arg(pixX).arg(pixY));
+
+  headerData.remove("Width");
+  headerData.remove("Height");
+  headerData.remove("X-PixelSizeUM");
+  headerData.remove("Y-PixelSizeUM");
 
   BasDataProvider* provider = new BasDataProvider(parent);
   provider->insertFileInformation(filename);
   provider->providerInformation.unite(headerData);
   provider->pixelData = pixelData;
+  provider->dataSize = QSize(w,h);
   return provider;
 }
 
@@ -173,7 +184,7 @@ const void* BasDataProvider::getData() {
 }
 
 QSize BasDataProvider::size() {
-  return QSize(providerInformation["Width"].toInt(), providerInformation["Height"].toInt());
+  return dataSize;
 }
 
 int BasDataProvider::bytesCount() {

@@ -32,7 +32,7 @@
 #include <QFile>
 #include <QXmlStreamWriter>
 #include <QSettings>
-
+#include <QMessageBox>
 
 #include "tools/mat3D.h"
 #include "core/crystal.h"
@@ -154,9 +154,23 @@ void CrystalDisplay::slotCellChanged() {
   crystal->setCell(cell);
 }
 
+#include "ui/sadeasteregg.h"
+
 void CrystalDisplay::slotSpacegroupChanged(QString s) {
-  setPaletteForStatus(ui->Spacegroup, crystal->getSpacegroup()->setGroupSymbol(s));
-  QPalette p = ui->Spacegroup->palette();
+  if (s=="JRS") {
+    ui->Spacegroup->setText("Fd3m");
+    ui->latticeA->setValue(5.43102064);
+    /*QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::NoIcon);
+    msgBox.setWindowTitle("Dieses Programm ist meinem lieben Papa gewidmet.");
+    msgBox.setText("<html><body style=\"background-color:#FFCCFF\"><p style=\"background-color:#FFCCFF\" align=\"center\"><img src=\":/papa.jpeg\"/><h2>Jochen Schumann</h2>6.12.1947 - 10.6.2011<p align=\"right\">Ich vermisse dich</p></p></body></html>");
+    msgBox.exec();
+    */
+    SadEasterEgg see;
+    see.exec();
+  } else {
+    setPaletteForStatus(ui->Spacegroup, crystal->getSpacegroup()->setGroupSymbol(s));
+  }
 }
 
 

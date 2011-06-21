@@ -121,7 +121,8 @@ SOURCES += main.cpp\
     config/colorconfigitem.cpp \
     ui/printdialog.cpp \
     tools/colortextitem.cpp \
-    image/imagedatastore.cpp
+    image/imagedatastore.cpp \
+    ui/sadeasteregg.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -203,7 +204,8 @@ HEADERS  += ui/clip.h \
     config/colorconfigitem.h \
     ui/printdialog.h \
     tools/colortextitem.h \
-    image/imagedatastore.h
+    image/imagedatastore.h \
+    ui/sadeasteregg.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
@@ -220,7 +222,8 @@ FORMS    += ui/clip.ui \
     ui/fitdisplay.ui \
     ui/hkltool.ui \
     ui/clipconfig.ui \
-    ui/printdialog.ui
+    ui/printdialog.ui \
+    ui/sadeasteregg.ui
 
 RESOURCES += \
     resources/resources.qrc

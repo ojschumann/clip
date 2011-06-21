@@ -28,6 +28,7 @@
 #include <QStyledItemDelegate>
 #include <QAbstractTableModel>
 #include <Eigen/Dense>
+#include <iomanip>
 
 #include "tools/rulermodel.h"
 #include "tools/ruleritem.h"
@@ -102,104 +103,66 @@ void ResolutionCalculator::deletePressed() {
 }
 
 __attribute__((force_align_arg_pointer)) void ResolutionCalculator::slotCalcResolution() {
-  // Calc the resolution based on the minimasation of
-  // S = sum_i ( ( x_i *r_x )^2 + (y_i * r_y)^2 - d_i^2 )^2
-  // where r_i and r_i are the x- and y-pixelsize of a ruler
-  // k_x and k_y are the searched resolutions and d_i is the
-  // provided length of the ruler
-  //
-  // 1.) independent x- and y-resolutions
-  //
-  // 0 = dS/d(r_x^2) = 2*sum_i (( x_i *r_x )^2 + (y_i * r_y)^2 - d_i^2 )  x_i^2
-  // 0 = dS/d(r_y^2) = 2*sum_i (( x_i *r_x )^2 + (y_i * r_y)^2 - d_i^2 )  y_i^2
-  //
-  // as array equation:
-  // ( X  U )  (r_x) =  (v_x)
-  // ( U  Y )  (r_y) =  (v_y)
-  //
-  // where
-  // X = sum_i x_i^4
-  // Y = sum_i y_i^4
-  // U = sum_i x_i^2 * y_i^2
-  // v_x = sum_i d_i^2 * x_i^2
-  // v_y = sum_i d_i^2 * y_i^2
-  //
-  // 2.) single resolution r = r_x = r_y
-  //
-  // From array equation
-  //
-  // 0 = dS/d(r^2) = sum_i ( (x_i^2 + y_i^2) * r^2 - d_i^2 ) (x_i^2 + y_i^2)
-  //
-  // r = sum_i d_i^2 * (x_i^2 + y_i^2) / sum (x_i^2 + y_i^2)^2 = (v_x+v_y) / (X + 2*U + Y)
 
+  struct RulerData {
+    double dx;
+    double dy;
+    double l;
+  };
 
-
-
-  Eigen::Matrix2d M;
-  M = Eigen::Matrix2d::Zero();
-  Eigen::Vector2d v;
-  v = Eigen::Vector2d::Zero();
+  // Load all rulers with a valid length in list
+  QList<RulerData> rulerWithLengthData;
   QSizeF s = image->data()->getTransformedSizeData(ImageDataStore::PixelSize);
   for (int n=0; n<rulers.size(); n++) {
     bool ok;
     double l = rulers.at(n)->data(0).toDouble(&ok);
     if (ok && (l>0.0)) {
       RulerItem* r = dynamic_cast<RulerItem*>(rulers.at(n));
-      double dx = (r->getStart().x()-r->getEnd().x())*s.width();
-      double dy = (r->getStart().y()-r->getEnd().y())*s.height();
-      M(0,0) += dx*dx*dx*dx; // X
-      M(1,0) += dx*dx*dy*dy; // Y
-      M(1,1) += dy*dy*dy*dy; // U
-      v(0) += l*l*dx*dx;     // v_x
-      v(1) += l*l*dy*dy;     // v_y
+      RulerData d;
+      d.l = l;
+      d.dx = (r->getStart().x()-r->getEnd().x())*s.width();
+      d.dy = (r->getStart().y()-r->getEnd().y())*s.height();
+      rulerWithLengthData.append(d);
     }
   }
 
-  Eigen::Vector2d r = Eigen::Vector2d::Zero();
+  int dim = resolutionsLocked ? 1 : 2;
+  Eigen::Vector2d r;
   bool solutionOK = false;
-  if (resolutionsLocked) {
-    double denominator = (M(0,0) + 2*M(1,0) + M(1,1));
-    if (denominator>1e-6) {
-      r(0) = (v(0)+v(1)) / denominator;
-      r(1) = r(0);
-      M(0, 1) = M(1, 0);
-      solutionOK = true;
-    }
-  } else {
-    M(0, 1) = M(1, 0);
-    Eigen::JacobiSVD<Eigen::Matrix2d> svd(M, Eigen::ComputeFullU | Eigen::ComputeFullV);
-    double conditionNumber = svd.singularValues()(0) / svd.singularValues()(1);
-    if (conditionNumber<10000.0) { // condition number is equal to the quotient of resolutions to the power of four
-      r = svd.solve(v);
-      solutionOK = (M*r).isApprox(v, 1e-6) && r(0)>0.0 && r(1)>0.0;
-      if (false) {
-        cout << "OK?" << (M*r).isApprox(v, 1e-6) << (r(0)>0.0) << (r(1)>0.0) << endl;
-        cout << "ConditionNumber: " << conditionNumber << endl;
-        double relativeError = (M*r-v).norm() / v.norm();
-        qDebug() << "Relative Error" << relativeError;
-        cout << "Matrix is: " << endl << M << endl;
-        cout << "Vector is: " << endl << v << endl;
-        cout << "Resolution is: " << endl << r << endl;
-        cout << "M*r is: " << endl << M*r << endl << endl;
-        r = M.fullPivLu().solve(v);
-        cout << "Resolution is: " << endl << r << endl;
-        cout << "M*r is: " << endl << M*r << endl << endl;
-        for (int n=0; n<rulers.size(); n++) {
-          bool ok;
-          double l = rulers.at(n)->data(0).toDouble(&ok);
-          if (ok && (l>0.0)) {
-            RulerItem* ri = dynamic_cast<RulerItem*>(rulers.at(n));
-            double dx = (ri->getStart().x()-ri->getEnd().x())*s.width();
-            double dy = (ri->getStart().y()-ri->getEnd().y())*s.height();
-            cout << l << " " << dx << " " << dy << " / " << l*l << " " << r(0)*dx*dx << " " << r(1)*dy*dy << endl;
-          }
-        }
+
+  // If more amount of data is sufficient for problem, do cal
+  if (rulerWithLengthData.size()>=dim) {
+
+    // Build linear set of equations M*x =b
+    Eigen::MatrixXd M(rulerWithLengthData.size(), dim);
+    Eigen::VectorXd b(rulerWithLengthData.size());
+
+    for (int n=0; n<rulerWithLengthData.size(); n++) {
+      RulerData d = rulerWithLengthData.at(n);
+      if (resolutionsLocked) {
+        // if one resolution then (x_n^2+y_n^2)*r = l_n^2 -> M(n, 0) = x_n^2+y_n^2
+        M(n, 0) = d.dx*d.dx+d.dy*d.dy;
+      } else {
+        // if two resolutions then r_1*x_n^2 + r2*y_n^2 = l_n^2 -> M(n,0) = x_n^2 ; M(n,1) = y_n^2
+        M(n, 0) = d.dx*d.dx;
+        M(n, 1) = d.dy*d.dy;
       }
+      b(n) = d.l*d.l;
     }
-    cout << "ConditionNumber " << conditionNumber << endl << M << " " <<
-M.row(0).dot(M.row(1))/M.row(0).norm()/M.row(1).norm() << " " <<
-M.col(0).dot(M.col(1))/M.col(0).norm()/M.col(1).norm() << " " << endl;
+
+    // Solve this system via SVD -> least square solution
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd(M, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    Eigen::VectorXd x = svd.solve(b);
+
+    if (resolutionsLocked) {
+      solutionOK = x(0)>0.0;
+      r(0) = r(1) = x(0);
+    } else {
+      solutionOK = (x(0)>0.0) && (x(1)>0.0) && (svd.singularValues()(1)/svd.singularValues()(0)>1e-4);
+      r=x;
+    }
   }
+
   if (solutionOK) {
     hRes = sqrt(r(0));
     vRes = sqrt(r(1));

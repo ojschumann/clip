@@ -55,6 +55,7 @@ signals:
 public slots:
 private:
   QVector<float> pixelData;
+  QSize dataSize;
 };
 
 #endif // BASDATAPROVIDER_H

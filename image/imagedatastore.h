@@ -36,6 +36,12 @@ public:
     PhysicalSize,
     PixelSize,
     PlaneDetectorToSampleDistance,
+    CellA,
+    CellB,
+    CellC,
+    CellAlpha,
+    CellBeta,
+    CellGamma,
   };
   explicit ImageDataStore(QObject *parent = 0);
 

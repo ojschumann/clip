@@ -669,6 +669,19 @@ void Projector::setImage(LaueImage *tmpImage) {
     closeImage();
     imageData = tmpImage;
     emit imageLoaded(imageData);
+
+    if (getCrystal()) {
+      QList<double> cell = getCrystal()->getCell();
+      QList<ImageDataStore::DataType> t = QList<ImageDataStore::DataType>() << ImageDataStore::CellA << ImageDataStore::CellB << ImageDataStore::CellC << ImageDataStore::CellAlpha << ImageDataStore::CellBeta << ImageDataStore::CellGamma;
+      for (int i=0; i<cell.size(); i++) {
+        bool ok;
+        if (imageData->data()->hasData(t[i]) && imageData->data()->getData(t[i]).toDouble(&ok)>0.0 && ok) {
+          cell[i] = imageData->data()->getData(t[i]).toDouble();
+        }
+      }
+      getCrystal()->setCell(cell);
+    }
+
     connect(imageData, SIGNAL(imageContentsChanged()), getScene(), SLOT(update()));
   } else {
     tmpImage->deleteLater();
