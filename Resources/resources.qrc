@@ -46,6 +46,30 @@
         <file>icons/up-arrow.svg</file>
         <file>icons/unlock.png</file>
         <file>icons/lock.png</file>
+        <file>icons/zoomin.png</file>
+        <file>icons/zoomout.png</file>
+        <file>icons/editcopy.png</file>
+        <file>icons/editundo.png</file>
+        <file>icons/exportpdf.png</file>
+        <file>icons/textbold.png</file>
+        <file>icons/textcenter.png</file>
+        <file>icons/textitalic.png</file>
+        <file>icons/textjustify.png</file>
+        <file>icons/textleft.png</file>
+        <file>icons/textright.png</file>
+        <file>icons/textunder.png</file>
+        <file>icons/editpaste.png</file>
+        <file>icons/editredo.png</file>
+        <file>icons/editcut.png</file>
+        <file>icons/textsuperscript.png</file>
+        <file>icons/textsubscript.png</file>
+        <file>icons/zoomout.png</file>
+        <file>icons/fit-page.png</file>
+        <file>icons/fit-width.png</file>
+        <file>icons/layout-landscape.png</file>
+        <file>icons/layout-portrait.png</file>
+        <file>icons/page-setup.png</file>
+        <file>icons/zoomin.png</file>
     </qresource>
     <qresource prefix="/">
         <file>DefaultWorkspace.cws</file>

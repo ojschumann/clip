@@ -70,7 +70,7 @@ signals:
   void mousePositionInfo(MousePositionInfo);
   void rotationFromProjector(double);
 protected slots:
-  void renderPrintout(QPrinter*);
+  void renderPrintout(QPainter*, const QRectF&);
   void resizeView();
   void slotOpenResolutionCalc();
   void generateMousePositionInfo(QPointF);

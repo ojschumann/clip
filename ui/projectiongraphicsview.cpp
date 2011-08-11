@@ -88,23 +88,30 @@ void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rec
     painter->fillRect(rect, Qt::white);
 
   } else {
-    // Rect in scene coordinates of what is actually visible in the view
-    // sometimes a little bit more than sceneRect()!!!
+    // In the Viewport, sometimes a little more than sceneRect() is visible.
+    // Use mapToScene() of the viewport dimensions to get max visible rect
+    QRectF visibleSceneRectF = QRectF(mapToScene(0, 0), mapToScene(viewport()->width(), viewport()->height())).normalized();
 
     QTransform viewportTransform = painter->worldTransform();
-    QRectF visibleRect = QRectF(mapToScene(0, 0), mapToScene(viewport()->width(), viewport()->height())).normalized();
 
-    QRectF imgRect = viewportTransform.mapRect(visibleRect);
-    QRect sourceRect = viewportTransform.mapRect(rect).toRect();
+    // complete visible scene Rect in device coordinates (not neccessarily viewport coordinates!)
+    QRectF fullRawSceneRect = viewportTransform.mapRect(visibleSceneRectF);
+
+
+    // Rect to paint on
+    QRectF rawPaintRectF = viewportTransform.mapRect(rect);
+    // Source rect in image is translated by offset of fullRawSceneRectF
+    QRectF imgSourceRectF = rawPaintRectF.translated(-fullRawSceneRect.topLeft());
 
     QTransform zoomTransform;
     QTransform::quadToSquare(rectToPoly(sceneRect()), zoomTransform);
     zoomTransform = QTransform::fromScale(1, -1) * zoomTransform;
 
-    QImage cache = image->getScaledImage(imgRect.size().toSize(), rectToPoly(zoomTransform.mapRect(visibleRect)));
+    QImage cache = image->getScaledImage(fullRawSceneRect.size().toSize(), rectToPoly(zoomTransform.mapRect(visibleSceneRectF)));
 
     painter->resetTransform();
-    painter->drawImage(sourceRect, cache, sourceRect);
+    painter->drawImage(rawPaintRectF.toRect(), cache, imgSourceRectF.toRect());
+    painter->drawRect(0, 0, painter->device()->width(), painter->device()->height());
     painter->setTransform(viewportTransform);
   }
 }

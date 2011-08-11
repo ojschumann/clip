@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>314</width>
-    <height>332</height>
+    <width>667</width>
+    <height>583</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,21 +16,26 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QTextEdit" name="textEdit">
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QPushButton" name="pushButton">
-      <property name="text">
-       <string>Print</string>
-      </property>
+      <widget class="QTextEdit" name="textEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>1</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QPrintPreviewWidget" name="preview" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>4</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -47,12 +52,792 @@ p, li { white-space: pre-wrap; }
    </attribute>
    <addaction name="actionInsert_Cell_Table"/>
   </widget>
+  <widget class="QToolBar" name="charFormatToolbar">
+   <property name="windowTitle">
+    <string>Format Actions</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionTextBold"/>
+   <addaction name="actionTextItalic"/>
+   <addaction name="actionTextUnderline"/>
+   <addaction name="actionSubscript"/>
+   <addaction name="actionSuperscript"/>
+   <addaction name="actionTextColor"/>
+  </widget>
+  <widget class="QToolBar" name="editToolbar">
+   <property name="windowTitle">
+    <string>Edit Actions</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionUndo"/>
+   <addaction name="actionRedo"/>
+   <addaction name="actionCut"/>
+   <addaction name="actionCopy"/>
+   <addaction name="actionPaste"/>
+  </widget>
+  <widget class="QToolBar" name="paragraphFormatToolbar">
+   <property name="windowTitle">
+    <string>Format Actions</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAlignLeft"/>
+   <addaction name="actionAlignCenter"/>
+   <addaction name="actionAlignRight"/>
+   <addaction name="actionAlignJustify"/>
+  </widget>
+  <widget class="QToolBar" name="formatToolbar">
+   <property name="windowTitle">
+    <string>Format Actions</string>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::BottomToolBarArea|Qt::TopToolBarArea</set>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>667</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="actionCut"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+   </widget>
+   <widget class="QMenu" name="menuF_ormat">
+    <property name="title">
+     <string>F&amp;ormat</string>
+    </property>
+    <addaction name="actionTextBold"/>
+    <addaction name="actionTextItalic"/>
+    <addaction name="actionTextUnderline"/>
+    <addaction name="actionSubscript"/>
+    <addaction name="actionSuperscript"/>
+    <addaction name="separator"/>
+    <addaction name="actionAlignLeft"/>
+    <addaction name="actionAlignCenter"/>
+    <addaction name="actionAlignRight"/>
+    <addaction name="actionAlignJustify"/>
+    <addaction name="separator"/>
+    <addaction name="actionTextColor"/>
+   </widget>
+   <addaction name="menuEdit"/>
+   <addaction name="menuF_ormat"/>
+  </widget>
+  <widget class="QToolBar" name="previewToolbar">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+   <addaction name="actionFitPage"/>
+   <addaction name="actionFitWidth"/>
+   <addaction name="actionZoomPreviewIn"/>
+   <addaction name="actionZoomPreviewOut"/>
+   <addaction name="separator"/>
+   <addaction name="actionPortrait"/>
+   <addaction name="actionLandscape"/>
+   <addaction name="separator"/>
+   <addaction name="actionConfigurePage"/>
+   <addaction name="actionPrint"/>
+  </widget>
   <action name="actionInsert_Cell_Table">
    <property name="text">
     <string>Insert Cell Table</string>
    </property>
   </action>
+  <action name="actionPrint">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fileprint.png</normaloff>:/icons/icons/fileprint.png</iconset>
+   </property>
+   <property name="text">
+    <string>Print</string>
+   </property>
+  </action>
+  <action name="actionTextBold">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/textbold.png</normaloff>:/icons/icons/textbold.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Bold</string>
+   </property>
+   <property name="toolTip">
+    <string>Bold</string>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+  </action>
+  <action name="actionTextUnderline">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/textunder.png</normaloff>:/icons/icons/textunder.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Underline</string>
+   </property>
+   <property name="font">
+    <font>
+     <underline>true</underline>
+    </font>
+   </property>
+  </action>
+  <action name="actionTextItalic">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/textitalic.png</normaloff>:/icons/icons/textitalic.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Italic</string>
+   </property>
+   <property name="font">
+    <font>
+     <italic>true</italic>
+    </font>
+   </property>
+  </action>
+  <action name="actionSubscript">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/textsubscript.png</normaloff>:/icons/icons/textsubscript.png</iconset>
+   </property>
+   <property name="text">
+    <string>S&amp;ubscript</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionSuperscript">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/textsuperscript.png</normaloff>:/icons/icons/textsuperscript.png</iconset>
+   </property>
+   <property name="text">
+    <string>Su&amp;perscript</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl++</string>
+   </property>
+  </action>
+  <action name="actionAlignLeft">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/textleft.png</normaloff>:/icons/icons/textleft.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Left</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionAlignCenter">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/textcenter.png</normaloff>:/icons/icons/textcenter.png</iconset>
+   </property>
+   <property name="text">
+    <string>C&amp;enter</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionAlignRight">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/textright.png</normaloff>:/icons/icons/textright.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Right</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionAlignJustify">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/textjustify.png</normaloff>:/icons/icons/textjustify.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Justify</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+J</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/editundo.png</normaloff>:/icons/icons/editundo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="toolTip">
+    <string>&amp;Undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/editredo.png</normaloff>:/icons/icons/editredo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="toolTip">
+    <string>&amp;Redo</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/editcut.png</normaloff>:/icons/icons/editcut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/editcopy.png</normaloff>:/icons/icons/editcopy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/editpaste.png</normaloff>:/icons/icons/editpaste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionTextColor">
+   <property name="text">
+    <string>&amp;Color...</string>
+   </property>
+   <property name="toolTip">
+    <string>Color</string>
+   </property>
+  </action>
+  <action name="actionFitPage">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fit-page.png</normaloff>:/icons/icons/fit-page.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fit Page</string>
+   </property>
+  </action>
+  <action name="actionZoomPreviewIn">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/viewmag+.png</normaloff>:/icons/icons/viewmag+.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom in</string>
+   </property>
+  </action>
+  <action name="actionZoomPreviewOut">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/viewmag-.png</normaloff>:/icons/icons/viewmag-.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom out</string>
+   </property>
+  </action>
+  <action name="actionFitWidth">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fit-width.png</normaloff>:/icons/icons/fit-width.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fit Width</string>
+   </property>
+  </action>
+  <action name="actionConfigurePage">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/page-setup.png</normaloff>:/icons/icons/page-setup.png</iconset>
+   </property>
+   <property name="text">
+    <string>Configure Page</string>
+   </property>
+  </action>
+  <action name="actionLandscape">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/layout-landscape.png</normaloff>:/icons/icons/layout-landscape.png</iconset>
+   </property>
+   <property name="text">
+    <string>Landscape</string>
+   </property>
+  </action>
+  <action name="actionPortrait">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/layout-portrait.png</normaloff>:/icons/icons/layout-portrait.png</iconset>
+   </property>
+   <property name="text">
+    <string>Portrait</string>
+   </property>
+   <property name="toolTip">
+    <string>Portrait</string>
+   </property>
+  </action>
  </widget>
- <resources/>
- <connections/>
+ <customwidgets>
+  <customwidget>
+   <class>QPrintPreviewWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">qprintpreviewwidget.h</header>
+   <container>1</container>
+   <slots>
+    <signal>paintRequested(QPrinter*)</signal>
+    <signal>previewChanged()</signal>
+    <slot>updatePreview()</slot>
+    <slot>setPortraitOrientation()</slot>
+    <slot>setLandscapeOrientation()</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../resources/resources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>actionPrint</sender>
+   <signal>triggered()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>testPrint()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>290</x>
+     <y>263</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>textEdit</sender>
+   <signal>currentCharFormatChanged(QTextCharFormat)</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>currentCharFormatChanged(QTextCharFormat)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>175</x>
+     <y>157</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>125</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>textEdit</sender>
+   <signal>cursorPositionChanged()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>cursorPositionChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>381</x>
+     <y>82</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>494</x>
+     <y>77</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>preview</sender>
+   <signal>paintRequested(QPrinter*)</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>printPreview(QPrinter*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>268</x>
+     <y>567</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>493</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionUndo</sender>
+   <signal>triggered()</signal>
+   <receiver>textEdit</receiver>
+   <slot>undo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRedo</sender>
+   <signal>triggered()</signal>
+   <receiver>textEdit</receiver>
+   <slot>redo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCut</sender>
+   <signal>triggered()</signal>
+   <receiver>textEdit</receiver>
+   <slot>cut()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCopy</sender>
+   <signal>triggered()</signal>
+   <receiver>textEdit</receiver>
+   <slot>copy()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPaste</sender>
+   <signal>triggered()</signal>
+   <receiver>textEdit</receiver>
+   <slot>paste()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>textEdit</sender>
+   <signal>copyAvailable(bool)</signal>
+   <receiver>actionCut</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>249</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>textEdit</sender>
+   <signal>copyAvailable(bool)</signal>
+   <receiver>actionCopy</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>249</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTextBold</sender>
+   <signal>triggered()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>textBold()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>288</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTextItalic</sender>
+   <signal>triggered()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>textItalic()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>288</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTextUnderline</sender>
+   <signal>triggered()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>textUnderline()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>288</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSubscript</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>textSubscript(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>288</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSuperscript</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>textSuperscript(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>288</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTextColor</sender>
+   <signal>triggered()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>textColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>288</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>textEdit</sender>
+   <signal>textChanged()</signal>
+   <receiver>preview</receiver>
+   <slot>updatePreview()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>151</x>
+     <y>196</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>119</x>
+     <y>530</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>preview</sender>
+   <signal>previewChanged()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>previewUpdateZoomFactor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>333</x>
+     <y>542</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLandscape</sender>
+   <signal>triggered()</signal>
+   <receiver>preview</receiver>
+   <slot>setLandscapeOrientation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>542</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPortrait</sender>
+   <signal>triggered()</signal>
+   <receiver>preview</receiver>
+   <slot>setPortraitOrientation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>542</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>testPrint()</slot>
+  <slot>currentCharFormatChanged(QTextCharFormat)</slot>
+  <slot>cursorPositionChanged()</slot>
+  <slot>printPreview(QPrinter*)</slot>
+  <slot>textBold()</slot>
+  <slot>textUnderline()</slot>
+  <slot>textItalic()</slot>
+  <slot>textSubscript(bool)</slot>
+  <slot>textSuperscript(bool)</slot>
+  <slot>textColor()</slot>
+  <slot>previewUpdateZoomFactor()</slot>
+ </slots>
 </ui>

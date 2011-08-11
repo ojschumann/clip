@@ -492,11 +492,9 @@ void ProjectionPlane::slotContextClearAll() {
 }
 
 
-void ProjectionPlane::renderPrintout(QPrinter* printer) {
-  //QTextDocument
-  QPainter painter(printer);
+void ProjectionPlane::renderPrintout(QPainter* painter, const QRectF& target) {
   projector->setHQPrintMode(true);
-  ui->view->render(&painter);
+  ui->view->render(painter, target);
   projector->setHQPrintMode(false);
 }
 
@@ -505,11 +503,9 @@ void ProjectionPlane::renderPrintout(QPrinter* printer) {
 
 void ProjectionPlane::on_actionPrint_triggered()
 {
-  //PrintDialog* d = new PrintDialog(this);
-  //d->show();
-  QPrintPreviewDialog* d = new QPrintPreviewDialog(this);
-  connect(d, SIGNAL(paintRequested(QPrinter*)), this, SLOT(renderPrintout(QPrinter*)));
-  d->exec();
+  PrintDialog* d = new PrintDialog(this);
+  connect(d, SIGNAL(paintRequested(QPainter*, const QRectF&)), this, SLOT(renderPrintout(QPainter*,QRectF)));
+  d->show();
 }
 
 const char XML_ProjectionPlane_Element[] = "ProjectionPlane";

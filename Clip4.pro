@@ -122,7 +122,8 @@ SOURCES += main.cpp\
     ui/printdialog.cpp \
     tools/colortextitem.cpp \
     image/imagedatastore.cpp \
-    ui/sadeasteregg.cpp
+    ui/sadeasteregg.cpp \
+    tools/combolineedit.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -205,7 +206,8 @@ HEADERS  += ui/clip.h \
     ui/printdialog.h \
     tools/colortextitem.h \
     image/imagedatastore.h \
-    ui/sadeasteregg.h
+    ui/sadeasteregg.h \
+    tools/combolineedit.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \
