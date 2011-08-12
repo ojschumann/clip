@@ -111,7 +111,10 @@ void SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsIte
     p->drawPixmap(QPoint(0,0), *cache);
     p->restore();
   } else {
-    p->setPen(spotColor);
+    QPen pen(spotColor);
+    pen.setWidthF(0.0);
+    pen.setCosmetic(true);
+    p->setPen(pen);
     for (int i=0; i<coordinates.size(); i++) {
       p->drawEllipse(coordinates.at(i), spotSize, spotSize);
     }

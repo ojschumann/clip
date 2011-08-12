@@ -272,6 +272,7 @@ void LauePlaneProjector::decorateScene() {
   center->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
   center->setCursor(Qt::SizeAllCursor);
   center->setTransform(QTransform::fromScale(det2img.m11(), det2img.m22()));
+  center->setLineWidth(1.0);
 
   CircleItem* marker=new CircleItem(0.1, center);
   ConfigStore::getInstance()->ensureColor(ConfigStore::PrimaryBeamMarker, marker, SLOT(setColor(QColor)));

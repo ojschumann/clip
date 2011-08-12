@@ -29,14 +29,20 @@
 #include <QClipboard>
 #include <QMimeData>
 #include <QComboBox>
+#include <QToolButton>
 #include <QFontComboBox>
 #include <QTextList>
 #include <QColorDialog>
 #include <QMessageBox>
 #include <QDebug>
 #include <QPainter>
-#include <QToolButton>
+#include <QPrinter>
+#include <QPrinterInfo>
+#include <QPrintDialog>
+#include <QPrintPreviewWidget>
 #include <QPageSetupDialog>
+#include <QFileDialog>
+#include <QFileInfo>
 
 #include "tools/combolineedit.h"
 
@@ -77,8 +83,20 @@ PrintDialog::PrintDialog(QWidget *parent) :
 {
   ui->setupUi(this);
 
-  printer = new QPrinter();
+  printer = new QPrinter(QPrinterInfo::defaultPrinter());
   printer->setPageMargins(10, 10, 10, 10, QPrinter::Millimeter);
+  preview = new QPrintPreviewWidget(printer, ui->previewFrame);
+
+  connect(ui->actionLandscape, SIGNAL(triggered()), preview, SLOT(setLandscapeOrientation()));
+  connect(ui->actionPortrait, SIGNAL(triggered()), preview, SLOT(setPortraitOrientation()));
+  connect(ui->textEdit, SIGNAL(textChanged()), preview, SLOT(updatePreview()));
+  connect(preview, SIGNAL(paintRequested(QPrinter*)), this, SLOT(printPreview(QPrinter*)));
+  connect(preview, SIGNAL(previewChanged()), this, SLOT(previewUpdateZoomFactor()));
+
+  QVBoxLayout* l = new QVBoxLayout(ui->previewFrame);
+  l->addWidget(preview);
+  l->setMargin(0);
+
 
 
   setToolButtonStyle(Qt::ToolButtonFollowStyle);
@@ -154,7 +172,7 @@ PrintDialog::PrintDialog(QWidget *parent) :
   ag->addAction(ui->actionLandscape);
 
   ui->actionFitPage->setChecked(true);
-  if (ui->preview->orientation() == QPrinter::Portrait)
+  if (preview->orientation() == QPrinter::Portrait)
       ui->actionPortrait->setChecked(true);
   else
       ui->actionLandscape->setChecked(true);
@@ -163,6 +181,7 @@ PrintDialog::PrintDialog(QWidget *parent) :
 PrintDialog::~PrintDialog()
 {
   delete ui;
+  delete printer;
 }
 
 const QString rsrcPath = ":/icons/icons/";
@@ -482,7 +501,7 @@ void PrintDialog::previewZoomFactorChanged() {
   qreal factor = text.remove(QLatin1Char('%')).toFloat(&ok);
   factor = qMax(qreal(1.0), qMin(qreal(1000.0), factor));
   if (ok) {
-    ui->preview->setZoomFactor(factor/100.0);
+    preview->setZoomFactor(factor/100.0);
     zoomFactor->setEditText(QString::fromLatin1("%1%").arg(factor));
     previewSetFitting(false);
   }
@@ -491,22 +510,22 @@ void PrintDialog::previewZoomFactorChanged() {
 
 void PrintDialog::previewZoomIn() {
   previewSetFitting(false);
-  ui->preview->zoomIn();
+  preview->zoomIn();
   previewUpdateZoomFactor();
 }
 
 void PrintDialog::previewZoomOut() {
   previewSetFitting(false);
-  ui->preview->zoomOut();
+  preview->zoomOut();
   previewUpdateZoomFactor();
 }
 
 void PrintDialog::previewZoomFit(QAction* action) {
   previewSetFitting(true);
   if (action == ui->actionFitPage)
-    ui->preview->fitInView();
+    preview->fitInView();
   else
-    ui->preview->fitToWidth();
+    preview->fitToWidth();
 }
 
 bool PrintDialog::previewIsFitting() {
@@ -533,19 +552,18 @@ void PrintDialog::previewSetFitting(bool on) {
 }
 
 void PrintDialog::previewUpdateZoomFactor() {
-  zoomFactor->lineEdit()->setText(QString().sprintf("%.1f%%", ui->preview->zoomFactor()*100));
+  zoomFactor->lineEdit()->setText(QString().sprintf("%.1f%%", preview->zoomFactor()*100));
 }
 
-void PrintDialog::previewPageSetup() {
-
-  QPageSetupDialog pageSetup(, q);
+void PrintDialog::previewSetupPage() {
+  QPageSetupDialog pageSetup(printer, this);
   if (pageSetup.exec() == QDialog::Accepted) {
     // update possible orientation changes
     if (preview->orientation() == QPrinter::Portrait) {
-      portraitAction->setChecked(true);
+      ui->actionPortrait->setChecked(true);
       preview->setPortraitOrientation();
     }else {
-      landscapeAction->setChecked(true);
+      ui->actionLandscape->setChecked(true);
       preview->setLandscapeOrientation();
     }
   }
@@ -577,13 +595,46 @@ void PrintDialog::printToPrinter() {
           return;
       }
   #endif
+*/
+  printer->setOutputFormat(QPrinter::NativeFormat);
+  printer->setOutputFileName(QString::null);
+  QPrintDialog* printDialog = new QPrintDialog(printer, this);
+  if (printDialog->exec() == QDialog::Accepted) {
+    preview->print();
+  }
+  delete printDialog;
+}
 
-      if (!printDialog)
-          printDialog = new QPrintDialog(printer, q);
-      if (printDialog->exec() == QDialog::Accepted) {
-          preview->print();
-          q->accept();
-      }
-  }*/
+void PrintDialog::printToPdf() {
+  QString suffix = ".pdf";
+  QString title("Export to PDF");
+
+  printer->setOutputFormat(QPrinter::PdfFormat);
+  QString fileName = QFileDialog::getSaveFileName(this, title, printer->outputFileName(),
+                                                  QLatin1Char('*') + suffix);
+  if (!fileName.isEmpty()) {
+    if (QFileInfo(fileName).suffix().isEmpty())
+      fileName.append(suffix);
+    printer->setOutputFileName(fileName);
+  }
+  if (!printer->outputFileName().isEmpty())
+    preview->print();
+  printer->setOutputFormat(QPrinter::NativeFormat);
+}
+
+void PrintDialog::printToPng() {
+  QString suffix = ".pdf";
+  QString title("Export to PDF");
+
+  printer->setOutputFormat(QPrinter::PdfFormat);
+  QString fileName = QFileDialog::getSaveFileName(this, title, printer->outputFileName(),
+                                                  QLatin1Char('*') + suffix);
+  if (!fileName.isEmpty()) {
+    if (QFileInfo(fileName).suffix().isEmpty())
+      fileName.append(suffix);
+    printer->setOutputFileName(fileName);
+  }
+  if (!printer->outputFileName().isEmpty())
+    preview->print();
 }
 

@@ -25,7 +25,6 @@
 
 #include <QMainWindow>
 #include <QTextCharFormat>
-
 QT_FORWARD_DECLARE_CLASS(QAction)
 QT_FORWARD_DECLARE_CLASS(QActionGroup)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
@@ -33,6 +32,8 @@ QT_FORWARD_DECLARE_CLASS(QFontComboBox)
 QT_FORWARD_DECLARE_CLASS(QTextEdit)
 QT_FORWARD_DECLARE_CLASS(QMenu)
 QT_FORWARD_DECLARE_CLASS(QPrinter)
+QT_FORWARD_DECLARE_CLASS(QPrintPreviewWidget)
+
 
 namespace Ui {
   class PrintDialog;
@@ -85,10 +86,12 @@ private slots:
   void previewZoomOut();
   void previewZoomFactorChanged();
   void previewUpdateZoomFactor();
-  void previewPageSetup();
+  void previewSetupPage();
 
 
   void printToPrinter();
+  void printToPdf();
+  void printToPng();
   void printPreview(QPrinter *);
 
 private:
@@ -100,6 +103,7 @@ private:
   QActionGroup* fitGroup;
 
   QPrinter* printer;
+  QPrintPreviewWidget* preview;
 
 };
 

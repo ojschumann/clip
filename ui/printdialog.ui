@@ -28,11 +28,11 @@
         </sizepolicy>
        </property>
       </widget>
-      <widget class="QPrintPreviewWidget" name="preview" native="true">
+      <widget class="QWidget" name="previewFrame" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
-         <verstretch>4</verstretch>
+         <verstretch>2</verstretch>
         </sizepolicy>
        </property>
       </widget>
@@ -173,6 +173,7 @@
    <addaction name="separator"/>
    <addaction name="actionConfigurePage"/>
    <addaction name="actionPrint"/>
+   <addaction name="actionPrintPDF"/>
   </widget>
   <action name="actionInsert_Cell_Table">
    <property name="text">
@@ -470,22 +471,16 @@
     <string>Portrait</string>
    </property>
   </action>
+  <action name="actionPrintPDF">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fileprintpdf.png</normaloff>:/icons/icons/fileprintpdf.png</iconset>
+   </property>
+   <property name="text">
+    <string>Print as PDF</string>
+   </property>
+  </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QPrintPreviewWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">qprintpreviewwidget.h</header>
-   <container>1</container>
-   <slots>
-    <signal>paintRequested(QPrinter*)</signal>
-    <signal>previewChanged()</signal>
-    <slot>updatePreview()</slot>
-    <slot>setPortraitOrientation()</slot>
-    <slot>setLandscapeOrientation()</slot>
-   </slots>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="../resources/resources.qrc"/>
  </resources>
@@ -494,7 +489,7 @@
    <sender>actionPrint</sender>
    <signal>triggered()</signal>
    <receiver>PrintDialog</receiver>
-   <slot>testPrint()</slot>
+   <slot>printToPrinter()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -535,22 +530,6 @@
     <hint type="destinationlabel">
      <x>494</x>
      <y>77</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>preview</sender>
-   <signal>paintRequested(QPrinter*)</signal>
-   <receiver>PrintDialog</receiver>
-   <slot>printPreview(QPrinter*)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>268</x>
-     <y>567</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>493</x>
-     <y>336</y>
     </hint>
    </hints>
   </connection>
@@ -763,30 +742,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>textEdit</sender>
-   <signal>textChanged()</signal>
-   <receiver>preview</receiver>
-   <slot>updatePreview()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>151</x>
-     <y>196</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>119</x>
-     <y>530</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>preview</sender>
-   <signal>previewChanged()</signal>
+   <sender>actionConfigurePage</sender>
+   <signal>triggered()</signal>
    <receiver>PrintDialog</receiver>
-   <slot>previewUpdateZoomFactor()</slot>
+   <slot>previewSetupPage()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>333</x>
-     <y>542</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>333</x>
@@ -795,10 +758,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionLandscape</sender>
+   <sender>actionPrintPDF</sender>
    <signal>triggered()</signal>
-   <receiver>preview</receiver>
-   <slot>setLandscapeOrientation()</slot>
+   <receiver>PrintDialog</receiver>
+   <slot>printToPdf()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -806,29 +769,13 @@
     </hint>
     <hint type="destinationlabel">
      <x>333</x>
-     <y>542</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionPortrait</sender>
-   <signal>triggered()</signal>
-   <receiver>preview</receiver>
-   <slot>setPortraitOrientation()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>333</x>
-     <y>542</y>
+     <y>291</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
-  <slot>testPrint()</slot>
+  <slot>printToPrinter()</slot>
   <slot>currentCharFormatChanged(QTextCharFormat)</slot>
   <slot>cursorPositionChanged()</slot>
   <slot>printPreview(QPrinter*)</slot>
@@ -839,5 +786,7 @@
   <slot>textSuperscript(bool)</slot>
   <slot>textColor()</slot>
   <slot>previewUpdateZoomFactor()</slot>
+  <slot>previewSetupPage()</slot>
+  <slot>printToPdf()</slot>
  </slots>
 </ui>
