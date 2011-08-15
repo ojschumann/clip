@@ -79,6 +79,8 @@ protected:
   ProjectionPlane* addProjector(Projector*);
   void addActions();
 private:
+  template<class T> T* raiseOrCreateToolWindow();
+
   Ui::Clip *ui;
 
   QAction *closeAct;

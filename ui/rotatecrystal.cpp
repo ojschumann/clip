@@ -53,6 +53,8 @@ RotateCrystal::RotateCrystal(QWidget *parent) :
 
   connect(&buttonMapper, SIGNAL(mapped(int)), this, SLOT(addRotation(int)));
   connect(ui->resetButton, SIGNAL(clicked()), this, SLOT(resetSum()));
+
+  connect(Clip::getInstance(), SIGNAL(projectorRotation(double)), this, SLOT(addRotationAngle(double)));
   connect(Clip::getInstance(), SIGNAL(windowChanged()), this, SLOT(windowChanged()));
 
   windowChanged();

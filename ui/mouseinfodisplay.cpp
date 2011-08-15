@@ -75,6 +75,9 @@ MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
 
   connect(ui->cursorBox, SIGNAL(toggled(bool)), this, SLOT(cursorTableVisiblyToggled(bool)));
 
+  connect(Clip::getInstance(), SIGNAL(mousePositionInfo(MousePositionInfo)), this, SLOT(showMouseInfo(MousePositionInfo)));
+  connect(this, SIGNAL(highlightMarker(Vec3D)), Clip::getInstance(), SIGNAL(highlightMarker(Vec3D)));
+
   ui->angleTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->angleTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->angleTable->horizontalHeader()->setMinimumSectionSize(fontMetrics().width("Negative")+8);

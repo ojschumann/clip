@@ -43,6 +43,7 @@
 #include "ui/clip.h"
 #include "ui/imagetoolbox.h"
 #include "ui/resolutioncalculator.h"
+#include "ui/printdialog.h"
 #include "core/crystal.h"
 #include "core/reflection.h"
 #include "core/projector.h"
@@ -157,7 +158,10 @@ void ProjectionPlane::resizeView() {
   // And set the Geometry
   ui->view->setGeometry(finalRect.toRect());
   // Set the ZoomRect to the view
-  ui->view->fitInView(minViewRect, Qt::KeepAspectRatio);
+  //ui->view->fitInView(minViewRect, Qt::KeepAspectRatio);
+  QTransform
+  ui->view->setTransform();
+
 }
 
 void ProjectionPlane::resizeEvent(QResizeEvent *e) {
@@ -498,12 +502,10 @@ void ProjectionPlane::renderPrintout(QPainter* painter, const QRectF& target) {
   projector->setHQPrintMode(false);
 }
 
-#include "ui/printdialog.h"
-#include <QPrintPreviewDialog>
 
 void ProjectionPlane::on_actionPrint_triggered()
 {
-  PrintDialog* d = new PrintDialog(this);
+  PrintDialog* d = new PrintDialog(projector, this);
   connect(d, SIGNAL(paintRequested(QPainter*, const QRectF&)), this, SLOT(renderPrintout(QPainter*,QRectF)));
   d->show();
 }

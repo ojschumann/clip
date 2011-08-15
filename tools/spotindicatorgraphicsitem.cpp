@@ -112,7 +112,7 @@ void SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsIte
     p->restore();
   } else {
     QPen pen(spotColor);
-    pen.setWidthF(0.0);
+    pen.setWidthF(1.0);
     pen.setCosmetic(true);
     p->setPen(pen);
     for (int i=0; i<coordinates.size(); i++) {

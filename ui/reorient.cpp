@@ -45,7 +45,6 @@ Reorient::Reorient(QWidget *parent) :
   gonioAxisSelection(1, ui->axis2Combo->currentIndex());
 
   connect(Clip::getInstance(), SIGNAL(windowChanged()), this, SLOT(windowChanged()));
-
   windowChanged();
 }
 

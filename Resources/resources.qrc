@@ -72,6 +72,7 @@
         <file>icons/zoomin.png</file>
         <file>icons/fileprintpdf.png</file>
         <file>icons/fileprintpng.png</file>
+        <file>icons/fileprintps.png</file>
     </qresource>
     <qresource prefix="/">
         <file>DefaultWorkspace.cws</file>

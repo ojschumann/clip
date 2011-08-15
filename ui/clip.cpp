@@ -267,48 +267,29 @@ void Clip::addActions() {
 
 
 void Clip::on_actionReflection_Info_triggered() {
+  raiseOrCreateToolWindow<MouseInfoDisplay>();
+}
+
+void Clip::on_actionRotation_triggered() {
+  raiseOrCreateToolWindow<RotateCrystal>();
+}
+
+void Clip::on_actionReorientation_triggered() {
+  raiseOrCreateToolWindow<Reorient>();
+}
+
+template <class T> T* Clip::raiseOrCreateToolWindow() {
   foreach (QMdiSubWindow* mdi, ui->mdiArea->subWindowList()) {
-    if (dynamic_cast<MouseInfoDisplay*>(mdi->widget())) {
+    if (dynamic_cast<T*>(mdi->widget())) {
       mdi->raise();
       ui->mdiArea->setActiveSubWindow(mdi);
-      return;
+      return NULL;
     }
   }
-  MouseInfoDisplay* info = new MouseInfoDisplay();
-  connect(this, SIGNAL(mousePositionInfo(MousePositionInfo)), info, SLOT(showMouseInfo(MousePositionInfo)));
-  connect(info, SIGNAL(highlightMarker(Vec3D)), this, SIGNAL(highlightMarker(Vec3D)));
-  QMdiSubWindow* m = addMdiWindow(info);
+  T* tool = new T();
+  QMdiSubWindow* m = addMdiWindow(tool);
   m->setWindowFlags(m->windowFlags() & ~Qt::WindowMaximizeButtonHint);
-  //m->show();
-  //m->layout()->setSizeConstraint(QLayout::SetFixedSize);
-
-}
-
-void Clip::on_actionRotation_triggered()
-{
-  foreach (QMdiSubWindow* mdi, ui->mdiArea->subWindowList()) {
-    if (dynamic_cast<RotateCrystal*>(mdi->widget())) {
-      mdi->raise();
-      ui->mdiArea->setActiveSubWindow(mdi);
-      return;
-    }
-  }
-  RotateCrystal* rotate = new RotateCrystal();
-  connect(this, SIGNAL(projectorRotation(double)), rotate, SLOT(addRotationAngle(double)));
-  addMdiWindow(rotate);
-}
-
-void Clip::on_actionReorientation_triggered()
-{
-  foreach (QMdiSubWindow* mdi, ui->mdiArea->subWindowList()) {
-    if (dynamic_cast<Reorient*>(mdi->widget())) {
-      mdi->raise();
-      ui->mdiArea->setActiveSubWindow(mdi);
-      return;
-    }
-  }
-  Reorient* reorient = new Reorient();
-  addMdiWindow(reorient);
+  return tool;
 }
 
 void Clip::on_actionOpen_Workspace_triggered() {

@@ -15,6 +15,12 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="margin">
+     <number>0</number>
+    </property>
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <item row="0" column="0">
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -174,6 +180,8 @@
    <addaction name="actionConfigurePage"/>
    <addaction name="actionPrint"/>
    <addaction name="actionPrintPDF"/>
+   <addaction name="actionPrintPS"/>
+   <addaction name="actionPrintPNG"/>
   </widget>
   <action name="actionInsert_Cell_Table">
    <property name="text">
@@ -480,6 +488,24 @@
     <string>Print as PDF</string>
    </property>
   </action>
+  <action name="actionPrintPS">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fileprintps.png</normaloff>:/icons/icons/fileprintps.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export Postscript</string>
+   </property>
+  </action>
+  <action name="actionPrintPNG">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fileprintpng.png</normaloff>:/icons/icons/fileprintpng.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export PNG</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../resources/resources.qrc"/>
@@ -773,6 +799,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionPrintPS</sender>
+   <signal>triggered()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>printToPS()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPrintPNG</sender>
+   <signal>triggered()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>printToPng()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>printToPrinter()</slot>
@@ -788,5 +846,7 @@
   <slot>previewUpdateZoomFactor()</slot>
   <slot>previewSetupPage()</slot>
   <slot>printToPdf()</slot>
+  <slot>printToPS()</slot>
+  <slot>printToPng()</slot>
  </slots>
 </ui>

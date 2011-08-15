@@ -276,6 +276,7 @@ void LauePlaneProjector::decorateScene() {
 
   CircleItem* marker=new CircleItem(0.1, center);
   ConfigStore::getInstance()->ensureColor(ConfigStore::PrimaryBeamMarker, marker, SLOT(setColor(QColor)));
+  marker->setLineWidth(1.0);
 
   CircleItem* handle=new CircleItem(getSpotSize(), center);
   ConfigStore::getInstance()->ensureColor(ConfigStore::PrimaryBeamMarker, handle, SLOT(setColor(QColor)));
@@ -283,6 +284,7 @@ void LauePlaneProjector::decorateScene() {
   handle->setFlag(QGraphicsItem::ItemIsMovable, true);
   handle->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
   handle->setCursor(Qt::SizeAllCursor);
+  handle->setLineWidth(1.0);
 
   connect(this, SIGNAL(spotSizeChanged(double)), center, SLOT(setRadius(double)));
   connect(this, SIGNAL(spotSizeChanged(double)), handle, SLOT(setRadius(double)));

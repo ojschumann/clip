@@ -34,6 +34,7 @@ QT_FORWARD_DECLARE_CLASS(QMenu)
 QT_FORWARD_DECLARE_CLASS(QPrinter)
 QT_FORWARD_DECLARE_CLASS(QPrintPreviewWidget)
 
+QT_FORWARD_DECLARE_CLASS(Projector)
 
 namespace Ui {
   class PrintDialog;
@@ -44,7 +45,7 @@ class PrintDialog : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit PrintDialog(QWidget *parent = 0);
+  explicit PrintDialog(Projector*, QWidget *parent = 0);
   ~PrintDialog();
 
 private:
@@ -91,10 +92,16 @@ private slots:
 
   void printToPrinter();
   void printToPdf();
+  void printToPS();
   void printToPng();
   void printPreview(QPrinter *);
 
 private:
+  bool loadFilenameToPrinter(const QString& title, const QString& suffix);
+
+private:
+  Projector* projector;
+
   QComboBox *comboStyle;
   QFontComboBox *comboFont;
   QComboBox *comboSize;

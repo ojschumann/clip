@@ -44,6 +44,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 
+#include "core/projector.h"
 #include "tools/combolineedit.h"
 
 class ZoomFactorValidator : public QDoubleValidator
@@ -77,11 +78,13 @@ public:
 
 
 
-PrintDialog::PrintDialog(QWidget *parent) :
+PrintDialog::PrintDialog(Projector* p, QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::PrintDialog)
+    ui(new Ui::PrintDialog),
+    projector(p)
 {
   ui->setupUi(this);
+  connect(p, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
   printer = new QPrinter(QPrinterInfo::defaultPrinter());
   printer->setPageMargins(10, 10, 10, 10, QPrinter::Millimeter);
@@ -440,60 +443,31 @@ void PrintDialog::verticalAlignmentChanged(QTextCharFormat::VerticalAlignment a)
   ui->actionSuperscript->setChecked(a == QTextCharFormat::AlignSuperScript);
 }
 
-
-
-#include <QTextTable>
-#include <QTextTableFormat>
-#include <QTextFrameFormat>
+#include "core/crystal.h"
 
 void PrintDialog::on_actionInsert_Cell_Table_triggered()
 {
-  QString tableCode = "";
-  tableCode += "<table border=\"1\">";
-  tableCode += "<tr><th>a</th><th>b</th><th>c</th></tr>";
-  tableCode += "<tr><td>5.1</td><td>5.1</td><td>5.1</td></tr>";
-  tableCode += "<tr><th>alpha</th><th>beta</th><th>gamma</th></tr>";
-  tableCode += "<tr><td>90</td><td>90</td><td>90</td></tr>";
-  tableCode += "</table>";
-  QTextCursor cursor(ui->textEdit->textCursor());
-  cursor.beginEditBlock();
-  /*QTextTableFormat format;
-  format.setPadding(0.0);
-  format.setCellPadding(2.0);
-  format.setCellSpacing(0.0);
-  format.setBorder(1.0);
-  format.setBorderStyle(QTextFrameFormat::BorderStyle_Solid);
-  //format.setAlignment(Qt::AlignLeft);
-  QTextTable* table = cursor.insertTable(2,3, format);
-  table->cellAt(0, 0).firstCursorPosition().insertText("a");
-  table->cellAt(0, 1).firstCursorPosition().insertText("b");
-  table->cellAt(0, 2).firstCursorPosition().insertText("c");
-  table->cellAt(1, 0).firstCursorPosition().insertText("alpha");
-  table->cellAt(1, 1).firstCursorPosition().insertText("beta");
-  table->cellAt(1, 2).firstCursorPosition().insertText("gamma");*/
-  cursor.insertHtml(tableCode);
-  cursor.endEditBlock();
+  if (projector && projector->getCrystal()) {
+
+    QString tableCode = "";
+    tableCode += "<table border=\"1\">";
+    tableCode += "<tr><th>a</th><th>b</th><th>c</th></tr>";
+    tableCode += "<tr><td>%1</td><td>%2</td><td>%3</td></tr>";
+    tableCode += "<tr><th>alpha</th><th>beta</th><th>gamma</th></tr>";
+    tableCode += "<tr><td>%4</td><td>%5</td><td>%6</td></tr>";
+    tableCode += "</table>";
+
+    QList<double> cell = projector->getCrystal()->getCell();
+    foreach (double d, cell)
+      tableCode = tableCode.arg(d);
+
+    QTextCursor cursor(ui->textEdit->textCursor());
+    cursor.beginEditBlock();
+    cursor.insertHtml(tableCode);
+    cursor.endEditBlock();
+  }
 }
 
-
-void PrintDialog::printPreview(QPrinter *printer) {
-  QSizeF pageSize = printer->pageRect(QPrinter::DevicePixel).size();
-
-  QTextDocument* d = ui->textEdit->document()->clone();
-  d->setPageSize(pageSize);
-
-  qreal textHeight = d->size().height();
-
-  QPainter p(printer);
-  d->drawContents(&p);
-
-  QRectF remainingPage(0, textHeight, pageSize.width(), pageSize.height()-textHeight);
-
-  emit paintRequested(&p, remainingPage);
-
-  p.end();
-  delete d;
-}
 
 void PrintDialog::previewZoomFactorChanged() {
   QString text = zoomFactor->lineEdit()->text();
@@ -507,6 +481,7 @@ void PrintDialog::previewZoomFactorChanged() {
   }
 
 }
+
 
 void PrintDialog::previewZoomIn() {
   previewSetFitting(false);
@@ -569,72 +544,121 @@ void PrintDialog::previewSetupPage() {
   }
 }
 
+bool PrintDialog::loadFilenameToPrinter(const QString &title, const QString &suffix) {
+  QString fileName = QFileDialog::getSaveFileName(this, title, printer->outputFileName(),
+                                                  QLatin1Char('*') + suffix);
+  if (!fileName.isEmpty()) {
+    if (QFileInfo(fileName).suffix().isEmpty())
+      fileName.append(suffix);
+    printer->setOutputFileName(fileName);
+    return true;
+  }
+  return false;
+}
 
 void PrintDialog::printToPrinter() {
-  /*#if defined(Q_WS_WIN) || defined(Q_WS_MAC)
-      if (printer->outputFormat() != QPrinter::NativeFormat) {
-          QString title;
-          QString suffix;
-          if (printer->outputFormat() == QPrinter::PdfFormat) {
-              title = QCoreApplication::translate("QPrintPreviewDialog", "Export to PDF");
-              suffix = QLatin1String(".pdf");
-          } else {
-              title = QCoreApplication::translate("QPrintPreviewDialog", "Export to PostScript");
-              suffix = QLatin1String(".ps");
-          }
-          QString fileName = QFileDialog::getSaveFileName(q, title, printer->outputFileName(),
-                                                          QLatin1Char('*') + suffix);
-          if (!fileName.isEmpty()) {
-              if (QFileInfo(fileName).suffix().isEmpty())
-                  fileName.append(suffix);
-              printer->setOutputFileName(fileName);
-          }
-          if (!printer->outputFileName().isEmpty())
-              preview->print();
-          q->accept();
-          return;
-      }
-  #endif
-*/
   printer->setOutputFormat(QPrinter::NativeFormat);
+  QString oldFilename = printer->outputFileName();
   printer->setOutputFileName(QString::null);
   QPrintDialog* printDialog = new QPrintDialog(printer, this);
   if (printDialog->exec() == QDialog::Accepted) {
     preview->print();
   }
   delete printDialog;
+  printer->setOutputFileName(oldFilename);
 }
 
 void PrintDialog::printToPdf() {
-  QString suffix = ".pdf";
-  QString title("Export to PDF");
-
-  printer->setOutputFormat(QPrinter::PdfFormat);
-  QString fileName = QFileDialog::getSaveFileName(this, title, printer->outputFileName(),
-                                                  QLatin1Char('*') + suffix);
-  if (!fileName.isEmpty()) {
-    if (QFileInfo(fileName).suffix().isEmpty())
-      fileName.append(suffix);
-    printer->setOutputFileName(fileName);
-  }
-  if (!printer->outputFileName().isEmpty())
+  if (loadFilenameToPrinter("Export to PDF", ".pdf")) {
+    printer->setOutputFormat(QPrinter::PdfFormat);
     preview->print();
-  printer->setOutputFormat(QPrinter::NativeFormat);
+    printer->setOutputFormat(QPrinter::NativeFormat);
+  }
 }
+
+void PrintDialog::printToPS() {
+  if (loadFilenameToPrinter("Export to Postscript", ".ps")) {
+    printer->setOutputFormat(QPrinter::PdfFormat);
+    preview->print();
+    printer->setOutputFormat(QPrinter::NativeFormat);
+  }
+}
+
+#include <QGraphicsView>
+#include "image/laueimage.h"
+#include "image/imagedatastore.h"
+#include <QInputDialog>
 
 void PrintDialog::printToPng() {
-  QString suffix = ".pdf";
-  QString title("Export to PDF");
+  if (projector && !projector->getScene()->views().isEmpty() && loadFilenameToPrinter("Portable Network Graphics (PNG)", ".png")) {
 
-  printer->setOutputFormat(QPrinter::PdfFormat);
-  QString fileName = QFileDialog::getSaveFileName(this, title, printer->outputFileName(),
-                                                  QLatin1Char('*') + suffix);
-  if (!fileName.isEmpty()) {
-    if (QFileInfo(fileName).suffix().isEmpty())
-      fileName.append(suffix);
-    printer->setOutputFileName(fileName);
+    QGraphicsView *const firstView = projector->getScene()->views().at(0);
+
+
+    int imgWidth;
+    int imgHeight;
+
+    if (projector->getLaueImage()) {
+      QRectF visibleSceneRectF = QRectF(firstView->mapToScene(0, 0), firstView->mapToScene(firstView->viewport()->rect().bottomRight())).normalized();
+      QSizeF imageSize = projector->getLaueImage()->data()->getTransformedSizeData(ImageDataStore::PixelSize);
+      imgWidth = imageSize.width()*visibleSceneRectF.width()/projector->getScene()->sceneRect().width();
+      imgHeight = imageSize.height()*visibleSceneRectF.height()/projector->getScene()->sceneRect().height();
+    } else {
+      imgWidth = firstView->viewport()->width();
+      imgHeight = firstView->viewport()->height();
+    }
+
+
+    int textHeight = 0;
+    qreal scale = 1.0;
+
+    QTextDocument* d = ui->textEdit->document()->clone();
+    if (!d->isEmpty()) {
+      qreal desiredTextWidth = 2.0*d->documentMargin() + 80*QFontMetrics(QFont("Courier New", 8)).averageCharWidth();
+      scale = 1.0*imgWidth/desiredTextWidth;
+      d->setTextWidth(desiredTextWidth);
+      textHeight = int(scale*d->size().height()) + 1;
+    }
+
+    QImage img(imgWidth, imgHeight+textHeight, QImage::Format_ARGB32);
+    QPainter p(&img);
+
+    if (!d->isEmpty()) {
+      p.save();
+      p.scale(scale, scale);
+      d->drawContents(&p);
+      p.restore();
+    }
+
+    emit paintRequested(&p, QRectF(0, textHeight, imgWidth, imgHeight));
+
+    p.end();
+    delete d;
+
+    img.save(printer->outputFileName());
+
+
   }
-  if (!printer->outputFileName().isEmpty())
-    preview->print();
 }
 
+void PrintDialog::printPreview(QPrinter *printer) {
+  QSizeF pageSize = printer->pageRect(QPrinter::DevicePixel).size();
+
+
+  QTextDocument* d = ui->textEdit->document()->clone();
+  d->setPageSize(pageSize);
+
+  int textHeight = 0;
+  if (!d->isEmpty()) {
+    textHeight = int(d->size().height())+1;
+  }
+
+  QPainter p(printer);
+  if (!d->isEmpty())
+    d->drawContents(&p);
+
+  emit paintRequested(&p, QRectF(0, textHeight, pageSize.width(), pageSize.height()-textHeight));
+
+  p.end();
+  delete d;
+}
