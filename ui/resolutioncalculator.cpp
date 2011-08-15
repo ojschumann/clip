@@ -102,13 +102,13 @@ void ResolutionCalculator::deletePressed() {
   rulers.del(idx);
 }
 
+struct RulerData {
+  double dx;
+  double dy;
+  double l;
+};
 __attribute__((force_align_arg_pointer)) void ResolutionCalculator::slotCalcResolution() {
 
-  struct RulerData {
-    double dx;
-    double dy;
-    double l;
-  };
 
   // Load all rulers with a valid length in list
   QList<RulerData> rulerWithLengthData;

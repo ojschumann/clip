@@ -159,9 +159,9 @@ void ProjectionPlane::resizeView() {
   ui->view->setGeometry(finalRect.toRect());
   // Set the ZoomRect to the view
   //ui->view->fitInView(minViewRect, Qt::KeepAspectRatio);
-  QTransform
-  ui->view->setTransform();
-
+  scaleFactor = qMin(ui->view->viewport()->width()/minViewRect.width(), ui->view->viewport()->height()/minViewRect.height());
+  ui->view->setTransform(QTransform::fromScale(scaleFactor, -scaleFactor));
+  ui->view->centerOn(minViewRect.center());
 }
 
 void ProjectionPlane::resizeEvent(QResizeEvent *e) {

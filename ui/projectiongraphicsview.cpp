@@ -115,4 +115,3 @@ void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rec
     painter->setTransform(viewportTransform);
   }
 }
-

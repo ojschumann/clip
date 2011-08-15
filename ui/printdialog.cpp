@@ -599,12 +599,20 @@ void PrintDialog::printToPng() {
     int imgHeight;
 
     if (projector->getLaueImage()) {
-      QRectF visibleSceneRectF = QRectF(firstView->mapToScene(0, 0), firstView->mapToScene(firstView->viewport()->rect().bottomRight())).normalized();
+      QRectF visibleSceneRectF = QRectF(firstView->mapToScene(0, 0), firstView->mapToScene(firstView->viewport()->width(), firstView->viewport()->height())).normalized();
+      QRectF sceneRect = projector->getScene()->sceneRect();
       QSizeF imageSize = projector->getLaueImage()->data()->getTransformedSizeData(ImageDataStore::PixelSize);
-      imgWidth = imageSize.width()*visibleSceneRectF.width()/projector->getScene()->sceneRect().width();
-      imgHeight = imageSize.height()*visibleSceneRectF.height()/projector->getScene()->sceneRect().height();
-    } else {
-      imgWidth = firstView->viewport()->width();
+      qDebug() << visibleSceneRectF;
+      qDebug() << sceneRect;
+      qDebug() << firstView->mapToScene(0, 0) << firstView->mapToScene(firstView->viewport()->width(), firstView->viewport()->height());
+      visibleSceneRectF = sceneRect;
+      imgWidth = imageSize.width()*visibleSceneRectF.width()/projector->getScene()->sceneRect().width() + 0.5;
+      imgHeight = imageSize.height()*visibleSceneRectF.height()/projector->getScene()->sceneRect().height() + 0.5;
+      qDebug() << imgWidth << imgHeight;
+      qDebug() << firstView->mapToScene(0.5, 0.5) << firstView->mapToScene(-0.5, -0.5) << firstView->mapToScene(-1.0, - 1.0);
+    }
+    else {
+      imgWidth = 100;// QInputDialog::IntInputfirstView->viewport()->width();
       imgHeight = firstView->viewport()->height();
     }
 
