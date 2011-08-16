@@ -111,7 +111,6 @@ void ProjectionGraphicsView::drawBackground(QPainter *painter, const QRectF &rec
 
     painter->resetTransform();
     painter->drawImage(rawPaintRectF.toRect(), cache, imgSourceRectF.toRect());
-    painter->drawRect(0, 0, painter->device()->width(), painter->device()->height());
     painter->setTransform(viewportTransform);
   }
 }

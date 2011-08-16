@@ -66,6 +66,7 @@ signals:
 protected:
   QList<QPolygonF> generatePolygon(const Vec3D&, const Vec3D&);
   QRectF imgRect;
+  QRectF tightBoundingRect;
   CircleItem* startHandle;
   CircleItem* endHandle;
   bool highlighted;

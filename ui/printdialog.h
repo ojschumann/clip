@@ -90,14 +90,17 @@ private slots:
   void previewSetupPage();
 
 
+  void quickPrintToPrinter();
   void printToPrinter();
   void printToPdf();
   void printToPS();
   void printToPng();
+  void printToSvg();
   void printPreview(QPrinter *);
 
 private:
-  bool loadFilenameToPrinter(const QString& title, const QString& suffix);
+  bool doPrintout(QPrinter::OutputFormat format, const QString &title=QString::null, const QString &suffix=QString::null);
+  QString getFilename(QString& title, QString& suffix);
 
 private:
   Projector* projector;

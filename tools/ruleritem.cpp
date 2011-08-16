@@ -66,42 +66,49 @@ QRectF RulerItem::boundingRect() const {
 }
 
 QPainterPath RulerItem::shape() const {
-  QPainterPath path(startHandle->pos());
-  path.addEllipse(startHandle->pos(), radius, radius);
-  path.moveTo(endHandle->pos());
-  path.addEllipse(endHandle->pos(), radius, radius);
+  QPainterPath path;
+  foreach (QGraphicsItem* i, childItems()) {
+    QPointF p = i->pos();
+    path.addPath(QTransform::fromTranslate(p.x(), p.y()).map(propagatedTransform.map(i->shape())));
+  }
   return path;
 }
 
 void RulerItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
+  //PDF-Export via QPrinter::setOutputFormat(PdfFormat) has a Bug concerning
+  //Cosmetic Pens and very small coordinates (here, the rect is (0, 0, 1, 1))
+  //thus reset the World Transform and paint with noncosmetic pens
   if (startHandle->pos()!=endHandle->pos()) {
+
     QPen pen(ConfigStore::getInstance()->color(ConfigStore::Ruler));
-    if (highlighted) {
-      pen.setWidthF(2.5);
-    } else {
-      pen.setWidthF(0);
-    }
-    pen.setCosmetic(true);
+    pen.setWidthF(highlighted?2.5:1.0);
+    pen.setCosmetic(false);
     p->setPen(pen);
+
+    QTransform t = p->worldTransform();
+    p->resetTransform();
+
     QVector<QLineF> lines;
-    QLineF l(startHandle->pos(), endHandle->pos());
+    QLineF l(t.map(startHandle->pos()), t.map(endHandle->pos()));
     p->drawLine(l);
 
-    l.setLength(0.7*radius);
+    l.setLength(2.5*radius*t.m11()*propagatedTransform.m11());
     l.setAngle(l.angle()+30.0);
     lines << l;
     l.setAngle(l.angle()-60.0);
     lines << l;
-    l = QLineF(endHandle->pos(), startHandle->pos());
-    l.setLength(0.7*radius);
+    l = QLineF(t.map(endHandle->pos()), t.map(startHandle->pos()));
+    l.setLength(2.5*radius*t.m11()*propagatedTransform.m11());
     l.setAngle(l.angle()+30.0);
     lines << l;
     l.setAngle(l.angle()-60.0);
     lines << l;
 
-    pen.setWidth(0);
+    pen.setWidth(1);
     p->setPen(pen);
     p->drawLines(lines);
+
+    p->setTransform(t);
   }
 }
 

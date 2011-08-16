@@ -41,6 +41,8 @@
 
 using namespace std;
 
+static const double sceneBlowup = 1000.0;
+
 LauePlaneProjector::LauePlaneProjector(QObject* parent):
     Projector(parent),
     localCoordinates(),
@@ -95,7 +97,7 @@ QPointF LauePlaneProjector::scattered2det(const Vec3D &v) const{
   if (w.x()<=0.0) {
     return QPointF();
   }
-  return QPointF(w.y()/w.x()+detDx, w.z()/w.x()+detDy);
+  return QPointF(sceneBlowup*(w.y()/w.x()+detDx), sceneBlowup*(w.z()/w.x()+detDy));
 }
 
 QPointF LauePlaneProjector::scattered2det(const Vec3D &v, bool& b) const{
@@ -105,17 +107,17 @@ QPointF LauePlaneProjector::scattered2det(const Vec3D &v, bool& b) const{
     return QPointF();
   }
   b=true;
-  return QPointF(w.y()/w.x()+detDx, w.z()/w.x()+detDy);
+  return QPointF(sceneBlowup*(w.y()/w.x()+detDx), sceneBlowup*(w.z()/w.x()+detDy));
 }
 
 Vec3D LauePlaneProjector::det2scattered(const QPointF& p) const{
-  Vec3D v(1.0 , p.x()-detDx, p.y()-detDy);
+  Vec3D v(1.0 , p.x()/sceneBlowup-detDx, p.y()/sceneBlowup-detDy);
   v.normalize();
   return localCoordinates.transposed()*v;
 }
 
 Vec3D LauePlaneProjector::det2scattered(const QPointF& p, bool& b) const{
-  Vec3D v(1.0 , p.x()-detDx, p.y()-detDy);
+  Vec3D v(1.0 , p.x()/sceneBlowup-detDx, p.y()/sceneBlowup-detDy);
   v.normalize();
   b=true;
   return localCoordinates.transposed()*v;
@@ -147,13 +149,40 @@ Vec3D LauePlaneProjector::det2normal(const QPointF &p, bool &b)  const {
   }
 }
 
+bool LauePlaneProjector::project(const Reflection &r, QPointF& p) {
+  if (r.lowestDiffOrder==0)
+    return false;
+
+  bool doesReflect=false;
+  for (int i=0; i<r.orders.size(); i++) {
+    int n=r.orders[i];
+    if ((2.0*QminVal<=n*r.Qscatter) and (n*r.Qscatter<=2.0*QmaxVal)) {
+      doesReflect=true;
+      break;
+    }
+  }
+  if (not doesReflect)
+    return false;
+
+  Vec3D v=localCoordinates*r.scatteredRay;
+  double s=v.x();
+  if (s<1e-10)
+    return false;
+
+
+  s=1.0/s;
+  p.setX((v.y()*s+detDx)*sceneBlowup);
+  p.setY((v.z()*s+detDy)*sceneBlowup);
+  return true;
+}
+
 void LauePlaneProjector::setDetSize(double dist, double width, double height) {
   if ((detDist!=dist) or (detWidth!=width) or (detHeight!=height)) {
     detDist=dist;
     detWidth=width;
     detHeight=height;
 
-    scene.setSceneRect(QRectF(-0.5*detWidth/detDist, -0.5*detHeight/detDist, detWidth/detDist, detHeight/detDist));
+    scene.setSceneRect(QRectF(-0.5*sceneBlowup*detWidth/detDist, -0.5*sceneBlowup*detHeight/detDist, sceneBlowup*detWidth/detDist, sceneBlowup*detHeight/detDist));
 
     emit projectionRectSizeChanged();
     emit projectionParamsChanged();
@@ -230,33 +259,6 @@ void LauePlaneProjector::setYOffset(double v) {
 }
 
 
-bool LauePlaneProjector::project(const Reflection &r, QPointF& p) {
-  if (r.lowestDiffOrder==0)
-    return false;
-
-  bool doesReflect=false;
-  for (int i=0; i<r.orders.size(); i++) {
-    int n=r.orders[i];
-    if ((2.0*QminVal<=n*r.Qscatter) and (n*r.Qscatter<=2.0*QmaxVal)) {
-      doesReflect=true;
-      break;
-    }
-  }
-  if (not doesReflect)
-    return false;
-
-  Vec3D v=localCoordinates*r.scatteredRay;
-  double s=v.x();
-  if (s<1e-10)
-    return false;
-
-
-  s=1.0/s;
-  p.setX(v.y()*s+detDx);
-  p.setY(v.z()*s+detDy);
-  return true;
-}
-
 void LauePlaneProjector::decorateScene() {
   while (!decorationItems.empty()) {
     QGraphicsItem* item = decorationItems.takeLast();
@@ -280,7 +282,7 @@ void LauePlaneProjector::decorateScene() {
 
   CircleItem* handle=new CircleItem(getSpotSize(), center);
   ConfigStore::getInstance()->ensureColor(ConfigStore::PrimaryBeamMarker, handle, SLOT(setColor(QColor)));
-  handle->setPos(0.2, 0);
+  handle->setPos(0.05*scene.width(), 0);
   handle->setFlag(QGraphicsItem::ItemIsMovable, true);
   handle->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
   handle->setCursor(Qt::SizeAllCursor);
@@ -332,7 +334,7 @@ void LauePlaneProjector::movedPrimaryBeamMarker() {
   }
   qDebug() << "movedPbMarker" << center->pos() << det2img.map(q);
   if (b) {
-    setDetOffset(xOffset()+(p.x()-q.x())*dist(), yOffset()+(p.y()-q.y())*dist());
+    setDetOffset(xOffset()+(p.x()-q.x())*dist()/sceneBlowup, yOffset()+(p.y()-q.y())*dist()/sceneBlowup);
   }
 }
 
@@ -347,7 +349,8 @@ void LauePlaneProjector::updatePrimaryBeamPos() {
     }
     if (b) {
       CircleItem* center=dynamic_cast<CircleItem*>(decorationItems[0]);
-      center->setPosNoSig(det2img.map(q));
+      q = det2img.map((q));
+      center->setPosNoSig(q);
     }
   }
 }

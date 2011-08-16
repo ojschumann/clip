@@ -544,53 +544,69 @@ void PrintDialog::previewSetupPage() {
   }
 }
 
-bool PrintDialog::loadFilenameToPrinter(const QString &title, const QString &suffix) {
+
+
+
+QString PrintDialog::getFilename(QString &title, QString &suffix) {
   QString fileName = QFileDialog::getSaveFileName(this, title, printer->outputFileName(),
-                                                  QLatin1Char('*') + suffix);
-  if (!fileName.isEmpty()) {
-    if (QFileInfo(fileName).suffix().isEmpty())
-      fileName.append(suffix);
+                                                QLatin1Char('*') + suffix);
+  if (fileName.isEmpty()) return QString::null;
+  if (QFileInfo(fileName).suffix().isEmpty())
+    fileName.append(suffix);
+  return fileName;
+}
+
+bool PrintDialog::doPrintout(QPrinter::OutputFormat format, const QString &title, const QString &suffix) {
+  if (format==QPrinter::NativeFormat) {
+    printer->setOutputFileName(QString::null);
+  } else {
+    QString fileName = getFilename(title, suffix);
+    if (fileName.isNull()) return false;
     printer->setOutputFileName(fileName);
-    return true;
   }
-  return false;
+  printer->setOutputFormat(format);
+  preview->print();
+  return true;
 }
 
 void PrintDialog::printToPrinter() {
-  printer->setOutputFormat(QPrinter::NativeFormat);
-  QString oldFilename = printer->outputFileName();
-  printer->setOutputFileName(QString::null);
   QPrintDialog* printDialog = new QPrintDialog(printer, this);
   if (printDialog->exec() == QDialog::Accepted) {
-    preview->print();
+    doPrintout(QPrinter::NativeFormat);
   }
   delete printDialog;
-  printer->setOutputFileName(oldFilename);
+}
+
+void PrintDialog::quickPrintToPrinter() {
+  doPrintout(QPrinter::NativeFormat);
 }
 
 void PrintDialog::printToPdf() {
-  if (loadFilenameToPrinter("Export to PDF", ".pdf")) {
-    printer->setOutputFormat(QPrinter::PdfFormat);
-    preview->print();
-    printer->setOutputFormat(QPrinter::NativeFormat);
-  }
+  doPrintout(QPrinter::PdfFormat, "Export to PDF", ".pdf");
 }
 
 void PrintDialog::printToPS() {
-  if (loadFilenameToPrinter("Export to Postscript", ".ps")) {
-    printer->setOutputFormat(QPrinter::PdfFormat);
-    preview->print();
-    printer->setOutputFormat(QPrinter::NativeFormat);
-  }
+  doPrintout(QPrinter::PostScriptFormat, "Export to Postscript", ".ps");
+}
+
+#include <QtSvg/QSvgGenerator>
+
+void PrintDialog::printToSvg() {
+  if (doPrintout("Export to Scalable Vector Graphics", ".svg")) {
+    QSvgGenerator generator;
+    generator.setFileName(printer->outputFileName());
+    generator.setSize(printer->pageSize(QPrinter::Millimeter));
+
 }
 
 #include <QGraphicsView>
 #include "image/laueimage.h"
 #include "image/imagedatastore.h"
 #include <QInputDialog>
+#include <QScrollBar>
 
 void PrintDialog::printToPng() {
-  if (projector && !projector->getScene()->views().isEmpty() && loadFilenameToPrinter("Portable Network Graphics (PNG)", ".png")) {
+  if (projector && !projector->getScene()->views().isEmpty() && doPrintout("Portable Network Graphics (PNG)", ".png")) {
 
     QGraphicsView *const firstView = projector->getScene()->views().at(0);
 
@@ -605,11 +621,14 @@ void PrintDialog::printToPng() {
       qDebug() << visibleSceneRectF;
       qDebug() << sceneRect;
       qDebug() << firstView->mapToScene(0, 0) << firstView->mapToScene(firstView->viewport()->width(), firstView->viewport()->height());
-      visibleSceneRectF = sceneRect;
+      //visibleSceneRectF = sceneRect;
       imgWidth = imageSize.width()*visibleSceneRectF.width()/projector->getScene()->sceneRect().width() + 0.5;
       imgHeight = imageSize.height()*visibleSceneRectF.height()/projector->getScene()->sceneRect().height() + 0.5;
       qDebug() << imgWidth << imgHeight;
       qDebug() << firstView->mapToScene(0.5, 0.5) << firstView->mapToScene(-0.5, -0.5) << firstView->mapToScene(-1.0, - 1.0);
+      if (firstView->horizontalScrollBar()) {
+        qDebug() << "Scroll" << firstView->horizontalScrollBar()->minimum() << firstView->horizontalScrollBar()->value() << firstView->horizontalScrollBar()->maximum() << endl;
+      }
     }
     else {
       imgWidth = 100;// QInputDialog::IntInputfirstView->viewport()->width();
@@ -651,7 +670,6 @@ void PrintDialog::printToPng() {
 
 void PrintDialog::printPreview(QPrinter *printer) {
   QSizeF pageSize = printer->pageRect(QPrinter::DevicePixel).size();
-
 
   QTextDocument* d = ui->textEdit->document()->clone();
   d->setPageSize(pageSize);

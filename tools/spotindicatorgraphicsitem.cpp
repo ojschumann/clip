@@ -111,13 +111,20 @@ void SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsIte
     p->drawPixmap(QPoint(0,0), *cache);
     p->restore();
   } else {
+    //PDF-Export via QPrinter::setOutputFormat(PdfFormat) has a Bug concerning
+    //Cosmetic Pens and very small coordinates (here, the rect is (0, 0, 1, 1))
+    //thus reset the World Transform and paint with noncosmetic pens
+
     QPen pen(spotColor);
     pen.setWidthF(1.0);
-    pen.setCosmetic(true);
+    pen.setCosmetic(false);
     p->setPen(pen);
+    QTransform t = p->worldTransform();
+    p->resetTransform();
     for (int i=0; i<coordinates.size(); i++) {
-      p->drawEllipse(coordinates.at(i), spotSize, spotSize);
+      p->drawEllipse(t.map(coordinates.at(i)), spotSize*t.m11(), spotSize*t.m22());
     }
+    p->setTransform(t);
   }
 }
 

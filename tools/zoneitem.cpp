@@ -73,7 +73,7 @@ ZoneItem::~ZoneItem() {
 }
 
 QRectF ZoneItem::boundingRect() const {
-  return imgRect;
+  return tightBoundingRect;
 }
 
 QPainterPath ZoneItem::shape() const {
@@ -91,14 +91,23 @@ void ZoneItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
   foreach (QPolygonF poly, zonePolys)
     p->drawPolygon(poly);
 
+
+  //PDF-Export via QPrinter::setOutputFormat(PdfFormat) has a Bug concerning
+  //Cosmetic Pens and very small coordinates (here, the rect is (0, 0, 1, 1))
+  //thus reset the World Transform and paint with noncosmetic pens
   QPen pen;
   pen.setWidthF(highlighted?2.0:1.0);
-  pen.setCosmetic(true);
+  pen.setCosmetic(false);
   pen.setColor(config->color(ConfigStore::ZoneMarkerLine));
   pen.setStyle(Qt::DashLine);
   p->setPen(pen);
+  p->setBrush(Qt::NoBrush);
+  QTransform t = p->worldTransform();
+  p->resetTransform();
   foreach (QPolygonF poly, zoneLines)
-    p->drawPolyline(poly);
+    p->drawPolyline(t.map(poly));
+  p->setWorldTransform(t);
+
 }
 
 
@@ -160,6 +169,7 @@ void ZoneItem::updatePolygon() {
 
     QList<QPointF> borderPoints;
     QRectF sImgRect = imgRect.adjusted(0.0001, 0.0001, -0.0001, -0.0001);
+    //QRectF sImgRect = imgRect.adjusted(-0.01, -0.01, 0.01, 0.01);
     foreach (QPolygonF q, polys) {
       if (!sImgRect.contains(q.first())) borderPoints << q.first();
       if (!sImgRect.contains(q.last())) borderPoints << q.last();
@@ -238,9 +248,18 @@ void ZoneItem::updatePolygon() {
         }
       }
     }
+    bool firstPoly = true;
     foreach (QPolygonF p, closedItems) {
-      if (!p.empty())
+      if (!p.empty()) {
         zonePolys<< p;
+        if (firstPoly) {
+          firstPoly=false;
+          tightBoundingRect = p.boundingRect();
+        } else {
+          tightBoundingRect = tightBoundingRect.united(p.boundingRect());
+        }
+
+      }
     }
 
   }
@@ -300,6 +319,9 @@ void ZoneItem::updateOptimalZone() {
     }
 
     zoneLines = generatePolygon(zoneNormal, n);
+    /*for (int m=0; m<zoneLines.size(); m++)
+      for (int n=0; n<zoneLines[m].size(); n++)
+        zoneLines[m][n] *= 1000.0; */
     update();
   }
 }

@@ -45,11 +45,18 @@ CircleItem::~CircleItem() {
 }
 
 void CircleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+  //PDF-Export via QPrinter::setOutputFormat(PdfFormat) has a Bug concerning
+  //Cosmetic Pens and very small coordinates (here, the rect is (0, 0, 1, 1))
+  //thus reset the World Transform and paint with noncosmetic pens
+
+  QTransform t = painter->worldTransform();
+  painter->resetTransform();
   QPen pen(color);
   pen.setWidthF(lineWidth);
-  pen.setCosmetic(true);
+  pen.setCosmetic(false);
   painter->setPen(pen);
-  painter->drawEllipse(QPointF(0,0), radius, radius);
+  painter->drawEllipse(t.map(QPointF(0,0)), radius*t.m11(), radius*t.m22());
+  painter->setTransform(t);
 }
 
 QRectF CircleItem::boundingRect() const {
