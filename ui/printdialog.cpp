@@ -547,20 +547,11 @@ void PrintDialog::previewSetupPage() {
 
 
 
-QString PrintDialog::getFilename(const QString &title, const QString &suffix) {
-  QString fileName = QFileDialog::getSaveFileName(this, title, printer->outputFileName(),
-                                                QLatin1Char('*') + suffix);
-  if (fileName.isEmpty()) return QString::null;
-  if (QFileInfo(fileName).suffix().isEmpty())
-    fileName.append(suffix);
-  return fileName;
-}
-
 bool PrintDialog::doPrintout(QPrinter::OutputFormat format, const QString &title, const QString &suffix) {
   if (format==QPrinter::NativeFormat) {
     printer->setOutputFileName(QString::null);
   } else {
-    QString fileName = getFilename(title, suffix);
+    QString fileName = QString::null;//getFilename(title, suffix);
     if (fileName.isNull()) return false;
     printer->setOutputFileName(fileName);
   }
@@ -568,6 +559,7 @@ bool PrintDialog::doPrintout(QPrinter::OutputFormat format, const QString &title
   preview->print();
   return true;
 }
+
 
 void PrintDialog::printToPrinter() {
   QPrintDialog* printDialog = new QPrintDialog(printer, this);
@@ -591,7 +583,7 @@ void PrintDialog::printToPS() {
 
 #include <QtSvg/QSvgGenerator>
 
-void PrintDialog::printToSvg() {
+/*void PrintDialog::printToSvg() {
   QSvgGenerator generator;
   generator.setFileName("test.svg");
 
@@ -631,7 +623,7 @@ void PrintDialog::printToSvg() {
   delete d;
 
 
-}
+}*/
 
 #include <QGraphicsView>
 #include "image/laueimage.h"
@@ -717,10 +709,20 @@ QSize PrintDialog::getImageSize(bool askForSize) {
   return QSize(100, 100);
 }
 
+
+QString PrintDialog::PaintDeviceFactory::getFilename(const QString &title, const QString &suffix) {
+  QString fileName = QFileDialog::getSaveFileName(NULL, title, "",
+                                                QLatin1Char('*') + suffix);
+  if (fileName.isEmpty()) return QString::null;
+  if (QFileInfo(fileName).suffix().isEmpty())
+    fileName.append(suffix);
+  return fileName;
+}
+
 class PrinterDevice: public PrintDialog::PaintDeviceFactory {
 public:
   PrinterDevice(QPrinter* _p): printer(_p) {}
-  virtual QPaintDevice* getDevice(int) const { return printer; }
+  virtual QPaintDevice* getDevice(int) { return printer; }
   virtual double desiredTextWidth() const { return printer->pageRect(QPrinter::DevicePixel).width(); }
   virtual int deviceWidth() const { return printer->pageRect(QPrinter::DevicePixel).width(); }
 private:
@@ -760,7 +762,9 @@ public:
   PngDevice(Projector* p): ImageDevice(p), img(0) { }
   ~PngDevice() {
     if (img) {
-      img->save(getFilename("Portable Network Graphics (PNG)", ".png"));
+      QString filename;
+      if (!(filename = getFilename("Portable Network Graphics (PNG)", ".png")).isNull())
+        img->save(filename);
       delete img;
       img = 0;
     }
@@ -768,22 +772,54 @@ public:
 
   virtual QPaintDevice* getDevice(int textHeight) {
     if (!img) img = new QImage(imageSize.width(), imageSize.height()+textHeight, QImage::Format_ARGB32);
+    img->fill(qRgb(0xFF, 0xFF, 0xFF));
     return img;
   }
 private:
   QImage* img;
 };
 
+class SvgDevice: public ImageDevice {
+public:
+  SvgDevice(Projector* p): ImageDevice(p), gen(0) { }
+  ~SvgDevice() {
+    if (gen) {
+      delete gen;
+      gen = 0;
+    }
+  }
+
+  virtual QPaintDevice* getDevice(int textHeight) {
+    QString filename;
+    if (!gen && !(filename = getFilename("Scalable Vector Graphics", ".svg")).isNull()) {
+      gen = new QSvgGenerator();
+      gen->setFileName(filename);
+      gen->setSize(QSize(imageSize.width(), imageSize.height()+textHeight));
+      gen->setViewBox(QRect(0, 0, imageSize.width(), imageSize.height()+textHeight));
+    }
+    return gen;
+  }
+private:
+  QSvgGenerator* gen;
+};
+
 
 void PrintDialog::printPreview(QPrinter *printer) {
-  renderToPaintDevice(PrinterDevice(printer));
+  PrinterDevice pd(printer);
+  renderToPaintDevice(pd);
 }
 
 void PrintDialog::printToPng() {
-  renderToPaintDevice(PngDevice(projector));
+  PngDevice pd(projector);
+  renderToPaintDevice(pd);
 }
 
-void PrintDialog::renderToPaintDevice(const PaintDeviceFactory& factory) {
+void PrintDialog::printToSvg() {
+  SvgDevice sd(projector);
+  renderToPaintDevice(sd);
+}
+
+void PrintDialog::renderToPaintDevice(PaintDeviceFactory& factory) {
   int textHeight = 0;
   qreal scale = 1.0;
 
@@ -800,6 +836,7 @@ void PrintDialog::renderToPaintDevice(const PaintDeviceFactory& factory) {
   if (!d->isEmpty()) {
     p.save();
     p.scale(scale, scale);
+    p.setBackground(Qt::white);
     d->drawContents(&p);
     p.restore();
   }
