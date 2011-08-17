@@ -25,13 +25,15 @@
 
 #include <QMainWindow>
 #include <QTextCharFormat>
+#include <QPrinter>
+
 QT_FORWARD_DECLARE_CLASS(QAction)
 QT_FORWARD_DECLARE_CLASS(QActionGroup)
 QT_FORWARD_DECLARE_CLASS(QComboBox)
 QT_FORWARD_DECLARE_CLASS(QFontComboBox)
 QT_FORWARD_DECLARE_CLASS(QTextEdit)
 QT_FORWARD_DECLARE_CLASS(QMenu)
-QT_FORWARD_DECLARE_CLASS(QPrinter)
+//QT_FORWARD_DECLARE_CLASS(QPrinter)
 QT_FORWARD_DECLARE_CLASS(QPrintPreviewWidget)
 
 QT_FORWARD_DECLARE_CLASS(Projector)
@@ -98,9 +100,19 @@ private slots:
   void printToSvg();
   void printPreview(QPrinter *);
 
+public:
+  class PaintDeviceFactory {
+  public:
+    virtual QPaintDevice* getDevice(int textHeight) = 0;
+    virtual double desiredTextWidth() const = 0;
+    virtual int deviceWidth() const = 0;
+  };
+
 private:
+  void renderToPaintDevice(const PaintDeviceFactory&);
+  QSize getImageSize(bool askForSize);
   bool doPrintout(QPrinter::OutputFormat format, const QString &title=QString::null, const QString &suffix=QString::null);
-  QString getFilename(QString& title, QString& suffix);
+  QString getFilename(const QString& title, const QString& suffix);
 
 private:
   Projector* projector;

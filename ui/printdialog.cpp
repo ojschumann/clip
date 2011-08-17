@@ -547,7 +547,7 @@ void PrintDialog::previewSetupPage() {
 
 
 
-QString PrintDialog::getFilename(QString &title, QString &suffix) {
+QString PrintDialog::getFilename(const QString &title, const QString &suffix) {
   QString fileName = QFileDialog::getSaveFileName(this, title, printer->outputFileName(),
                                                 QLatin1Char('*') + suffix);
   if (fileName.isEmpty()) return QString::null;
@@ -592,10 +592,44 @@ void PrintDialog::printToPS() {
 #include <QtSvg/QSvgGenerator>
 
 void PrintDialog::printToSvg() {
-  if (doPrintout("Export to Scalable Vector Graphics", ".svg")) {
-    QSvgGenerator generator;
-    generator.setFileName(printer->outputFileName());
-    generator.setSize(printer->pageSize(QPrinter::Millimeter));
+  QSvgGenerator generator;
+  generator.setFileName("test.svg");
+
+
+  double scale = 1.0;
+  int imgWidth = 1100;
+  int imgHeight = 1400;
+  int textHeight = 0;
+
+  QTextDocument* d = ui->textEdit->document()->clone();
+  if (!d->isEmpty()) {
+    qreal desiredTextWidth = 2.0*d->documentMargin() + 80*QFontMetrics(QFont("Courier New", 8)).averageCharWidth();
+    scale = 1.0*imgWidth/desiredTextWidth;
+    d->setTextWidth(desiredTextWidth);
+    textHeight = int(scale*d->size().height()) + 1;
+  }
+
+  generator.setSize(QSize(imgWidth, imgHeight+textHeight));
+  generator.setViewBox(QRect(0, 0, imgWidth, imgHeight+textHeight));
+
+  QPainter p;
+
+  //p.setClipRect(0, 0, imgWidth, imgHeight+textHeight);
+  //p.setClipping(true);
+  p.begin(&generator);
+  if (!d->isEmpty()) {
+    p.setPen(Qt::black);
+    p.setBrush(Qt::black);
+    p.save();
+    p.scale(scale, scale);
+    d->drawContents(&p);
+    p.restore();
+  }
+  emit paintRequested(&p, QRectF(0, textHeight, imgWidth, imgHeight));
+
+  p.end();
+  delete d;
+
 
 }
 
@@ -605,8 +639,9 @@ void PrintDialog::printToSvg() {
 #include <QInputDialog>
 #include <QScrollBar>
 
-void PrintDialog::printToPng() {
-  if (projector && !projector->getScene()->views().isEmpty() && doPrintout("Portable Network Graphics (PNG)", ".png")) {
+/*void PrintDialog::printToPng() {
+  QString filename;
+  if (projector && !projector->getScene()->views().isEmpty() && !(filename = getFilename("Portable Network Graphics (PNG)", ".png")).isNull()) {
 
     QGraphicsView *const firstView = projector->getScene()->views().at(0);
 
@@ -662,29 +697,115 @@ void PrintDialog::printToPng() {
     p.end();
     delete d;
 
-    img.save(printer->outputFileName());
+    img.save(filename);
 
 
   }
+}*/
+
+QSize PrintDialog::getImageSize(bool askForSize) {
+  if (projector && !projector->getScene()->views().isEmpty() && projector->getLaueImage()) {
+    QGraphicsView *const firstView = projector->getScene()->views().at(0);
+
+    QRectF visibleSceneRectF = QRectF(firstView->mapToScene(0, 0), firstView->mapToScene(firstView->viewport()->width(), firstView->viewport()->height())).normalized();
+    QSizeF imageSize = projector->getLaueImage()->data()->getTransformedSizeData(ImageDataStore::PixelSize);
+    imageSize.rwidth() *= visibleSceneRectF.width()/projector->getScene()->sceneRect().width();
+    imageSize.rheight() *= visibleSceneRectF.height()/projector->getScene()->sceneRect().height();
+    imageSize += QSizeF(0.5, 0.5);
+    return imageSize.toSize();
+  }
+  return QSize(100, 100);
 }
+
+class PrinterDevice: public PrintDialog::PaintDeviceFactory {
+public:
+  PrinterDevice(QPrinter* _p): printer(_p) {}
+  virtual QPaintDevice* getDevice(int) const { return printer; }
+  virtual double desiredTextWidth() const { return printer->pageRect(QPrinter::DevicePixel).width(); }
+  virtual int deviceWidth() const { return printer->pageRect(QPrinter::DevicePixel).width(); }
+private:
+  QPrinter* printer;
+};
+
+class ImageDevice: public PrintDialog::PaintDeviceFactory {
+public:
+  ImageDevice(Projector* p);
+  ~ImageDevice() {}
+  virtual double desiredTextWidth() const { return 80*QFontMetrics(QFont("Courier New", 8)).averageCharWidth(); }
+  virtual int deviceWidth() const { return imageSize.width(); }
+protected:
+  Projector* projector;
+  QSize imageSize;
+};
+
+ImageDevice::ImageDevice(Projector *p): projector(p) {
+  if (projector && !projector->getScene()->views().isEmpty()) {
+    QGraphicsView *const firstView = projector->getScene()->views().at(0);
+    QRectF visibleSceneRectF = QRectF(firstView->mapToScene(0, 0), firstView->mapToScene(firstView->viewport()->width(), firstView->viewport()->height())).normalized();
+    if (projector->getLaueImage()) {
+      QSizeF displayedImageSize = projector->getLaueImage()->data()->getTransformedSizeData(ImageDataStore::PixelSize);
+      displayedImageSize.rwidth() *= visibleSceneRectF.width()/projector->getScene()->sceneRect().width();
+      displayedImageSize.rheight() *= visibleSceneRectF.height()/projector->getScene()->sceneRect().height();
+      imageSize = (displayedImageSize + QSizeF(0.5, 0.5)).toSize();
+    } else {
+      imageSize = (visibleSceneRectF.size() * 800/visibleSceneRectF.width()).toSize();
+    }
+  } else {
+    imageSize = QSize(600, 800);
+  }
+}
+
+class PngDevice: public ImageDevice {
+public:
+  PngDevice(Projector* p): ImageDevice(p), img(0) { }
+  ~PngDevice() {
+    if (img) {
+      img->save(getFilename("Portable Network Graphics (PNG)", ".png"));
+      delete img;
+      img = 0;
+    }
+  }
+
+  virtual QPaintDevice* getDevice(int textHeight) {
+    if (!img) img = new QImage(imageSize.width(), imageSize.height()+textHeight, QImage::Format_ARGB32);
+    return img;
+  }
+private:
+  QImage* img;
+};
+
 
 void PrintDialog::printPreview(QPrinter *printer) {
-  QSizeF pageSize = printer->pageRect(QPrinter::DevicePixel).size();
+  renderToPaintDevice(PrinterDevice(printer));
+}
+
+void PrintDialog::printToPng() {
+  renderToPaintDevice(PngDevice(projector));
+}
+
+void PrintDialog::renderToPaintDevice(const PaintDeviceFactory& factory) {
+  int textHeight = 0;
+  qreal scale = 1.0;
 
   QTextDocument* d = ui->textEdit->document()->clone();
-  d->setPageSize(pageSize);
-
-  int textHeight = 0;
   if (!d->isEmpty()) {
-    textHeight = int(d->size().height())+1;
+    scale = 1.0*factory.deviceWidth()/factory.desiredTextWidth();
+    d->setTextWidth(factory.desiredTextWidth());
+    textHeight = int(scale*d->size().height()) + 1;
   }
 
-  QPainter p(printer);
-  if (!d->isEmpty())
+  QPaintDevice* device = factory.getDevice(textHeight);
+  QPainter p(device);
+
+  if (!d->isEmpty()) {
+    p.save();
+    p.scale(scale, scale);
     d->drawContents(&p);
+    p.restore();
+  }
 
-  emit paintRequested(&p, QRectF(0, textHeight, pageSize.width(), pageSize.height()-textHeight));
-
-  p.end();
+  emit paintRequested(&p, QRectF(0, textHeight, device->width(), device->height()+textHeight));
   delete d;
 }
+
+

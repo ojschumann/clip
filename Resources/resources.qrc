@@ -73,6 +73,7 @@
         <file>icons/fileprintpdf.png</file>
         <file>icons/fileprintpng.png</file>
         <file>icons/fileprintps.png</file>
+        <file>icons/fileprintsvg.png</file>
     </qresource>
     <qresource prefix="/">
         <file>DefaultWorkspace.cws</file>

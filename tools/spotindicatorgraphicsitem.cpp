@@ -114,15 +114,26 @@ void SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsIte
     //PDF-Export via QPrinter::setOutputFormat(PdfFormat) has a Bug concerning
     //Cosmetic Pens and very small coordinates (here, the rect is (0, 0, 1, 1))
     //thus reset the World Transform and paint with noncosmetic pens
+    //
+    //SVG-Export via QSvgGenerator doesn't obey the QPainter-Clip, thus do some clipping here
 
     QPen pen(spotColor);
     pen.setWidthF(1.0);
     pen.setCosmetic(false);
     p->setPen(pen);
+    p->setBrush(Qt::NoBrush);
+
     QTransform t = p->worldTransform();
     p->resetTransform();
+
+    QPainterPath circle;
+    circle.addEllipse(QPointF(0, 0), spotSize*t.m11(), spotSize*t.m22());
+
     for (int i=0; i<coordinates.size(); i++) {
-      p->drawEllipse(t.map(coordinates.at(i)), spotSize*t.m11(), spotSize*t.m22());
+      //p->drawEllipse(t.map(coordinates.at(i)), spotSize*t.m11(), spotSize*t.m22());
+      QPainterPath movedCircle = circle.translated(t.map(coordinates.at(i)));
+      if (movedCircle.intersects(p->clipPath()))
+        p->drawPath(movedCircle);
     }
     p->setTransform(t);
   }

@@ -182,6 +182,7 @@
    <addaction name="actionPrintPDF"/>
    <addaction name="actionPrintPS"/>
    <addaction name="actionPrintPNG"/>
+   <addaction name="actionPrintSVG"/>
   </widget>
   <action name="actionInsert_Cell_Table">
    <property name="text">
@@ -485,7 +486,7 @@
      <normaloff>:/icons/icons/fileprintpdf.png</normaloff>:/icons/icons/fileprintpdf.png</iconset>
    </property>
    <property name="text">
-    <string>Print as PDF</string>
+    <string>Export as PDF</string>
    </property>
   </action>
   <action name="actionPrintPS">
@@ -494,7 +495,7 @@
      <normaloff>:/icons/icons/fileprintps.png</normaloff>:/icons/icons/fileprintps.png</iconset>
    </property>
    <property name="text">
-    <string>Export Postscript</string>
+    <string>Export as Postscript</string>
    </property>
   </action>
   <action name="actionPrintPNG">
@@ -503,7 +504,16 @@
      <normaloff>:/icons/icons/fileprintpng.png</normaloff>:/icons/icons/fileprintpng.png</iconset>
    </property>
    <property name="text">
-    <string>Export PNG</string>
+    <string>Export as PNG</string>
+   </property>
+  </action>
+  <action name="actionPrintSVG">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fileprintsvg.png</normaloff>:/icons/icons/fileprintsvg.png</iconset>
+   </property>
+   <property name="text">
+    <string>Export as SVG</string>
    </property>
   </action>
  </widget>
@@ -831,6 +841,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionPrintSVG</sender>
+   <signal>triggered()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>printToSvg()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>printToPrinter()</slot>
@@ -848,5 +874,6 @@
   <slot>printToPdf()</slot>
   <slot>printToPS()</slot>
   <slot>printToPng()</slot>
+  <slot>printToSvg()</slot>
  </slots>
 </ui>

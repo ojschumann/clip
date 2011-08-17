@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl xml
+QT       += core gui opengl xml svg
 
 TARGET = Clip
 TEMPLATE = app

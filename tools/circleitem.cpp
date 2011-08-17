@@ -55,6 +55,7 @@ void CircleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
   pen.setWidthF(lineWidth);
   pen.setCosmetic(false);
   painter->setPen(pen);
+  painter->setBrush(Qt::NoBrush);
   painter->drawEllipse(t.map(QPointF(0,0)), radius*t.m11(), radius*t.m22());
   painter->setTransform(t);
 }
