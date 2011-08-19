@@ -177,12 +177,12 @@ void Clip::on_actionAbout_triggered(bool) {
   f.open(QIODevice::ReadOnly);
   QString message = QString(f.readAll());
 
-  message.replace("</VER_PRODUCTVERSION_STR>", QString(VER_PRODUCTVERSION_STR));
-  message.replace("</HG_REPRO_ID>", QString(HG_REPRO_ID));
-  message.replace("</HG_REPRO_REV>", QString(HG_REPRO_REV));
-  message.replace("</HG_REPRO_DATE>", QString(HG_REPRO_DATE));
-  message.replace("</BUILD_DATE>", QString(BUILD_DATE));
-  message.replace("</BUILD_TIME>", QString(BUILD_TIME));
+  message.replace("<VER_PRODUCTVERSION_STR/>", QString(VER_PRODUCTVERSION_STR));
+  message.replace("<HG_REPRO_ID/>", QString(HG_REPRO_ID));
+  message.replace("<HG_REPRO_REV/>", QString(HG_REPRO_REV));
+  message.replace("<HG_REPRO_DATE/>", QString(HG_REPRO_DATE));
+  message.replace("<BUILD_DATE/>", QString(BUILD_DATE));
+  message.replace("<BUILD_TIME/>", QString(BUILD_TIME));
 
   QMessageBox::about(this, "Cologne Laue Indexation Program", message);
 }

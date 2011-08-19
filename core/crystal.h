@@ -76,7 +76,7 @@ public:
   Mat3D getReziprocalOrientationMatrix() const;
   Mat3D getRotationMatrix() const;
 
-  void calcEulerAngles(double &omega, double &chi, double &phi);
+  QList<double> calcEulerAngles(bool inDegrees=false);
   void setEulerAngles(double omega, double chi, double phi);
 
   Spacegroup* getSpacegroup();

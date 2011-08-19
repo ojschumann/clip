@@ -23,8 +23,6 @@
 #include "printdialog.h"
 #include "ui_printdialog.h"
 
-#include <QMenu>
-#include <QMenuBar>
 #include <QTextCharFormat>
 #include <QClipboard>
 #include <QMimeData>
@@ -33,8 +31,6 @@
 #include <QFontComboBox>
 #include <QTextList>
 #include <QColorDialog>
-#include <QMessageBox>
-#include <QDebug>
 #include <QPainter>
 #include <QPrinter>
 #include <QPrinterInfo>
@@ -43,9 +39,16 @@
 #include <QPageSetupDialog>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QtSvg/QSvgGenerator>
+#include <QGraphicsView>
+#include <QInputDialog>
+#include <QSettings>
 
+#include "image/laueimage.h"
+#include "image/imagedatastore.h"
 #include "core/projector.h"
 #include "tools/combolineedit.h"
+#include "core/crystal.h"
 
 class ZoomFactorValidator : public QDoubleValidator
 {
@@ -113,6 +116,10 @@ PrintDialog::PrintDialog(Projector* p, QWidget *parent) :
   setupTextActions();
 
   ui->textEdit->setFocus();
+  QFile f(":/report.css");
+  f.open(QIODevice::ReadOnly);
+  ui->textEdit->document()->setDefaultStyleSheet(QString(f.readAll()));
+  f.close();
 
   fontChanged(ui->textEdit->font());
   colorChanged(ui->textEdit->textColor());
@@ -443,30 +450,6 @@ void PrintDialog::verticalAlignmentChanged(QTextCharFormat::VerticalAlignment a)
   ui->actionSuperscript->setChecked(a == QTextCharFormat::AlignSuperScript);
 }
 
-#include "core/crystal.h"
-
-void PrintDialog::on_actionInsert_Cell_Table_triggered()
-{
-  if (projector && projector->getCrystal()) {
-
-    QString tableCode = "";
-    tableCode += "<table border=\"1\">";
-    tableCode += "<tr><th>a</th><th>b</th><th>c</th></tr>";
-    tableCode += "<tr><td>%1</td><td>%2</td><td>%3</td></tr>";
-    tableCode += "<tr><th>alpha</th><th>beta</th><th>gamma</th></tr>";
-    tableCode += "<tr><td>%4</td><td>%5</td><td>%6</td></tr>";
-    tableCode += "</table>";
-
-    QList<double> cell = projector->getCrystal()->getCell();
-    foreach (double d, cell)
-      tableCode = tableCode.arg(d);
-
-    QTextCursor cursor(ui->textEdit->textCursor());
-    cursor.beginEditBlock();
-    cursor.insertHtml(tableCode);
-    cursor.endEditBlock();
-  }
-}
 
 
 void PrintDialog::previewZoomFactorChanged() {
@@ -544,156 +527,55 @@ void PrintDialog::previewSetupPage() {
   }
 }
 
-
-
-
-bool PrintDialog::doPrintout(QPrinter::OutputFormat format, const QString &title, const QString &suffix) {
-  if (format==QPrinter::NativeFormat) {
-    printer->setOutputFileName(QString::null);
-  } else {
-    QString fileName = QString::null;//getFilename(title, suffix);
-    if (fileName.isNull()) return false;
-    printer->setOutputFileName(fileName);
-  }
-  printer->setOutputFormat(format);
-  preview->print();
-  return true;
-}
-
-
-void PrintDialog::printToPrinter() {
-  QPrintDialog* printDialog = new QPrintDialog(printer, this);
-  if (printDialog->exec() == QDialog::Accepted) {
-    doPrintout(QPrinter::NativeFormat);
-  }
-  delete printDialog;
-}
-
-void PrintDialog::quickPrintToPrinter() {
-  doPrintout(QPrinter::NativeFormat);
-}
-
-void PrintDialog::printToPdf() {
-  doPrintout(QPrinter::PdfFormat, "Export to PDF", ".pdf");
-}
-
-void PrintDialog::printToPS() {
-  doPrintout(QPrinter::PostScriptFormat, "Export to Postscript", ".ps");
-}
-
-#include <QtSvg/QSvgGenerator>
-
-/*void PrintDialog::printToSvg() {
-  QSvgGenerator generator;
-  generator.setFileName("test.svg");
-
-
-  double scale = 1.0;
-  int imgWidth = 1100;
-  int imgHeight = 1400;
-  int textHeight = 0;
-
-  QTextDocument* d = ui->textEdit->document()->clone();
-  if (!d->isEmpty()) {
-    qreal desiredTextWidth = 2.0*d->documentMargin() + 80*QFontMetrics(QFont("Courier New", 8)).averageCharWidth();
-    scale = 1.0*imgWidth/desiredTextWidth;
-    d->setTextWidth(desiredTextWidth);
-    textHeight = int(scale*d->size().height()) + 1;
+int numberOfDecimalPlaces(double d) {
+  int m=0;
+  d -= trunc(d);
+  while (fabs(d)>1e-10) {
+    d *= 10.0;
+    d -= trunc(d);
+    m++;
   }
 
-  generator.setSize(QSize(imgWidth, imgHeight+textHeight));
-  generator.setViewBox(QRect(0, 0, imgWidth, imgHeight+textHeight));
+  return m;
+}
 
-  QPainter p;
+#include "tools/zipiterator.h"
 
-  //p.setClipRect(0, 0, imgWidth, imgHeight+textHeight);
-  //p.setClipping(true);
-  p.begin(&generator);
-  if (!d->isEmpty()) {
-    p.setPen(Qt::black);
-    p.setBrush(Qt::black);
-    p.save();
-    p.scale(scale, scale);
-    d->drawContents(&p);
-    p.restore();
+void doReplace(QString& code, const QStringList& fields, const QList<double>& values, int maxDigits, bool handleAngles=false) {
+
+  int digits = 0;
+  foreach (double d, values) digits = qMin(maxDigits, qMax(digits, numberOfDecimalPlaces(d)));
+
+  QPair<QString,double> p;
+  foreach(p, Zip(fields, values)) code.replace(p.first, QString::number(p.second, 'f', (handleAngles && ((fabs(p.second-90.0)<1e-7)||(fabs(p.second-120.0)<1e-7))?0:digits) ));
+
+}
+
+void PrintDialog::on_actionInsert_Cell_Table_triggered()
+{
+  if (projector && projector->getCrystal()) {
+
+    Crystal* c = projector->getCrystal();
+
+    QFile f(":/report_crystal.html");
+    f.open(QIODevice::ReadOnly);
+    QString tableCode = QString(f.readAll());
+    f.close();
+
+    tableCode.replace("<SPACEGROUP/>", c->getSpacegroup()->groupSymbol());
+    QList<double> cell=c->getCell();
+
+    doReplace(tableCode, QStringList() << "<CELL_A/>" << "<CELL_B/>" << "<CELL_C/>", cell.mid(0, 3), 5);
+    doReplace(tableCode, QStringList() << "<CELL_ALPHA/>" << "<CELL_BETA/>" << "<CELL_GAMMA/>", cell.mid(3, 3), 5, true);
+    doReplace(tableCode, QStringList() << "<ORIENTATION_OMEGA/>" << "<ORIENTATION_CHI/>" << "<ORIENTATION_PHI/>", c->calcEulerAngles(true), 3);
+
+    QTextCursor cursor(ui->textEdit->textCursor());
+    cursor.beginEditBlock();
+    cursor.insertHtml(tableCode);
+    cursor.endEditBlock();
   }
-  emit paintRequested(&p, QRectF(0, textHeight, imgWidth, imgHeight));
+}
 
-  p.end();
-  delete d;
-
-
-}*/
-
-#include <QGraphicsView>
-#include "image/laueimage.h"
-#include "image/imagedatastore.h"
-#include <QInputDialog>
-#include <QScrollBar>
-
-/*void PrintDialog::printToPng() {
-  QString filename;
-  if (projector && !projector->getScene()->views().isEmpty() && !(filename = getFilename("Portable Network Graphics (PNG)", ".png")).isNull()) {
-
-    QGraphicsView *const firstView = projector->getScene()->views().at(0);
-
-
-    int imgWidth;
-    int imgHeight;
-
-    if (projector->getLaueImage()) {
-      QRectF visibleSceneRectF = QRectF(firstView->mapToScene(0, 0), firstView->mapToScene(firstView->viewport()->width(), firstView->viewport()->height())).normalized();
-      QRectF sceneRect = projector->getScene()->sceneRect();
-      QSizeF imageSize = projector->getLaueImage()->data()->getTransformedSizeData(ImageDataStore::PixelSize);
-      qDebug() << visibleSceneRectF;
-      qDebug() << sceneRect;
-      qDebug() << firstView->mapToScene(0, 0) << firstView->mapToScene(firstView->viewport()->width(), firstView->viewport()->height());
-      //visibleSceneRectF = sceneRect;
-      imgWidth = imageSize.width()*visibleSceneRectF.width()/projector->getScene()->sceneRect().width() + 0.5;
-      imgHeight = imageSize.height()*visibleSceneRectF.height()/projector->getScene()->sceneRect().height() + 0.5;
-      qDebug() << imgWidth << imgHeight;
-      qDebug() << firstView->mapToScene(0.5, 0.5) << firstView->mapToScene(-0.5, -0.5) << firstView->mapToScene(-1.0, - 1.0);
-      if (firstView->horizontalScrollBar()) {
-        qDebug() << "Scroll" << firstView->horizontalScrollBar()->minimum() << firstView->horizontalScrollBar()->value() << firstView->horizontalScrollBar()->maximum() << endl;
-      }
-    }
-    else {
-      imgWidth = 100;// QInputDialog::IntInputfirstView->viewport()->width();
-      imgHeight = firstView->viewport()->height();
-    }
-
-
-    int textHeight = 0;
-    qreal scale = 1.0;
-
-    QTextDocument* d = ui->textEdit->document()->clone();
-    if (!d->isEmpty()) {
-      qreal desiredTextWidth = 2.0*d->documentMargin() + 80*QFontMetrics(QFont("Courier New", 8)).averageCharWidth();
-      scale = 1.0*imgWidth/desiredTextWidth;
-      d->setTextWidth(desiredTextWidth);
-      textHeight = int(scale*d->size().height()) + 1;
-    }
-
-    QImage img(imgWidth, imgHeight+textHeight, QImage::Format_ARGB32);
-    QPainter p(&img);
-
-    if (!d->isEmpty()) {
-      p.save();
-      p.scale(scale, scale);
-      d->drawContents(&p);
-      p.restore();
-    }
-
-    emit paintRequested(&p, QRectF(0, textHeight, imgWidth, imgHeight));
-
-    p.end();
-    delete d;
-
-    img.save(filename);
-
-
-  }
-}*/
 
 QSize PrintDialog::getImageSize(bool askForSize) {
   if (projector && !projector->getScene()->views().isEmpty() && projector->getLaueImage()) {
@@ -709,38 +591,71 @@ QSize PrintDialog::getImageSize(bool askForSize) {
   return QSize(100, 100);
 }
 
+PrintDialog::PaintDeviceFactory::PaintDeviceFactory(const QString &description, const QString &suffix): filename(QString::null), fileChooserAborted(false) {
+  if (!description.isNull()) {
+    filename = getFilename(description, suffix);
+    fileChooserAborted = filename.isNull();
+  }
+}
+
+PrintDialog::PaintDeviceFactory::~PaintDeviceFactory() {
+  QFileInfo fInfo(filename);
+  if (!filename.isEmpty() && fInfo.exists())
+    QSettings().setValue("LastDirectory", fInfo.canonicalFilePath());
+}
 
 QString PrintDialog::PaintDeviceFactory::getFilename(const QString &title, const QString &suffix) {
-  QString fileName = QFileDialog::getSaveFileName(NULL, title, "",
-                                                QLatin1Char('*') + suffix);
+
+  QString fileName = QFileDialog::getSaveFileName(NULL, title, QSettings().value("LastDirectory").toString(), QLatin1Char('*') + suffix);
   if (fileName.isEmpty()) return QString::null;
+  ;
+
   if (QFileInfo(fileName).suffix().isEmpty())
     fileName.append(suffix);
+
   return fileName;
+
 }
 
 class PrinterDevice: public PrintDialog::PaintDeviceFactory {
 public:
-  PrinterDevice(QPrinter* _p): printer(_p) {}
-  virtual QPaintDevice* getDevice(int) { return printer; }
+  PrinterDevice(QPrinter* _p, QPrinter::OutputFormat f=QPrinter::NativeFormat, const QString& description=QString::null, const QString& sufffix=QString::null):
+      PaintDeviceFactory(description, sufffix),
+      printer(_p),
+      format(f) {}
+  ~PrinterDevice() { printer->setOutputFormat(QPrinter::NativeFormat); }
+  virtual QPaintDevice* getDevice(int) {
+    if (fileChooserAborted) return NULL;
+    printer->setOutputFormat(format);
+    printer->setOutputFileName(filename);
+    return printer;
+  }
   virtual double desiredTextWidth() const { return printer->pageRect(QPrinter::DevicePixel).width(); }
   virtual int deviceWidth() const { return printer->pageRect(QPrinter::DevicePixel).width(); }
 private:
   QPrinter* printer;
+  QPrinter::OutputFormat format;
 };
 
 class ImageDevice: public PrintDialog::PaintDeviceFactory {
 public:
-  ImageDevice(Projector* p);
-  ~ImageDevice() {}
+  ImageDevice(Projector* p, const QString& description, const QString& suffix);
+  ~ImageDevice() { if (device) { delete device; device=0; } }
   virtual double desiredTextWidth() const { return 80*QFontMetrics(QFont("Courier New", 8)).averageCharWidth(); }
   virtual int deviceWidth() const { return imageSize.width(); }
+  QPaintDevice* getDevice(int textHeight) {
+    if (filename.isNull()) return NULL;
+    if (!device) setupDevice(textHeight);
+    return device;
+  }
 protected:
-  Projector* projector;
+  virtual void setupDevice(int textHeight) = 0;
+  //Projector* projector;
   QSize imageSize;
+  QPaintDevice* device;
 };
 
-ImageDevice::ImageDevice(Projector *p): projector(p) {
+ImageDevice::ImageDevice(Projector *projector, const QString& description, const QString& suffix): PaintDeviceFactory(description, suffix), device(0) {
   if (projector && !projector->getScene()->views().isEmpty()) {
     QGraphicsView *const firstView = projector->getScene()->views().at(0);
     QRectF visibleSceneRectF = QRectF(firstView->mapToScene(0, 0), firstView->mapToScene(firstView->viewport()->width(), firstView->viewport()->height())).normalized();
@@ -759,71 +674,63 @@ ImageDevice::ImageDevice(Projector *p): projector(p) {
 
 class PngDevice: public ImageDevice {
 public:
-  PngDevice(Projector* p): ImageDevice(p), img(0) { }
-  ~PngDevice() {
-    if (img) {
-      QString filename;
-      if (!(filename = getFilename("Portable Network Graphics (PNG)", ".png")).isNull())
-        img->save(filename);
-      delete img;
-      img = 0;
-    }
+  PngDevice(Projector* p): ImageDevice(p, "Export as Portable Network Graphics", ".png") { }
+  ~PngDevice() { if (device) dynamic_cast<QImage*>(device)->save(filename); }
+  virtual void setupDevice(int textHeight) {
+    device = new QImage(imageSize.width(), imageSize.height()+textHeight, QImage::Format_ARGB32);
+    static_cast<QImage*>(device)->fill(qRgb(0xFF, 0xFF, 0xFF));
   }
-
-  virtual QPaintDevice* getDevice(int textHeight) {
-    if (!img) img = new QImage(imageSize.width(), imageSize.height()+textHeight, QImage::Format_ARGB32);
-    img->fill(qRgb(0xFF, 0xFF, 0xFF));
-    return img;
-  }
-private:
-  QImage* img;
 };
 
 class SvgDevice: public ImageDevice {
 public:
-  SvgDevice(Projector* p): ImageDevice(p), gen(0) { }
-  ~SvgDevice() {
-    if (gen) {
-      delete gen;
-      gen = 0;
-    }
+  SvgDevice(Projector* p): ImageDevice(p, "Export as Scalable Vector Graphics", ".svg") { }
+  virtual void setupDevice(int textHeight) {
+    device = new QSvgGenerator();
+    static_cast<QSvgGenerator*>(device)->setFileName(filename);
+    static_cast<QSvgGenerator*>(device)->setSize(QSize(imageSize.width(), imageSize.height()+textHeight));
+    static_cast<QSvgGenerator*>(device)->setViewBox(QRect(0, 0, imageSize.width(), imageSize.height()+textHeight));
   }
-
-  virtual QPaintDevice* getDevice(int textHeight) {
-    QString filename;
-    if (!gen && !(filename = getFilename("Scalable Vector Graphics", ".svg")).isNull()) {
-      gen = new QSvgGenerator();
-      gen->setFileName(filename);
-      gen->setSize(QSize(imageSize.width(), imageSize.height()+textHeight));
-      gen->setViewBox(QRect(0, 0, imageSize.width(), imageSize.height()+textHeight));
-    }
-    return gen;
-  }
-private:
-  QSvgGenerator* gen;
 };
 
+void PrintDialog::printToPrinter() {
+  QPrintDialog* printDialog = new QPrintDialog(printer, this);
+  if (printDialog->exec() == QDialog::Accepted) {
+    renderToPaintDevice(PrinterDevice(printer));
+  }
+  delete printDialog;
+}
 
-void PrintDialog::printPreview(QPrinter *printer) {
-  PrinterDevice pd(printer);
-  renderToPaintDevice(pd);
+void PrintDialog::printToDefaultPrinter() {
+  renderToPaintDevice(PrinterDevice(printer));
+}
+
+void PrintDialog::printPreview(QPrinter *p) {
+  renderToPaintDevice(PrinterDevice(p));
+}
+
+void PrintDialog::printToPdf() {
+  renderToPaintDevice(PrinterDevice(printer, QPrinter::PdfFormat, "Export to PDF", ".pdf"));
+}
+
+void PrintDialog::printToPS() {
+  renderToPaintDevice(PrinterDevice(printer, QPrinter::PostScriptFormat, "Export to Postscript", ".ps"));
 }
 
 void PrintDialog::printToPng() {
-  PngDevice pd(projector);
-  renderToPaintDevice(pd);
+  renderToPaintDevice(PngDevice(projector));
 }
 
 void PrintDialog::printToSvg() {
-  SvgDevice sd(projector);
-  renderToPaintDevice(sd);
+  renderToPaintDevice(SvgDevice(projector));
 }
 
-void PrintDialog::renderToPaintDevice(PaintDeviceFactory& factory) {
+void PrintDialog::renderToPaintDevice(const PaintDeviceFactory& _factory) {
+  PaintDeviceFactory& factory = const_cast<PaintDeviceFactory&>(_factory);
   int textHeight = 0;
   qreal scale = 1.0;
 
-  QTextDocument* d = ui->textEdit->document()->clone();
+  QScopedPointer<QTextDocument> d(ui->textEdit->document()->clone());
   if (!d->isEmpty()) {
     scale = 1.0*factory.deviceWidth()/factory.desiredTextWidth();
     d->setTextWidth(factory.desiredTextWidth());
@@ -831,6 +738,7 @@ void PrintDialog::renderToPaintDevice(PaintDeviceFactory& factory) {
   }
 
   QPaintDevice* device = factory.getDevice(textHeight);
+  if (!device) return;
   QPainter p(device);
 
   if (!d->isEmpty()) {
@@ -842,7 +750,6 @@ void PrintDialog::renderToPaintDevice(PaintDeviceFactory& factory) {
   }
 
   emit paintRequested(&p, QRectF(0, textHeight, device->width(), device->height()+textHeight));
-  delete d;
 }
 
 

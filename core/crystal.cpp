@@ -581,7 +581,8 @@ void Crystal::synchronUpdate(bool b) {
   updateIsSynchron=b;
 }
 
-void Crystal::calcEulerAngles(double &omega, double &chi, double &phi) {
+QList<double> Crystal::calcEulerAngles(bool inDegrees) {
+  double omega, chi, phi;
   omega=-atan2(MRot(0,1),MRot(1,1));
   //chi=asin(MRot[2][1]);
   double s=sin(omega);
@@ -593,6 +594,9 @@ void Crystal::calcEulerAngles(double &omega, double &chi, double &phi) {
   }
   Mat3D M(Mat3D(Vec3D(1,0,0), -chi)*Mat3D(Vec3D(0,0,1), -omega)*MRot);
   phi=atan2(M(0,2),M(0,0));
+  QList<double> result = QList<double>() << omega << chi << phi;
+  if (inDegrees) for (int n=0; n<3; n++) result[n] *= 180.0*M_1_PI;
+  return result;
 }
 
 void Crystal::setEulerAngles(double omega, double chi, double phi) {
@@ -682,12 +686,11 @@ void Crystal::saveToXML(QDomElement base) {
   e.setAttribute(XML_Crystal_Cell_beta, beta);
   e.setAttribute(XML_Crystal_Cell_gamma, gamma);
 
-  double omega, chi, phi;
-  calcEulerAngles(omega, chi, phi);
+  QList<double> euler = calcEulerAngles(true);
   e = crystalElement.appendChild(doc.createElement(XML_Crystal_Orientation)).toElement();
-  e.setAttribute(XML_Crystal_Orientation_omega, 180.0*M_1_PI*omega);
-  e.setAttribute(XML_Crystal_Orientation_phi, 180.0*M_1_PI*phi);
-  e.setAttribute(XML_Crystal_Orientation_chi, 180.0*M_1_PI*chi);
+  e.setAttribute(XML_Crystal_Orientation_omega, euler[0]);
+  e.setAttribute(XML_Crystal_Orientation_phi, euler[1]);
+  e.setAttribute(XML_Crystal_Orientation_chi, euler[2]);
 
   e = crystalElement.appendChild(doc.createElement(XML_Crystal_Rotation)).toElement();
   e.setAttribute(XML_Crystal_Rotation_x, rotationAxis.x());
@@ -867,8 +870,7 @@ double Crystal::OrientationGroup::upperBound(int member) const {
 
 void Crystal::saveParametersAsDefault() {
   QSettings settings;
-  double omega, chi, phi;
-  calcEulerAngles(omega, chi, phi);
+  QList<double> euler = calcEulerAngles();
   settings.beginGroup("Crystal");
   settings.setValue("Spacegroup", spaceGroup.groupSymbol());
   settings.setValue("CellA", a);
@@ -877,8 +879,8 @@ void Crystal::saveParametersAsDefault() {
   settings.setValue("CellAlpha", alpha);
   settings.setValue("CellBeta", beta);
   settings.setValue("CellGamma", gamma);
-  settings.setValue("EulerOmega", omega);
-  settings.setValue("EulerChi", chi);
-  settings.setValue("EulerPhi", phi);
+  settings.setValue("EulerOmega", euler[0]);
+  settings.setValue("EulerChi", euler[1]);
+  settings.setValue("EulerPhi", euler[2]);
   settings.endGroup();
 }

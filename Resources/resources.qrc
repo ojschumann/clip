@@ -82,5 +82,7 @@
         <file>Default_StereoProjector.xml</file>
         <file>AboutMessage.txt</file>
         <file>papa.jpeg</file>
+        <file>report_crystal.html</file>
+        <file>report.css</file>
     </qresource>
 </RCC>

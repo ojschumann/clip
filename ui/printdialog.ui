@@ -179,12 +179,17 @@
    <addaction name="separator"/>
    <addaction name="actionConfigurePage"/>
    <addaction name="actionPrint"/>
+   <addaction name="actionPrintQuick"/>
    <addaction name="actionPrintPDF"/>
    <addaction name="actionPrintPS"/>
    <addaction name="actionPrintPNG"/>
    <addaction name="actionPrintSVG"/>
   </widget>
   <action name="actionInsert_Cell_Table">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/Crystal.png</normaloff>:/icons/icons/Crystal.png</iconset>
+   </property>
    <property name="text">
     <string>Insert Cell Table</string>
    </property>
@@ -514,6 +519,15 @@
    </property>
    <property name="text">
     <string>Export as SVG</string>
+   </property>
+  </action>
+  <action name="actionPrintQuick">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/filequickprint.png</normaloff>:/icons/icons/filequickprint.png</iconset>
+   </property>
+   <property name="text">
+    <string>Print to default Printer</string>
    </property>
   </action>
  </widget>
@@ -857,6 +871,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionPrintQuick</sender>
+   <signal>triggered()</signal>
+   <receiver>PrintDialog</receiver>
+   <slot>printToDefaultPrinter()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>291</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>printToPrinter()</slot>
@@ -875,5 +905,6 @@
   <slot>printToPS()</slot>
   <slot>printToPng()</slot>
   <slot>printToSvg()</slot>
+  <slot>printToDefaultPrinter()</slot>
  </slots>
 </ui>

@@ -238,4 +238,6 @@ OTHER_FILES += \
     Todo.txt \
     Resources/clip.rc \
     Resources/AboutMessage.txt \
-    README.txt
+    README.txt \
+    Resources/report_crystal.html \
+    Resources/report.css

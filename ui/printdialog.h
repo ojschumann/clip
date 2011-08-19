@@ -92,7 +92,7 @@ private slots:
   void previewSetupPage();
 
 
-  void quickPrintToPrinter();
+  void printToDefaultPrinter();
   void printToPrinter();
   void printToPdf();
   void printToPS();
@@ -103,22 +103,21 @@ private slots:
 public:
   class PaintDeviceFactory {
   public:
-    PaintDeviceFactory(const QString& desc=QString::null, const QString& suf=QString::null): painter(0), description(desc), suffix(suf) {}
-    ~PaintDeviceFactory() { if (painter) delete painter; }
+    PaintDeviceFactory(const QString& description=QString::null, const QString& suffix=QString::null);
+    virtual ~PaintDeviceFactory();
     virtual QPaintDevice* getDevice(int textHeight) = 0;
     virtual double desiredTextWidth() const = 0;
     virtual int deviceWidth() const = 0;
-    QString getFilename(const QString& title, const QString& suffix);
   protected:
-    QPainter* painter;
-    QString description;
-    QString suffix;
+    QString filename;
+    bool fileChooserAborted;
+  private:
+    QString getFilename(const QString& title, const QString& suffix);
   };
 
 private:
-  void renderToPaintDevice(PaintDeviceFactory&);
+  void renderToPaintDevice(const PaintDeviceFactory&);
   QSize getImageSize(bool askForSize);
-  bool doPrintout(QPrinter::OutputFormat format, const QString &title=QString::null, const QString &suffix=QString::null);
 
 private:
   Projector* projector;

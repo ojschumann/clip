@@ -104,12 +104,11 @@ void CrystalDisplay::slotUpdateOrientationMatrix() {
     }
   }
   // let Crystal calc Euler angles and write to UI
-  double omega, phi, chi;
-  crystal->calcEulerAngles(omega, chi, phi);
+  QList<double> euler = crystal->calcEulerAngles(true);
   allowRotationUpdate = false;
-  ui->rotationOmega->setValue(180.0*M_1_PI*omega);
-  ui->rotationChi->setValue(180.0*M_1_PI*chi);
-  ui->rotationPhi->setValue(180.0*M_1_PI*phi);
+  ui->rotationOmega->setValue(euler[0]);
+  ui->rotationChi->setValue(euler[1]);
+  ui->rotationPhi->setValue(euler[2]);
   allowRotationUpdate = true;
 }
 
