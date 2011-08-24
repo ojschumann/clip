@@ -29,6 +29,8 @@ PRE_TARGETDEPS += defs
 DEFINES += __HG_REPRO_ID__="\\\"\$(shell hg -R \"$$PWD\" -q id)\\\""
 DEFINES += __HG_REPRO_REV__="\\\"\$(shell hg -R \"$$PWD\" -q parent --template {rev})\\\""
 DEFINES += __HG_REPRO_DATE__="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\\\"\""
+DEFINES += __SOURCEDIR__=\\\"$$PWD\\\"
+#DEFINES += __SOURCEDIR__=$$PWD
 
 
 QMAKE_CXXFLAGS += -std=gnu++0x
@@ -243,4 +245,5 @@ OTHER_FILES += \
     README.txt \
     Resources/report_crystal.html \
     Resources/report.css \
-    Resources/report_LauePlaneProjector.html
+    Resources/report_LauePlaneProjector.html \
+    Resources/report_image.html

@@ -120,7 +120,7 @@ bool LaueImage::hasInfo(const QString& key) {
 }
 
 QVariant LaueImage::getInfo(const QString& key) {
-  return !provider->getProviderInfo(key);
+  return provider->getProviderInfo(key);
 }
 
 

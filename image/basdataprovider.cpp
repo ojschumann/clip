@@ -36,6 +36,26 @@
 
 using namespace std;
 
+const char BasDataProvider::Info_OriginalFilename[] = "OriginalFilename";
+const char BasDataProvider::Info_IPSize[] = "IP-Size";
+const char BasDataProvider::Info_XPixelSize[] = "X-PixelSizeUM";
+const char BasDataProvider::Info_YPixelSize[] = "Y-PixelSizeUM";
+const char BasDataProvider::Info_BitsPerPixel[] = "BitsPerPixel";
+const char BasDataProvider::Info_Width[] = "Width";
+const char BasDataProvider::Info_Height[] = "Height";
+const char BasDataProvider::Info_Sensitivity[] = "Sensitivity";
+const char BasDataProvider::Info_Latitude[] = "Latitude";
+const char BasDataProvider::Info_ExposureDate[] = "Exposure Date";
+const char BasDataProvider::Info_UnixTime[] = "UnixTime";
+const char BasDataProvider::Info_OverflowPixels[] = "OverflowPixels";
+const char BasDataProvider::Info_Comment[] = "Comment";
+const char BasDataProvider::Info_InfFilename[] = "InfFilename";
+const char BasDataProvider::Info_InfPath[] = "Complete Inf-Path";
+const char BasDataProvider::Info_PixelSize[] = "PixelSize";
+const char BasDataProvider::INF_Suffix[] = "inf";
+const char BasDataProvider::IMG_Suffix[] = "img";
+
+
 BasDataProvider::BasDataProvider(QObject *parent) :
     DataProvider(parent)
 {
@@ -46,7 +66,7 @@ BasDataProvider::~BasDataProvider() {
 
 
 QStringList BasDataProvider::Factory::fileFormatFilters() {
-  return QStringList() << "img" << "inf";
+  return QStringList() << IMG_Suffix << INF_Suffix;
 }
 
 DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataStore* store, QObject *parent) {
@@ -57,10 +77,10 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
 
   // Check if suffix is .inf or .img
   QString suffix = info.suffix().toLower();
-  if (suffix!="img" && suffix!="inf") return NULL;
+  if (suffix!=IMG_Suffix && suffix!=INF_Suffix) return NULL;
 
   // search the second file (img or inf)
-  QString secondSuffix = (suffix=="img")?"inf":"img";
+  QString secondSuffix = (suffix==IMG_Suffix)?INF_Suffix:IMG_Suffix;
   QDir dir(info.path());
   QStringList filter;
   filter << info.completeBaseName()+".*";
@@ -75,8 +95,8 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
   }
   if (!ok) return NULL;
 
-  QFile infFile((suffix=="inf")?info.filePath():info2.filePath());
-  QFile imgFile((suffix=="img")?info.filePath():info2.filePath());
+  QFile infFile((suffix==INF_Suffix)?info.filePath():info2.filePath());
+  QFile imgFile((suffix==IMG_Suffix)?info.filePath():info2.filePath());
 
   if (!infFile.open(QFile::ReadOnly) || !imgFile.open(QFile::ReadOnly)) return NULL;
 
@@ -85,13 +105,13 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
   if (inf.readLine()!="BAS_IMAGE_FILE") return NULL;
 
   QStringList keyValues;
-  keyValues << "OriginalFilename" << "IP-Size" << "X-PixelSizeUM" << "Y-PixelSizeUM"
-      << "BitsPerPixel" << "Width" << "Height" << "Sensitivity" << "Latitude" << "Exposure Date"
-      << "UnixTime" << "OverflowPixels" << "" << "Comment";
+  keyValues << Info_OriginalFilename << Info_IPSize << Info_XPixelSize << Info_YPixelSize
+      << Info_BitsPerPixel << Info_Width << Info_Height << Info_Sensitivity << Info_Latitude << Info_ExposureDate
+      << Info_UnixTime << Info_OverflowPixels << "" << Info_Comment;
   QStringList intKeyValues;
-  intKeyValues << "X-PixelSizeUM" << "Y-PixelSizeUM"
-      << "BitsPerPixel" << "Width" << "Height" << "Sensitivity" << "Latitude"
-      << "UnixTime" << "OverflowPixels";
+  intKeyValues << Info_XPixelSize << Info_YPixelSize
+      << Info_BitsPerPixel << Info_Width << Info_Height << Info_Sensitivity << Info_Latitude
+      << Info_UnixTime << Info_OverflowPixels;
 
 
   QMap<QString, QVariant> headerData;
@@ -109,31 +129,31 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
     }
   }
 
-  quint64 unixtime = headerData["UnixTime"].toULongLong();
+  quint64 unixtime = headerData[Info_UnixTime].toULongLong();
   QDateTime date;
   date.setTime_t(unixtime);
-  headerData["UnixTime"] = QVariant(QString("%1 (%2)").arg(unixtime).arg(date.toString(Qt::DefaultLocaleLongDate)));
+  headerData[Info_UnixTime] = QVariant(QString("%1 (%2)").arg(unixtime).arg(date.toString(Qt::DefaultLocaleLongDate)));
 
   info.setFile(infFile.fileName());
-  headerData.insert("InfFilename", QVariant(info.fileName()));
-  headerData.insert("Complete Inf-Path", QVariant(info.canonicalFilePath()));
+  headerData.insert(Info_InfFilename, QVariant(info.fileName()));
+  headerData.insert(Info_InfPath, QVariant(info.canonicalFilePath()));
 
 
-  int pixelCount = headerData["Width"].toInt()*headerData["Height"].toInt();
-  int bytesPerPixel = (headerData["BitsPerPixel"].toInt()>8)?2:1;
+  int pixelCount = headerData[Info_Width].toInt()*headerData[Info_Height].toInt();
+  int bytesPerPixel = (headerData[Info_BitsPerPixel].toInt()>8)?2:1;
   int dataSize = pixelCount * bytesPerPixel;
   if (dataSize != imgFile.size()) return NULL;
 
 
   QVector<float> pixelData(pixelCount);
 
-  double linscale = 4000.0/headerData["Sensitivity"].toDouble();
-  linscale *= headerData["X-PixelSizeUM"].toDouble()/100.0;
-  linscale *= headerData["Y-PixelSizeUM"].toDouble()/100.0;
+  double linscale = 4000.0/headerData[Info_Sensitivity].toDouble();
+  linscale *= headerData[Info_XPixelSize].toDouble()/100.0;
+  linscale *= headerData[Info_YPixelSize].toDouble()/100.0;
 
-  double logscale = M_LN10*headerData["Latitude"].toDouble();
+  double logscale = M_LN10*headerData[Info_Latitude].toDouble();
   linscale *= exp(-0.5*logscale);
-  logscale /= (1<<headerData["BitsPerPixel"].toInt())-1;
+  logscale /= (1<<headerData[Info_BitsPerPixel].toInt())-1;
 
   QDataStream in(&imgFile);
   in.setByteOrder(QDataStream::BigEndian);
@@ -156,20 +176,20 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
     }
   }
 
-  int w = headerData["Width"].toInt();
-  int h = headerData["Height"].toInt();
-  int pixX = headerData["X-PixelSizeUM"].toInt();
-  int pixY = headerData["Y-PixelSizeUM"].toInt();
+  int w = headerData[Info_Width].toInt();
+  int h = headerData[Info_Height].toInt();
+  int pixX = headerData[Info_XPixelSize].toInt();
+  int pixY = headerData[Info_YPixelSize].toInt();
   store->setData(ImageDataStore::PixelSize, QSizeF(w, h));
   store->setData(ImageDataStore::PhysicalSize, QSizeF(0.001*w*pixX, 0.001*h*pixY));
 
-  headerData.insert("Size", QString("%1x%2 pixels").arg(w).arg(h));
-  headerData.insert("PixelSize", QString("%1x%2 µm").arg(pixX).arg(pixY));
+  headerData.insert(Info_ImageSize, QString("%1x%2 pixels").arg(w).arg(h));
+  headerData.insert(Info_PixelSize, QString("%1x%2 µm").arg(pixX).arg(pixY));
 
-  headerData.remove("Width");
-  headerData.remove("Height");
-  headerData.remove("X-PixelSizeUM");
-  headerData.remove("Y-PixelSizeUM");
+  headerData.remove(Info_Width);
+  headerData.remove(Info_Height);
+  headerData.remove(Info_XPixelSize);
+  headerData.remove(Info_YPixelSize);
 
   BasDataProvider* provider = new BasDataProvider(parent);
   provider->insertFileInformation(filename);

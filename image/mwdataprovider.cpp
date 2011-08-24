@@ -124,7 +124,7 @@ DataProvider* MWDataProvider::Factory::getProvider(QString filename, ImageDataSt
 
 
   headerData.insert("BitsPerPixel", 16);
-  headerData.insert("Size", "256x256 pixels");  //pixels
+  headerData.insert(Info_ImageSize, "256x256 pixels");  //pixels
   headerData.insert("Sample Description", QString(hs2File.read(52)));
   headerData.insert("Operator", QString(hs2File.read(52)));
   headerData.insert("Comment", QString(hs2File.read(52)));

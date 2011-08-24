@@ -128,7 +128,7 @@
      <x>0</x>
      <y>0</y>
      <width>667</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuEdit">
@@ -190,7 +190,7 @@
   <action name="actionInsert_Cell_Table">
    <property name="icon">
     <iconset resource="../resources/resources.qrc">
-     <normaloff>:/icons/icons/Crystal.png</normaloff>:/icons/icons/Crystal.png</iconset>
+     <normaloff>:/icons/icons/crystaltable.png</normaloff>:/icons/icons/crystaltable.png</iconset>
    </property>
    <property name="text">
     <string>Insert Cell Table</string>

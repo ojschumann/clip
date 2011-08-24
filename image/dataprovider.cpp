@@ -88,6 +88,7 @@ void DataProvider::saveToXML(QDomElement) {}
 void DataProvider::loadFromXML(QDomElement) {}
 
 const char DataProvider::Info_ImageFilename[] = "ImgFilename";
+const char DataProvider::Info_ImageSize[] = "Size";
 const char DataProvider::Info_ImagePath[] = "Complete Path";
 const char DataProvider::Info_ImageCreationDate[] = "File Creation Date";
 

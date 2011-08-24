@@ -61,7 +61,7 @@ DataProvider* QImageDataProvider::Factory::getProvider(QString filename, ImageDa
 
     store->setData(ImageDataStore::PixelSize, img.size());
 
-    headerData.insert("Size", QString("%1x%2").arg(img.width()).arg(img.height()));
+    headerData.insert(Info_ImageSize, QString("%1x%2 pixels").arg(img.width()).arg(img.height()));
     QImageDataProvider* provider = new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied), parent);
     provider->insertFileInformation(filename);
     provider->providerInformation.unite(headerData);

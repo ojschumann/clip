@@ -77,7 +77,7 @@ DataProvider* XYZDataProvider::Factory::getProvider(QString filename, ImageDataS
   provider->imgWidth = width;
   provider->imgHeight = height;
   provider->insertFileInformation(filename);
-  provider->providerInformation.insert("Size", QString("%1x%2 pixels").arg(width).arg(height));
+  provider->providerInformation.insert(Info_ImageSize, QString("%1x%2 pixels").arg(width).arg(height));
 
   return provider;
 }

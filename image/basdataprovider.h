@@ -48,6 +48,26 @@ public:
   virtual int bytesCount();
   virtual int pixelCount();
   virtual Format format();
+
+  static const char Info_OriginalFilename[];
+  static const char Info_IPSize[];
+  static const char Info_XPixelSize[];
+  static const char Info_YPixelSize[];
+  static const char Info_BitsPerPixel[];
+  static const char Info_Width[];
+  static const char Info_Height[];
+  static const char Info_Sensitivity[];
+  static const char Info_Latitude[];
+  static const char Info_ExposureDate[];
+  static const char Info_UnixTime[];
+  static const char Info_OverflowPixels[];
+  static const char Info_Comment[];
+  static const char Info_InfFilename[];
+  static const char Info_InfPath[];
+  static const char Info_PixelSize[];
+  static const char INF_Suffix[];
+  static const char IMG_Suffix[];
+
 private:
   explicit BasDataProvider(QObject *parent = 0);
 signals:

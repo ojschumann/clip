@@ -71,6 +71,7 @@ public:
   virtual QList<QString> getProviderInfoKeys() { return providerInformation.keys(); }
 
   static const char Info_ImageFilename[];
+  static const char Info_ImageSize[];
   static const char Info_ImagePath[];
   static const char Info_ImageCreationDate[];
 

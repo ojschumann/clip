@@ -10,5 +10,6 @@ Printing
     Image Filename !
     Table with Image Info ?
     Table with Orientation Matrix ?
+    Using QtWebKit for rendering (better support for special table formats
 
 Implement a faster MonochromeScaler

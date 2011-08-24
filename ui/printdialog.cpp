@@ -557,7 +557,7 @@ void PrintDialog::on_actionInsert_Cell_Table_triggered() {
     Crystal* c = projector->getCrystal();
 
     //QFile f(":/report_crystal.html");
-    QFile f("Z:/Eigene Dateien/Privat/Clip4/Resources/report_crystal.html");
+    QFile f(__SOURCEDIR__ "/Resources/report_crystal.html");
     if (f.open(QIODevice::ReadOnly)) {
       QString tableCode = QString(f.readAll());
       f.close();
@@ -577,7 +577,7 @@ void PrintDialog::on_actionInsert_Cell_Table_triggered() {
 void PrintDialog::on_actionInsert_Projector_Info_triggered() {
   if (projector) {
     //QFile f(QString(":/report_%1.html").arg(projector->projectorName()));
-    QFile f(QString("Z:/Eigene Dateien/Privat/Clip4/Resources/report_%1.html").arg(projector->projectorName()));
+    QFile f(QString(__SOURCEDIR__"/Resources/report_%1.html").arg(projector->projectorName()));
     if (f.open(QIODevice::ReadOnly)) {
       QString tableCode = QString(f.readAll());
       f.close();
@@ -591,6 +591,18 @@ void PrintDialog::on_actionInsert_Projector_Info_triggered() {
 
 void PrintDialog::on_actionInsert_Image_info_triggered() {
   if (projector && projector->getLaueImage()) {
+    //QFile f(":/report_crystal.html");
+    QFile f(__SOURCEDIR__ "/Resources/report_image.html");
+    if (f.open(QIODevice::ReadOnly)) {
+      QString tableCode = QString(f.readAll());
+      f.close();
+
+      tableCode.replace("<IMAGEPATH/>", projector->getLaueImage()->getInfo(DataProvider::Info_ImagePath).toString());
+
+      WebkitTextObject::insertObject(ui->textEdit, tableCode);
+    }
+
+
     foreach (QString key, projector->getLaueImage()->infoKeys()) {
       qDebug() << key << projector->getLaueImage()->getInfo(key).toString();
     }
