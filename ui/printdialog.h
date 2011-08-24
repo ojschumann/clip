@@ -66,6 +66,8 @@ signals:
   void paintRequested (QPainter *, const QRectF&);
 
 private slots:
+  void on_actionInsert_Image_info_triggered();
+  void on_actionInsert_Projector_Info_triggered();
   void on_actionInsert_Cell_Table_triggered();
 
   // Slots for formating the description

@@ -33,6 +33,7 @@ class QPainter;
 class QRectF;
 class QSizeF;
 class QTextEdit;
+class QPicture;
 
 class WebkitTextObject : public QObject, public QTextObjectInterface
 {
@@ -40,7 +41,7 @@ class WebkitTextObject : public QObject, public QTextObjectInterface
     Q_INTERFACES(QTextObjectInterface)
 public:
     enum { WebkitTextFormat = QTextFormat::UserObject + 1 };
-    enum WebkitProperties { WebPage = 1, TestClass = 2 };
+    enum WebkitProperties { HtmlString = 1, PictureCache= 2 };
 
     WebkitTextObject(QObject* parent=0);
     virtual ~WebkitTextObject();
@@ -49,6 +50,8 @@ public:
                          const QTextFormat &format);
     void drawObject(QPainter *painter, const QRectF &rect, QTextDocument *doc,
                     int posInDocument, const QTextFormat &format);
+
+    QPicture* getPicture(const QTextFormat& format);
 
     static void registerObject(QTextDocument* doc);
     static void insertObject(QTextEdit* edit, const QString& html);

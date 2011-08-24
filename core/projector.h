@@ -99,6 +99,7 @@ public:
   virtual QString displayName()=0;
   virtual QSize projectorSizeHint() const = 0;
   virtual QString FitObjectName();
+  virtual QString fillInfoTable(const QString&);
 
   double Qmin() const;
   double Qmax() const;

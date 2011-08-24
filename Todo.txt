@@ -9,7 +9,6 @@ Printing
   Insert Text-Object to Print
     Image Filename !
     Table with Image Info ?
-    Table with Projector Info ?
     Table with Orientation Matrix ?
 
 Implement a faster MonochromeScaler

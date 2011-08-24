@@ -54,6 +54,10 @@ public:
   bool isValid() { return (provider!=0) && (scaler!=0); }
 
   QString name();
+  QList<QString> infoKeys();
+  bool hasInfo(const QString& key);
+  QVariant getInfo(const QString& key);
+
   QList<QWidget*> toolboxPages();
   QList<BezierCurve*> getTransferCurves();
   QImage getScaledImage(const QSize& , const QPolygonF&);

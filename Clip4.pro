@@ -242,4 +242,5 @@ OTHER_FILES += \
     Resources/AboutMessage.txt \
     README.txt \
     Resources/report_crystal.html \
-    Resources/report.css
+    Resources/report.css \
+    Resources/report_LauePlaneProjector.html

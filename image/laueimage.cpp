@@ -111,6 +111,19 @@ QString LaueImage::name() {
   return provider->name();
 }
 
+QList<QString> LaueImage::infoKeys() {
+  return provider->getProviderInfoKeys();
+}
+
+bool LaueImage::hasInfo(const QString& key) {
+  return !provider->getProviderInfo(key).isNull();
+}
+
+QVariant LaueImage::getInfo(const QString& key) {
+  return !provider->getProviderInfo(key);
+}
+
+
 QList<QWidget*> LaueImage::toolboxPages() {
   QList<QWidget*> pages;
   pages << provider->toolboxPages();
@@ -123,7 +136,7 @@ const char XML_LaueImage_element_fn[] = "Filename";
 
 void LaueImage::saveToXML(QDomElement base) {
   QDomElement image = ensureElement(base, XML_LaueImage_element);
-  image.setAttribute(XML_LaueImage_element_fn, provider->getProviderInfo("Complete Path").toString());
+  image.setAttribute(XML_LaueImage_element_fn, provider->getProviderInfo(DataProvider::Info_ImagePath).toString());
   provider->saveToXML(image);
   scaler->saveToXML(image);
   saveCurvesToXML(image);

@@ -372,6 +372,21 @@ QString LauePlaneProjector::displayName() {
   return QString("Laue Plane");
 }
 
+QString LauePlaneProjector::fillInfoTable(const QString &_html) {
+  QString html(_html);
+  html.replace("<DIST/>", QString::number(dist(), 'f', 3));
+  html.replace("<WIDTH/>", QString::number(width(), 'f', 3));
+  html.replace("<HEIGHT/>", QString::number(height(), 'f', 3));
+  html.replace("<OMEGA/>", QString::number(omega(), 'f', 3));
+  html.replace("<CHI/>", QString::number(chi(), 'f', 3));
+  html.replace("<PHI/>", QString::number(phi(), 'f', 3));
+  html.replace("<DX/>", QString::number(xOffset(), 'f', 3));
+  html.replace("<DY/>", QString::number(yOffset(), 'f', 3));
+  html.replace("<QMIN/>", QString::number(Qmin(), 'f', 3));
+  html.replace("<QMAX/>", QString::number(Qmax(), 'f', 3));
+  return html;
+}
+
 
 double LauePlaneProjector::dist() const {
   return detDist;

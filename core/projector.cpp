@@ -115,6 +115,10 @@ QString Projector::FitObjectName() {
   return displayName();
 }
 
+QString Projector::fillInfoTable(const QString &) {
+  return QString::null;
+}
+
 Projector& Projector::operator=(const Projector& o) {
   det2img = o.det2img;
   img2det = o.img2det;

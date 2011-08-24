@@ -50,14 +50,14 @@ DataProvider* DataProvider::loadImage(const QString &) {
 
 void DataProvider::insertFileInformation(const QString &filename) {
   QFileInfo info(filename);
-  providerInformation.insert("ImgFilename", info.fileName());
-  providerInformation.insert("Complete Path", info.canonicalFilePath());
-  providerInformation.insert("File Creation Date", info.created().toString(Qt::DefaultLocaleLongDate));
+  providerInformation.insert(Info_ImageFilename, info.fileName());
+  providerInformation.insert(Info_ImagePath, info.canonicalFilePath());
+  providerInformation.insert(Info_ImageCreationDate, info.created().toString(Qt::DefaultLocaleLongDate));
 }
 
 QString DataProvider::name() {
-  if (providerInformation.contains("ImgFilename")) {
-    return providerInformation["ImgFilename"].toString();
+  if (providerInformation.contains(Info_ImageFilename)) {
+    return providerInformation[Info_ImageFilename].toString();
   }
   return QString();
 }
@@ -84,6 +84,10 @@ QList<QWidget*> DataProvider::toolboxPages() {
   return l;
 }
 
-
 void DataProvider::saveToXML(QDomElement) {}
 void DataProvider::loadFromXML(QDomElement) {}
+
+const char DataProvider::Info_ImageFilename[] = "ImgFilename";
+const char DataProvider::Info_ImagePath[] = "Complete Path";
+const char DataProvider::Info_ImageCreationDate[] = "File Creation Date";
+

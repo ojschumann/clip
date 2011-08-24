@@ -57,6 +57,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionInsert_Cell_Table"/>
+   <addaction name="actionInsert_Projector_Info"/>
+   <addaction name="actionInsert_Image_info"/>
   </widget>
   <widget class="QToolBar" name="charFormatToolbar">
    <property name="windowTitle">
@@ -528,6 +530,24 @@
    </property>
    <property name="text">
     <string>Print to default Printer</string>
+   </property>
+  </action>
+  <action name="actionInsert_Projector_Info">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/Projector.png</normaloff>:/icons/icons/Projector.png</iconset>
+   </property>
+   <property name="text">
+    <string>Insert Projector Info</string>
+   </property>
+  </action>
+  <action name="actionInsert_Image_info">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/info.png</normaloff>:/icons/icons/info.png</iconset>
+   </property>
+   <property name="text">
+    <string>Insert Image info</string>
    </property>
   </action>
  </widget>

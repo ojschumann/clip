@@ -67,7 +67,13 @@ public:
   virtual Format format()=0;
   virtual QString name();
   virtual QList<QWidget*> toolboxPages();
-  virtual QVariant getProviderInfo(QString key) { return providerInformation[key]; }
+  virtual QVariant getProviderInfo(const QString& key) { return providerInformation[key]; }
+  virtual QList<QString> getProviderInfoKeys() { return providerInformation.keys(); }
+
+  static const char Info_ImageFilename[];
+  static const char Info_ImagePath[];
+  static const char Info_ImageCreationDate[];
+
 
 protected:
   explicit DataProvider(QObject *parent = 0);

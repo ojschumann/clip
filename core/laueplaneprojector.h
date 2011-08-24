@@ -54,6 +54,7 @@ public:
   virtual QString projectorName() const;
   QSize projectorSizeHint() const;
   virtual QString displayName();
+  virtual QString fillInfoTable(const QString &);
   double dist() const;
   double width() const;
   double height() const;

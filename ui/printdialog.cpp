@@ -191,7 +191,6 @@ PrintDialog::PrintDialog(Projector* p, QWidget *parent) :
 }
 
 PrintDialog::~PrintDialog() {
-  qDebug() << "~PrintDialog()";
   delete ui;
   delete printer;
 }
@@ -553,32 +552,52 @@ void doReplace(QString& code, const QStringList& fields, const QList<double>& va
 
 }
 
-void PrintDialog::on_actionInsert_Cell_Table_triggered()
-{
+void PrintDialog::on_actionInsert_Cell_Table_triggered() {
   if (projector && projector->getCrystal()) {
-
     Crystal* c = projector->getCrystal();
 
     //QFile f(":/report_crystal.html");
     QFile f("Z:/Eigene Dateien/Privat/Clip4/Resources/report_crystal.html");
-    f.open(QIODevice::ReadOnly);
-    QString tableCode = QString(f.readAll());
-    f.close();
+    if (f.open(QIODevice::ReadOnly)) {
+      QString tableCode = QString(f.readAll());
+      f.close();
 
-    tableCode.replace("<SPACEGROUP/>", c->getSpacegroup()->groupSymbol());
-    QList<double> cell=c->getCell();
+      tableCode.replace("<SPACEGROUP/>", c->getSpacegroup()->groupSymbol());
+      QList<double> cell=c->getCell();
 
-    doReplace(tableCode, QStringList() << "<CELL_A/>" << "<CELL_B/>" << "<CELL_C/>", cell.mid(0, 3), 5);
-    doReplace(tableCode, QStringList() << "<CELL_ALPHA/>" << "<CELL_BETA/>" << "<CELL_GAMMA/>", cell.mid(3, 3), 5, true);
-    doReplace(tableCode, QStringList() << "<ORIENTATION_OMEGA/>" << "<ORIENTATION_CHI/>" << "<ORIENTATION_PHI/>", c->calcEulerAngles(true), 3);
+      doReplace(tableCode, QStringList() << "<CELL_A/>" << "<CELL_B/>" << "<CELL_C/>", cell.mid(0, 3), 5);
+      doReplace(tableCode, QStringList() << "<CELL_ALPHA/>" << "<CELL_BETA/>" << "<CELL_GAMMA/>", cell.mid(3, 3), 5, true);
+      doReplace(tableCode, QStringList() << "<ORIENTATION_OMEGA/>" << "<ORIENTATION_CHI/>" << "<ORIENTATION_PHI/>", c->calcEulerAngles(true), 3);
 
-    /*QTextCursor cursor(ui->textEdit->textCursor());
-    /cursor.beginEditBlock();
-    cursor.insertHtml(tableCode);
-    cursor.endEditBlock(); */
-    WebkitTextObject::insertObject(ui->textEdit, tableCode);
+      WebkitTextObject::insertObject(ui->textEdit, tableCode);
+    }
   }
 }
+
+void PrintDialog::on_actionInsert_Projector_Info_triggered() {
+  if (projector) {
+    //QFile f(QString(":/report_%1.html").arg(projector->projectorName()));
+    QFile f(QString("Z:/Eigene Dateien/Privat/Clip4/Resources/report_%1.html").arg(projector->projectorName()));
+    if (f.open(QIODevice::ReadOnly)) {
+      QString tableCode = QString(f.readAll());
+      f.close();
+
+      tableCode = projector->fillInfoTable(tableCode);
+      if (!tableCode.isNull())
+        WebkitTextObject::insertObject(ui->textEdit, tableCode);
+    }
+  }
+}
+
+void PrintDialog::on_actionInsert_Image_info_triggered() {
+  if (projector && projector->getLaueImage()) {
+    foreach (QString key, projector->getLaueImage()->infoKeys()) {
+      qDebug() << key << projector->getLaueImage()->getInfo(key).toString();
+    }
+  }
+}
+
+
 
 
 QSize PrintDialog::getImageSize(bool askForSize) {
