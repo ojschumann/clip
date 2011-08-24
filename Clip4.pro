@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl xml svg
+QT       += core gui opengl xml svg webkit
 
 TARGET = Clip
 TEMPLATE = app
@@ -123,7 +123,8 @@ SOURCES += main.cpp\
     tools/colortextitem.cpp \
     image/imagedatastore.cpp \
     ui/sadeasteregg.cpp \
-    tools/combolineedit.cpp
+    tools/combolineedit.cpp \
+    tools/webkittextobject.cpp
 
 HEADERS  += ui/clip.h \
     ui/crystaldisplay.h \
@@ -207,7 +208,8 @@ HEADERS  += ui/clip.h \
     tools/colortextitem.h \
     image/imagedatastore.h \
     ui/sadeasteregg.h \
-    tools/combolineedit.h
+    tools/combolineedit.h \
+    tools/webkittextobject.h
 
 FORMS    += ui/clip.ui \
     ui/crystaldisplay.ui \

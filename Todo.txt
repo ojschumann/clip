@@ -7,9 +7,9 @@ Scattering orders for reflection info
 Printing
   Print with increased linewidth of spot indicators
   Insert Text-Object to Print
-    Table with Projector Info ?
-    Table with Image Info ?
-    Table with Orientation Matrix ?
     Image Filename !
+    Table with Image Info ?
+    Table with Projector Info ?
+    Table with Orientation Matrix ?
 
 Implement a faster MonochromeScaler

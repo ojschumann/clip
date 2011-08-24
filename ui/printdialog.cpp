@@ -49,6 +49,7 @@
 #include "core/projector.h"
 #include "tools/combolineedit.h"
 #include "core/crystal.h"
+#include "tools/webkittextobject.h"
 
 class ZoomFactorValidator : public QDoubleValidator
 {
@@ -88,6 +89,7 @@ PrintDialog::PrintDialog(Projector* p, QWidget *parent) :
 {
   ui->setupUi(this);
   connect(p, SIGNAL(destroyed()), this, SLOT(deleteLater()));
+  setAttribute(Qt::WA_DeleteOnClose);
 
   printer = new QPrinter(QPrinterInfo::defaultPrinter());
   printer->setPageMargins(10, 10, 10, 10, QPrinter::Millimeter);
@@ -103,7 +105,7 @@ PrintDialog::PrintDialog(Projector* p, QWidget *parent) :
   l->addWidget(preview);
   l->setMargin(0);
 
-
+  WebkitTextObject::registerObject(ui->textEdit->document());
 
   setToolButtonStyle(Qt::ToolButtonFollowStyle);
 
@@ -188,8 +190,8 @@ PrintDialog::PrintDialog(Projector* p, QWidget *parent) :
       ui->actionLandscape->setChecked(true);
 }
 
-PrintDialog::~PrintDialog()
-{
+PrintDialog::~PrintDialog() {
+  qDebug() << "~PrintDialog()";
   delete ui;
   delete printer;
 }
@@ -557,7 +559,8 @@ void PrintDialog::on_actionInsert_Cell_Table_triggered()
 
     Crystal* c = projector->getCrystal();
 
-    QFile f(":/report_crystal.html");
+    //QFile f(":/report_crystal.html");
+    QFile f("Z:/Eigene Dateien/Privat/Clip4/Resources/report_crystal.html");
     f.open(QIODevice::ReadOnly);
     QString tableCode = QString(f.readAll());
     f.close();
@@ -569,10 +572,11 @@ void PrintDialog::on_actionInsert_Cell_Table_triggered()
     doReplace(tableCode, QStringList() << "<CELL_ALPHA/>" << "<CELL_BETA/>" << "<CELL_GAMMA/>", cell.mid(3, 3), 5, true);
     doReplace(tableCode, QStringList() << "<ORIENTATION_OMEGA/>" << "<ORIENTATION_CHI/>" << "<ORIENTATION_PHI/>", c->calcEulerAngles(true), 3);
 
-    QTextCursor cursor(ui->textEdit->textCursor());
-    cursor.beginEditBlock();
+    /*QTextCursor cursor(ui->textEdit->textCursor());
+    /cursor.beginEditBlock();
     cursor.insertHtml(tableCode);
-    cursor.endEditBlock();
+    cursor.endEditBlock(); */
+    WebkitTextObject::insertObject(ui->textEdit, tableCode);
   }
 }
 
@@ -725,12 +729,16 @@ void PrintDialog::printToSvg() {
   renderToPaintDevice(SvgDevice(projector));
 }
 
+#include <QtWebKit/QWebPage>
+#include <QtWebKit/QWebFrame>
+
 void PrintDialog::renderToPaintDevice(const PaintDeviceFactory& _factory) {
   PaintDeviceFactory& factory = const_cast<PaintDeviceFactory&>(_factory);
   int textHeight = 0;
   qreal scale = 1.0;
 
   QScopedPointer<QTextDocument> d(ui->textEdit->document()->clone());
+  WebkitTextObject::registerObject(d.data());
   if (!d->isEmpty()) {
     scale = 1.0*factory.deviceWidth()/factory.desiredTextWidth();
     d->setTextWidth(factory.desiredTextWidth());
@@ -740,6 +748,7 @@ void PrintDialog::renderToPaintDevice(const PaintDeviceFactory& _factory) {
   QPaintDevice* device = factory.getDevice(textHeight);
   if (!device) return;
   QPainter p(device);
+  p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);;
 
   if (!d->isEmpty()) {
     p.save();
