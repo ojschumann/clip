@@ -65,6 +65,7 @@ protected:
   QPen _gridPen;
 };
 
+static const char headerStyleSheet[] = "QHeaderView::Section { border-style: plain; border-width: 4px }";
 
 MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
     QWidget(parent),
@@ -72,6 +73,7 @@ MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
     lastVector()
 {
   ui->setupUi(this);
+
 
   connect(ui->cursorBox, SIGNAL(toggled(bool)), this, SLOT(cursorTableVisiblyToggled(bool)));
 
@@ -81,16 +83,16 @@ MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
   ui->angleTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->angleTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->angleTable->horizontalHeader()->setMinimumSectionSize(fontMetrics().width("Negative")+8);
-  ui->angleTable->horizontalHeader()->setStyleSheet("QHeaderView::Section { border-style: plain; border-width: 4px }");
+  ui->angleTable->horizontalHeader()->setStyleSheet(headerStyleSheet);
 
   ui->scatterTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->scatterTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->scatterTable->horizontalHeader()->setMinimumSectionSize(fontMetrics().width("  123.456  "));
-  ui->scatterTable->horizontalHeader()->setStyleSheet("QHeaderView::Section { border-style: plain; border-width: 4px }");
+  ui->scatterTable->horizontalHeader()->setStyleSheet(headerStyleSheet);
 
   ui->cursorTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->cursorTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-  ui->cursorTable->horizontalHeader()->setStyleSheet("QHeaderView::Section { border-style: plain; border-width: 4px }");
+  ui->cursorTable->horizontalHeader()->setStyleSheet(headerStyleSheet);
 
   ui->cursorTable->setItemDelegate(new NoBorderDelegate(ui->cursorTable));
 
