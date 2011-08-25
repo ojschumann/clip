@@ -556,8 +556,11 @@ void PrintDialog::on_actionInsert_Cell_Table_triggered() {
   if (projector && projector->getCrystal()) {
     Crystal* c = projector->getCrystal();
 
-    //QFile f(":/report_crystal.html");
+#ifdef __SOURCEDIR__
     QFile f(__SOURCEDIR__ "/Resources/report_crystal.html");
+#else
+    QFile f(":/report_crystal.html");
+#endif
     if (f.open(QIODevice::ReadOnly)) {
       QString tableCode = QString(f.readAll());
       f.close();
@@ -576,8 +579,11 @@ void PrintDialog::on_actionInsert_Cell_Table_triggered() {
 
 void PrintDialog::on_actionInsert_Projector_Info_triggered() {
   if (projector) {
-    //QFile f(QString(":/report_%1.html").arg(projector->projectorName()));
+#ifdef __SOURCEDIR__
     QFile f(QString(__SOURCEDIR__"/Resources/report_%1.html").arg(projector->projectorName()));
+#else
+    QFile f(QString(":/report_%1.html").arg(projector->projectorName()));
+#endif
     if (f.open(QIODevice::ReadOnly)) {
       QString tableCode = QString(f.readAll());
       f.close();
@@ -589,22 +595,60 @@ void PrintDialog::on_actionInsert_Projector_Info_triggered() {
   }
 }
 
+struct ValueSorter {
+  bool operator()(const QPair<QString, QString>& p1, const QPair<QString, QString>& p2) { return p1.second.length() < p2.second.length(); }
+};
+
 void PrintDialog::on_actionInsert_Image_info_triggered() {
   if (projector && projector->getLaueImage()) {
-    //QFile f(":/report_crystal.html");
+#ifdef __SOURCEDIR__
     QFile f(__SOURCEDIR__ "/Resources/report_image.html");
+#else
+    QFile f(":/report_image.html");
+#endif
     if (f.open(QIODevice::ReadOnly)) {
       QString tableCode = QString(f.readAll());
       f.close();
 
       tableCode.replace("<IMAGEPATH/>", projector->getLaueImage()->getInfo(DataProvider::Info_ImagePath).toString());
 
+      QList<QPair<QString, QString> > values;
+      foreach (QString key, projector->getLaueImage()->infoKeys())
+        if (key!=DataProvider::Info_ImagePath)
+          values.append(qMakePair(key, projector->getLaueImage()->getInfo(key).toString()));
+      qStableSort(values.begin(), values.end(), ValueSorter());
+
+      int mix = (values.size()+1)/2;
+
+      qStableSort(values.begin(), values.begin()+mix);
+      qStableSort(values.begin()+mix, values.end());
+
+      QList<QPair<QString, QString> > tmpValues;
+      for (int i=0; i<mix; i++) {
+        tmpValues << values.at(i);
+        if (i+mix<values.length()) tmpValues << values.at(i+mix);
+      }
+      values = tmpValues;
+
+      QRegExp loopRegExp("<loop>(.*)</loop>");
+      QString loopCode;
+      if (loopRegExp.indexIn(tableCode)>=0) {
+        int replacePos = 0;
+
+        QPair<QString, QString> p;
+        foreach(p, values) {
+          if ((replacePos = loopCode.indexOf("<HEADER/>", replacePos))==-1) {
+            replacePos = loopCode.size();
+            loopCode += loopRegExp.capturedTexts().at(1);
+          }
+          loopCode.replace(loopCode.indexOf("<HEADER/>", replacePos), 9, p.first);
+          loopCode.replace(loopCode.indexOf("<VALUE/>", replacePos), 8, p.second);
+        }
+        tableCode.replace(loopRegExp.pos(), loopRegExp.matchedLength(), loopCode);
+      }
+
+
       WebkitTextObject::insertObject(ui->textEdit, tableCode);
-    }
-
-
-    foreach (QString key, projector->getLaueImage()->infoKeys()) {
-      qDebug() << key << projector->getLaueImage()->getInfo(key).toString();
     }
   }
 }
@@ -760,9 +804,6 @@ void PrintDialog::printToSvg() {
   renderToPaintDevice(SvgDevice(projector));
 }
 
-#include <QtWebKit/QWebPage>
-#include <QtWebKit/QWebFrame>
-
 void PrintDialog::renderToPaintDevice(const PaintDeviceFactory& _factory) {
   PaintDeviceFactory& factory = const_cast<PaintDeviceFactory&>(_factory);
   int textHeight = 0;
@@ -789,7 +830,7 @@ void PrintDialog::renderToPaintDevice(const PaintDeviceFactory& _factory) {
     p.restore();
   }
 
-  emit paintRequested(&p, QRectF(0, textHeight, device->width(), device->height()+textHeight));
+  emit paintRequested(&p, QRectF(0, textHeight, device->width(), device->height()-textHeight));
 }
 
 

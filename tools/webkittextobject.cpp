@@ -88,7 +88,6 @@ QPicture* WebkitTextObject::getPicture(const QTextFormat &format) {
     page->mainFrame()->render(&painter, QWebFrame::ContentsLayer, QRegion(0, 0, s.width(), s.height()));
     painter.end();
 
-    qDebug() << "Generate" << fontSize << fontFamily << s << picture->size();
     cache->insert(key, picture);
   }
   return cache->object(key);
@@ -102,7 +101,6 @@ void WebkitTextObject::registerObject(QTextDocument* doc) {
 
 
 void WebkitTextObject::insertObject(QTextEdit* edit, const QString& html) {
-
   QTextCursor cursor = edit->textCursor();
 
   QTextCharFormat webkitCharFormat;

@@ -1,25 +1,26 @@
 <html>
  <head>
   <style type="text/css">
-   .celltable { border-style:solid; border-color:#000000; border-collapse:collapse; table-layout:fixed; width:28em }
+   .celltable { border-style:solid; border-color:#000000; border-collapse:collapse;  width:55em }
    .mainheader { text-align:center; vertical-align: center; padding-bottom:8px; padding-top:3px }
-   .header { font-weight:bold; text-align:center; vertical-align: center }
-   .value { padding-right:5px; text-align:right; vertical-align: center }
+   .header { padding: 1px 3px 1px 3px; font-weight:bold; text-align:left; vertical-align: center; white-space:nowrap }
+   .value { padding:1px 3px 1px 3px; text-align:left; vertical-align: center }
    .sgheader { font-weight:bold }
-   .sgvalue { padding-left: 10px }
+   .sgvalue { padding-left: 3px }
   </style>
  </head>
- <body>
-  <table class="celltable" border="1" cellspacing="0" cellpadding="1">
+ <body style="margin:0px">
+  <table class="celltable" border="1">
   <tbody>
    <tr><td colspan="6" class="mainheader"><span class="sgheader">Image</span>  <span class="sgvalue"><IMAGEPATH/></span></td></tr>
-   <tr>
-    <td class="header">Image Size</td>
-    <td colspan="2" class="value"><IMAGESIZE/></td>
-    <td class="header">Creation Date</td>
-    <td colspan="2" class="value"><CREATIONDATE/></td>
-   </tr>
-   <loop/>
+   <loop>
+    <tr>
+     <td class="header"><HEADER/></td>
+     <td colspan="2" class="value" style="white-space:nowrap"><VALUE/></td>
+     <td class="header"><HEADER/></td>
+     <td colspan="2" class="value"><VALUE/></td>
+    </tr>
+   </loop>
    </tbody>
   </table>
  </body>

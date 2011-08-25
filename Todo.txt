@@ -13,3 +13,5 @@ Printing
     Using QtWebKit for rendering (better support for special table formats
 
 Implement a faster MonochromeScaler
+
+Suche nach mehrfach genutzten Strings. Diese dann schön in static const char Variablen umsetzen
