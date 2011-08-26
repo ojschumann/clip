@@ -159,12 +159,6 @@ void CrystalDisplay::slotSpacegroupChanged(QString s) {
   if (s=="JRS") {
     ui->Spacegroup->setText("Fd3m");
     ui->latticeA->setValue(5.43102064);
-    /*QMessageBox msgBox;
-    msgBox.setIcon(QMessageBox::NoIcon);
-    msgBox.setWindowTitle("Dieses Programm ist meinem lieben Papa gewidmet.");
-    msgBox.setText("<html><body style=\"background-color:#FFCCFF\"><p style=\"background-color:#FFCCFF\" align=\"center\"><img src=\":/papa.jpeg\"/><h2>Jochen Schumann</h2>6.12.1947 - 10.6.2011<p align=\"right\">Ich vermisse dich</p></p></body></html>");
-    msgBox.exec();
-    */
     SadEasterEgg see;
     see.exec();
   } else {
@@ -290,8 +284,8 @@ void CrystalDisplay::on_actionSave_triggered() {
     settings.setValue("LastDirectory", QFileInfo(filename).canonicalFilePath());
 
 
-    QDomDocument doc("Crystal");
-    QDomElement docElement = doc.appendChild(doc.createElement("Crystal")).toElement();
+    QDomDocument doc(Crystal::Settings_Group);
+    QDomElement docElement = doc.appendChild(doc.createElement(Crystal::Settings_Group)).toElement();
     crystal->saveToXML(docElement);
 
     QTextStream ts(&file);

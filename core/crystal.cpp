@@ -77,6 +77,20 @@ public:
 };
 
 
+
+const char Crystal::Settings_Group[] = "Crystal";
+const char Crystal::Settings_Spacegroup[] = "Spacegroup";
+const char Crystal::Settings_CellA[] = "CellA";
+const char Crystal::Settings_CellB[] = "CellB";
+const char Crystal::Settings_CellC[] = "CellC";
+const char Crystal::Settings_CellAlpha[] = "CellAlpha";
+const char Crystal::Settings_CellBeta[] = "CellBeta";
+const char Crystal::Settings_CellGamma[] = "CellGamma";
+const char Crystal::Settings_EulerOmega[] = "EulerOmega";
+const char Crystal::Settings_EulerChi[] = "EulerChi";
+const char Crystal::Settings_EulerPhi[] = "EulerPhi";
+
+
 Crystal::Crystal(QObject* parent):
     FitObject(parent),
     MReal(),
@@ -90,17 +104,17 @@ Crystal::Crystal(QObject* parent):
     orientationGroup(this)
 {
   QSettings settings;
-  settings.beginGroup("Crystal");
-  spaceGroup.setGroupSymbol(settings.value("Spacegroup", "P1").toString());
-  internalSetCell(settings.value("CellA", 4.0).toDouble(),
-                  settings.value("CellB", 4.0).toDouble(),
-                  settings.value("CellC", 4.0).toDouble(),
-                  settings.value("CellAlpha", 90.0).toDouble(),
-                  settings.value("CellBeta", 90.0).toDouble(),
-                  settings.value("CellGamma", 90.0).toDouble());
-  setEulerAngles(settings.value("EulerOmega", 00.0).toDouble(),
-                 settings.value("EulerChi", 00.0).toDouble(),
-                 settings.value("EulerPhi", 00.0).toDouble());
+  settings.beginGroup(Settings_Group);
+  spaceGroup.setGroupSymbol(settings.value(Settings_Spacegroup, "P1").toString());
+  internalSetCell(settings.value(Settings_CellA, 4.0).toDouble(),
+                  settings.value(Settings_CellB, 4.0).toDouble(),
+                  settings.value(Settings_CellC, 4.0).toDouble(),
+                  settings.value(Settings_CellAlpha, 90.0).toDouble(),
+                  settings.value(Settings_CellBeta, 90.0).toDouble(),
+                  settings.value(Settings_CellGamma, 90.0).toDouble());
+  setEulerAngles(settings.value(Settings_EulerOmega, 00.0).toDouble(),
+                 settings.value(Settings_EulerChi, 00.0).toDouble(),
+                 settings.value(Settings_EulerPhi, 00.0).toDouble());
 
   settings.endGroup();
 
@@ -144,7 +158,7 @@ Crystal& Crystal::operator=(const Crystal& c) {
 Crystal::~Crystal() {}
 
 QString Crystal::FitObjectName() {
-  return "Crystal";
+  return Settings_Group;
 }
 
 void Crystal::prepareForFit() {
@@ -651,8 +665,6 @@ void Crystal::convertHtoR() {
 }
 
 
-const char XML_Crystal_Element[] = "Crystal";
-const char XML_Crystal_Spacegroup[] = "Spacegroup";
 const char XML_Crystal_Spacegroup_symbol[] = "symbol";
 const char XML_Crystal_Cell[] = "Cell";
 const char XML_Crystal_Cell_a[] = "a";
@@ -673,9 +685,9 @@ const char XML_Crystal_Rotation_type[] = "type";
 
 void Crystal::saveToXML(QDomElement base) {
   QDomDocument doc = base.ownerDocument();
-  QDomElement crystalElement = ensureElement(base, XML_Crystal_Element);
+  QDomElement crystalElement = ensureElement(base, Settings_Group);
 
-  QDomElement e = crystalElement.appendChild(doc.createElement(XML_Crystal_Spacegroup)).toElement();
+  QDomElement e = crystalElement.appendChild(doc.createElement(Settings_Spacegroup)).toElement();
   e.setAttribute(XML_Crystal_Spacegroup_symbol, spaceGroup.groupSymbol());
 
   e = crystalElement.appendChild(doc.createElement(XML_Crystal_Cell)).toElement();
@@ -702,12 +714,12 @@ void Crystal::saveToXML(QDomElement base) {
 
 bool Crystal::loadFromXML(QDomElement base) {
   QDomElement crystalElement = base;
-  if (crystalElement.tagName()!=XML_Crystal_Element)
-    crystalElement = base.elementsByTagName(XML_Crystal_Element).at(0).toElement();
+  if (crystalElement.tagName()!=Settings_Group)
+    crystalElement = base.elementsByTagName(Settings_Group).at(0).toElement();
   if (crystalElement.isNull()) return false;
   for (QDomElement e=crystalElement.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
     bool ok = true;
-    if (e.tagName()==XML_Crystal_Spacegroup) {
+    if (e.tagName()==Settings_Spacegroup) {
       if (!spaceGroup.setGroupSymbol(e.attribute(XML_Crystal_Spacegroup_symbol))) return false;
     } else if (e.tagName()==XML_Crystal_Cell) {
       double a = readDouble(e, XML_Crystal_Cell_a, ok);

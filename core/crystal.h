@@ -50,6 +50,18 @@ public:
     DirectSpace
   };
 
+  static const char Settings_Group[];
+  static const char Settings_Spacegroup[];
+  static const char Settings_CellA[];
+  static const char Settings_CellB[];
+  static const char Settings_CellC[];
+  static const char Settings_CellAlpha[];
+  static const char Settings_CellBeta[];
+  static const char Settings_CellGamma[];
+  static const char Settings_EulerOmega[];
+  static const char Settings_EulerChi[];
+  static const char Settings_EulerPhi[];
+
   Crystal(QObject* parent=0);
   virtual ~Crystal();
 
