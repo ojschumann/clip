@@ -1,0 +1,55 @@
+<!DOCTYPE ClipWorkspace>
+<ClipWorkspace>
+  <CrystalConnection>
+    <ConnectedCrystal>
+      <CrystalDisplay>
+        <Geometry width="214" x="0" y="0" height="275"/>
+        <Crystal>
+          <Spacegroup symbol="Pm3m"/>
+          <Cell beta="90.00000000000001" gamma="90.00000000000001" alpha="90.00000000000001" a="5" b="5" c="5"/>
+          <Orientation phi="-101.163938285742" omega="-167.6189483214884" chi="-78.9145533703321"/>
+          <RotationAxis x="1" y="0" z="0" type="0"/>
+        </Crystal>
+      </CrystalDisplay>
+    </ConnectedCrystal>
+    <ConnectedProjectors>
+      <ProjectionPlane projectortype="LauePlaneProjector">
+        <Geometry width="331" x="214" y="0" height="384"/>
+        <ZoomSteps/>
+        <Projector>
+          <QRange Qmax="6.283" Qmin="0"/>
+          <Display textSize="7.000000000000001" spotSize="1" spotsEnabled="1" maxHKLSum="3"/>
+          <ZoneMarkers>
+            <Marker>
+              <StartHandle x="0.9401009795704503" y="0.9177924025519778"/>
+              <EndHandle x="0.7131439898614531" y="0.109903031522442"/>
+            </Marker>
+            <Marker>
+              <StartHandle x="0.4428763206109484" y="0.93042071197411"/>
+              <EndHandle x="0.9818417146056329" y="0.2492820371768388"/>
+            </Marker>
+            <Marker>
+              <StartHandle x="0.2189154512049928" y="0.1077096911163519"/>
+              <EndHandle x="0.9799253918904022" y="0.5778786093068872"/>
+            </Marker>
+            <Marker>
+              <StartHandle x="0.02899035486182952" y="0.6119831155071566"/>
+              <EndHandle x="0.922594427199143" y="0.4427488276864144"/>
+            </Marker>
+            <Marker>
+              <StartHandle x="0.1027313018525995" y="0.4431165887353671"/>
+              <EndHandle x="0.5711974110032364" y="0.8559870550161812"/>
+            </Marker>
+            <Marker>
+              <StartHandle x="0.1083697070014127" y="0.1225569365111257"/>
+              <EndHandle x="0.2613201361182071" y="0.9756206805272506"/>
+            </Marker>
+          </ZoneMarkers>
+          <DetSize width="150" dist="30" height="150"/>
+          <DetOrientation Chi="0" Phi="0" Omega="180"/>
+          <DetOffset xOffset="0" yOffset="0"/>
+        </Projector>
+      </ProjectionPlane>
+    </ConnectedProjectors>
+  </CrystalConnection>
+</ClipWorkspace>

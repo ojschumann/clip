@@ -1,0 +1,3 @@
+<ProjectionPlane projectortype="StereoProjector">
+  <Geometry width="350" height="405"/>
+</ProjectionPlane>

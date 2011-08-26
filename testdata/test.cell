@@ -1,0 +1,5 @@
+  <Crystal>
+   <Spacegroup symbol="P4/mmm" />
+   <Cell beta="90.0" gamma="90.0" alpha="90.0" a="4.0" b="4.0" c="12.0" />
+   <Orientation phi="10.0" omega="20.0" chi="30.0" />
+  </Crystal>
