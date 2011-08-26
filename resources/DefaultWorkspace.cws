@@ -1,0 +1,18 @@
+<!DOCTYPE ClipWorkspace>
+<ClipWorkspace>
+  <CrystalConnection>
+   <ConnectedCrystal>
+    <CrystalDisplay>
+      <Crystal>
+      </Crystal>
+    </CrystalDisplay>
+   </ConnectedCrystal>
+   <ConnectedProjectors>
+    <ProjectionPlane projectortype="LauePlaneProjector">
+      <ZoomSteps/>
+      <Projector>
+      </Projector>
+    </ProjectionPlane>
+   </ConnectedProjectors>
+  </CrystalConnection>
+</ClipWorkspace>
