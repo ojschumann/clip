@@ -164,7 +164,7 @@ void ProjectionPlane::resizeView() {
   ui->view->centerOn(minViewRect.center());
 }
 
-void ProjectionPlane::resizeEvent(QResizeEvent *e) {
+void ProjectionPlane::resizeEvent(QResizeEvent* /*e*/) {
   resizeView();
 }
 

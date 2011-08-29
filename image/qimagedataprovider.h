@@ -49,7 +49,8 @@ public:
 private:
   explicit QImageDataProvider(const QImage& img, QObject *parent = 0);
   virtual ~QImageDataProvider();
-  QImageDataProvider(const QImageDataProvider&) {}
+  QImageDataProvider(const QImageDataProvider&);
+  QImageDataProvider& operator=(const QImageDataProvider&);
   QImage data;
 
 signals:

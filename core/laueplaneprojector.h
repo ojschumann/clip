@@ -145,10 +145,8 @@ protected:
   ShiftGroup shiftGroup;
 
 private:
-  LauePlaneProjector(const LauePlaneProjector&):
-      distGroup(this),
-      orientationGroup(this),
-      shiftGroup(this) {};
+  LauePlaneProjector(const LauePlaneProjector&);
+  LauePlaneProjector& operator=(const LauePlaneProjector&);
 };
 
 #endif

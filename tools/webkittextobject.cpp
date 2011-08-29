@@ -43,7 +43,7 @@ WebkitTextObject::WebkitTextObject(QObject* parent): QObject(parent)  {
 WebkitTextObject::~WebkitTextObject()  {
 }
 
-QSizeF WebkitTextObject::intrinsicSize(QTextDocument * doc, int /*posInDocument*/,
+QSizeF WebkitTextObject::intrinsicSize(QTextDocument* /*doc*/, int /*posInDocument*/,
                                     const QTextFormat &format)
 {
   return getPicture(format)->boundingRect().size();

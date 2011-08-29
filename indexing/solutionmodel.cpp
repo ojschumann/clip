@@ -30,11 +30,11 @@ SolutionModel::SolutionModel(QObject *parent):
 {
 }
 
-int SolutionModel::rowCount(const QModelIndex & parent) const {
+int SolutionModel::rowCount(const QModelIndex& /*parent*/) const {
   return solutions.count();
 }
 
-int SolutionModel::columnCount(const QModelIndex & parent) const {
+int SolutionModel::columnCount(const QModelIndex& /*parent*/) const {
   return 3;
 }
 

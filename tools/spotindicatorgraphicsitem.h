@@ -36,6 +36,7 @@ public:
   virtual ~SpotIndicatorGraphicsItem();
 private:
   SpotIndicatorGraphicsItem(const SpotIndicatorGraphicsItem&);
+  SpotIndicatorGraphicsItem& operator=(const SpotIndicatorGraphicsItem&);
 public slots:
   void setColor(QColor);
 public:
@@ -74,7 +75,8 @@ protected:
     QImage* localCache;
     bool shouldStop;
   private:
-    Worker(const Worker&) {};
+    Worker(const Worker&);
+    Worker& operator=(const Worker&);
   };
   QList<Worker*> workers;
 };

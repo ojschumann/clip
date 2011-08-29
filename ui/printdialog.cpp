@@ -656,7 +656,7 @@ void PrintDialog::on_actionInsert_Image_info_triggered() {
 
 
 
-QSize PrintDialog::getImageSize(bool askForSize) {
+QSize PrintDialog::getImageSize(bool /*askForSize*/) {
   if (projector && !projector->getScene()->views().isEmpty() && projector->getLaueImage()) {
     QGraphicsView *const firstView = projector->getScene()->views().at(0);
 

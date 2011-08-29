@@ -868,15 +868,15 @@ void Crystal::OrientationGroup::doSetValue(QList<double> values) {
   crystal->setRotation(M);
 }
 
-double Crystal::OrientationGroup::epsilon(int member) const {
+double Crystal::OrientationGroup::epsilon(int /* member*/) const {
   return 0.0001;
 }
 
-double Crystal::OrientationGroup::lowerBound(int member) const {
+double Crystal::OrientationGroup::lowerBound(int /*member*/) const {
   return -10;
 }
 
-double Crystal::OrientationGroup::upperBound(int member) const {
+double Crystal::OrientationGroup::upperBound(int /*member*/) const {
   return 10;
 }
 

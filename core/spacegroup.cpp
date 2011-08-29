@@ -85,7 +85,7 @@ Spacegroup::Spacegroup(QObject* parent): QObject(parent) {
   setGroupSymbol("P1");
 }
 
-Spacegroup::Spacegroup(const Spacegroup &o) {
+Spacegroup::Spacegroup(const Spacegroup &o): QObject(NULL) {
   symbol = o.symbol;
   crystalsystem = o.crystalsystem;
   group = o.group;

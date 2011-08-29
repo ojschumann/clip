@@ -40,7 +40,7 @@ protected:
   Vec3D markerNormal;
   Mat3D const* normalToIndexMatrix;
   Mat3D const* indexToNormalMatrix;
-  virtual void highlight(bool b) {}
+  virtual void highlight(bool /*b*/) {}
 };
 
 #endif // MARKER_H

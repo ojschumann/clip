@@ -43,15 +43,15 @@ RulerModel::RulerModel(ItemStore<RulerItem>& r, LaueImage* img, QObject* parent)
   connect(&rulers, SIGNAL(itemRemoved(int)), this, SLOT(rulerRemoved(int)));
 }
 
-int RulerModel::rowCount(const QModelIndex & parent = QModelIndex() ) const {
+int RulerModel::rowCount(const QModelIndex& /*parent*/ ) const {
   return rulers.size();
 }
 
-int RulerModel::columnCount(const QModelIndex & parent = QModelIndex() ) const {
+int RulerModel::columnCount(const QModelIndex& /*parent*/  ) const {
   return 5;
 }
 
-QVariant RulerModel::data ( const QModelIndex & index, int role = Qt::DisplayRole ) const {
+QVariant RulerModel::data ( const QModelIndex & index, int role	) const {
   if (role==Qt::DisplayRole) {
     RulerItem* r = rulers.at(index.row());
     double dx = fabs(r->getStart().x()-r->getEnd().x());
@@ -104,7 +104,7 @@ Qt::ItemFlags RulerModel::flags(const QModelIndex &index) const {
   return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
-bool RulerModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+bool RulerModel::setData(const QModelIndex &index, const QVariant &value, int /*role*/) {
   bool b;
   double val = value.toDouble(&b);
   if (b) {

@@ -55,7 +55,7 @@ protected:
   bool highlighted;
   double radius;
 private:
-  RulerItem(const RulerItem& o) {}
+  RulerItem(const RulerItem& o);
   QColor rulerColor;
 };
 

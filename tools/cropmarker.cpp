@@ -32,7 +32,7 @@
 #include "config/configstore.h"
 
 
-CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _angle, double _handleSize, QGraphicsItem *parent):
+CropMarker::CropMarker(const QPointF& /*pCenter*/, double /*_dx*/, double /*_dy*/, double /*_angle*/, double _handleSize, QGraphicsItem *parent):
     QGraphicsObject(parent)
 {
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
@@ -117,7 +117,7 @@ QPolygonF CropMarker::getRect() {
   return rect;
 }
 
-void CropMarker::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void CropMarker::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
   double w = size.width()/2;
   double h = size.height()/2;
   double d = 2.0*handleSize;

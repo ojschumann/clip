@@ -27,7 +27,7 @@ DiagramGV::DiagramGV(QWidget *parent) :
 {
 }
 
-void DiagramGV::resizeEvent(QResizeEvent *event) {
+void DiagramGV::resizeEvent(QResizeEvent* /*event*/) {
   if (!sceneRect().isEmpty()) {
     fitInView(sceneRect());
   }

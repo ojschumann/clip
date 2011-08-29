@@ -42,7 +42,7 @@
 class NumberEditDelegate: public QStyledItemDelegate {
 public:
   NumberEditDelegate(QObject* parent=0): QStyledItemDelegate(parent) {}
-  virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+  virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     NumberEdit* n = new NumberEdit(parent, true);
     n->setButtonSymbols(QAbstractSpinBox::NoButtons);
     n->setMinimum(0.0);
@@ -107,8 +107,12 @@ struct RulerData {
   double dy;
   double l;
 };
-__attribute__((force_align_arg_pointer)) void ResolutionCalculator::slotCalcResolution() {
 
+#ifdef __WIN__
+__attribute__((force_align_arg_pointer)) void ResolutionCalculator::slotCalcResolution() {
+#else
+void ResolutionCalculator::slotCalcResolution() {
+#endif
 
   // Load all rulers with a valid length in list
   QList<RulerData> rulerWithLengthData;

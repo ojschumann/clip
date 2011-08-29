@@ -74,7 +74,7 @@ protected:
   virtual void emitChanged();
   virtual void emitItemClicked();
 private:
-  ItemStore<T>& operator=(const ItemStore<T>&) { return *this; }
+  ItemStore<T>& operator=(const ItemStore<T>&);
   QList<T*> items;
 };
 

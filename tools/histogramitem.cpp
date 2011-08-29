@@ -40,7 +40,7 @@ QRectF HistogramItem::boundingRect() const {
   return QRectF(0,0,1,1);
 }
 
-void HistogramItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void HistogramItem::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
   if (maxValue == 0 || pathes.empty()) return;
   painter->save();
   QList<QColor> l;

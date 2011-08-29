@@ -63,13 +63,11 @@
         <file>icons/editcut.png</file>
         <file>icons/textsuperscript.png</file>
         <file>icons/textsubscript.png</file>
-        <file>icons/zoomout.png</file>
         <file>icons/fit-page.png</file>
         <file>icons/fit-width.png</file>
         <file>icons/layout-landscape.png</file>
         <file>icons/layout-portrait.png</file>
         <file>icons/page-setup.png</file>
-        <file>icons/zoomin.png</file>
         <file>icons/fileprintpdf.png</file>
         <file>icons/fileprintpng.png</file>
         <file>icons/fileprintps.png</file>

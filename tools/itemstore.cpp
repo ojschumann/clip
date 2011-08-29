@@ -36,7 +36,7 @@ template <class T> ItemStore<T>::ItemStore(QObject* parent) :
 
 }
 
-template <class T> ItemStore<T>::ItemStore(const ItemStore &o) {
+template <class T> ItemStore<T>::ItemStore(const ItemStore &o):AbstractItemStore() {
   items = o.items;
 }
 

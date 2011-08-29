@@ -565,7 +565,7 @@ LauePlaneProjector::DistGroup::DistGroup(LauePlaneProjector* p):
   addParameter("Distance");
 }
 
-double LauePlaneProjector::DistGroup::value(int member) const {
+double LauePlaneProjector::DistGroup::value(int /*member*/) const {
   return projector->dist();
 }
 
@@ -573,15 +573,15 @@ void LauePlaneProjector::DistGroup::doSetValue(QList<double> values) {
   projector->setDetSize(values.at(0), projector->width(), projector->height());
 }
 
-double LauePlaneProjector::DistGroup::epsilon(int member) const {
+double LauePlaneProjector::DistGroup::epsilon(int /*member*/) const {
   return 0.001;
 }
 
-double LauePlaneProjector::DistGroup::lowerBound(int member) const {
+double LauePlaneProjector::DistGroup::lowerBound(int /*member*/) const {
   return 5.0;
 }
 
-double LauePlaneProjector::DistGroup::upperBound(int member) const {
+double LauePlaneProjector::DistGroup::upperBound(int /*member*/) const {
   return 300.0;
 }
 
@@ -607,15 +607,15 @@ void LauePlaneProjector::ShiftGroup::doSetValue(QList<double> values) {
   projector->setDetOffset(values.at(0), values.at(1));
 }
 
-double LauePlaneProjector::ShiftGroup::epsilon(int member) const {
+double LauePlaneProjector::ShiftGroup::epsilon(int /*member*/) const {
   return 0.0001;
 }
 
-double LauePlaneProjector::ShiftGroup::lowerBound(int member) const {
+double LauePlaneProjector::ShiftGroup::lowerBound(int /*member*/) const {
   return -20.0;
 }
 
-double LauePlaneProjector::ShiftGroup::upperBound(int member) const {
+double LauePlaneProjector::ShiftGroup::upperBound(int /*member*/) const {
   return 380;
 }
 
@@ -642,15 +642,15 @@ void LauePlaneProjector::OrientationGroup::doSetValue(QList<double> values) {
   projector->setDetOrientation(values.at(0), values.at(1), projector->phi());
 }
 
-double LauePlaneProjector::OrientationGroup::epsilon(int member) const {
+double LauePlaneProjector::OrientationGroup::epsilon(int /*member*/) const {
   return 0.0001;
 }
 
-double LauePlaneProjector::OrientationGroup::lowerBound(int member) const {
+double LauePlaneProjector::OrientationGroup::lowerBound(int /*member*/) const {
   return -20.0;
 }
 
-double LauePlaneProjector::OrientationGroup::upperBound(int member) const {
+double LauePlaneProjector::OrientationGroup::upperBound(int /*member*/) const {
   return 380;
 }
 

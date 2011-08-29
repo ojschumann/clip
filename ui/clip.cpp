@@ -64,7 +64,7 @@ Clip::Clip(QWidget *parent) :
 }
 
 
-Clip::Clip(const Clip &) {
+Clip::Clip(const Clip &):QMainWindow() {
 }
 
 

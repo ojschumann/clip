@@ -44,7 +44,7 @@ CircleItem::CircleItem(double r, QGraphicsItem *parent) :
 CircleItem::~CircleItem() {
 }
 
-void CircleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void CircleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
   //PDF-Export via QPrinter::setOutputFormat(PdfFormat) has a Bug concerning
   //Cosmetic Pens and very small coordinates (here, the rect is (0, 0, 1, 1))
   //thus reset the World Transform and paint with noncosmetic pens

@@ -69,7 +69,7 @@ int IndexDisplay::maxSearchIndex() {
   return ui->maxIndex->value();
 }
 
-void IndexDisplay::updateSolutionDisplay(QModelIndex index, QModelIndex prev) {
+void IndexDisplay::updateSolutionDisplay(QModelIndex index, QModelIndex /*prev*/) {
   int n=index.row();
   if (n>=0) {
     Solution s = solutions.getSolution(n);
