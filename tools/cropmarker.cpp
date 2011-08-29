@@ -32,7 +32,7 @@
 #include "config/configstore.h"
 
 
-CropMarker::CropMarker(const QPointF &pCenter, double _dx, double _dy, double _angle, double _handleSize, QGraphicsItem *parent):
+CropMarker::CropMarker(const QPointF& /* pCenter */, double /* _dx */, double /* _dy */, double /* _angle */, double _handleSize, QGraphicsItem *parent):
     QGraphicsObject(parent)
 {
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);

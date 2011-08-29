@@ -38,6 +38,7 @@ public:
     QStringList fileFormatFilters();
     DataProvider* getProvider(QString, ImageDataStore*, QObject* = 0);
   };
+  virtual ~QImageDataProvider();
 
   virtual void saveToXML(QDomElement);
   virtual void loadFromXML(QDomElement);
@@ -48,8 +49,7 @@ public:
   virtual Format format();
 private:
   explicit QImageDataProvider(const QImage& img, QObject *parent = 0);
-  virtual ~QImageDataProvider();
-  QImageDataProvider(const QImageDataProvider&) {}
+  QImageDataProvider(const QImageDataProvider&);
   QImage data;
 
 signals:

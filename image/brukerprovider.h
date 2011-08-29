@@ -49,6 +49,8 @@ public:
   virtual Format format();
 private:
   explicit BrukerProvider(QObject *parent = 0);
+  BrukerProvider(const BrukerProvider&);
+  BrukerProvider& operator=(const BrukerProvider&);
 signals:
 
 public slots:

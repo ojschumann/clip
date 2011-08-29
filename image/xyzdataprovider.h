@@ -49,6 +49,8 @@ public:
   virtual Format format();
 private:
   explicit XYZDataProvider(QObject *parent = 0);
+  XYZDataProvider(const XYZDataProvider&);
+  XYZDataProvider& operator=(const XYZDataProvider&);
 signals:
 
     public slots:

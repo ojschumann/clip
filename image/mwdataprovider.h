@@ -50,6 +50,8 @@ public:
   virtual Format format();
 private:
   explicit MWDataProvider(QObject *parent = 0);
+  MWDataProvider(const MWDataProvider&);
+  MWDataProvider& operator=(const MWDataProvider&);
 signals:
 
 public slots:
