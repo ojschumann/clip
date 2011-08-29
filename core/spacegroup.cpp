@@ -24,7 +24,6 @@
 
 #include <QRegExp>
 #include <QStringList>
-#include <QDebug>
 #include <iostream>
 #include <iomanip>
 

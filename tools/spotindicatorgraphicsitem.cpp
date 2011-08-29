@@ -24,8 +24,8 @@
 
 #include <QPainter>
 #include <QGraphicsView>
-#include <QDebug>
 #include <iostream>
+#include <QDebug>
 
 #include "config/configstore.h"
 
@@ -83,7 +83,7 @@ void SpotIndicatorGraphicsItem::updateCache() {
       if (worker->localCache) {
         p.drawImage(QPoint(0,0), *worker->localCache);
       } else {
-        qDebug() << "No chache for Worker";
+        qDebug() << "No chache for Worker:" << workers.indexOf(worker);
       }
     }
     cacheNeedsUpdate=false;

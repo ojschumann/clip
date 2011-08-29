@@ -128,7 +128,7 @@
      <x>0</x>
      <y>0</y>
      <width>667</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuEdit">
@@ -158,8 +158,18 @@
     <addaction name="separator"/>
     <addaction name="actionTextColor"/>
    </widget>
+   <widget class="QMenu" name="menuInsert">
+    <property name="title">
+     <string>Insert</string>
+    </property>
+    <addaction name="actionInsert_Cell_Table"/>
+    <addaction name="actionInsert_Projector_Info"/>
+    <addaction name="actionInsert_Image_info"/>
+    <addaction name="separator"/>
+   </widget>
    <addaction name="menuEdit"/>
    <addaction name="menuF_ormat"/>
+   <addaction name="menuInsert"/>
   </widget>
   <widget class="QToolBar" name="previewToolbar">
    <property name="windowTitle">

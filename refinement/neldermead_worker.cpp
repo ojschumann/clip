@@ -293,9 +293,7 @@ QList<double> NMWorker::calcDeviation() {
   QList<double> res;
   for (int i=0; i<N; i++) {
     res << sqrt(fabs(s0*eps(i,i)));
-    qDebug() << res.last();
   }
-  qDebug() << "";
   return res;
 
 }

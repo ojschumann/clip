@@ -37,6 +37,9 @@
 
 using namespace std;
 
+
+const char BrukerProvider::Info_Format[] = "FORMAT";
+
 BrukerProvider::BrukerProvider(QObject *parent) :
     DataProvider(parent)
 {
@@ -111,7 +114,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
       maxHeaderFields = headerSize/80;
     }
 
-    if (key=="FORMAT") {
+    if (key==Info_Format) {
       headerData.insert(key, QVariant(value.toInt(&ok)));
       if (!ok) return NULL;
     } else {
@@ -125,7 +128,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
 
   // Check, if all nesessary fields are present
   if ((headerSize==0) ||
-      (!headerData.contains("FORMAT")) ||
+      (!headerData.contains(Info_Format)) ||
       (!headerData.contains("NROWS")) ||
       (!headerData.contains("NCOLS")) ||
       (!headerData.contains("NOVERFL")) ||
@@ -151,7 +154,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
 
   int bytesPerUnderflow = 0;
   int numberUnderflow = 0;
-  if (headerData["FORMAT"].toInt()>=100) {
+  if (headerData[Info_Format].toInt()>=100) {
     if (byteCounts.size()<2) return NULL;
     bytesPerUnderflow = byteCounts.at(1).toInt(&ok);
     if (!ok) return NULL;
@@ -165,7 +168,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
   int underflowTableSize = padTo(bytesPerUnderflow * numberUnderflow, 16);
 
   int overflowTableSize = 0;
-  if (headerData["FORMAT"].toInt()<100) {
+  if (headerData[Info_Format].toInt()<100) {
     if (overflowNumbers.size()!=1) return NULL;
     overflowTableSize = 16*overflowNumbers.at(0).toInt(&ok);
     if (!ok) return NULL;
@@ -195,7 +198,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
   pixelData = readArrayFromSfrm(imgFile, rows*cols, bytesPerPixel);
 
   //TODO: check underflowdata
-  if (headerData["FORMAT"].toInt()<100) {
+  if (headerData[Info_Format].toInt()<100) {
     // TODO implement old overflow format
   } else {
     int twoByteOverflowCount = overflowNumbers.at(1).toInt();
@@ -216,7 +219,6 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
           overflowData[n]=fourByteOverflowData.at(i++);
         }
       }
-      qDebug() << i << " " << fourByteOverflowCount;
     } else if (bytesPerPixel==2) {
       sigVal = 0xFFFF;
       imgFile.seek(headerSize+dataSize+underflowTableSize);
@@ -228,7 +230,6 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
         pixelData[n]=overflowData.at(i++);
       }
     }
-    qDebug() << i << " " << twoByteOverflowCount;
   }
 
   store->setData(ImageDataStore::PixelSize, QSizeF(rows, cols));

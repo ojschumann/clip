@@ -22,8 +22,6 @@
 
 #include "numberedit.h"
 
-#include <QDebug>
-
 NumberEdit::NumberEdit(QWidget *parent, bool _emptyValid) :
     QDoubleSpinBox(parent), emptyValid(_emptyValid)
 {

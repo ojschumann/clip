@@ -39,8 +39,7 @@ QImageDataProvider::QImageDataProvider(const QImage& img, QObject *parent) :
 {
 }
 
-QImageDataProvider::~QImageDataProvider() {
-}
+QImageDataProvider::~QImageDataProvider() {}
 
 QStringList QImageDataProvider::Factory::fileFormatFilters() {
   QStringList formats;

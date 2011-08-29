@@ -26,6 +26,7 @@
 #include <QMainWindow>
 #include <QTextCharFormat>
 #include <QPrinter>
+#include <QTimer>
 
 QT_FORWARD_DECLARE_CLASS(QAction)
 QT_FORWARD_DECLARE_CLASS(QActionGroup)
@@ -70,6 +71,9 @@ private slots:
   void on_actionInsert_Projector_Info_triggered();
   void on_actionInsert_Cell_Table_triggered();
 
+  void handleImageStatus();
+  void imageMenuTrggered(QAction*);
+
   // Slots for formating the description
   void textBold();
   void textUnderline();
@@ -93,7 +97,7 @@ private slots:
   void previewUpdateZoomFactor();
   void previewSetupPage();
 
-
+  // Slots for Printing to various formats
   void printToDefaultPrinter();
   void printToPrinter();
   void printToPdf();
@@ -133,6 +137,12 @@ private:
 
   QPrinter* printer;
   QPrintPreviewWidget* preview;
+
+  QTimer updateTimer;
+  bool updateScheduled;
+private slots:
+  void scheduleUpdate();
+  void doUpdate();
 
 };
 

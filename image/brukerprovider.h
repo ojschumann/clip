@@ -38,6 +38,8 @@ public:
     DataProvider* getProvider(QString, ImageDataStore*, QObject* = 0);
   };
 
+  static const char Info_Format[];
+
   virtual ~BrukerProvider();
 
   virtual const void* getData();
@@ -47,6 +49,8 @@ public:
   virtual Format format();
 private:
   explicit BrukerProvider(QObject *parent = 0);
+  BrukerProvider(const BrukerProvider&);
+  BrukerProvider& operator=(const BrukerProvider&);
 signals:
 
 public slots:

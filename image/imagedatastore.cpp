@@ -21,9 +21,6 @@
  **********************************************************************/
 
 #include "imagedatastore.h"
-
-#include <QDebug>
-
 #include "tools/tools.h"
 
 ImageDataStore::ImageDataStore(QObject *parent) :

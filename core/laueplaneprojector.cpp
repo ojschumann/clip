@@ -332,7 +332,6 @@ void LauePlaneProjector::movedPrimaryBeamMarker() {
   } else if (omega()<89.5) {
     q=scattered2det(Vec3D(-1,0,0), b);
   }
-  qDebug() << "movedPbMarker" << center->pos() << det2img.map(q);
   if (b) {
     setDetOffset(xOffset()+(p.x()-q.x())*dist()/sceneBlowup, yOffset()+(p.y()-q.y())*dist()/sceneBlowup);
   }

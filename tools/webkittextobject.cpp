@@ -25,7 +25,6 @@
 
 #include <QtGui>
 #include <QSharedPointer>
-#include <QDebug>
 #include <QCache>
 #include <QPicture>
 #include <QPair>

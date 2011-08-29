@@ -43,6 +43,7 @@
 #include <QGraphicsView>
 #include <QInputDialog>
 #include <QSettings>
+#include <QCoreApplication>
 
 #include "image/laueimage.h"
 #include "image/imagedatastore.h"
@@ -91,9 +92,19 @@ PrintDialog::PrintDialog(Projector* p, QWidget *parent) :
   connect(p, SIGNAL(destroyed()), this, SLOT(deleteLater()));
   setAttribute(Qt::WA_DeleteOnClose);
 
+
   printer = new QPrinter(QPrinterInfo::defaultPrinter());
   printer->setPageMargins(10, 10, 10, 10, QPrinter::Millimeter);
   preview = new QPrintPreviewWidget(printer, ui->previewFrame);
+
+  connect(projector, SIGNAL(imageClosed()), this, SLOT(handleImageStatus()));
+  connect(projector, SIGNAL(imageLoaded(LaueImage*)), this, SLOT(handleImageStatus()));
+  connect(projector->getScene(), SIGNAL(changed(QList<QRectF>)), this, SLOT(scheduleUpdate()));
+
+  updateTimer.setInterval(500);
+  updateTimer.setSingleShot(true);
+  connect(&updateTimer, SIGNAL(timeout()), this, SLOT(doUpdate()));
+
 
   connect(ui->actionLandscape, SIGNAL(triggered()), preview, SLOT(setLandscapeOrientation()));
   connect(ui->actionPortrait, SIGNAL(triggered()), preview, SLOT(setPortraitOrientation()));
@@ -116,6 +127,10 @@ PrintDialog::PrintDialog(Projector* p, QWidget *parent) :
   ui->actionTextUnderline->setShortcut(QKeySequence::Underline);
 
   setupTextActions();
+
+  ui->actionInsert_Image_info->setMenu(new QMenu(ui->toolBar));
+  connect(ui->actionInsert_Image_info->menu(), SIGNAL(triggered(QAction*)), this, SLOT(imageMenuTrggered(QAction*)));
+  handleImageStatus();
 
   ui->textEdit->setFocus();
   QFile f(":/report.css");
@@ -528,6 +543,31 @@ void PrintDialog::previewSetupPage() {
   }
 }
 
+
+void PrintDialog::handleImageStatus() {
+  bool imageLoaded = projector->getLaueImage();
+  QMenu* menu = ui->actionInsert_Image_info->menu();
+
+  ui->actionInsert_Image_info->setEnabled(imageLoaded);
+
+  if (imageLoaded) {
+    foreach (QString key, projector->getLaueImage()->infoKeys()) {
+      menu->addAction(key);
+    }
+  } else {
+    menu->clear();
+  }
+}
+
+void PrintDialog::imageMenuTrggered(QAction *a) {
+  QTextCursor cursor = ui->textEdit->textCursor();
+
+  cursor.beginEditBlock();
+  cursor.insertText(projector->getLaueImage()->getInfo(a->text()).toString());
+  cursor.endEditBlock();
+  ui->textEdit->setTextCursor(cursor);
+}
+
 int numberOfDecimalPlaces(double d) {
   int m=0;
   d -= trunc(d);
@@ -834,3 +874,23 @@ void PrintDialog::renderToPaintDevice(const PaintDeviceFactory& _factory) {
 }
 
 
+
+void PrintDialog::scheduleUpdate() {
+  if (updateTimer.isActive()) {
+    if (updateScheduled) {
+      QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    } else {
+      updateScheduled = true;
+    }
+
+  } else {
+    updateScheduled = false;
+    updateTimer.start();
+  }
+}
+
+void PrintDialog::doUpdate() {
+  preview->updatePreview();
+  if (updateScheduled)
+    scheduleUpdate();
+}

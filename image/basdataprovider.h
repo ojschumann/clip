@@ -70,6 +70,8 @@ public:
 
 private:
   explicit BasDataProvider(QObject *parent = 0);
+  BasDataProvider(const BasDataProvider&);
+  BasDataProvider& operator=(const BasDataProvider&);
 signals:
 
 public slots:
