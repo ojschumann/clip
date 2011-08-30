@@ -39,7 +39,9 @@ StereoCfg::StereoCfg(StereoProjector* p, QWidget *parent) :
   connect(ui->setDefault, SIGNAL(clicked()), p, SLOT(saveParametersAsDefault()));
   connect(ui->detMinQ, SIGNAL(valueChanged(double)), this, SLOT(slotSetQRange()));
   connect(ui->detMaxQ, SIGNAL(valueChanged(double)), this, SLOT(slotSetQRange()));
+  connect(ui->onlyScattering, SIGNAL(toggled(bool)), p, SLOT(setDisplayOnlyScatteringReflections(bool)));
   connect(p, SIGNAL(projectionParamsChanged()), this, SLOT(slotLoadParams()));
+
 
   connect(ui->Xp, SIGNAL(clicked()), this, SLOT(slotSetProjectionDirection()));
   connect(ui->Xm, SIGNAL(clicked()), this, SLOT(slotSetProjectionDirection()));
@@ -65,6 +67,7 @@ void StereoCfg::slotLoadParams() {
   ui->maxRefLabel->setValue(projector->getMaxHklSqSum());
   ui->detMinQ->setValue(projector->Qmin());
   ui->detMaxQ->setValue(projector->Qmax());
+  ui->onlyScattering->setChecked(projector->displaysOnlyScatteringReflections());
 
   Mat3D M = projector->getDetOrientation();
   Vec3D v = M.transposed()*Vec3D(1,0,0);

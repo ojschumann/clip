@@ -33,15 +33,29 @@
 #include "ui/laueplanecfg.h"
 #include "core/reflection.h"
 #include "core/projectorfactory.h"
+#include "core/crystal.h"
 #include "image/laueimage.h"
 #include "tools/tools.h"
 #include "tools/circleitem.h"
 #include "tools/xmltools.h"
 #include "config/configstore.h"
 
+
 using namespace std;
 
 static const double sceneBlowup = 1000.0;
+
+const char XML_LPP_DetSize[] = "DetSize";
+const char XML_LPP_DetSize_dist[] = "dist";
+const char XML_LPP_DetSize_width[] = "width";
+const char XML_LPP_DetSize_height[] = "height";
+const char XML_LPP_DetOrientation[] = "DetOrientation";
+const char XML_LPP_DetOrientation_omega[] = "Omega";
+const char XML_LPP_DetOrientation_chi[] = "Chi";
+const char XML_LPP_DetOrientation_phi[] = "Phi";
+const char XML_LPP_DetOffset[] = "DetOffset";
+const char XML_LPP_DetOffset_x[] = "xOffset";
+const char XML_LPP_DetOffset_y[] = "yOffset";
 
 LauePlaneProjector::LauePlaneProjector(QObject* parent):
     Projector(parent),
@@ -52,15 +66,16 @@ LauePlaneProjector::LauePlaneProjector(QObject* parent):
 {
   QSettings settings;
   settings.beginGroup(projectorName());
-  internalSetWavevectors(settings.value("Qmin", 0.0).toDouble(), settings.value("Qmax", 2.0*M_PI).toDouble());
+  internalSetWavevectors(settings.value(Settings_QRangeMin, 0.0).toDouble(), settings.value(Settings_QRangeMax, 2.0*M_PI).toDouble());
+  setMaxHklSqSum(settings.value(Settings_maxHKLSqSum, 3).toInt());
+  setTextSizeFraction(settings.value(Settings_textSizeFraction, 10.0).toDouble());
+  setSpotSizeFraction(settings.value(Settings_spotSizeFraction,  1.0).toDouble());
+
   setDetSize(settings.value("detDist", 30.0).toDouble(), settings.value("detWidth", 150.0).toDouble(), settings.value("detHeight", 150.0).toDouble());
   setDetOrientation(settings.value("detOmega", 180.0).toDouble(), settings.value("detChi", 0).toDouble(), settings.value("detPhi", 0).toDouble());
   detDx=1.0;
   detDy=1.0;
   setDetOffset(settings.value("detDX", 0.0).toDouble(), settings.value("detDY", 0.0).toDouble());
-  setMaxHklSqSum(settings.value("maxHKLSqSum", 3).toInt());
-  setTextSizeFraction(settings.value("textSizeFraction", 10.0).toDouble());
-  setSpotSizeFraction(settings.value("spotSizeFraction",  1.0).toDouble());
   settings.endGroup();
 
   addParameterGroup(&distGroup);
@@ -149,14 +164,20 @@ Vec3D LauePlaneProjector::det2normal(const QPointF &p, bool &b)  const {
   }
 }
 
+QPair<double, double> LauePlaneProjector::validOrderRange(double /*Q*/, double Qscatter) {
+  if (Qscatter<1e-5) return qMakePair(0.0, 0.0);
+  return qMakePair(2.0*QminVal/Qscatter, 2.0*QmaxVal/Qscatter);
+}
+
 bool LauePlaneProjector::project(const Reflection &r, QPointF& p) {
   if (r.lowestDiffOrder==0)
     return false;
 
+  QPair<double, double> limits = validOrderRange(r.Q, r.Qscatter);
   bool doesReflect=false;
   for (int i=0; i<r.orders.size(); i++) {
     int n=r.orders[i];
-    if ((2.0*QminVal<=n*r.Qscatter) and (n*r.Qscatter<=2.0*QmaxVal)) {
+    if ((limits.first<=n) and (n<=limits.second)) {
       doesReflect=true;
       break;
     }
@@ -175,6 +196,7 @@ bool LauePlaneProjector::project(const Reflection &r, QPointF& p) {
   p.setY((v.z()*s+detDy)*sceneBlowup);
   return true;
 }
+
 
 void LauePlaneProjector::setDetSize(double dist, double width, double height) {
   if ((detDist!=dist) or (detWidth!=width) or (detHeight!=height)) {
@@ -444,18 +466,6 @@ void LauePlaneProjector::loadParmetersFromImage(LaueImage *img) {
 
   setDetSize(d, w, h);
 }
-
-const char XML_LPP_DetSize[] = "DetSize";
-const char XML_LPP_DetSize_dist[] = "dist";
-const char XML_LPP_DetSize_width[] = "width";
-const char XML_LPP_DetSize_height[] = "height";
-const char XML_LPP_DetOrientation[] = "DetOrientation";
-const char XML_LPP_DetOrientation_omega[] = "Omega";
-const char XML_LPP_DetOrientation_chi[] = "Chi";
-const char XML_LPP_DetOrientation_phi[] = "Phi";
-const char XML_LPP_DetOffset[] = "DetOffset";
-const char XML_LPP_DetOffset_x[] = "xOffset";
-const char XML_LPP_DetOffset_y[] = "yOffset";
 
 QDomElement LauePlaneProjector::saveToXML(QDomElement base) {
   QDomDocument doc = base.ownerDocument();

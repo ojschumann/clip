@@ -64,6 +64,12 @@ public:
 
   virtual Projector& operator=(const Projector& o);
 
+  static const char Settings_QRangeMin[];
+  static const char Settings_QRangeMax[];
+  static const char Settings_maxHKLSqSum[];
+  static const char Settings_textSizeFraction[];
+  static const char Settings_spotSizeFraction[];
+
   // Functions for transformations in the different Coordinate systems
 
   static Vec3D normal2scattered(const Vec3D&);
@@ -191,7 +197,7 @@ signals:
   void markerChanged(AbstractMarkerItem*);
   void markerClicked(AbstractMarkerItem*);
   void markerRemoved(AbstractMarkerItem*);
-  void spotHighlightChanged(Vec3D);
+  void spotHighlightChanged(Vec3D, QString);
   void projectorSavesDefault();
 protected slots:
   virtual void updateImgTransformations();
@@ -211,8 +217,9 @@ protected:
   void internalSetWavevectors(double, double);
   void updateSpotHighlightMarker();
   virtual bool project(const Reflection &r, QPointF &point)=0;
+  virtual QString diffractionOrders(const Vec3D& hkl);
+  virtual QPair<double, double> validOrderRange(double Q, double Qscatter)=0;
   virtual bool parseXMLElement(QDomElement e);
-
 
   // Stuff like Primary beam marker, Coordinate lines
   QList<QGraphicsItem*> decorationItems;

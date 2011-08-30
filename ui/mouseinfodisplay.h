@@ -35,6 +35,33 @@ namespace Ui {
   class MouseInfoDisplay;
 }
 
+/* The flow of data to this display is somewhat difficult to trace. Here is a description:
+   most signals are routed through the CLIP-instance.
+   On a mouse move and a mouse leave event, the ProjectionPlane does a "emit mousePositionInfo(MousePositionInfo);"
+   All plane are connected to the signal Clip::mousePositionInfo(MousePositionInfo); which is in turn connected to
+   MouseInfoDisplay::showMouseInfo(MousePositionInfo).
+
+   On call of showMouseInfo(MousePositionInfo), the MouseInfoDisplay connects the Projector::spotHighlightChanged(Vec3D, QString) slot
+   to the MouseInfoDisplay::receiveSpotHightlight(Vec3D, QString) signal. An existing connection to this slot is disconnected first.
+   Thus only the last Projector, that had a mousePositionInfo posted is connected by this signal.
+
+
+   ProjectionPlane::mousePositionInfo(MousePositionInfo)
+   -> Clip::mousePositionInfo(MousePositionInfo)
+   -> MouseInfoDisplay::showMouseInfo(MousePositionInfo)
+      connect(info.projector::spotHighlightChanged(Vec3D, QString) -> MouseInfoDisplay::receiveSpotHightlight(Vec3D, QString))
+      emit MouseInfoDisplay::highlightMarker(Vec3D index)
+      update Cursor section
+
+   MouseInfoDisplay::highlightMarker(Vec3D index)
+   -> Clip::highlightMarker(Vec3D)
+   -> Projector::setSpotHighlighting(Vec3D)
+      updateSpotHighlightMarker()  // Also on Projector::project()
+        emit Projector::spotHighlightChanged(hkl2Reziprocal(index))
+         -> MouseInfoDisplay::receiveSpotHightlight(Vec3D, QString))
+
+   */
+
 class MouseInfoDisplay : public QWidget
 {
   Q_OBJECT
@@ -48,7 +75,7 @@ signals:
   void highlightMarker(Vec3D);
 public slots:
   void showMouseInfo(MousePositionInfo);
-  void receiveSpotHightlight(Vec3D);
+  void receiveSpotHightlight(Vec3D, QString);
 protected:
   virtual void changeEvent(QEvent *);
 private slots:

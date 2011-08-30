@@ -65,7 +65,7 @@ void ProjectionGraphicsView::mouseReleaseEvent(QMouseEvent *e) {
 }
 
 void ProjectionGraphicsView::leaveEvent(QEvent *) {
-  emit mouseLeft();
+  emit mouseHasLeft();
 }
 
 void ProjectionGraphicsView::setImage(LaueImage * img) {

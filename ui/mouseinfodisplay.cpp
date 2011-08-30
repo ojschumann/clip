@@ -128,12 +128,13 @@ public:
   }
 };
 
+
 void MouseInfoDisplay::showMouseInfo(MousePositionInfo info) {
   if (((lastSender != info.projector) || lastSender.isNull()) && info.projector) {
     if (!lastSender.isNull())
       lastSender->disconnect(this);
     lastSender = info.projector;
-    connect(info.projector, SIGNAL(spotHighlightChanged(Vec3D)), this, SLOT(receiveSpotHightlight(Vec3D)));
+    connect(info.projector, SIGNAL(spotHighlightChanged(Vec3D, QString)), this, SLOT(receiveSpotHightlight(Vec3D, QString)));
     if (ui->lockReflection->isChecked()) {
       IndexParser parser(ui->reflex->text());
       if (parser.isValid())
@@ -154,17 +155,15 @@ void MouseInfoDisplay::showMouseInfo(MousePositionInfo info) {
     }
   }
 
-
   if (info.nearestOk && !ui->lockReflection->isChecked()) {
     setPaletteForStatus(ui->reflex, true);
-    // Can't set Text in displayReflection, as this is used from on_reflex_textEdited as well
     ui->reflex->setText(info.nearestReflection.toText());
     emit highlightMarker(info.nearestReflection.hkl().toType<double>());
   }
 
 }
 
-void MouseInfoDisplay::receiveSpotHightlight(Vec3D v) {
+void MouseInfoDisplay::receiveSpotHightlight(Vec3D v, QString diffOrders) {
   double d = v.norm();
   v /= d;
   double TT = 180.0*M_1_PI*acos(qBound(-1.0, v(0), 1.0));
@@ -177,6 +176,8 @@ void MouseInfoDisplay::receiveSpotHightlight(Vec3D v) {
     ui->angleTable->item(i, 0)->setText(QString::number(180*M_1_PI*acos(qBound(-1.0, v(i), 1.0)), 'f', 2));
     ui->angleTable->item(i, 1)->setText(QString::number(180*M_1_PI*acos(qBound(-1.0,-v(i), 1.0)), 'f', 2));
   }
+
+  ui->diffOrders->setText(diffOrders);
 }
 
 /*void MouseInfoDisplay::displayReflection(const Reflection &r, double detQMin, double detQMax) {
@@ -200,6 +201,7 @@ void MouseInfoDisplay::receiveSpotHightlight(Vec3D v) {
   ui->diffOrders->setText(diffOrders);
 }
 */
+
 void MouseInfoDisplay::on_reflex_textEdited(QString text) {
   IndexParser parser(text);
   setPaletteForStatus(ui->reflex, parser.isValid());

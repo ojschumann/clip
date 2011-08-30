@@ -40,7 +40,7 @@ public:
   void leaveEvent(QEvent *);
 signals:
   void mouseMoved(QPointF);
-  void mouseLeft();
+  void mouseHasLeft();
 public slots:
   void retakeMouseEvent() { viewIgnoresThisMouseEvent = false; }
   void setImage(LaueImage*);

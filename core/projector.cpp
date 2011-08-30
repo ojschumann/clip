@@ -48,6 +48,28 @@
 #include "tools/xmltools.h"
 #include "config/configstore.h"
 #include "tools/colortextitem.h"
+#include "tools/tools.h"
+
+
+const char Projector::Settings_QRangeMin[] = "Qmin";
+const char Projector::Settings_QRangeMax[] = "Qmax";
+
+const char Projector::Settings_maxHKLSqSum[] = "maxHKLSqSum";
+const char Projector::Settings_textSizeFraction[] = "textSizeFraction";
+const char Projector::Settings_spotSizeFraction[] = "spotSizeFraction";
+
+const char XML_Projector_element[] = "Projector";
+const char XML_Projector_QRange[] = "QRange";
+const char XML_Projector_Display[] = "Display";
+const char XML_Projector_Display_maxHKL[] = "maxHKLSum";
+const char XML_Projector_Display_spotSize[] = "spotSize";
+const char XML_Projector_Display_textSize[] = "textSize";
+const char XML_Projector_Display_spotsEnables[] = "spotsEnabled";
+const char XML_Projector_SpotMarkers[] = "SpotMarkers";
+const char XML_Projector_SpotMarkers_marker[] = "Marker";
+const char XML_Projector_ZoneMarkers[] = "ZoneMarkers";
+
+
 
 using namespace std;
 
@@ -264,6 +286,37 @@ void Projector::doProjection() {
   emit projectedPointsUpdated();
 }
 
+QString Projector::diffractionOrders(const Vec3D &hkl) {
+  if (crystal.isNull()) return QString::null;
+
+  TVec3D<int> integralHKL = hkl.toType<int>();
+  bool isInt = ((hkl-integralHKL.toType<double>()).norm_sq() < 1e-2);
+  int denom = isInt ? ggt(integralHKL.x(), ggt(integralHKL.y(), integralHKL.z())) : 1;
+
+  integralHKL /= denom;
+
+  Vec3D q = crystal->hkl2Reziprocal(hkl);
+  double Q = q.norm();
+  q /= Q;
+  Q *= 2.0*M_PI / denom;
+  double Qscatter = Q/q.x();
+
+  QPair<double, double> limits = validOrderRange(Q, Qscatter);
+
+  QStringList res;
+  for (int n=qMax(1, int(limits.first)); n<=int(limits.second); n++) {
+    if (!isInt || !crystal->getSpacegroup()->isExtinct(integralHKL*n)) {
+      int g = ggt(n, denom);
+      if (g==denom) {
+        res << QString::number(n/g);
+      } else {
+        res << QString("%1/%2").arg(n/g).arg(denom/g);
+      }
+    }
+  }
+  return res.join(", ");
+}
+
 Vec3D Projector::normal2scattered(const Vec3D &v) {
   double x=v.x();
   if (x<=0.0) {
@@ -452,10 +505,8 @@ void Projector::setHQPrintMode(bool b) {
 }
 
 void Projector::setSpotHighlighting(Vec3D hkl) {
-  //if (spotHighlightHKL != hkl ) {
-    spotHighlightHKL = hkl;
-    updateSpotHighlightMarker();
-  //}
+  spotHighlightHKL = hkl;
+  updateSpotHighlightMarker();
 }
 
 void Projector::updateSpotHighlightMarker() {
@@ -464,10 +515,10 @@ void Projector::updateSpotHighlightMarker() {
   if (show) {
     Vec3D v = crystal->hkl2Reziprocal(spotHighlightHKL);
     p = normal2det(v.normalized(), show);
-    //TODO: emit including scattering orders
-    emit spotHighlightChanged(v);
+    emit spotHighlightChanged(v, diffractionOrders(spotHighlightHKL));
   }
 
+  // show might be changed above in normal2det()
   if (show) {
     if (spotHighlightItem==0) {
       CircleItem* item = new CircleItem(1.1*getSpotSize());
@@ -477,8 +528,7 @@ void Projector::updateSpotHighlightMarker() {
       scene.addItem(spotHighlightItem);
     }
     spotHighlightItem->setPos(p);
-
-  } else {
+  } else if (spotHighlightItem) {
     delete spotHighlightItem;
     spotHighlightItem = 0;
   }
@@ -713,28 +763,13 @@ void Projector::doImgRotation(const QTransform& t) {
     imageData->addTransform(t.inverted());
 }
 
-
-
-const char XML_Projector_element[] = "Projector";
-const char XML_Projector_QRange[] = "QRange";
-const char XML_Projector_QRange_min[] = "Qmin";
-const char XML_Projector_QRange_max[] = "Qmax";
-const char XML_Projector_Display[] = "Display";
-const char XML_Projector_Display_maxHKL[] = "maxHKLSum";
-const char XML_Projector_Display_spotSize[] = "spotSize";
-const char XML_Projector_Display_textSize[] = "textSize";
-const char XML_Projector_Display_spotsEnables[] = "spotsEnabled";
-const char XML_Projector_SpotMarkers[] = "SpotMarkers";
-const char XML_Projector_SpotMarkers_marker[] = "Marker";
-const char XML_Projector_ZoneMarkers[] = "ZoneMarkers";
-
 QDomElement Projector::saveToXML(QDomElement base) {
   QDomDocument doc = base.ownerDocument();
   QDomElement projector = ensureElement(base, XML_Projector_element);
 
   QDomElement e = projector.appendChild(doc.createElement(XML_Projector_QRange)).toElement();
-  e.setAttribute(XML_Projector_QRange_min, Qmin());
-  e.setAttribute(XML_Projector_QRange_max, Qmax());
+  e.setAttribute(Settings_QRangeMin, Qmin());
+  e.setAttribute(Settings_QRangeMax, Qmax());
 
   e = projector.appendChild(doc.createElement(XML_Projector_Display)).toElement();
   e.setAttribute(XML_Projector_Display_maxHKL, getMaxHklSqSum());
@@ -783,10 +818,10 @@ bool Projector::loadFromXML(QDomElement base) {
 bool Projector::parseXMLElement(QDomElement e) {
   bool ok=true;
   if (e.tagName()==XML_Projector_QRange) {
-    double Qmin = readDouble(e, XML_Projector_QRange_min, ok);
-    double Qmax = readDouble(e, XML_Projector_QRange_max, ok);
+    double Qmin = readDouble(e, Settings_QRangeMin, ok);
+    double Qmax = readDouble(e, Settings_QRangeMax, ok);
     if (ok) setWavevectors(Qmin, Qmax);
-  } else if (e.tagName()=="Display") {
+  } else if (e.tagName()==XML_Projector_Display) {
     double tsize = readDouble(e, XML_Projector_Display_textSize, ok);
     double ssize = readDouble(e, XML_Projector_Display_spotSize, ok);
     int maxHKLS = readInt(e, XML_Projector_Display_maxHKL, ok);
@@ -815,11 +850,11 @@ bool Projector::parseXMLElement(QDomElement e) {
 void Projector::saveParametersAsDefault() {
   QSettings settings;
   settings.beginGroup(projectorName());
-  settings.setValue("Qmin", Qmin());
-  settings.setValue("Qmax", Qmax());
-  settings.setValue("maxHKLSqSum", getMaxHklSqSum());
-  settings.setValue("textSizeFraction", getTextSizeFraction());
-  settings.setValue("spotSizeFraction", getSpotSizeFraction());
+  settings.setValue(Settings_QRangeMin, Qmin());
+  settings.setValue(Settings_QRangeMax, Qmax());
+  settings.setValue(Settings_maxHKLSqSum, getMaxHklSqSum());
+  settings.setValue(Settings_textSizeFraction, getTextSizeFraction());
+  settings.setValue(Settings_spotSizeFraction, getSpotSizeFraction());
   settings.endGroup();
   emit projectorSavesDefault();
 }

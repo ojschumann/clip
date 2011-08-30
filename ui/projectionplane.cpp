@@ -82,7 +82,7 @@ ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
   connect(projector, SIGNAL(imageClosed()), this, SLOT(imageClosed()));
   connect(projector, SIGNAL(projectorSavesDefault()), this, SLOT(saveParametersAsProjectorDefault()));
   connect(ui->view, SIGNAL(mouseMoved(QPointF)), this, SLOT(generateMousePositionInfoFromView(QPointF)));
-  connect(ui->view, SIGNAL(mouseLeft()), this, SLOT(generateEmptyMousePositionInfo()));
+  connect(ui->view, SIGNAL(mouseHasLeft()), this, SLOT(generateEmptyMousePositionInfo()));
 
   ui->view->setScene(projector->getScene());
   ui->view->setTransform(QTransform(1,0,0,-1,0,0));
@@ -189,15 +189,20 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
   lastMousePosition = mousePressOrigin;
 }
 
+#include <QDebug>
+
 void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
   QPointF p = ui->view->mapToScene(ui->view->viewport()->mapFromGlobal(e->globalPos()));
   QPointF dp = (p-mousePressOrigin);
   bool largeMove = fasthypot(dp.x(), dp.y())>projector->getSpotSize();
   if (e->buttons()==Qt::LeftButton) {
     if (ui->zoomAction->isChecked()) {
+      // Zoom
       zoomRubber->setGeometry(QRect(ui->view->mapFromScene(mousePressOrigin), ui->view->mapFromScene(p)).normalized());
     } else if ((ui->rulerAction->isChecked() || ui->markZonesAction->isChecked()) && largeMove) {
+      // Ruler and Zone-Marker and already a large mouse movement
       if (!addedDragItemOnThisMove) {
+        // Add new Item at mouse position
         addedDragItemOnThisMove = true;
         if (ui->rulerAction->isChecked()) {
           projector->addRuler(mousePressOrigin, p);
@@ -205,16 +210,20 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
           projector->addZoneMarker(mousePressOrigin, p);
         }
       } else {
+        // event resposibilitz not not sucessfully transfered to the created itemm, strange...
+        qDebug() << "not transfered";
         if (ui->rulerAction->isChecked()) {
           projector->rulers().last()->setEnd(projector->det2img.map(p));
         } else if (ui->markZonesAction->isChecked()) {
           projector->zoneMarkers().last()->setEnd(projector->det2img.map(p));
         }
       }
+      // Reemit event. This should transfer the Event handling to the new Item
       QMouseEvent e_again(QEvent::MouseButtonPress, ui->view->viewport()->mapFromGlobal(QCursor::pos()), Qt::LeftButton, e->buttons(), e->modifiers());
       inMousePress = false;
       ui->view->mousePressEvent(&e_again);
     } else if (ui->panAction->isChecked()) {
+      // Pan the view
       bool b1, b2;
       Vec3D v1 = projector->det2normal(lastMousePosition, b1);
       Vec3D v2 = projector->det2normal(p, b2);
@@ -224,12 +233,15 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
         r.normalize();
         projector->addRotation(r, acos(v1*v2));
 
+#ifdef _WIN32
         // Process screen updates. Otherwise on Windows no updates are prosessed if
         // two projectors are active and the mouse moves fast.
         // Otherwise, on Linux this produces stange effects.
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+#endif
       }
     } else if (ui->rotAction->isChecked()) {
+      // Rotate the view
       bool b1, b2;
       Vec3D v1 = projector->det2normal(lastMousePosition, b1);
       Vec3D v2 = projector->det2normal(p, b2);
@@ -332,7 +344,6 @@ void ProjectionPlane::on_openImgAction_triggered() {
 }
 
 void ProjectionPlane::generateMousePositionInfoFromView(QPointF p) {
-  // Rotation
   if (!inMousePress)
     generateMousePositionInfo(p);
 }

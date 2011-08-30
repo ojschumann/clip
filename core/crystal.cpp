@@ -330,7 +330,7 @@ QVector<Reflection> Crystal::doGeneration() {
           r.hklSqSum=h*h+k*k+l*l;
           r.Q=Q;
           r.d = 2.0*M_PI/Q;
-          for (int i=1; i<=int(M_1_PI*Qmax*r.d+0.9); i++) {
+          for (int i=1; i<=int(M_1_PI*Qmax*r.d+0.999); i++) {
             if (!sg.isExtinct(TVec3D<int>(i*h, i*k, i*l)))
               r.orders.push_back(i);
           }
@@ -399,6 +399,8 @@ void Crystal::UpdateRef::operator()(Reflection &r) {
       r.highestDiffOrder=r.orders[j];
       j++;
     }
+  } else {
+    r.Qscatter = -1.0;
   }
   if (r.lowestDiffOrder!=0)
     r.scatteredRay = Projector::normal2scattered(r.normal);

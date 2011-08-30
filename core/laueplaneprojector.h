@@ -92,6 +92,7 @@ protected:
   virtual bool parseXMLElement(QDomElement e);
 
   virtual bool project(const Reflection &r, QPointF& p);
+  virtual QPair<double, double> validOrderRange(double Q, double Qscatter);
 
   Mat3D localCoordinates;
   double detDist;

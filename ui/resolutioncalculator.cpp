@@ -108,7 +108,7 @@ struct RulerData {
   double l;
 };
 
-#ifdef __WIN__
+#ifdef _WIN32
 __attribute__((force_align_arg_pointer)) void ResolutionCalculator::slotCalcResolution() {
 #else
 void ResolutionCalculator::slotCalcResolution() {
