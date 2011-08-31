@@ -552,7 +552,7 @@ void PrintDialog::handleImageStatus() {
 
   if (imageLoaded) {
     foreach (QString key, projector->getLaueImage()->infoKeys()) {
-      menu->addAction(key);
+      menu->addAction(key)->setData(projector->getLaueImage()->getInfo(key));
     }
   } else {
     menu->clear();
@@ -563,7 +563,7 @@ void PrintDialog::imageMenuTrggered(QAction *a) {
   QTextCursor cursor = ui->textEdit->textCursor();
 
   cursor.beginEditBlock();
-  cursor.insertText(projector->getLaueImage()->getInfo(a->text()).toString());
+  cursor.insertText(a->data().toString());
   cursor.endEditBlock();
   ui->textEdit->setTextCursor(cursor);
 }
@@ -588,8 +588,8 @@ void doReplace(QString& code, const QStringList& fields, const QList<double>& va
   foreach (double d, values) digits = qMin(maxDigits, qMax(digits, numberOfDecimalPlaces(d)));
 
   QPair<QString,double> p;
-  foreach(p, Zip(fields, values)) code.replace(p.first, QString::number(p.second, 'f', (handleAngles && ((fabs(p.second-90.0)<1e-7)||(fabs(p.second-120.0)<1e-7))?0:digits) ));
-
+  foreach(p, Zip(fields, values))
+    code.replace(p.first, QString::number(p.second, 'f', (handleAngles && ((fabs(p.second-90.0)<1e-7)||(fabs(p.second-120.0)<1e-7))?0:digits) ));
 }
 
 void PrintDialog::on_actionInsert_Cell_Table_triggered() {

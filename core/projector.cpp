@@ -319,9 +319,8 @@ QString Projector::diffractionOrders(const Vec3D &hkl) {
 
 Vec3D Projector::normal2scattered(const Vec3D &v) {
   double x=v.x();
-  if (x<=0.0) {
+  if (x<=0.0)
     return Vec3D();
-  }
   double y=v.y();
   double z=v.z();
   return Vec3D(2*x*x-1.0, 2.0*x*y, 2.0*x*z);
@@ -329,13 +328,11 @@ Vec3D Projector::normal2scattered(const Vec3D &v) {
 
 Vec3D Projector::normal2scattered(const Vec3D &v, bool& b) {
   double x=v.x();
-  if (x<=0.0) {
-    b=false;
+  b = (x>0.0);
+  if (!b)
     return Vec3D();
-  }
   double y=v.y();
   double z=v.z();
-  b=true;
   return Vec3D(2*x*x-1.0, 2.0*x*y, 2.0*x*z);
 }
 
@@ -357,11 +354,9 @@ Vec3D Projector::scattered2normal(const Vec3D& v, bool& b) {
   double z=v.z();
 
   x=sqrt(0.5*(x+1.0));
-  if (x==0.0) {
-    b=false;
+  b = (x!=0.0);
+  if (!b)
     return Vec3D();
-  }
-  b=true;
   return Vec3D(x, 0.5*y/x, 0.5*z/x);
 }
 

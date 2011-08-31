@@ -345,7 +345,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="icon">
     <iconset resource="../resources/resources.qrc">
-     <normaloff>:/icons/icons/Projector.png</normaloff>:/icons/icons/Projector.png</iconset>
+     <normaloff>:/icons/icons/zone.png</normaloff>:/icons/icons/zone.png</iconset>
    </property>
    <property name="text">
     <string>Mark Zones</string>

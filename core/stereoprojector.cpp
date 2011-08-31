@@ -103,21 +103,14 @@ Vec3D StereoProjector::det2scattered(const QPointF& p, bool& b) const {
 QPointF StereoProjector::normal2det(const Vec3D& n) const {
   Vec3D v=localCoordinates*n;
   double s=1.0+v.x();
-  if (s<1e-5) {
-    return QPointF();
-  }
-  return QPointF(v.y()/s, v.z()/s);
+  return (s>1e-5) ? QPointF(v.y()/s, v.z()/s) : QPointF();
 }
 
 QPointF StereoProjector::normal2det(const Vec3D& n, bool& b) const {
   Vec3D v=localCoordinates*n;
   double s=1.0+v.x();
-  if (s<1e-5) {
-    b=false;
-    return QPointF();
-  }
-  b=true;
-  return QPointF(v.y()/s, v.z()/s);
+  b = (s>1e-5);
+  return (b) ? QPointF(v.y()/s, v.z()/s) : QPointF();
 }
 
 Vec3D StereoProjector::det2normal(const QPointF& p) const {
@@ -155,7 +148,6 @@ bool StereoProjector::project(const Reflection &r, QPointF &p) {
     return false;
 
   Vec3D v=localCoordinates*r.normal;
-  //Vec3D v=localCoordinates*r.scatteredRay;
   double s=1.0+v.x();
   if (s>1e-5) {
     s=1.0/s;

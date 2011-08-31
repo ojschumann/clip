@@ -554,7 +554,7 @@
   <action name="actionInsert_Image_info">
    <property name="icon">
     <iconset resource="../resources/resources.qrc">
-     <normaloff>:/icons/icons/info.png</normaloff>:/icons/icons/info.png</iconset>
+     <normaloff>:/icons/icons/imagetable.png</normaloff>:/icons/icons/imagetable.png</iconset>
    </property>
    <property name="text">
     <string>Insert Image info</string>

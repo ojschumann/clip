@@ -26,12 +26,13 @@
 #include <QTime>
 #include <iostream>
 #include <cmath>
-
+#include <QDebug>
 
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
+
   QApplication a(argc, argv);
 
   a.setApplicationName("Clip");

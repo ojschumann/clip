@@ -50,7 +50,6 @@
         <file>icons/zoomout.png</file>
         <file>icons/editcopy.png</file>
         <file>icons/editundo.png</file>
-        <file>icons/exportpdf.png</file>
         <file>icons/textbold.png</file>
         <file>icons/textcenter.png</file>
         <file>icons/textitalic.png</file>
@@ -74,6 +73,8 @@
         <file>icons/fileprintsvg.png</file>
         <file>icons/crystaltable.png</file>
         <file>icons/projectortable.png</file>
+        <file>icons/imagetable.png</file>
+        <file>icons/zone.png</file>
     </qresource>
     <qresource prefix="/">
         <file>DefaultWorkspace.cws</file>

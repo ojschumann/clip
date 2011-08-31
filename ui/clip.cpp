@@ -35,6 +35,7 @@
 #include "ui/projectionplane.h"
 #include "core/laueplaneprojector.h"
 #include "core/stereoprojector.h"
+#include "core/diffractingstereoprojector.h"
 #include "ui/crystaldisplay.h"
 #include "ui/mouseinfodisplay.h"
 #include "ui/rotatecrystal.h"
@@ -103,6 +104,12 @@ void Clip::on_newLaue_triggered() {
 void Clip::on_newStereo_triggered() {
   addProjector(new StereoProjector());
 }
+
+void Clip::on_newDiffStereo_triggered()
+{
+  addProjector(new DiffractingStereoProjector());
+}
+
 
 ProjectionPlane* Clip::addProjector(Projector* p) {
   if (!p) return 0;

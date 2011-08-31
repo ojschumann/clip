@@ -149,6 +149,11 @@
     <string>Configuration</string>
    </property>
   </action>
+  <action name="newDiffStereo">
+   <property name="text">
+    <string>New Stereographic Projection</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>

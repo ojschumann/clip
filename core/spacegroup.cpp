@@ -160,7 +160,7 @@ void Spacegroup::GroupElement::normalize() {
 }
 
 // TODO: convert to QString toString();
-void Spacegroup::GroupElement::print() const {
+/*void Spacegroup::GroupElement::print() const {
   QStringList l;
   TMat3D<int> O(M);
   O.transpose();
@@ -187,7 +187,7 @@ void Spacegroup::GroupElement::print() const {
     cout << ", ";
   }
   cout << endl;
-}
+}*/
 
 Spacegroup::GroupElement Spacegroup::GroupElement::operator*(const Spacegroup::GroupElement& o) const {
   return Spacegroup::GroupElement(M*o.M, M*o.t + t);

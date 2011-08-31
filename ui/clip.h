@@ -62,6 +62,7 @@ public slots:
   void on_newCrystal_triggered();
   void on_newLaue_triggered();
   void on_newStereo_triggered();
+  void on_newDiffStereo_triggered();
   void on_actionAbout_triggered(bool);
   void on_actionAbout_Qt_triggered(bool);
 
