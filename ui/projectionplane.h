@@ -73,12 +73,13 @@ protected slots:
   void renderPrintout(QPainter*, const QRectF&);
   void resizeView();
   void slotOpenResolutionCalc();
-  void generateMousePositionInfo(QPointF);
+  void generateMousePositionInfo(QPointF, bool lock = false);
   void generateMousePositionInfoFromView(QPointF p);
   void generateEmptyMousePositionInfo();
   void slotContextMenu();
   void slotContextSetRotationAxis();
   void slotContextSetRotationAxisOnSpot();
+  void slotContextLockReflectionInfoOnSpot();
   void slotContextClearSpotMarkers();
   void slotContextClearZoneMarkers();
   void slotContextClearRulers();

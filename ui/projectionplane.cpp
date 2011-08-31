@@ -348,7 +348,7 @@ void ProjectionPlane::generateMousePositionInfoFromView(QPointF p) {
     generateMousePositionInfo(p);
 }
 
-void ProjectionPlane::generateMousePositionInfo(QPointF p) {
+void ProjectionPlane::generateMousePositionInfo(QPointF p, bool lock) {
   MousePositionInfo info;
   info.valid=true;
   info.projectorPos = p;
@@ -370,6 +370,7 @@ void ProjectionPlane::generateMousePositionInfo(QPointF p) {
   info.scattered = projector->det2scattered(p, info.scatteredOk);
   if (projector->getCrystal()) {
     info.nearestOk = true;
+    info.lockOnNearest = lock;
     info.nearestReflection = projector->getClosestReflection(info.normal);
   }
   emit mousePositionInfo(info);
@@ -463,6 +464,7 @@ void ProjectionPlane::slotContextMenu() {
 
   context.addAction("Set Rotation Axis on nearest Reflection", this, SLOT(slotContextSetRotationAxisOnSpot()));
   context.addAction("Set Rotation Axis exactly here", this, SLOT(slotContextSetRotationAxis()));
+  context.addAction("Lock Reflection Info on nearest Reflection", this, SLOT(slotContextLockReflectionInfoOnSpot()));
   context.addAction("Clear all Markers", this, SLOT(slotContextClearAll()));
   context.addAction("Clear all Spot Markers", this, SLOT(slotContextClearSpotMarkers()));
   context.addAction("Clear all Zone Markers", this, SLOT(slotContextClearZoneMarkers()));
@@ -486,6 +488,10 @@ void ProjectionPlane::slotContextSetRotationAxisOnSpot() {
     Vec3D normal = projector->det2normal(lastMousePosition, ok);
     if (ok) crystal->setRotationAxis(projector->getClosestReflection(normal).hkl().toType<double>(), Crystal::ReziprocalSpace);
   }
+}
+
+void ProjectionPlane::slotContextLockReflectionInfoOnSpot() {
+  generateMousePositionInfo(lastMousePosition, true);
 }
 
 void ProjectionPlane::slotContextClearSpotMarkers() {

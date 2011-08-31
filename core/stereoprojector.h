@@ -49,13 +49,13 @@ public:
   //virtual double TTmax() const;
 
   virtual QDomElement saveToXML(QDomElement base);
-  bool displaysOnlyScatteringReflections();
+  bool displaysNonscatteringReflections();
 public slots:
   virtual QWidget* configWidget();
   virtual void decorateScene();
   void setDetOrientation(const Mat3D& M);
   Mat3D getDetOrientation();
-  void setDisplayOnlyScatteringReflections(bool);
+  void setDisplayNonscatteringReflections(bool);
   void saveParametersAsDefault();
 protected:
   virtual bool project(const Reflection &r, QPointF &);
@@ -63,7 +63,7 @@ protected:
   virtual bool parseXMLElement(QDomElement);
 
   Mat3D localCoordinates;
-  bool displayOnlyScatteringReflections;
+  bool displayNonscatteringReflections;
 };
 
 #endif

@@ -38,7 +38,7 @@
 
 const char XML_Stereo_Frame[] = "Frame";
 const char XML_Stereo_Frame_Mxx[] = "M%1%2";
-const char XML_Stereo_OnlyScattering[] = "DisplayOnlyScattering";
+const char XML_Stereo_NonScattering[] = "DisplayNonScattering";
 
 
 using namespace std;
@@ -46,7 +46,7 @@ using namespace std;
 StereoProjector::StereoProjector(QObject* parent):
     Projector(parent),
     localCoordinates(),
-    displayOnlyScatteringReflections(false) {
+    displayNonscatteringReflections(false) {
 
   internalSetWavevectors(0, M_PI);
 
@@ -61,7 +61,7 @@ StereoProjector::StereoProjector(QObject* parent):
       localCoordinates(i,j)=settings.value(QString("Frame%1%2").arg(i).arg(j), (i==j)?1.0:0.0).toDouble();
     }
   }
-  setDisplayOnlyScatteringReflections(settings.value(XML_Stereo_OnlyScattering, false).toBool());
+  setDisplayNonscatteringReflections(settings.value(XML_Stereo_NonScattering, true).toBool());
 
 
   settings.endGroup();
@@ -136,25 +136,26 @@ Vec3D StereoProjector::det2normal(const QPointF& p, bool& b) const {
 }
 
 QPair<double, double> StereoProjector::validOrderRange(double Q, double Qscatter) {
-  double q = displayOnlyScatteringReflections ? Qscatter : Q;
+  double q = displayNonscatteringReflections ? Q : Qscatter;
   if (q<1e-5) return qMakePair(0.0, 0.0);
   return qMakePair(2.0*QminVal/q, 2.0*QmaxVal/q);
 }
 
 bool StereoProjector::project(const Reflection &r, QPointF &p) {
-  bool doesReflect=false;
+  bool reflectionInRange=false;
   QPair<double, double> limits = validOrderRange(r.Q, r.Qscatter);
   for (int i=0; i<r.orders.size(); i++) {
     int n=r.orders[i];
     if ((limits.first<=n) and (n<=limits.second)) {
-      doesReflect=true;
+      reflectionInRange=true;
       break;
     }
   }
-  if (not doesReflect)
+  if (not reflectionInRange)
     return false;
 
   Vec3D v=localCoordinates*r.normal;
+  //Vec3D v=localCoordinates*r.scatteredRay;
   double s=1.0+v.x();
   if (s>1e-5) {
     s=1.0/s;
@@ -245,13 +246,13 @@ Mat3D StereoProjector::getDetOrientation() {
   return localCoordinates;
 }
 
-void StereoProjector::setDisplayOnlyScatteringReflections(bool b) {
-  displayOnlyScatteringReflections = b;
+void StereoProjector::setDisplayNonscatteringReflections(bool b) {
+  displayNonscatteringReflections = b;
   emit projectionParamsChanged();
 }
 
-bool StereoProjector::displaysOnlyScatteringReflections() {
-  return displayOnlyScatteringReflections;
+bool StereoProjector::displaysNonscatteringReflections() {
+  return displayNonscatteringReflections;
 }
 
 QDomElement StereoProjector::saveToXML(QDomElement base) {
@@ -262,8 +263,8 @@ QDomElement StereoProjector::saveToXML(QDomElement base) {
       e.setAttribute(QString(XML_Stereo_Frame_Mxx).arg(i).arg(j), localCoordinates(i,j));
     }
   }
-  e = projector.appendChild(projector.ownerDocument().createElement(XML_Stereo_OnlyScattering)).toElement();
-  e.setAttribute("value", displayOnlyScatteringReflections);
+  e = projector.appendChild(projector.ownerDocument().createElement(XML_Stereo_NonScattering)).toElement();
+  e.setAttribute("value", displayNonscatteringReflections);
   return projector;
 }
 
@@ -277,10 +278,10 @@ bool StereoProjector::parseXMLElement(QDomElement e) {
       }
     }
     if (ok) setDetOrientation(M);
-  } else if (e.tagName()==XML_Stereo_OnlyScattering) {
+  } else if (e.tagName()==XML_Stereo_NonScattering) {
     int senabled = readInt(e, "value", ok);
     if (ok)
-      setDisplayOnlyScatteringReflections(senabled!=0);
+      setDisplayNonscatteringReflections(senabled!=0);
   } else {
     return Projector::parseXMLElement(e);
   }
@@ -295,7 +296,7 @@ void StereoProjector::saveParametersAsDefault() {
       settings.setValue(QString("Frame%1%2").arg(i).arg(j), localCoordinates(i,j));
     }
   }
-  settings.setValue(XML_Stereo_OnlyScattering, displayOnlyScatteringReflections);
+  settings.setValue(XML_Stereo_NonScattering, displayNonscatteringReflections);
 
   settings.endGroup();
   Projector::saveParametersAsDefault();

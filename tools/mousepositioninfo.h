@@ -35,6 +35,7 @@ public:
     valid = false;
     scatteredOk=false;
     nearestOk=false;
+    lockOnNearest=false;
     projector=0;
     detQMin=0.0;
     detQMax=0.0;
@@ -44,12 +45,16 @@ public:
   QPointF projectorPos;
   QPointF imagePos;
   Vec3D normal;
+
   bool scatteredOk;
   Vec3D scattered;
+
   bool nearestOk;
+  bool lockOnNearest;
   double detQMin;
   double detQMax;
   Reflection nearestReflection;
+
   QObject* projector;
 };
 

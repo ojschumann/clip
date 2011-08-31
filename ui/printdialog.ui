@@ -545,7 +545,7 @@
   <action name="actionInsert_Projector_Info">
    <property name="icon">
     <iconset resource="../resources/resources.qrc">
-     <normaloff>:/icons/icons/Projector.png</normaloff>:/icons/icons/Projector.png</iconset>
+     <normaloff>:/icons/icons/projectortable.png</normaloff>:/icons/icons/projectortable.png</iconset>
    </property>
    <property name="text">
     <string>Insert Projector Info</string>

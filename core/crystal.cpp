@@ -384,6 +384,7 @@ void Crystal::UpdateRef::operator()(Reflection &r) {
   r.normal=MRot*r.normalLocal;
   r.lowestDiffOrder=0;
   r.highestDiffOrder=0;
+  r.Qscatter = -1.0;
 
   // sin(theta) = v*e_x = v.x
   // x direction points toward source, z points upwards
@@ -399,8 +400,6 @@ void Crystal::UpdateRef::operator()(Reflection &r) {
       r.highestDiffOrder=r.orders[j];
       j++;
     }
-  } else {
-    r.Qscatter = -1.0;
   }
   if (r.lowestDiffOrder!=0)
     r.scatteredRay = Projector::normal2scattered(r.normal);

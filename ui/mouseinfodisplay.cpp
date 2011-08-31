@@ -155,9 +155,10 @@ void MouseInfoDisplay::showMouseInfo(MousePositionInfo info) {
     }
   }
 
-  if (info.nearestOk && !ui->lockReflection->isChecked()) {
+  if (info.nearestOk && (!ui->lockReflection->isChecked() || info.lockOnNearest)) {
     setPaletteForStatus(ui->reflex, true);
     ui->reflex->setText(info.nearestReflection.toText());
+    ui->lockReflection->setChecked(info.lockOnNearest);
     emit highlightMarker(info.nearestReflection.hkl().toType<double>());
   }
 

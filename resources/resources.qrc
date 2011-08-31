@@ -73,6 +73,7 @@
         <file>icons/fileprintps.png</file>
         <file>icons/fileprintsvg.png</file>
         <file>icons/crystaltable.png</file>
+        <file>icons/projectortable.png</file>
     </qresource>
     <qresource prefix="/">
         <file>DefaultWorkspace.cws</file>
