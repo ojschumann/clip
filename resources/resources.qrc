@@ -10,71 +10,61 @@
         <file>curves/07-rainbow.curve</file>
     </qresource>
     <qresource prefix="/icons">
-        <file>icons/Clip.ico</file>
-        <file>icons/Clip.png</file>
+        <file>icons/clip.ico</file>
+        <file>icons/clip.png</file>
         <file>icons/color_curve.png</file>
         <file>icons/configure.png</file>
-        <file>icons/Crystal.png</file>
-        <file>icons/cursor_hor.png</file>
-        <file>icons/cursor_rot.png</file>
+        <file>icons/crystal.png</file>
+        <file>icons/crystaltable.png</file>
         <file>icons/cut.png</file>
+        <file>icons/down-arrow.svg</file>
+        <file>icons/editcopy.png</file>
+        <file>icons/editcut.png</file>
+        <file>icons/editpaste.png</file>
+        <file>icons/editredo.png</file>
+        <file>icons/editundo.png</file>
         <file>icons/fileclose.png</file>
-        <file>icons/filefind.png</file>
-        <file>icons/fileimport.png</file>
-        <file>icons/filenew.png</file>
         <file>icons/fileopen.png</file>
         <file>icons/fileprint.png</file>
+        <file>icons/fileprintpdf.png</file>
+        <file>icons/fileprintpng.png</file>
+        <file>icons/fileprintps.png</file>
+        <file>icons/fileprintsvg.png</file>
         <file>icons/filequickprint.png</file>
         <file>icons/filesave.png</file>
-        <file>icons/filesaveas.png</file>
+        <file>icons/fit-page.png</file>
+        <file>icons/fit-width.png</file>
         <file>icons/flag.png</file>
         <file>icons/flip_horizontal.png</file>
         <file>icons/flip_vertical.png</file>
-        <file>icons/Index.png</file>
+        <file>icons/imagetable.png</file>
+        <file>icons/index.png</file>
         <file>icons/info.png</file>
+        <file>icons/layout-landscape.png</file>
+        <file>icons/layout-portrait.png</file>
+        <file>icons/lock.png</file>
+        <file>icons/page-setup.png</file>
         <file>icons/pan.png</file>
-        <file>icons/Projector.png</file>
+        <file>icons/projector.png</file>
+        <file>icons/projectortable.png</file>
         <file>icons/rotate_ccw.png</file>
         <file>icons/rotate_cw.png</file>
         <file>icons/ruler.png</file>
-        <file>icons/viewmag1.png</file>
-        <file>icons/viewmag-.png</file>
-        <file>icons/viewmag+.png</file>
-        <file>icons/viewmagfit.png</file>
-        <file>icons/zoom.png</file>
-        <file>icons/down-arrow.svg</file>
-        <file>icons/up-arrow.svg</file>
-        <file>icons/unlock.png</file>
-        <file>icons/lock.png</file>
-        <file>icons/zoomin.png</file>
-        <file>icons/zoomout.png</file>
-        <file>icons/editcopy.png</file>
-        <file>icons/editundo.png</file>
         <file>icons/textbold.png</file>
         <file>icons/textcenter.png</file>
         <file>icons/textitalic.png</file>
         <file>icons/textjustify.png</file>
         <file>icons/textleft.png</file>
         <file>icons/textright.png</file>
-        <file>icons/textunder.png</file>
-        <file>icons/editpaste.png</file>
-        <file>icons/editredo.png</file>
-        <file>icons/editcut.png</file>
-        <file>icons/textsuperscript.png</file>
         <file>icons/textsubscript.png</file>
-        <file>icons/fit-page.png</file>
-        <file>icons/fit-width.png</file>
-        <file>icons/layout-landscape.png</file>
-        <file>icons/layout-portrait.png</file>
-        <file>icons/page-setup.png</file>
-        <file>icons/fileprintpdf.png</file>
-        <file>icons/fileprintpng.png</file>
-        <file>icons/fileprintps.png</file>
-        <file>icons/fileprintsvg.png</file>
-        <file>icons/crystaltable.png</file>
-        <file>icons/projectortable.png</file>
-        <file>icons/imagetable.png</file>
+        <file>icons/textsuperscript.png</file>
+        <file>icons/textunder.png</file>
+        <file>icons/unlock.png</file>
+        <file>icons/up-arrow.svg</file>
+        <file>icons/viewmag+.png</file>
+        <file>icons/viewmag-.png</file>
         <file>icons/zone.png</file>
+        <file>icons/zoom.png</file>
     </qresource>
     <qresource prefix="/">
         <file>DefaultWorkspace.cws</file>

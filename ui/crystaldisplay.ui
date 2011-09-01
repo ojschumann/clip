@@ -30,7 +30,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../resources/resources.qrc">
-    <normaloff>:/icons/icons/Crystal.png</normaloff>:/icons/icons/Crystal.png</iconset>
+    <normaloff>:/icons/icons/crystal.png</normaloff>:/icons/icons/crystal.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout">
@@ -699,7 +699,7 @@ p, li { white-space: pre-wrap; }
   <action name="actionIndex">
    <property name="icon">
     <iconset resource="../resources/resources.qrc">
-     <normaloff>:/icons/icons/Index.png</normaloff>:/icons/icons/Index.png</iconset>
+     <normaloff>:/icons/icons/index.png</normaloff>:/icons/icons/index.png</iconset>
    </property>
    <property name="text">
     <string>Index</string>
@@ -721,7 +721,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="icon">
     <iconset resource="../resources/resources.qrc">
-     <normaloff>:/icons/icons/Crystal.png</normaloff>:/icons/icons/Crystal.png</iconset>
+     <normaloff>:/icons/icons/crystal.png</normaloff>:/icons/icons/crystal.png</iconset>
    </property>
    <property name="text">
     <string>Drag</string>

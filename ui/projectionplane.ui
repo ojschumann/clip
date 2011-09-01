@@ -18,7 +18,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../resources/resources.qrc">
-    <normaloff>:/icons/icons/Projector.png</normaloff>:/icons/icons/Projector.png</iconset>
+    <normaloff>:/icons/icons/projector.png</normaloff>:/icons/icons/projector.png</iconset>
   </property>
   <widget class="QWidget" name="viewFrame">
    <property name="minimumSize">
