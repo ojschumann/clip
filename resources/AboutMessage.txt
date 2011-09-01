@@ -2,7 +2,7 @@
 a program to index and refine laue exposures.<br><br>
 It is dedicated to my late dad.<br><br>
 Version: <VER_PRODUCTVERSION_STR/> <br>
-Mercurial ID: <HG_REPRO_ID/> Revision: </HG_REPRO_REV><br>
+Mercurial ID: <HG_REPRO_ID/> Revision: <HG_REPRO_REV/><br>
 Mercurial Date: <HG_REPRO_DATE/><br>
 Build Date: <BUILD_DATE/> <BUILD_TIME/><br><br>
 Copyright &copy; 2008-2011 O.J.Schumann (<a href="mailto:o.j.schumann@gmail.com">o.j.schumann@gmail.com</a>)</p>

@@ -1,5 +1,5 @@
 /**********************************************************************
-  Copyright (C) 2010 Olaf J. Schumann
+  Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
   For more information, see <http://clip.berlios.de>
