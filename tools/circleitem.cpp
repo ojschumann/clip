@@ -25,7 +25,7 @@
 #include <QPainterPath>
 #include <QGraphicsSceneMouseEvent>
 #include <QtDebug>
-#include <iostream>
+ 
 
 #include "tools/tools.h"
 
@@ -113,7 +113,7 @@ void CircleItem::doUpdate() {
 }
 
 
-#include <iostream>
+ 
 using namespace std;
 void CircleItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
   if (event->button()==Qt::LeftButton) emit itemClicked();

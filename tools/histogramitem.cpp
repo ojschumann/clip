@@ -25,7 +25,7 @@
 #include <QPainter>
 #include <cmath>
 #include <QTimer>
-#include <iostream>
+ 
 
 using namespace std;
 

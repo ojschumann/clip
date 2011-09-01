@@ -22,7 +22,7 @@
 
 #include "image/beziercurve.h"
 
-#include <iostream>
+ 
 #include <cmath>
 
 #include "tools/xmltools.h"

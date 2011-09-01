@@ -22,7 +22,7 @@
 
 #include "simplergbscaler.h"
 #include "image/datascalerfactory.h"
-#include <iostream>
+ 
 
 using namespace std;
 

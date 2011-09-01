@@ -29,7 +29,7 @@
 #include <QColorDialog>
 #include <QFileInfo>
 #include <QFileDialog>
-#include <iostream>
+ 
 
 #include "config/colorbutton.h"
 #include "config/configstore.h"

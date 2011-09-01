@@ -23,8 +23,8 @@
 #include "indexdisplay.h"
 #include "ui_indexdisplay.h"
 
-#include <iostream>
-#include <iomanip>
+ 
+ 
 #include <QThreadPool>
 #include <QSortFilterProxyModel>
 #include <QShortcut>

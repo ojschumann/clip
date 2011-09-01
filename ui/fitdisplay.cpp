@@ -23,7 +23,7 @@
 #include "fitdisplay.h"
 #include "ui_fitdisplay.h"
 
-#include <iostream>
+ 
 #include <QTreeWidgetItem>
 #include <QVariant>
 #include <QStyledItemDelegate>

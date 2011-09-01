@@ -22,7 +22,7 @@
 
 #include "dataproviderfactory.h"
 
-#include <iostream>
+ 
 #include <QStringList>
 
 using namespace std;

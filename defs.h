@@ -30,19 +30,19 @@ extern const char* HG_REPRO_DATE;
 extern const char* BUILD_DATE;
 extern const char* BUILD_TIME;
 
-#define VER_FILEVERSION             4,0,0,0
-#define VER_FILEVERSION_STR         "4.0.0.0\0"
+#define VER_FILEVERSION             4,0,0,2
+#define VER_FILEVERSION_STR         "4.0.0.2\0"
 
-#define VER_PRODUCTVERSION          4,0,0,0
-#define VER_PRODUCTVERSION_STR      "4.0beta1\0"
+#define VER_PRODUCTVERSION          4,0,0,2
+#define VER_PRODUCTVERSION_STR      "4.0beta2\0"
 
-#define VER_COMPANYNAME_STR         "Your Organization"
-#define VER_FILEDESCRIPTION_STR     "Software to evaluate Laue diffraction images."
+#define VER_COMPANYNAME_STR         ""
+#define VER_FILEDESCRIPTION_STR     "Software for evaluation of Laue diffraction images"
 #define VER_INTERNALNAME_STR        "Cologne Laue Indexation Program"
-#define VER_LEGALCOPYRIGHT_STR      "Copyright © 2011 Olaf J. Schumann"
+#define VER_LEGALCOPYRIGHT_STR      "Copyright © 2008-2011 Olaf J. Schumann"
 #define VER_LEGALTRADEMARKS1_STR    "Published under the termes of the Gnu Public License"
-#define VER_LEGALTRADEMARKS2_STR    VER_LEGALTRADEMARKS1_STR
-#define VER_ORIGINALFILENAME_STR    "clip.exe"
+#define VER_LEGALTRADEMARKS2_STR    ""
+#define VER_ORIGINALFILENAME_STR    "Clip.exe"
 #define VER_PRODUCTNAME_STR         "Clip"
 
 #define VER_COMPANYDOMAIN_STR       "clip.berlios.de"

@@ -10,6 +10,8 @@
         <file>curves/07-rainbow.curve</file>
     </qresource>
     <qresource prefix="/icons">
+        <file>icons/arrow-down.png</file>
+        <file>icons/arrow-up.png</file>
         <file>icons/clip.ico</file>
         <file>icons/clip.png</file>
         <file>icons/color_curve.png</file>
@@ -17,7 +19,6 @@
         <file>icons/crystal.png</file>
         <file>icons/crystaltable.png</file>
         <file>icons/cut.png</file>
-        <file>icons/down-arrow.svg</file>
         <file>icons/editcopy.png</file>
         <file>icons/editcut.png</file>
         <file>icons/editpaste.png</file>
@@ -60,7 +61,6 @@
         <file>icons/textsuperscript.png</file>
         <file>icons/textunder.png</file>
         <file>icons/unlock.png</file>
-        <file>icons/up-arrow.svg</file>
         <file>icons/viewmag+.png</file>
         <file>icons/viewmag-.png</file>
         <file>icons/zone.png</file>
@@ -75,5 +75,7 @@
         <file>papa.jpeg</file>
         <file>report_crystal.html</file>
         <file>report.css</file>
+        <file>report_LauePlaneProjector.html</file>
+        <file>report_image.html</file>
     </qresource>
 </RCC>

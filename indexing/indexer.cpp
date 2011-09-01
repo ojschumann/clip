@@ -24,8 +24,8 @@
 
 #include <QThreadPool>
 #include <QMutexLocker>
-#include <iostream>
-#include <iomanip>
+ 
+
 #include <cmath>
 #include <QtAlgorithms>
 #include <QDebug>
@@ -86,7 +86,7 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
 Indexer::~Indexer() {
   shouldStop = true;
   while (runningThreads.fetchAndAddOrdered(0)>0) {
-    cout << "wait on threads" << endl;
+    qDebug() << "wait on threads";
   }
 }
 
@@ -191,7 +191,7 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
     if (optRot.getOptimalRotation()==R) break;
     if (shouldStop) return;
     if (loops>25) {
-      cout << "FlipFlop ?" << endl;
+      qDebug() << "FlipFlop ?";
       return;
     }
     R = optRot.getOptimalRotation();
@@ -268,7 +268,5 @@ bool Indexer::AngleInfo::operator<(const AngleInfo& o) const {
 }
 
 void Indexer::stop() {
-  cout << "Indexer stop" << endl;
-  //QMutexLocker lock(&indexMutex);
   shouldStop=true;
 }

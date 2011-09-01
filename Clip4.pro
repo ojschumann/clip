@@ -20,6 +20,9 @@ win32 {
   PATH += C:/Programme/TortoiseHG
   PATH += C:/Program Files/TortoiseHg
 }
+static {
+  QMAKE_LFLAGS += -static-libgcc
+}
 
 defs.commands = -\$(DEL_FILE) $$DEFFILE
 QMAKE_EXTRA_TARGETS += defs
@@ -47,6 +50,7 @@ QMAKE_LFLAGS_DEBUG += -pg
 #QMAKE_CXXFLAGS += -Wl,-pie -pie -gstabs -g3 -shared-libgcc
 #QMAKE_LFLAGS += -Wl,-pie -pie -gstabs -g3 -shared-libgcc
 
+
 SOURCES += main.cpp\
         ui/clip.cpp \
     config/colorbutton.cpp \
@@ -62,7 +66,7 @@ SOURCES += main.cpp\
     core/spacegroupdata.cpp \
     core/stereoprojector.cpp \
     defs.cpp \
-    image/BezierCurve.cpp \
+    image/beziercurve.cpp \
     image/basdataprovider.cpp \
     image/brukerprovider.cpp \
     image/dataprovider.cpp \

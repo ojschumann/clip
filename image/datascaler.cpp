@@ -21,7 +21,7 @@
  **********************************************************************/
 
 #include "datascaler.h"
-#include <iostream>
+ 
 #include <cmath>
 
 #include "defs.h"

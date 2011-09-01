@@ -24,7 +24,7 @@
 
 #include <QPainter>
 #include <QGraphicsView>
-#include <iostream>
+ 
 #include <QDebug>
 
 #include "config/configstore.h"

@@ -24,7 +24,7 @@
 #include <ui/clip.h>
 
 #include <QTime>
-#include <iostream>
+ 
 #include <cmath>
 #include <QDebug>
 

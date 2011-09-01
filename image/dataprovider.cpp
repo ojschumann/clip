@@ -21,7 +21,7 @@
  **********************************************************************/
 
 #include "dataprovider.h"
-#include <iostream>
+ 
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QFileInfo>

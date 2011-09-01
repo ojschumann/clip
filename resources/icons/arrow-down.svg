@@ -14,7 +14,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.47 r22583"
-   sodipodi:docname="up-arrow.svg">
+   sodipodi:docname="down-arrow.svg"
+   inkscape:export-filename="\\intern\home\ne\schumann\Eigene Dateien\Privat\Clip4\resources\icons\arrow-down.png"
+   inkscape:export-xdpi="150"
+   inkscape:export-ydpi="150">
   <defs
      id="defs4">
     <inkscape:perspective
@@ -70,7 +73,7 @@
      transform="translate(-270,-242.36218)">
     <path
        style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:20;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       d="m 280,332.36218 160,0 -80,-80 -80,80 z"
+       d="m 280,252.36218 160,0 -80,80 -80,-80 z"
        id="path2818" />
   </g>
 </svg>

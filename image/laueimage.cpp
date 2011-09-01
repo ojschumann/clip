@@ -25,7 +25,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QApplication>
-#include <iostream>
+ 
 #include <QtConcurrentRun>
 
 #include "ui/clip.h"

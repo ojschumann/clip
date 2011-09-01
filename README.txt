@@ -7,8 +7,10 @@ for arbitary goniometer configurations. The program is written in the
 C++ programing language and the cross platform toolkit Qt.
 It runs on Windows, Linux and MacOS X.
 
+I would like to thank Gregory Tucker for his contributions to the
+Multiwire-Import filter.
 
-Clip is Copyright (C) 2010 by O.J.Schumann (o.j.schumann@gmail.com)
+Clip is Copyright (C) 2008-2011 by O.J.Schumann (o.j.schumann@gmail.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

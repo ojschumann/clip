@@ -25,7 +25,7 @@
 #include <QTime>
 #include <QGraphicsItem>
 #include <QString>
-#include <iostream>
+ 
 
 using namespace std;
 

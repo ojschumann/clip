@@ -25,7 +25,7 @@
 #include <QFile>
 #include <QStringList>
 #include <QDataStream>
-#include <iostream>
+ 
 
 #include "image/dataproviderfactory.h"
 #include "image/imagedatastore.h"

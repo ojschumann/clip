@@ -28,7 +28,7 @@
 #include <QTextStream>
 #include <QDateTime>
 #include <QStringList>
-#include <iostream>
+ 
 #include <cmath>
 
 #include "tools/xmltools.h"

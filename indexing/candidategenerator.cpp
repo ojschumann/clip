@@ -23,8 +23,8 @@
 #include "candidategenerator.h"
 
 #include <set>
-#include <iostream>
-#include <iomanip>
+ 
+ 
 
 #include "core/spacegroup.h"
 #include "tools/tools.h"

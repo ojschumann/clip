@@ -26,7 +26,7 @@
 #include <QPointF>
 #include <QSettings>
 #include <cmath>
-#include <iostream>
+
 #include <typeinfo>
 
 #include "defs.h"
@@ -98,7 +98,7 @@ Projector& LauePlaneProjector::operator=(const Projector& _o) {
     setDetOrientation(o->omega(), o->chi(), o->phi());
     setDetOffset(o->xOffset(), o->yOffset());
   } else {
-    cerr << "Copy operator on LauePlaneProjector " << endl;
+    qDebug() << "Copy operator on LauePlaneProjector ";
   }
   return *this;
 }

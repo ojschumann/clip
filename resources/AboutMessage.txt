@@ -5,7 +5,7 @@ Version: <VER_PRODUCTVERSION_STR/> <br>
 Mercurial ID: <HG_REPRO_ID/> Revision: </HG_REPRO_REV><br>
 Mercurial Date: <HG_REPRO_DATE/><br>
 Build Date: <BUILD_DATE/> <BUILD_TIME/><br><br>
-Copyright &copy; 2010 O.J.Schumann (<a href="mailto:o.j.schumann@gmail.com">o.j.schumann@gmail.com</a>)</p>
+Copyright &copy; 2008-2011 O.J.Schumann (<a href="mailto:o.j.schumann@gmail.com">o.j.schumann@gmail.com</a>)</p>
 
 <p>This program is free software: you can redistribute it and/or modify
 it under the terms of the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License</a>

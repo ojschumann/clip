@@ -24,7 +24,7 @@
 
 #include <QStringList>
 #include <QMap>
-#include <iostream>
+ 
 #include <QImageReader>
 
 #include "image/dataproviderfactory.h"

@@ -1,5 +1,5 @@
 /**********************************************************************
-  Copyright (C) 2010 Olaf J. Schumann
+  Copyright (C) 2010 Gregory Tucker and Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
   For more information, see <http://clip.berlios.de>
@@ -19,6 +19,9 @@
   or write to the Free Software Foundation, Inc., 51 Franklin Street,
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
+
+
+
 
 #ifndef MWDATAPROVIDER_H
 #define MWDATAPROVIDER_H

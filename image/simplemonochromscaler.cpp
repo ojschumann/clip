@@ -26,7 +26,7 @@
 #include <set>
 #include <tr1/unordered_set>
 #include <tr1/unordered_map>
-#include <iostream>
+ 
 #include <cmath>
 
 #include "image/beziercurve.h"

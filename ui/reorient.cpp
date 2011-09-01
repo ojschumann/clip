@@ -23,7 +23,7 @@
 #include "reorient.h"
 #include "ui_reorient.h"
 
-#include <iostream>
+ 
 
 #include "tools/indexparser.h"
 #include "core/crystal.h"

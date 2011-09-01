@@ -24,7 +24,7 @@
 
 #include <cmath>
 #include <QtGui/QGraphicsEllipseItem>
-#include <iostream>
+ 
 #include <QSettings>
 
 #include "ui/stereocfg.h"

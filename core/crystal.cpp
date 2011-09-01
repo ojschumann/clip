@@ -22,7 +22,7 @@
 
 
 #include <cmath>
-#include <iostream>
+ 
 #include <QTime>
 #include <QMetaObject>
 #include <QtConcurrentMap>

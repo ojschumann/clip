@@ -25,7 +25,7 @@
 
 #include <QGraphicsScene>
 #include <QMetaMethod>
-#include <iostream>
+ 
 
 using namespace std;
 

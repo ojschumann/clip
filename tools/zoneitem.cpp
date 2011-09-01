@@ -24,7 +24,7 @@
 #include <QPainter>
 #include <QPen>
 #include <QCursor>
-#include <iostream>
+ 
 #include <QPointF>
 
 #include "core/projector.h"

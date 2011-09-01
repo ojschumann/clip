@@ -23,9 +23,10 @@
 #include "spacegroup.h"
 
 #include <QRegExp>
+#include <QDebug>
 #include <QStringList>
-#include <iostream>
-#include <iomanip>
+ 
+ 
 
 #include "tools/tools.h"
 
@@ -270,7 +271,7 @@ bool Spacegroup::generateGroup(QString hall) {
     addToGroup(tmpGroup, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1,   GroupElement::MOD/2,                     0,   GroupElement::MOD/2));
     addToGroup(tmpGroup, GroupElement(1, 0, 0, 0, 1, 0, 0, 0, 1,   GroupElement::MOD/2,   GroupElement::MOD/2,                     0));
   } else {
-    cout << "Unknown Centering symbol" << endl;
+    qDebug() << "Unknown Centering symbol" << center;
     return false;
   }
 
@@ -348,7 +349,7 @@ bool Spacegroup::generateGroup(QString hall) {
       rotationPart = TMat3D<int>( 0, 0, 1, 1, 0, 0, 0, 1, 0);
       translationPart = TVec3D<int>(1, 1, 1);
     } else {
-      cout << "can't identify rotation part: " << qPrintable(hallElements.at(n)) << " " << qPrintable(direction) << " " << qPrintable(precedingDirection) << endl;
+      qDebug() << "can't identify rotation part:" << N << hallElements.at(n) << direction << precedingDirection;
       return false;
     }
 

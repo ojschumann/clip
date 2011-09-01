@@ -28,7 +28,7 @@
 #include <QTextStream>
 #include <QDateTime>
 #include <QStringList>
-#include <iostream>
+ 
 #include <cmath>
 #include <QtDebug>
 #include "tools/xmltools.h"
@@ -204,7 +204,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
     int twoByteOverflowCount = overflowNumbers.at(1).toInt();
     int fourByteOverflowCount = overflowNumbers.at(2).toInt();
     QVector<unsigned int> overflowData;
-    unsigned int sigVal;
+    unsigned int sigVal=0;
     if (bytesPerPixel==1) {
       sigVal = 0xFF;
       imgFile.seek(headerSize+dataSize+underflowTableSize);

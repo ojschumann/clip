@@ -27,7 +27,7 @@
 #include <QPainter>
 #include <QEvent>
 #include <QWindowStateChangeEvent>
-#include <iostream>
+ 
 
 #include "ui/clip.h"
 //#include "core/crystal.h"

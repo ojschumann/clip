@@ -23,8 +23,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include <iostream>
-
+ 
+#ifdef __DEBUG__
 using namespace std;
 
 template<class T> void printRect(const T& r) {
@@ -35,6 +35,6 @@ template<class T> void printRect(const T& r) {
 template<class T> void printPoint(const QString& s, const T& r) {
   cout << qPrintable(s) << " = (" << r.x() << "," << r.y() << ")" << endl;
 }
-
+#endif
 
 #endif // DEBUG_H

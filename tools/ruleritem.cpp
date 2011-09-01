@@ -23,7 +23,7 @@
 #include "ruleritem.h"
 #include <QPainter>
 #include <QCursor>
-#include <iostream>
+ 
 #include "tools/circleitem.h"
 #include "config/configstore.h"
 

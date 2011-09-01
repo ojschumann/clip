@@ -28,7 +28,7 @@
 #include <QStyledItemDelegate>
 #include <QAbstractTableModel>
 #include <Eigen/Dense>
-#include <iomanip>
+ 
 
 #include "tools/rulermodel.h"
 #include "tools/ruleritem.h"

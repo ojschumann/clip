@@ -23,7 +23,7 @@
 #include "core/projector.h"
 
 #include <cmath>
-#include <iostream>
+ 
 #include <QTimer>
 #include <QCursor>
 #include <QTime>
@@ -364,7 +364,7 @@ Reflection Projector::getClosestReflection(const Vec3D& normal) {
   if (crystal.isNull())
     return Reflection();
   QVector<Reflection> r = crystal->getReflectionList();
-  if (r.size()!=reflectionIsProjected.size()) cout << "Something horrible is going on..." << endl;
+  if (r.size()!=reflectionIsProjected.size()) qDebug() << "Something horrible is going on...";
   int minIdx=-1;
   double minDist=0;
   for (int n=0; n<r.size(); n++) {
@@ -798,7 +798,7 @@ bool Projector::loadFromXML(QDomElement base) {
   if (element.isNull()) return false;
   for (QDomElement e=element.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {
     if (!parseXMLElement(e)) {
-      cout << "Could not parse: " << qPrintable(e.tagName()) << endl;
+      qDebug() << "Could not parse:" << e.tagName();
     }
   }
 
