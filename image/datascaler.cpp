@@ -26,7 +26,7 @@
 
 #include "defs.h"
 #include "image/dataprovider.h"
-#include "image/BezierCurve.h"
+#include "image/beziercurve.h"
 #include "tools/xmltools.h"
 
 using namespace std;

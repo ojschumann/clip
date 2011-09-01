@@ -29,7 +29,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "image/BezierCurve.h"
+#include "image/beziercurve.h"
 #include "image/dataprovider.h"
 
 

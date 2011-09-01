@@ -49,206 +49,205 @@ QMAKE_LFLAGS_DEBUG += -pg
 
 SOURCES += main.cpp\
         ui/clip.cpp \
-    ui/crystaldisplay.cpp \
-    tools/vec3D.cpp \
-    tools/mat3D.cpp \
+    config/colorbutton.cpp \
+    config/colorconfigitem.cpp \
+    config/configstore.cpp \
     core/crystal.cpp \
-    refinement/fitobject.cpp \
+    core/diffractingstereoprojector.cpp \
+    core/laueplaneprojector.cpp \
     core/projector.cpp \
-    tools/objectstore.cpp \
+    core/projectorfactory.cpp \
     core/reflection.cpp \
     core/spacegroup.cpp \
-    tools/optimalrotation.cpp \
-    tools/numberedit.cpp \
-    ui/projectionplane.cpp \
-    ui/projectiongraphicsview.cpp \
-    core/laueplaneprojector.cpp \
+    core/spacegroupdata.cpp \
     core/stereoprojector.cpp \
-    ui/stereocfg.cpp \
-    ui/laueplanecfg.cpp \
-    tools/ruleritem.cpp \
-    ui/resolutioncalculator.cpp \
-    tools/rulermodel.cpp \
-    tools/zoneitem.cpp \
-    image/laueimage.cpp \
-    image/BezierCurve.cpp \
-    ui/imagetoolbox.cpp \
-    tools/diagramgv.cpp \
     defs.cpp \
+    image/BezierCurve.cpp \
+    image/basdataprovider.cpp \
+    image/brukerprovider.cpp \
     image/dataprovider.cpp \
     image/dataproviderfactory.cpp \
-    image/qimagedataprovider.cpp \
-    image/basdataprovider.cpp \
-    image/mwdataprovider.cpp \
     image/datascaler.cpp \
     image/datascalerfactory.cpp \
-    image/simplergbscaler.cpp \
-    tools/cropmarker.cpp \
-    tools/propagatinggraphicsobject.cpp \
-    ui/contrastcurves.cpp \
+    image/imagedatastore.cpp \
+    image/laueimage.cpp \
+    image/mwdataprovider.cpp \
+    image/qimagedataprovider.cpp \
     image/simplemonochromscaler.cpp \
-    tools/histogramitem.cpp \
-    ui/mouseinfodisplay.cpp \
-    indexing/indexer.cpp \
-    indexing/solution.cpp \
-    tools/itemstore.cpp \
-    tools/circleitem.cpp \
-    tools/spotindicatorgraphicsitem.cpp \
-    ui/indexdisplay.cpp \
-    core/spacegroupdata.cpp \
-    indexing/candidategenerator.cpp \
-    indexing/solutionmodel.cpp \
+    image/simplergbscaler.cpp \
     image/xyzdataprovider.cpp \
-    ui/rotatecrystal.cpp \
-    ui/reorient.cpp \
-    tools/indexparser.cpp \
-    tools/tools.cpp \
-    core/projectorfactory.cpp \
-    tools/xmllistiterators.cpp \
-    tools/xmltools.cpp \
-    tools/zipiterator.cpp \
+    indexing/candidategenerator.cpp \
+    indexing/indexer.cpp \
     indexing/livemarkermodel.cpp \
-    tools/abstractmarkeritem.cpp \
-    tools/spotitem.cpp \
     indexing/marker.cpp \
-    ui/fitdisplay.cpp \
-    refinement/neldermead.cpp \
-    refinement/neldermead_worker.cpp \
+    indexing/solution.cpp \
+    indexing/solutionmodel.cpp \
+    refinement/fitobject.cpp \
     refinement/fitparameter.cpp \
     refinement/fitparametergroup.cpp \
     refinement/fitparametertreeitem.cpp \
-    ui/hkltool.cpp \
-    tools/resizeingtablewidget.cpp \
-    image/brukerprovider.cpp \
-    ui/clipconfig.cpp \
-    config/configstore.cpp \
-    config/colorbutton.cpp \
-    config/colorconfigitem.cpp \
-    ui/printdialog.cpp \
+    refinement/neldermead.cpp \
+    refinement/neldermead_worker.cpp \
+    tools/abstractmarkeritem.cpp \
+    tools/circleitem.cpp \
     tools/colortextitem.cpp \
-    image/imagedatastore.cpp \
-    ui/sadeasteregg.cpp \
     tools/combolineedit.cpp \
+    tools/cropmarker.cpp \
+    tools/diagramgv.cpp \
+    tools/histogramitem.cpp \
+    tools/indexparser.cpp \
+    tools/itemstore.cpp \
+    tools/mat3D.cpp \
+    tools/numberedit.cpp \
+    tools/objectstore.cpp \
+    tools/optimalrotation.cpp \
+    tools/propagatinggraphicsobject.cpp \
+    tools/resizeingtablewidget.cpp \
+    tools/ruleritem.cpp \
+    tools/rulermodel.cpp \
+    tools/spotindicatorgraphicsitem.cpp \
+    tools/spotitem.cpp \
+    tools/tools.cpp \
+    tools/vec3D.cpp \
     tools/webkittextobject.cpp \
-    core/diffractingstereoprojector.cpp
+    tools/xmllistiterators.cpp \
+    tools/xmltools.cpp \
+    tools/zipiterator.cpp \
+    tools/zoneitem.cpp \
+    ui/clipconfig.cpp \
+    ui/contrastcurves.cpp \
+    ui/crystaldisplay.cpp \
+    ui/fitdisplay.cpp \
+    ui/hkltool.cpp \
+    ui/imagetoolbox.cpp \
+    ui/indexdisplay.cpp \
+    ui/laueplanecfg.cpp \
+    ui/mouseinfodisplay.cpp \
+    ui/printdialog.cpp \
+    ui/projectiongraphicsview.cpp \
+    ui/projectionplane.cpp \
+    ui/reorient.cpp \
+    ui/resolutioncalculator.cpp \
+    ui/rotatecrystal.cpp \
+    ui/sadeasteregg.cpp \
+    ui/stereocfg.cpp 
 
 HEADERS  += ui/clip.h \
-    ui/crystaldisplay.h \
-    tools/vec3D.h \
-    tools/mat3D.h \
-    defs.h \
+    config/colorbutton.h \
+    config/colorconfigitem.h \
+    config/configstore.h \
     core/crystal.h \
-    refinement/fitobject.h \
+    core/diffractingstereoprojector.h \
+    core/laueplaneprojector.h \
     core/projector.h \
-    tools/objectstore.h \
+    core/projectorfactory.h \
     core/reflection.h \
     core/spacegroup.h \
-    tools/optimalrotation.h \
-    tools/numberedit.h \
-    ui/projectionplane.h \
-    ui/projectiongraphicsview.h \
-    core/laueplaneprojector.h \
     core/stereoprojector.h \
-    tools/init3D.h \
-    ui/stereocfg.h \
-    ui/laueplanecfg.h \
-    tools/ruleritem.h \
-    ui/resolutioncalculator.h \
-    tools/rulermodel.h \
-    tools/zoneitem.h \
-    image/laueimage.h \
-    image/BezierCurve.h \
-    ui/imagetoolbox.h \
-    tools/diagramgv.h \
-    tools/debug.h \
+    defs.h \
+    image/basdataprovider.h \
+    image/beziercurve.h \
+    image/brukerprovider.h \
     image/dataprovider.h \
     image/dataproviderfactory.h \
-    image/qimagedataprovider.h \
-    image/basdataprovider.h \
-    image/mwdataprovider.h \
     image/datascaler.h \
     image/datascalerfactory.h \
-    image/simplergbscaler.h \
-    tools/cropmarker.h \
-    tools/propagatinggraphicsobject.h \
-    ui/contrastcurves.h \
+    image/imagedatastore.h \
+    image/laueimage.h \
+    image/mwdataprovider.h \
+    image/qimagedataprovider.h \
     image/simplemonochromscaler.h \
-    tools/histogramitem.h \
-    tools/mousepositioninfo.h \
-    ui/mouseinfodisplay.h \
-    indexing/indexer.h \
-    indexing/solution.h \
-    tools/itemstore.h \
-    tools/circleitem.h \
-    tools/spotindicatorgraphicsitem.h \
-    ui/indexdisplay.h \
-    indexing/candidategenerator.h \
-    indexing/solutionmodel.h \
+    image/simplergbscaler.h \
     image/xyzdataprovider.h \
-    ui/rotatecrystal.h \
-    ui/reorient.h \
-    tools/indexparser.h \
-    tools/tools.h \
-    core/projectorfactory.h \
-    tools/xmllistiterators.h \
-    tools/xmltools.h \
-    tools/zipiterator.h \
+    indexing/candidategenerator.h \
+    indexing/indexer.h \
     indexing/livemarkermodel.h \
-    tools/abstractmarkeritem.h \
-    tools/spotitem.h \
     indexing/marker.h \
-    ui/fitdisplay.h \
-    refinement/neldermead.h \
-    refinement/neldermead_worker.h \
+    indexing/solution.h \
+    indexing/solutionmodel.h \
+    refinement/fitobject.h \
     refinement/fitparameter.h \
     refinement/fitparametergroup.h \
     refinement/fitparametertreeitem.h \
-    ui/hkltool.h \
-    tools/resizeingtablewidget.h \
-    image/brukerprovider.h \
-    ui/clipconfig.h \
-    config/configstore.h \
-    config/colorbutton.h \
-    config/colorconfigitem.h \
-    ui/printdialog.h \
+    refinement/neldermead.h \
+    refinement/neldermead_worker.h \
+    tools/abstractmarkeritem.h \
+    tools/circleitem.h \
     tools/colortextitem.h \
-    image/imagedatastore.h \
-    ui/sadeasteregg.h \
     tools/combolineedit.h \
+    tools/cropmarker.h \
+    tools/debug.h \
+    tools/diagramgv.h \
+    tools/histogramitem.h \
+    tools/indexparser.h \
+    tools/init3D.h \
+    tools/itemstore.h \
+    tools/mat3D.h \
+    tools/mousepositioninfo.h \
+    tools/numberedit.h \
+    tools/objectstore.h \
+    tools/optimalrotation.h \
+    tools/propagatinggraphicsobject.h \
+    tools/resizeingtablewidget.h \
+    tools/ruleritem.h \
+    tools/rulermodel.h \
+    tools/spotindicatorgraphicsitem.h \
+    tools/spotitem.h \
+    tools/tools.h \
+    tools/vec3D.h \
     tools/webkittextobject.h \
-    core/diffractingstereoprojector.h
+    tools/xmllistiterators.h \
+    tools/xmltools.h \
+    tools/zipiterator.h \
+    tools/zoneitem.h \
+    ui/clipconfig.h \
+    ui/contrastcurves.h \
+    ui/crystaldisplay.h \
+    ui/fitdisplay.h \
+    ui/hkltool.h \
+    ui/imagetoolbox.h \
+    ui/indexdisplay.h \
+    ui/laueplanecfg.h \
+    ui/mouseinfodisplay.h \
+    ui/printdialog.h \
+    ui/projectiongraphicsview.h \
+    ui/projectionplane.h \
+    ui/reorient.h \
+    ui/resolutioncalculator.h \
+    ui/rotatecrystal.h \
+    ui/sadeasteregg.h \
+    ui/stereocfg.h \
 
 FORMS    += ui/clip.ui \
-    ui/crystaldisplay.ui \
-    ui/projectionplane.ui \
-    ui/stereocfg.ui \
-    ui/laueplanecfg.ui \
-    ui/resolutioncalculator.ui \
-    ui/imagetoolbox.ui \
+    ui/clipconfig.ui \
     ui/contrastcurves.ui \
-    ui/mouseinfodisplay.ui \
-    ui/indexdisplay.ui \
-    ui/rotatecrystal.ui \
-    ui/reorient.ui \
+    ui/crystaldisplay.ui \
     ui/fitdisplay.ui \
     ui/hkltool.ui \
-    ui/clipconfig.ui \
+    ui/imagetoolbox.ui \
+    ui/indexdisplay.ui \
+    ui/laueplanecfg.ui \
+    ui/mouseinfodisplay.ui \
     ui/printdialog.ui \
-    ui/sadeasteregg.ui
+    ui/projectionplane.ui \
+    ui/reorient.ui \
+    ui/resolutioncalculator.ui \
+    ui/rotatecrystal.ui \
+    ui/sadeasteregg.ui \
+    ui/stereocfg.ui
 
-RESOURCES += \
-    resources/resources.qrc
+RESOURCES += resources/resources.qrc
 
 win32 {
     RC_FILE = resources/clip.rc
 }
 
 OTHER_FILES += \
-    Todo.txt \
-    Resources/clip.rc \
-    Resources/AboutMessage.txt \
     README.txt \
-    Resources/report_crystal.html \
+    Resources/AboutMessage.txt \
+    Resources/clip.rc \
     Resources/report.css \
     Resources/report_LauePlaneProjector.html \
-    Resources/report_image.html
+    Resources/report_crystal.html \
+    Resources/report_image.html \
+    Todo.txt 

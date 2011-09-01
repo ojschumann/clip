@@ -29,7 +29,7 @@
 #include <QMouseEvent>
 #include <QFileDialog>
 
-#include "image/BezierCurve.h"
+#include "image/beziercurve.h"
 #include "image/laueimage.h"
 #include "tools/histogramitem.h"
 #include "tools/zipiterator.h"

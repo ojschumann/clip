@@ -33,7 +33,7 @@
 #include "image/datascalerfactory.h"
 #include "tools/xmltools.h"
 #include "tools/zipiterator.h"
-#include "image/BezierCurve.h"
+#include "image/beziercurve.h"
 #include "image/imagedatastore.h"
 
 using namespace std;

@@ -20,7 +20,7 @@
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
 
-#include "image/BezierCurve.h"
+#include "image/beziercurve.h"
 
 #include <iostream>
 #include <cmath>
