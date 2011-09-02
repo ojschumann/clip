@@ -22,6 +22,8 @@ win32 {
 }
 static {
   QMAKE_LFLAGS += -static-libgcc
+  QTPLUGIN += qjpeg qgif qmng qtiff qico qsvg
+  DEFINES += __STATIC__
 }
 
 defs.commands = -\$(DEL_FILE) $$DEFFILE
