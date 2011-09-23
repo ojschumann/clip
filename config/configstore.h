@@ -75,7 +75,7 @@ signals:
   void tmpColorChanged(QColor);
 
 private:
-  explicit ConfigStore(QObject *parent = 0);
+  explicit ConfigStore(QObject* _parent = nullptr);
   virtual ~ConfigStore();
 
   QList<ColorConfigItem*> colors;

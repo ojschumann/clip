@@ -26,8 +26,8 @@
 #include "tools/spotitem.h"
 #include "tools/zoneitem.h"
 
-LiveMarkerModel::LiveMarkerModel(Crystal *c, QObject *parent) :
-    QAbstractTableModel(parent),
+LiveMarkerModel::LiveMarkerModel(Crystal *c, QObject* _parent) :
+    QAbstractTableModel(_parent),
     crystal(c)
 {
   sortColumn = 0;
@@ -124,12 +124,12 @@ void LiveMarkerModel::rescore() {
   sort(sortColumn, sortOrder);
 }
 
-int LiveMarkerModel::rowCount(const QModelIndex& /*parent*/) const {
+int LiveMarkerModel::rowCount(const QModelIndex& /*_parent*/) const {
   // Has markers.size() rows for the individual markers plus one for the sum
   return markers.size()+1;
 }
 
-int LiveMarkerModel::columnCount(const QModelIndex& /*parent*/) const {
+int LiveMarkerModel::columnCount(const QModelIndex& /*_parent*/) const {
   return 10;
 }
 

@@ -29,7 +29,7 @@ class CircleItem : public QGraphicsObject
 {
   Q_OBJECT
 public:
-  explicit CircleItem(double r, QGraphicsItem *parent = 0);
+  explicit CircleItem(double r, QGraphicsItem *_parent = nullptr);
   virtual ~CircleItem();
 
   QRectF boundingRect() const;

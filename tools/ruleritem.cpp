@@ -30,8 +30,8 @@
 using namespace std;
 
 
-RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, double r, QGraphicsItem* parent):
-    PropagatingGraphicsObject(parent),
+RulerItem::RulerItem(const QPointF& p1, const QPointF& p2, double r, QGraphicsItem* _parent):
+    PropagatingGraphicsObject(_parent),
     startHandle(new CircleItem(r, this)),
     endHandle(new CircleItem(r,this)),
     highlighted(true),

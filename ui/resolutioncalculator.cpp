@@ -41,9 +41,9 @@
 
 class NumberEditDelegate: public QStyledItemDelegate {
 public:
-  NumberEditDelegate(QObject* parent=0): QStyledItemDelegate(parent) {}
-  virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
-    NumberEdit* n = new NumberEdit(parent, true);
+  NumberEditDelegate(QObject* _parent = nullptr): QStyledItemDelegate(_parent) {}
+  virtual QWidget* createEditor(QWidget* _parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
+    NumberEdit* n = new NumberEdit(_parent, true);
     n->setButtonSymbols(QAbstractSpinBox::NoButtons);
     n->setMinimum(0.0);
     n->setMaximum(1000.0);
@@ -51,8 +51,8 @@ public:
   }
 };
 
-ResolutionCalculator::ResolutionCalculator(ItemStore<RulerItem>& r, LaueImage* img, QWidget *parent) :
-    QWidget(parent),
+ResolutionCalculator::ResolutionCalculator(ItemStore<RulerItem>& r, LaueImage* img, QWidget* _parent) :
+    QWidget(_parent),
     ui(new Ui::ResolutionCalculator),
     rulers(r),
     resolutionsLocked(false),

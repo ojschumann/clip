@@ -27,9 +27,9 @@
 
 using namespace std;
 
-FitParameterTreeItem::FitParameterTreeItem(FitParameter *p, QTreeWidgetItem* parent):
+FitParameterTreeItem::FitParameterTreeItem(FitParameter *p, QTreeWidgetItem* _parent):
     QObject(0),
-    QTreeWidgetItem(parent),
+    QTreeWidgetItem(_parent),
     parameter(p)
 {
   setHidden(!p->isChangeable());

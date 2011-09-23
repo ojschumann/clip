@@ -31,7 +31,7 @@ class ProjectionGraphicsView : public QGraphicsView
 {
   Q_OBJECT
 public:
-  explicit ProjectionGraphicsView(QWidget *parent = 0);
+  explicit ProjectionGraphicsView(QWidget* _parent = nullptr);
 
   void dragEnterEvent(QDragEnterEvent *);
   void mousePressEvent(QMouseEvent *e);

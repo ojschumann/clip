@@ -28,7 +28,7 @@
 class ComboLineEdit: public QLineEdit {
   Q_OBJECT
 public:
-  ComboLineEdit(QWidget* parent = 0);
+  ComboLineEdit(QWidget* _parent = nullptr);
 protected:
   void focusInEvent(QFocusEvent *e);
   void focusOutEvent(QFocusEvent *e);

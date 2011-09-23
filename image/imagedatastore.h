@@ -43,7 +43,7 @@ public:
     CellBeta,
     CellGamma,
   };
-  explicit ImageDataStore(QObject *parent = 0);
+  explicit ImageDataStore(QObject* _parent = nullptr);
 
   bool hasData(DataType d) const;
   QVariant getData(DataType d) const;

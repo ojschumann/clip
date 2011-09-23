@@ -47,5 +47,18 @@ extern const char* BUILD_TIME;
 
 #define VER_COMPANYDOMAIN_STR       "clip.berlios.de"
 
+#ifndef __DEBUG__
+static inline unsigned long long rdtsctime()
+{
+     unsigned int eax, edx;
+     unsigned long long val;
+     __asm__ __volatile__("cpuid": : : "ax", "bx", "cx", "dx");
+     __asm__ __volatile__("rdtsc":"=a"(eax), "=d"(edx));
+     val = edx;
+     val = val << 32;
+     val += eax;
+     return val;
+}
+#endif
 
 #endif // DEFS_H

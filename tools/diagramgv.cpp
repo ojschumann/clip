@@ -22,8 +22,8 @@
 
 #include "diagramgv.h"
 
-DiagramGV::DiagramGV(QWidget *parent) :
-    QGraphicsView(parent)
+DiagramGV::DiagramGV(QWidget* _parent) :
+    QGraphicsView(_parent)
 {
 }
 
@@ -33,7 +33,7 @@ void DiagramGV::resizeEvent(QResizeEvent* /*event*/) {
   }
 }
 
-void DiagramGV::mousePressEvent(QMouseEvent *event) {
-  QGraphicsView::mousePressEvent(event);
+void DiagramGV::mousePressEvent(QMouseEvent *e) {
+  QGraphicsView::mousePressEvent(e);
 }
 

@@ -24,8 +24,8 @@
 
 #include <QHeaderView>
 
-ResizingTableWidget::ResizingTableWidget(QWidget *parent) :
-    QTableWidget(parent)
+ResizingTableWidget::ResizingTableWidget(QWidget* _parent) :
+    QTableWidget(_parent)
 {
 }
 

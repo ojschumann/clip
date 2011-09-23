@@ -29,7 +29,7 @@ class HistogramItem : public QGraphicsObject
 {
     Q_OBJECT
 public:
-    explicit HistogramItem(QGraphicsItem *parent = 0);
+    explicit HistogramItem(QGraphicsItem *_parent = nullptr);
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 signals:

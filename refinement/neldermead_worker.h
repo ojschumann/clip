@@ -29,7 +29,7 @@
 class NMWorker: public QObject {
   Q_OBJECT
 public:
-  NMWorker(Crystal* c, QObject* parent=0);
+  NMWorker(Crystal* c, QObject* _parent=nullptr);
   virtual ~NMWorker();
 
   void doOneIteration();

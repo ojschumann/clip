@@ -38,7 +38,7 @@ class IndexDisplay : public QWidget
     Q_OBJECT
 
 public:
-    explicit IndexDisplay(Crystal* _c, QWidget *parent = 0);
+    explicit IndexDisplay(Crystal* _c, QWidget* _parent = nullptr);
     virtual ~IndexDisplay();
     int maxSearchIndex();
 signals:

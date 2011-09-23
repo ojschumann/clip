@@ -29,7 +29,7 @@ class DiagramGV : public QGraphicsView
 {
     Q_OBJECT
 public:
-    explicit DiagramGV(QWidget *parent = 0);
+    explicit DiagramGV(QWidget* _parent = nullptr);
     void resizeEvent(QResizeEvent *event);
     // Need just to be public
     void mousePressEvent(QMouseEvent *event);

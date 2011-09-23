@@ -38,7 +38,7 @@ class FitDisplay : public QWidget
   Q_OBJECT
 
 public:
-  explicit FitDisplay(Crystal* c, QWidget *parent = 0);
+  explicit FitDisplay(Crystal* c, QWidget* _parent = nullptr);
   virtual ~FitDisplay();
 
 private slots:

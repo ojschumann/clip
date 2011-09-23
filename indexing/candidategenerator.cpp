@@ -32,8 +32,8 @@
 using namespace std;
 
 
-CandidateGenerator::CandidateGenerator(const Mat3D& _MReal, const Mat3D& _MReciprocal, QObject* parent):
-    QObject(parent),
+CandidateGenerator::CandidateGenerator(const Mat3D& _MReal, const Mat3D& _MReciprocal, QObject* _parent):
+    QObject(_parent),
     maxIndex(0,0,0),
     MReal(_MReal),
     MReciprocal(_MReciprocal)

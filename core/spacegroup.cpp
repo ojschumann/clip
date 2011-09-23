@@ -81,11 +81,11 @@ Spacegroup::System Spacegroup::SpacegroupSymbolInfo::system() const {
 }
 
 
-Spacegroup::Spacegroup(QObject* parent): QObject(parent) {
+Spacegroup::Spacegroup(QObject* _parent): QObject(_parent) {
   setGroupSymbol("P1");
 }
 
-Spacegroup::Spacegroup(const Spacegroup &o): QObject(NULL) {
+Spacegroup::Spacegroup(const Spacegroup &o): QObject(nullptr) {
   symbol = o.symbol;
   crystalsystem = o.crystalsystem;
   group = o.group;
@@ -212,12 +212,12 @@ bool Spacegroup::isExtinct(const TVec3D<int>& reflection) const {
   return false;
 }
 
-template <class T> void Spacegroup::addToGroup(QList<T> &group, const T& e) {
-  if (!group.contains(e)) {
-    group << e;
-    for (int i=0; i<group.size(); i++) {
-      addToGroup(group, e*group[i]);
-      addToGroup(group, group[i]*e);
+template <class T> void Spacegroup::addToGroup(QList<T> &_group, const T& e) {
+  if (!_group.contains(e)) {
+    _group << e;
+    for (int i=0; i<_group.size(); i++) {
+      addToGroup(_group, e*_group[i]);
+      addToGroup(_group, _group[i]*e);
     }
   }
 }

@@ -27,8 +27,8 @@
 #include "core/projector.h"
 #include "config/configstore.h"
 
-SpotItem::SpotItem(Projector *p, double r, QGraphicsItem *parent):
-  CircleItem(r, parent),
+SpotItem::SpotItem(Projector *p, double r, QGraphicsItem *_parent):
+  CircleItem(r, _parent),
   AbstractProjectorMarkerItem(p, AbstractMarkerItem::SpotMarker)
 {
   highlight(false);

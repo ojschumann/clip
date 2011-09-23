@@ -42,7 +42,7 @@ Projector* ProjectorFactory::getProjector(QString key) {
   if (providers.contains(key)) {
     return providers[key]();
   }
-  return NULL;
+  return nullptr;
 }
 
 bool ProjectorFactory::registerProjector(QString key, Provider provider) {

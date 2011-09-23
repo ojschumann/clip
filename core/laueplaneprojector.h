@@ -31,7 +31,7 @@
 class LauePlaneProjector: public Projector {
   Q_OBJECT
 public:
-  LauePlaneProjector(QObject* parent=0);
+  LauePlaneProjector(QObject* _parent=nullptr);
 
   virtual Projector& operator=(const Projector& o);
 

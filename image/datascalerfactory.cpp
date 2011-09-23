@@ -38,12 +38,12 @@ DataScalerFactory& DataScalerFactory::getInstance() {
   return instance;
 }
 
-DataScaler* DataScalerFactory::getScaler(DataProvider* dp, QObject* parent) {
+DataScaler* DataScalerFactory::getScaler(DataProvider* dp, QObject* _parent) {
   if (scalerGenerators.contains(dp->format())) {
     ScalerGenerator gen = scalerGenerators[dp->format()];
-    return (*gen)(dp, parent);
+    return (*gen)(dp, _parent);
   }
-  return NULL;
+  return nullptr;
 }
 
 bool DataScalerFactory::registerDataScaler(DataProvider::Format format, ScalerGenerator generator) {

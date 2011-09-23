@@ -33,8 +33,8 @@
 using namespace std;
 
 
-QImageDataProvider::QImageDataProvider(const QImage& img, QObject *parent) :
-    DataProvider(parent),
+QImageDataProvider::QImageDataProvider(const QImage& img, QObject* _parent) :
+    DataProvider(_parent),
     data(img)
 {
 }
@@ -49,7 +49,7 @@ QStringList QImageDataProvider::Factory::fileFormatFilters() {
   return formats;
 }
 
-DataProvider* QImageDataProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject *parent) {
+DataProvider* QImageDataProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject* _parent) {
   QImage img(filename);
   if (!img.isNull()) {
     QMap<QString, QVariant> headerData;
@@ -61,12 +61,12 @@ DataProvider* QImageDataProvider::Factory::getProvider(QString filename, ImageDa
     store->setData(ImageDataStore::PixelSize, img.size());
 
     headerData.insert(Info_ImageSize, QString("%1x%2 pixels").arg(img.width()).arg(img.height()));
-    QImageDataProvider* provider = new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied), parent);
+    QImageDataProvider* provider = new QImageDataProvider(img.convertToFormat(QImage::Format_ARGB32_Premultiplied), _parent);
     provider->insertFileInformation(filename);
     provider->providerInformation.unite(headerData);
     return provider;
   }
-  return NULL;
+  return nullptr;
 }
 
 const void* QImageDataProvider::getData() {

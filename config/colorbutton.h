@@ -29,7 +29,7 @@ class ColorButton : public QToolButton
 {
   Q_OBJECT
 public:
-  explicit ColorButton(const QColor& c, QWidget *parent = 0);
+  explicit ColorButton(const QColor& c, QWidget *_parent= nullptr);
 
 signals:
 public slots:

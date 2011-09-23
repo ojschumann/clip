@@ -41,14 +41,14 @@ using namespace std;
 
 class NoEditDelegate: public QStyledItemDelegate {
 public:
-  NoEditDelegate(QObject* parent=0): QStyledItemDelegate(parent) {}
-  virtual QWidget* createEditor(QWidget* /*parent*/, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
+  NoEditDelegate(QObject* _parent=nullptr): QStyledItemDelegate(_parent) {}
+  virtual QWidget* createEditor(QWidget* /*_parent*/, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     return 0;
   }
 };
 
-FitDisplay::FitDisplay(Crystal* c, QWidget *parent):
-    QWidget(parent),
+FitDisplay::FitDisplay(Crystal* c, QWidget* _parent):
+    QWidget(_parent),
     ui(new Ui::FitDisplay),
     mainFitObject(c)
 {

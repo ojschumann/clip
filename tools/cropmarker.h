@@ -31,7 +31,7 @@ class CropMarker : public QGraphicsObject
 {
   Q_OBJECT
 public:
-  explicit CropMarker(const QPointF& pCenter, double _dx, double _dy, double _angle, double handleSize, QGraphicsItem  *parent = 0);
+  explicit CropMarker(const QPointF& pCenter, double _dx, double _dy, double _angle, double handleSize, QGraphicsItem  *_parent = nullptr);
   virtual ~CropMarker();
   QPolygonF getRect();
   virtual void setImgTransform(const QTransform &);

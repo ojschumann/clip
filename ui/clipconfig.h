@@ -36,7 +36,7 @@ class ClipConfig : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit ClipConfig(QWidget *parent = 0);
+  explicit ClipConfig(QWidget* _parent = nullptr);
   virtual ~ClipConfig();
 
 protected slots:

@@ -37,7 +37,7 @@ class RotateCrystal : public QWidget
   Q_OBJECT
 
 public:
-  explicit RotateCrystal(QWidget *parent = 0);
+  explicit RotateCrystal(QWidget* _parent = nullptr);
   virtual ~RotateCrystal();
   virtual QSize sizeHint() const;
 public slots:
@@ -55,7 +55,7 @@ private:
   Ui::RotateCrystal *ui;
   double angleSum;
   QSignalMapper buttonMapper;
-  Crystal* paramsLoadedFromCrystal;
+  Crystal* paramsLoadedFromThisCrystal;
   bool axisChangeFromEdit;
 };
 

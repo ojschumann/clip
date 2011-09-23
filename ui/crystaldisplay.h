@@ -40,7 +40,7 @@ class CrystalDisplay : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit CrystalDisplay(QWidget *parent = 0);
+  explicit CrystalDisplay(QWidget* _parent = nullptr);
   virtual ~CrystalDisplay();
 
   void loadFromXML(QDomElement base);

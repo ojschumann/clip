@@ -28,8 +28,8 @@
 using namespace std;
 
 
-PropagatingGraphicsObject::PropagatingGraphicsObject(QGraphicsItem *parent) :
-    QGraphicsObject(parent)
+PropagatingGraphicsObject::PropagatingGraphicsObject(QGraphicsItem *_parent) :
+    QGraphicsObject(_parent)
 {
   setFlag(ItemSendsGeometryChanges);
   propagatePositionChange = true;

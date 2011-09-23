@@ -40,7 +40,7 @@ class LaueImage : public QObject
 public:
 
 
-  explicit LaueImage(QObject *parent = 0);
+  explicit LaueImage(QObject* _parent = nullptr);
   virtual ~LaueImage();
 
   void startOpenFile(QString filename, QDomElement base=QDomElement());
@@ -49,9 +49,9 @@ public:
   void loadFromXML(QDomElement);
 
   void saveCurvesToXML(QDomElement);
-  void loadCurvesFromXML(QDomElement, DataScaler* ds=0);
+  void loadCurvesFromXML(QDomElement, DataScaler* ds=nullptr);
 
-  bool isValid() { return (provider!=0) && (scaler!=0); }
+  bool isValid() { return (provider!=nullptr) && (scaler!=nullptr); }
 
   QString name();
   QList<QString> infoKeys();

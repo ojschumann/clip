@@ -32,8 +32,8 @@
 
 using namespace std;
 
-Reorient::Reorient(QWidget *parent) :
-    QWidget(parent),
+Reorient::Reorient(QWidget* _parent) :
+    QWidget(_parent),
     ui(new Ui::Reorient)
 {
   ui->setupUi(this);

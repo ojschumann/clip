@@ -29,8 +29,8 @@
 #include "ui/contrastcurves.h"
 #include "core/projector.h"
 
-ImageToolbox::ImageToolbox(Projector* p, QWidget *parent):
-    QMainWindow(parent),
+ImageToolbox::ImageToolbox(Projector* p, QWidget* _parent):
+    QMainWindow(_parent),
     ui(new Ui::ImageToolbox),
     projector(p)
 {

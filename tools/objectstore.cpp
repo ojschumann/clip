@@ -22,7 +22,7 @@
 
 #include <tools/objectstore.h>
 
-ObjectStore::ObjectStore(QObject* parent): QObject(parent), set() {
+ObjectStore::ObjectStore(QObject* _parent): QObject(_parent), set() {
 }
 int ObjectStore::size() {
     return set.size();
@@ -33,7 +33,7 @@ QObject* ObjectStore::at(int i) {
     if (i<size()) 
         return set[i];
     else
-        return NULL;
+        return nullptr;
 }
         
 void ObjectStore::addObject(QObject *o) {

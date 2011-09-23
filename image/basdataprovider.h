@@ -38,7 +38,7 @@ public:
   public:
     Factory() {}
     QStringList fileFormatFilters();
-    DataProvider* getProvider(QString, ImageDataStore*, QObject* = 0);
+    DataProvider* getProvider(QString, ImageDataStore*, QObject* = nullptr);
   };
 
   virtual ~BasDataProvider();
@@ -69,7 +69,7 @@ public:
   static const char IMG_Suffix[];
 
 private:
-  explicit BasDataProvider(QObject *parent = 0);
+  explicit BasDataProvider(QObject* _parent = nullptr);
   BasDataProvider(const BasDataProvider&);
   BasDataProvider& operator=(const BasDataProvider&);
 signals:

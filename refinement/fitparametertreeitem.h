@@ -32,7 +32,7 @@ class FitParameterTreeItem : public QObject, public QTreeWidgetItem
 {
   Q_OBJECT
 public:
-  explicit FitParameterTreeItem(FitParameter* p, QTreeWidgetItem* parent);
+  explicit FitParameterTreeItem(FitParameter* p, QTreeWidgetItem* _parent);
   virtual QVariant data(int column, int role) const;
   virtual void setData(int column, int role, const QVariant &value);
 signals:

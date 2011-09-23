@@ -37,8 +37,8 @@
 
 using namespace std;
 
-IndexDisplay::IndexDisplay(Crystal* _c, QWidget *parent) :
-    QWidget(parent),
+IndexDisplay::IndexDisplay(Crystal* _c, QWidget* _parent) :
+    QWidget(_parent),
     ui(new Ui::Indexing),
     crystal(_c),
     solutions()

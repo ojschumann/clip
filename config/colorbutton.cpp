@@ -24,8 +24,8 @@
 
 #include <QColorDialog>
 
-ColorButton::ColorButton(const QColor& c, QWidget *parent) :
-    QToolButton(parent)
+ColorButton::ColorButton(const QColor& c, QWidget *_parent) :
+    QToolButton(_parent)
 {
   setColor(c);
 }

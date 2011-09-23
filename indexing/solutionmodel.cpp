@@ -25,16 +25,16 @@
 #include <QApplication>
 #include <QVector>
 
-SolutionModel::SolutionModel(QObject *parent):
-  QAbstractTableModel(parent)
+SolutionModel::SolutionModel(QObject* _parent):
+  QAbstractTableModel(_parent)
 {
 }
 
-int SolutionModel::rowCount(const QModelIndex& /*parent*/) const {
+int SolutionModel::rowCount(const QModelIndex& /*_parent*/) const {
   return solutions.count();
 }
 
-int SolutionModel::columnCount(const QModelIndex& /*parent*/) const {
+int SolutionModel::columnCount(const QModelIndex& /*_parent*/) const {
   return 3;
 }
 

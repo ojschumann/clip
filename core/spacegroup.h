@@ -50,7 +50,7 @@ public:
   Q_DECLARE_FLAGS(System, Systems)
 
 
-  Spacegroup(QObject* parent=0);
+  Spacegroup(QObject* _parent=nullptr);
   Spacegroup(const Spacegroup&);
   bool setGroupSymbol(QString);
 

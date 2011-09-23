@@ -32,8 +32,8 @@
 
 using namespace std;
 
-XYZDataProvider::XYZDataProvider(QObject *parent) :
-    DataProvider(parent)
+XYZDataProvider::XYZDataProvider(QObject* _parent) :
+    DataProvider(_parent)
 {
 }
 
@@ -45,10 +45,10 @@ QStringList XYZDataProvider::Factory::fileFormatFilters() {
   return QStringList() << "raw" << "xyz";
 }
 
-DataProvider* XYZDataProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject *parent) {
+DataProvider* XYZDataProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject* _parent) {
   QFile imgFile(filename);
 
-  if (!imgFile.open(QFile::ReadOnly)) return NULL;
+  if (!imgFile.open(QFile::ReadOnly)) return nullptr;
 
   QDataStream in(&imgFile);
   in.setByteOrder(QDataStream::LittleEndian);
@@ -60,7 +60,7 @@ DataProvider* XYZDataProvider::Factory::getProvider(QString filename, ImageDataS
   in >> tmp;
   int height = tmp;
 
-  if ((2*width*height+4)!=imgFile.size()) return NULL;
+  if ((2*width*height+4)!=imgFile.size()) return nullptr;
   QVector<float> pixelData;
   pixelData.reserve(width*height);
 
@@ -72,7 +72,7 @@ DataProvider* XYZDataProvider::Factory::getProvider(QString filename, ImageDataS
 
   store->setData(ImageDataStore::PixelSize, QSizeF(width, height));
 
-  XYZDataProvider* provider = new XYZDataProvider(parent);
+  XYZDataProvider* provider = new XYZDataProvider(_parent);
   provider->pixelData = pixelData;
   provider->imgWidth = width;
   provider->imgHeight = height;

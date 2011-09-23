@@ -29,8 +29,10 @@
 
 using namespace std;
 
-ProjectionGraphicsView::ProjectionGraphicsView(QWidget *parent) :
-    QGraphicsView(parent) {
+QPolygonF rectToPoly(const QRectF& r);
+
+ProjectionGraphicsView::ProjectionGraphicsView(QWidget* _parent) :
+    QGraphicsView(_parent) {
   viewIgnoresThisMouseEvent=false;
 }
 

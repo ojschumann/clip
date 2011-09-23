@@ -43,8 +43,8 @@ const char XML_Stereo_NonScattering[] = "DisplayNonScattering";
 
 using namespace std;
 
-StereoProjector::StereoProjector(QObject* parent):
-    Projector(parent),
+StereoProjector::StereoProjector(QObject* _parent):
+    Projector(_parent),
     localCoordinates(),
     displayNonscatteringReflections(false) {
 

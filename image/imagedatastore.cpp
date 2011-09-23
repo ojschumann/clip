@@ -23,8 +23,8 @@
 #include "imagedatastore.h"
 #include "tools/tools.h"
 
-ImageDataStore::ImageDataStore(QObject *parent) :
-    QObject(parent)
+ImageDataStore::ImageDataStore(QObject* _parent) :
+    QObject(_parent)
 {
 }
 

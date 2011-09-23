@@ -30,7 +30,7 @@ using namespace std;
 class AbstractMonoScaler : public DataScaler {
   Q_OBJECT
 public:
-  explicit AbstractMonoScaler(DataProvider* dp, QObject *parent = 0): DataScaler(dp, parent) {}
+  explicit AbstractMonoScaler(DataProvider* dp, QObject *_parent= nullptr): DataScaler(dp, _parent) {}
   virtual ~AbstractMonoScaler() {}
 protected slots:
   virtual void setHistogramEqualisation(bool)=0;
@@ -47,7 +47,7 @@ protected:
   virtual QRgb getRGB(const QPointF &);
   virtual void setHistogramEqualisation(bool);
 private:
-  explicit SimpleMonochromScaler(DataProvider* dp, QObject *parent = 0);
+  explicit SimpleMonochromScaler(DataProvider* dp, QObject* _parent = nullptr);
   SimpleMonochromScaler(const SimpleMonochromScaler&);
   void makeValueIndex();
 

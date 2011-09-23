@@ -32,9 +32,9 @@
 using namespace std;
 
 
-DataScaler::DataScaler(DataProvider* dp, QObject *parent) :
-    QObject(parent),
-    provider(dp), cache(0), sourceRect()
+DataScaler::DataScaler(DataProvider* dp, QObject* _parent) :
+    QObject(_parent),
+    provider(dp), cache(nullptr), sourceRect()
 {
   for (int n=0; n<4; n++) {
     BezierCurve* curve = new BezierCurve();
@@ -65,8 +65,8 @@ void DataScaler::resetAllTransforms() {
 
 void DataScaler::addTransform(const QTransform & t) {
   sqareToRaw = t * sqareToRaw;
-  if (cache)
-    redrawCache();
+  redrawCache(); // redrawCache checks for (cache==nullptr) by itself, so it is safe
+
   emit imageContentsChanged();
 }
 
@@ -74,8 +74,8 @@ void DataScaler::updateContrastMapping() {
 }
 
 QImage DataScaler::getImage(const QSize &size, const QPolygonF &_sourceRect) {
-  if ((cache==0) || (size!=cache->size()) || (_sourceRect!=sourceRect)) {
-    if (cache) delete cache;
+  if ((cache==nullptr) || (size!=cache->size()) || (_sourceRect!=sourceRect)) {
+    if (cache!=nullptr) delete cache;
     cache = new QImage(size, QImage::Format_ARGB32_Premultiplied);
     sourceRect = _sourceRect;
     redrawCache();
@@ -84,7 +84,7 @@ QImage DataScaler::getImage(const QSize &size, const QPolygonF &_sourceRect) {
 }
 
 void DataScaler::redrawCache() {
-  if (!cache) return;
+  if (cache==nullptr) return;
 
   QRgb* data = (QRgb*)cache->bits();
 
@@ -156,7 +156,7 @@ void DataScaler::loadFromXML(QDomElement base) {
                            readDouble(e, XML_DataScaler_Transform_m33, ok));
       if (ok) {
         sqareToRaw = transform;
-        if (cache)
+        if (cache!=nullptr)
           redrawCache();
         emit imageContentsChanged();
       }

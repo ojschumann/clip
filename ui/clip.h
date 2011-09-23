@@ -48,7 +48,7 @@ public:
   Crystal* getMostRecentCrystal(bool checkProjectors=false);
   Projector* getMostRecentProjector(bool withCrystal=false);
 private:
-  explicit Clip(QWidget *parent = 0);
+  explicit Clip(QWidget* _parent = nullptr);
   Clip(const Clip&);
   virtual ~Clip();
   static Clip* instance;

@@ -49,7 +49,7 @@ public:
     }
   };
 
-  CandidateGenerator(const Mat3D&, const Mat3D&, QObject* parent=0);
+  CandidateGenerator(const Mat3D&, const Mat3D&, QObject* _parent=nullptr);
   Candidate getCandidate(int);
   QList<Candidate> getCandidateList(int until);
 

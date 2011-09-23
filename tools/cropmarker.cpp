@@ -32,8 +32,8 @@
 #include "config/configstore.h"
 
 
-CropMarker::CropMarker(const QPointF& /*pCenter*/, double /*_dx*/, double /*_dy*/, double /*_angle*/, double _handleSize, QGraphicsItem *parent):
-    QGraphicsObject(parent)
+CropMarker::CropMarker(const QPointF& /*pCenter*/, double /*_dx*/, double /*_dy*/, double /*_angle*/, double _handleSize, QGraphicsItem *_parent):
+    QGraphicsObject(_parent)
 {
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
   setFlag(QGraphicsItem::ItemIsMovable);
@@ -100,15 +100,15 @@ void CropMarker::setCursors() {
   t.rotate(-rotation());
   cursorPixmap = cursorPixmap.transformed(t, Qt::SmoothTransformation);
 
-  QCursor cursor(cursorPixmap);
-  handles.at(2)->setCursor(cursor);
-  handles.at(3)->setCursor(cursor);
+  QCursor newCursor(cursorPixmap);
+  handles.at(2)->setCursor(newCursor);
+  handles.at(3)->setCursor(newCursor);
 
   t.reset();
   t.rotate(90);
-  cursor=QCursor(cursorPixmap.transformed(t));
-  handles.at(0)->setCursor(cursor);
-  handles.at(1)->setCursor(cursor);
+  newCursor=QCursor(cursorPixmap.transformed(t));
+  handles.at(0)->setCursor(newCursor);
+  handles.at(1)->setCursor(newCursor);
 }
 
 QPolygonF CropMarker::getRect() {

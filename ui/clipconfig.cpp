@@ -38,8 +38,8 @@ using namespace std;
 
 
 
-ClipConfig::ClipConfig(QWidget *parent) :
-    QMainWindow(parent),
+ClipConfig::ClipConfig(QWidget* _parent) :
+    QMainWindow(_parent),
     ui(new Ui::ClipConfig)
 {
   ui->setupUi(this);

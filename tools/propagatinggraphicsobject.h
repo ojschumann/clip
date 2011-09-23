@@ -30,7 +30,7 @@ class PropagatingGraphicsObject : public QGraphicsObject
 {
     Q_OBJECT
 public:
-    explicit PropagatingGraphicsObject(QGraphicsItem *parent = 0);
+    explicit PropagatingGraphicsObject(QGraphicsItem *_parent = nullptr);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     virtual void setImgTransform(const QTransform&);
 protected:

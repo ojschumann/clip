@@ -34,7 +34,7 @@ class FitParameterGroup;
 class FitObject: public QObject {
   Q_OBJECT
 public:
-  FitObject(QObject* parent=0): QObject(parent) {}
+  FitObject(QObject* _parent=nullptr): QObject(_parent) {}
   virtual ~FitObject() {}
   virtual void prepareForFit() {}
   virtual FitObject& operator=(const FitObject& o);

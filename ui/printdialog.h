@@ -48,7 +48,7 @@ class PrintDialog : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit PrintDialog(Projector*, QWidget *parent = 0);
+  explicit PrintDialog(Projector*, QWidget* _parent = nullptr);
   ~PrintDialog();
 
 private:

@@ -38,8 +38,8 @@
 
 using namespace std;
 
-LaueImage::LaueImage(QObject *parent) :
-    QObject(parent), provider(0), scaler(0), dataStore()
+LaueImage::LaueImage(QObject* _parent) :
+    QObject(_parent), provider(nullptr), scaler(nullptr), dataStore()
 {
   connect(&watcher, SIGNAL(finished()), this, SLOT(doneOpenFile()));
 }
@@ -51,7 +51,7 @@ void LaueImage::startOpenFile(QString filename, QDomElement base) {
 
 QPair<DataProvider*, DataScaler*> LaueImage::doOpenFile(QString filename, QDomElement base) {
   DataProvider* dp = DataProviderFactory::getInstance().loadImage(filename, &dataStore);
-  DataScaler* ds = dp ? DataScalerFactory::getInstance().getScaler(dp) : NULL;
+  DataScaler* ds = dp ? DataScalerFactory::getInstance().getScaler(dp) : nullptr;
   if (ds && dp) {
     if (!base.isNull()) {
       dp->loadFromXML(base);
@@ -68,25 +68,25 @@ QPair<DataProvider*, DataScaler*> LaueImage::doOpenFile(QString filename, QDomEl
 void LaueImage::doneOpenFile() {
   DataProvider* dp = watcher.result().first;
   DataScaler* ds = watcher.result().second;
-  if (dp && ds) {
+  if (dp!=nullptr && ds!=nullptr) {
     provider = dp;
     scaler = ds;
-    // ds and dp were created in another thread and thus without parent.
-    // Set us as their parent
+    // ds and dp were created in another thread and thus without _parent.
+    // Set us as their _parent
     provider->setParent(this);
     scaler->setParent(this);
     connect(scaler, SIGNAL(imageContentsChanged()), this, SIGNAL(imageContentsChanged()));
     connect(scaler, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), this, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)));
   } else {
-    if (dp) delete dp;
-    if (ds) delete ds;
+    if (dp!=nullptr) delete dp;
+    if (ds!=nullptr) delete ds;
   }
   emit openFinished(this);
 }
 
 LaueImage::~LaueImage() {
-  if (scaler) delete scaler;
-  if (provider) delete provider;
+  if (scaler!=nullptr) delete scaler;
+  if (provider!=nullptr) delete provider;
 }
 
 QImage LaueImage::getScaledImage(const QSize& requestedSize, const QPolygonF& r) {
@@ -146,8 +146,10 @@ void LaueImage::loadFromXML(QDomElement base) {
   QDomElement element = base.elementsByTagName(XML_LaueImage_element).at(0).toElement();
   if (element.isNull()) return;
   QString filename = element.attribute(XML_LaueImage_element_fn);
-  if (scaler) delete scaler;
-  if (provider) delete provider;
+  if (scaler!=nullptr) delete scaler;
+  if (provider!=nullptr) delete provider;
+  scaler = nullptr;
+  provider = nullptr;
 
   startOpenFile(filename, element);
 }

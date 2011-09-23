@@ -26,8 +26,8 @@
 
 using namespace std;
 
-SimpleRGBScaler::SimpleRGBScaler(DataProvider* dp, QObject *parent) :
-    DataScaler(dp, parent)
+SimpleRGBScaler::SimpleRGBScaler(DataProvider* dp, QObject* _parent) :
+    DataScaler(dp, _parent)
 {
   data = static_cast<QRgb const*>(dp->getData());
   datawidth = dp->size().width();
@@ -39,8 +39,8 @@ SimpleRGBScaler::SimpleRGBScaler(const SimpleRGBScaler &): DataScaler(0)  {}
 SimpleRGBScaler::~SimpleRGBScaler() {
 }
 
-DataScaler* SimpleRGBScaler::getScaler(DataProvider *dp, QObject* parent) {
-  return new SimpleRGBScaler(dp, parent);
+DataScaler* SimpleRGBScaler::getScaler(DataProvider *dp, QObject* _parent) {
+  return new SimpleRGBScaler(dp, _parent);
 }
 #include <cmath>
 QRgb SimpleRGBScaler::getRGB(const QPointF &p) {

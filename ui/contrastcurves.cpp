@@ -35,8 +35,8 @@
 #include "tools/zipiterator.h"
 
 
-ContrastCurves::ContrastCurves(LaueImage* img, QWidget *parent) :
-    QWidget(parent),
+ContrastCurves::ContrastCurves(LaueImage* img, QWidget* _parent) :
+    QWidget(_parent),
     ui(new Ui::ContrastCurves),
     laueImage(img),
     handleMarkers(),
@@ -216,7 +216,7 @@ void ContrastCurves::makeHScale() {
 
 
 
-ContrastCurves::BoundedEllipse::BoundedEllipse(QGraphicsItem *parent): CircleItem(5, parent) {
+ContrastCurves::BoundedEllipse::BoundedEllipse(QGraphicsItem *_parent): CircleItem(5, _parent) {
   setFlag(QGraphicsItem::ItemIsMovable);
   setFlag(QGraphicsItem::ItemIgnoresTransformations);
   setAcceptedMouseButtons(Qt::LeftButton);

@@ -34,8 +34,11 @@
 
 using namespace std;
 
-ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* parent):
-    PropagatingGraphicsObject(parent),
+bool PointSort(const QPointF& p1, const QPointF& p2);
+QPolygonF getPath(const QPointF& from, const QPointF& to, QRectF on, bool clockwise, QPointF& via);
+
+ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* _parent):
+    PropagatingGraphicsObject(_parent),
     AbstractProjectorMarkerItem(p, AbstractMarkerItem::ZoneMarker),
     imgRect(-0.01, -0.01, 1.02, 1.02),
     startHandle(new CircleItem(projector->getSpotSize(), this)),

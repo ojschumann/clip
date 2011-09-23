@@ -36,7 +36,7 @@ public:
   public:
     Factory() {}
     QStringList fileFormatFilters();
-    DataProvider* getProvider(QString, ImageDataStore*, QObject* = 0);
+    DataProvider* getProvider(QString, ImageDataStore*, QObject* = nullptr);
   };
   virtual ~QImageDataProvider();
 
@@ -48,7 +48,7 @@ public:
   virtual int pixelCount();
   virtual Format format();
 private:
-  explicit QImageDataProvider(const QImage& img, QObject *parent = 0);
+  explicit QImageDataProvider(const QImage& img, QObject* _parent = nullptr);
   QImageDataProvider(const QImageDataProvider&);
   QImageDataProvider& operator=(const QImageDataProvider&);
   QImage data;

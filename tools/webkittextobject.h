@@ -43,7 +43,7 @@ public:
     enum { WebkitTextFormat = QTextFormat::UserObject + 1 };
     enum WebkitProperties { HtmlString = 1, PictureCache= 2 };
 
-    WebkitTextObject(QObject* parent=0);
+    WebkitTextObject(QObject* _parent=nullptr);
     virtual ~WebkitTextObject();
 
     QSizeF intrinsicSize(QTextDocument *doc, int posInDocument,

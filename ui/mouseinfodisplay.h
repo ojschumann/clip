@@ -67,7 +67,7 @@ class MouseInfoDisplay : public QWidget
   Q_OBJECT
 
 public:
-  explicit MouseInfoDisplay(QWidget *parent = 0);
+  explicit MouseInfoDisplay(QWidget* _parent = nullptr);
   virtual ~MouseInfoDisplay();
   virtual bool eventFilter(QObject *, QEvent *);
   virtual QSize sizeHint() const;

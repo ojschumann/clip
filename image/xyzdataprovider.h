@@ -36,7 +36,7 @@ public:
   public:
     Factory() {}
     QStringList fileFormatFilters();
-    DataProvider* getProvider(QString, ImageDataStore*, QObject* = 0);
+    DataProvider* getProvider(QString, ImageDataStore*, QObject* = nullptr);
   };
   virtual ~XYZDataProvider();
 
@@ -48,7 +48,7 @@ public:
   virtual int pixelCount();
   virtual Format format();
 private:
-  explicit XYZDataProvider(QObject *parent = 0);
+  explicit XYZDataProvider(QObject* _parent = nullptr);
   XYZDataProvider(const XYZDataProvider&);
   XYZDataProvider& operator=(const XYZDataProvider&);
 signals:

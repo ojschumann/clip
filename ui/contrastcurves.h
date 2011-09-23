@@ -44,7 +44,7 @@ class ContrastCurves : public QWidget
     Q_OBJECT
 
 public:
-    explicit ContrastCurves(LaueImage* img, QWidget *parent = 0);
+    explicit ContrastCurves(LaueImage* img, QWidget* _parent = nullptr);
     virtual ~ContrastCurves();
     void mousePressEvent(QMouseEvent *);
   public slots:
@@ -60,7 +60,7 @@ public:
   private:
     class BoundedEllipse: public CircleItem {
     public:
-      BoundedEllipse(QGraphicsItem *parent=0);
+      BoundedEllipse(QGraphicsItem *_parent = nullptr);
       QVariant itemChange(GraphicsItemChange change, const QVariant & value);
       void setBBox(const QRectF& b) { bbox = b; }
       bool operator<(const BoundedEllipse& o);

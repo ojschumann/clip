@@ -40,11 +40,11 @@ using namespace std;
 
 class NoBorderDelegate: public QStyledItemDelegate {
 public:
-  NoBorderDelegate(QTableWidget* parent=0): QStyledItemDelegate(parent) {
+  NoBorderDelegate(QTableWidget* _parent = nullptr): QStyledItemDelegate(_parent) {
     // create grid pen
-    int gridHint = parent->style()->styleHint(QStyle::SH_Table_GridLineColor, new QStyleOptionViewItemV4());
+    int gridHint = _parent->style()->styleHint(QStyle::SH_Table_GridLineColor, new QStyleOptionViewItemV4());
     QColor gridColor = static_cast<QRgb>(gridHint);
-    _gridPen = QPen(gridColor, 0, parent->gridStyle());
+    _gridPen = QPen(gridColor, 0, _parent->gridStyle());
   }
   virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
 
@@ -67,8 +67,8 @@ protected:
 
 static const char headerStyleSheet[] = "QHeaderView::Section { border-style: plain; border-width: 4px }";
 
-MouseInfoDisplay::MouseInfoDisplay(QWidget *parent) :
-    QWidget(parent),
+MouseInfoDisplay::MouseInfoDisplay(QWidget* _parent) :
+    QWidget(_parent),
     ui(new Ui::MouseInfoDisplay),
     lastVector()
 {

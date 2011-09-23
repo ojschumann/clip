@@ -30,9 +30,8 @@ defs.commands = -\$(DEL_FILE) $$DEFFILE
 QMAKE_EXTRA_TARGETS += defs
 PRE_TARGETDEPS += defs
 
-
 CONFIG(debug, debug|release) {
-  DEFINES += __SOURCEDIR__="\"\\\"$$PWD\\\"\""
+  DEFINES += __DEBUG__ __SOURCEDIR__="\"\\\"$$PWD\\\"\""
 }
 
 DEFINES += __HG_REPRO_ID__="\\\"\$(shell hg -R \"$$PWD\" -q id)\\\""
@@ -40,13 +39,13 @@ DEFINES += __HG_REPRO_REV__="\\\"\$(shell hg -R \"$$PWD\" -q parent --template {
 DEFINES += __HG_REPRO_DATE__="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\\\"\""
 
 
-
 QMAKE_CXXFLAGS += -std=gnu++0x
+LIBS += -lboost_thread
 
 # Eigen linear Algebra library
 INCLUDEPATH += ../eigen
 
-QMAKE_CXXFLAGS_DEBUG += -pg
+QMAKE_CXXFLAGS_DEBUG += -pg -W -Wpointer-arith -Wcast-qual -Wcast-align -Wmissing-declarations -Wredundant-decls
 QMAKE_LFLAGS_DEBUG += -pg
 #QMAKE_LFLAGS_RELEASE -= -Wl,-s
 #QMAKE_CXXFLAGS += -Wl,-pie -pie -gstabs -g3 -shared-libgcc

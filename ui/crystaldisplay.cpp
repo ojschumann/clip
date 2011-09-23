@@ -42,8 +42,8 @@
 #include "tools/tools.h"
 #include "tools/xmltools.h"
 
-CrystalDisplay::CrystalDisplay(QWidget *parent) :
-    QMainWindow(parent),
+CrystalDisplay::CrystalDisplay(QWidget* _parent) :
+    QMainWindow(_parent),
     ui(new Ui::CrystalDisplay), crystal(new Crystal(this)), allowRotationUpdate(true)
 {
   ui->setupUi(this);

@@ -32,7 +32,7 @@ class RulerItem : public PropagatingGraphicsObject
 {
   Q_OBJECT
 public:
-  RulerItem(const QPointF&, const QPointF&, double r, QGraphicsItem* parent=0);
+  RulerItem(const QPointF&, const QPointF&, double r, QGraphicsItem* _parent = nullptr);
   virtual ~RulerItem();
   QRectF boundingRect() const;
   QPainterPath shape() const;

@@ -29,8 +29,8 @@
 
 using namespace std;
 
-HistogramItem::HistogramItem(QGraphicsItem *parent) :
-    QGraphicsObject(parent)
+HistogramItem::HistogramItem(QGraphicsItem *_parent) :
+    QGraphicsObject(_parent)
 {
   maxValue = 0;
 }
@@ -75,19 +75,19 @@ void HistogramItem::setHistogram(QVector<int> r, QVector<int> g, QVector<int> b)
 
   maxValue=0;
   for (int i=0; i<r.size(); i++) {
-    double x = 1.0*i/(r.size()-1);
+    double xVal = 1.0*i/(r.size()-1);
     double vals[3];
     for (int n=0; n<3; n++) {
       vals[n]=l.at(n).at(i);
       if (vals[n]>0) vals[n]=log(vals[n]);
       if (maxValue<vals[n]) maxValue=vals[n];
-      pathes[n].lineTo(x, vals[n]);
+      pathes[n].lineTo(xVal, vals[n]);
     }
     for (int n=0; n<3; n++) {
       double val = std::min(vals[n], vals[(n+1)%3]);
-      pathes[n+3].lineTo(x, val);
+      pathes[n+3].lineTo(xVal, val);
     }
-    pathes[6].lineTo(x, std::min(vals[0], std::min(vals[1], vals[2])));
+    pathes[6].lineTo(xVal, std::min(vals[0], std::min(vals[1], vals[2])));
   }
   for (int i=0; i<pathes.size(); i++) {
     pathes[i].lineTo(1,0);

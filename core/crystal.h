@@ -62,7 +62,7 @@ public:
   static const char Settings_EulerChi[];
   static const char Settings_EulerPhi[];
 
-  Crystal(QObject* parent=0);
+  Crystal(QObject* _parent=nullptr);
   virtual ~Crystal();
 
   virtual Crystal& operator=(const Crystal& o);

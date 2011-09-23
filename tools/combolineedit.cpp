@@ -26,7 +26,7 @@
 
 
 
-ComboLineEdit::ComboLineEdit(QWidget* parent): QLineEdit(parent) {
+ComboLineEdit::ComboLineEdit(QWidget* _parent): QLineEdit(_parent) {
   setContextMenuPolicy(Qt::NoContextMenu);
   connect(this, SIGNAL(returnPressed()), SLOT(handleReturnPressed()));
 }

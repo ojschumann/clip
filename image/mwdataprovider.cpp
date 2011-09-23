@@ -43,8 +43,8 @@ using namespace std;
  version 1, March 21, 2011
 */
 
-MWDataProvider::MWDataProvider(QObject *parent) :
-    DataProvider(parent)
+MWDataProvider::MWDataProvider(QObject* _parent) :
+    DataProvider(_parent)
 {
 }
 
@@ -57,22 +57,22 @@ QStringList MWDataProvider::Factory::fileFormatFilters() {
   return QStringList() << "hs2";
 }
 
-DataProvider* MWDataProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject *parent) {
+DataProvider* MWDataProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject* _parent) {
   //load in information about the file
   QFileInfo info(filename);
 
   // Return if file does not exist
-  if (!info.exists() || !info.isReadable()) return NULL;
+  if (!info.exists() || !info.isReadable()) return nullptr;
 
   // Check if suffix is .hs2 or .his
   QString suffix = info.suffix().toLower();
-  //if (suffix!="hs2" || suffix!="his") return NULL;
-  if (suffix!="hs2") return NULL;
+  //if (suffix!="hs2" || suffix!="his") return nullptr;
+  if (suffix!="hs2") return nullptr;
 
   //load in the histogram image file
   QFile hs2File(info.filePath());
 
-  if (!hs2File.open(QFile::ReadOnly)) return NULL;
+  if (!hs2File.open(QFile::ReadOnly)) return nullptr;
 
   QMap<QString, QVariant> headerData;
 
@@ -158,7 +158,7 @@ DataProvider* MWDataProvider::Factory::getProvider(QString filename, ImageDataSt
   headerData.insert("Sample-Detector distance", QString("%1 mm").arg(10.0*dist, 0, 'f', 1));
   headerData.insert("Cell", QString("%1 %2 %3 %4 %5 %6").arg(aLat).arg(bLat).arg(cLat).arg(alpha).arg(beta).arg(gamma));
 
-  MWDataProvider* provider = new MWDataProvider(parent);
+  MWDataProvider* provider = new MWDataProvider(_parent);
   provider->insertFileInformation(filename);
   provider->providerInformation.unite(headerData);
   provider->pixelData = pixelData;

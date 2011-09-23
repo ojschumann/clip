@@ -60,8 +60,8 @@
 #include "tools/cropmarker.h"
 
 
-ProjectionPlane::ProjectionPlane(Projector* p, QWidget *parent) :
-    QMainWindow(parent),
+ProjectionPlane::ProjectionPlane(Projector* p, QWidget* _parent) :
+    QMainWindow(_parent),
     ui(new Ui::ProjectionPlane),
     projector(p),
     projectorConfig(0),
@@ -177,7 +177,7 @@ void ProjectionPlane::mousePressEvent(QMouseEvent *e) {
     if (ui->zoomAction->isChecked()) {
       if (zoomRubber) {
         delete zoomRubber;
-        zoomRubber = 0;
+        zoomRubber = nullptr;
       }
       zoomRubber = new QRubberBand(QRubberBand::Rectangle, ui->view->viewport());
       zoomRubber->setGeometry(QRect());
@@ -276,7 +276,7 @@ void ProjectionPlane::mouseReleaseEvent(QMouseEvent *e) {
       if (largeMove) zoomSteps.append(QRectF(mousePressOrigin, p).normalized());
       zoomRubber->hide();
       delete zoomRubber;
-      zoomRubber=0;
+      zoomRubber=nullptr;
       resizeView();
     }
     if (!largeMove) {

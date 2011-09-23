@@ -29,6 +29,8 @@
 #include <QtConcurrentRun>
 #include <QSettings>
 
+#include <boost/thread.hpp>
+
 #include "tools/tools.h"
 #include "core/crystal.h"
 #include "core/projector.h"
@@ -38,6 +40,8 @@
 #include "tools/xmltools.h"
 #include "tools/abstractmarkeritem.h"
 #include "refinement/fitparameter.h"
+#include "defs.h"
+
 using namespace std;
 
 
@@ -91,8 +95,8 @@ const char Crystal::Settings_EulerChi[] = "EulerChi";
 const char Crystal::Settings_EulerPhi[] = "EulerPhi";
 
 
-Crystal::Crystal(QObject* parent):
-    FitObject(parent),
+Crystal::Crystal(QObject* _parent):
+    FitObject(_parent),
     MReal(),
     MReziprocal(),
     MRot(),
@@ -141,17 +145,17 @@ Crystal::Crystal(QObject* parent):
   connect(this, SIGNAL(orientationChanged()), &orientationGroup, SLOT(groupDataChanged()));
 }
 
-Crystal& Crystal::operator=(const Crystal& c) {
+Crystal& Crystal::operator=(const Crystal& o) {
   synchronUpdate();
-  spaceGroup.setGroupSymbol(c.spaceGroup.groupSymbol());
-  internalSetCell(c.a,c.b,c.c,c.alpha,c.beta,c.gamma);
-  setWavevectors(c.Qmin, c.Qmax);
+  spaceGroup.setGroupSymbol(o.spaceGroup.groupSymbol());
+  internalSetCell(o.a,o.b,o.c,o.alpha,o.beta,o.gamma);
+  setWavevectors(o.Qmin, o.Qmax);
   predictionFactor = 1.0;
 
-  setRotation(c.getRotationMatrix());
-  setRotationAxis(c.getRotationAxis(), c.getRotationAxisType());
-  synchronUpdate(c.updateIsSynchron);
-  FitObject::operator=(c);
+  setRotation(o.getRotationMatrix());
+  setRotationAxis(o.getRotationAxis(), o.getRotationAxisType());
+  synchronUpdate(o.updateIsSynchron);
+  FitObject::operator=(o);
   return *this;
 }
 
@@ -166,9 +170,7 @@ void Crystal::prepareForFit() {
 }
 
 void Crystal::setCell(double _a, double _b, double _c, double _alpha, double _beta, double _gamma) {
-  QList<double> c;
-  c << _a << _b << _c << _alpha << _beta << _gamma;
-  setCell(c);
+  setCell(QList<double>() << _a << _b << _c << _alpha << _beta << _gamma);
 }
 
 void Crystal::setCell(QList<double> cell) {
@@ -278,17 +280,17 @@ void Crystal::reflectionGenerated() {
 }
 
 QVector<Reflection> Crystal::doGeneration() {
-  Vec3D astar(this->astar);
-  Vec3D bstar(this->bstar);
-  Vec3D cstar(this->cstar);
-  Mat3D MReziprocal(this->MReziprocal);
-  double Qmax(this->Qmax);
+  Vec3D savedAstar(this->astar);
+  Vec3D savedBstar(this->bstar);
+  Vec3D savedCstar(this->cstar);
+  Mat3D savedMReziprocal(this->MReziprocal);
+  double savedQMax(this->Qmax);
 
   // Qmax =2*pi/lambda_min
   // n*lambda=2*d*sin(theta) => n_max=2*d/lambda = Qmax*d/pi
-  int hMax = int(M_1_PI*a*Qmax);
+  int hMax = int(M_1_PI*a*savedQMax);
   // predicted number of reflections
-  double prediction = 4.0/3.0*M_1_PI*M_1_PI*Qmax*Qmax*Qmax*MReal.det();
+  double prediction = 4.0/3.0*M_1_PI*M_1_PI*savedQMax*savedQMax*savedQMax*MReal.det();
   Crystal::UpdateRef updateRef(this);
   QVector<Reflection> refs;
   refs.reserve(int(1.1*predictionFactor*prediction));
@@ -296,10 +298,10 @@ QVector<Reflection> Crystal::doGeneration() {
   for (int h=-hMax; h<hMax; h++) {
     //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
     // k^2 +2*k*h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
-    double ns = 1.0/bstar.norm_sq();
-    double p = astar*bstar*ns*h;
-    double q1 = astar.norm_sq()*ns*h*h;
-    double q2 = M_1_PI*M_1_PI*ns*Qmax*Qmax;
+    double ns = 1.0/savedBstar.norm_sq();
+    double p = savedAstar*savedBstar*ns*h;
+    double q1 = savedAstar.norm_sq()*ns*h*h;
+    double q2 = M_1_PI*M_1_PI*ns*savedQMax*savedQMax;
     double s = p*p-q1+q2;
     int kMin = (s>0)?int(-p-sqrt(s)):0;
     int kMax = (s>0)?int(-p+sqrt(s)):0;
@@ -308,11 +310,11 @@ QVector<Reflection> Crystal::doGeneration() {
 
       int hk_ggt = ggt(h,k);
 
-      Vec3D v = MReziprocal*Vec3D(h,k,0);
-      ns = 1.0/cstar.norm_sq();
-      p = v*cstar*ns;
+      Vec3D v = savedMReziprocal*Vec3D(h,k,0);
+      ns = 1.0/savedCstar.norm_sq();
+      p = v*savedCstar*ns;
       q1 = v.norm_sq()*ns;
-      q2 = M_1_PI*M_1_PI*ns*Qmax*Qmax;
+      q2 = M_1_PI*M_1_PI*ns*savedQMax*savedQMax;
       s = p*p-q1+q2;
       int lMin = (s>0)?int(-p-sqrt(s)):0;
       int lMax = (s>0)?int(-p+sqrt(s)):0;
@@ -320,7 +322,7 @@ QVector<Reflection> Crystal::doGeneration() {
       for (int l=lMin; l<=lMax; l++) {
         // store only lowest order reflections
         if (ggt(hk_ggt, l)==1) {
-          v=MReziprocal*Vec3D(h,k,l);
+          v=savedMReziprocal*Vec3D(h,k,l);
           double Q = 2.0*M_PI*v.norm();
 
           Reflection r;
@@ -330,7 +332,7 @@ QVector<Reflection> Crystal::doGeneration() {
           r.hklSqSum=h*h+k*k+l*l;
           r.Q=Q;
           r.d = 2.0*M_PI/Q;
-          for (int i=1; i<=int(M_1_PI*Qmax*r.d+0.999); i++) {
+          for (int i=1; i<=int(M_1_PI*savedQMax*r.d+0.999); i++) {
             if (!sg.isExtinct(TVec3D<int>(i*h, i*k, i*l)))
               r.orders.push_back(i);
           }
@@ -408,13 +410,54 @@ void Crystal::UpdateRef::operator()(Reflection &r) {
 }
 
 void Crystal::updateRotation() {
+  static int nthreads = 0;
+  nthreads++;
   if (not updateEnabled)
     return;
   UpdateRef updateRef(this);
+
+  long long t1 = rdtsctime();
+
   for (int i=0; i<reflections.size(); i++) {
     updateRef(reflections[i]);
   }
+
+  long long t2 = rdtsctime();
+
+  long long t3 = rdtsctime();
+
+  QList<boost::thread*> workers;
+  int chunkSize = reflections.size()/nthreads + 1;
+  for (int p=0; p<nthreads; p++) {
+    int start = p * chunkSize;
+    int length = qMin(start + chunkSize, reflections.size()) - start;
+    //qDebug() << chunkSize << p << reflections.size() << length << start;
+    Reflection* r = reflections.data() + start;
+    boost::thread* t = new boost::thread([r, length] {
+      UpdateRef update(this);
+      Reflection* ref = r;
+      for (int n=0; n<length; n++, ref++) {
+        update(*ref);
+      }
+
+    });
+
+    workers << t;
+  }
+  while (!workers.empty()) {
+    boost::thread* t = workers.takeLast();
+    t->join();
+    delete t;
+  }
+
+  long long t4 = rdtsctime();
+
+  qDebug() << nthreads << "Update times:" << t2-t1 << t3-t2 << t4-t3 << "speed:" << (t4-t3)*nthreads << "len:" << reflections.size();
+
   emit reflectionsUpdate();
+
+  nthreads %= 2*qMax(1u, boost::thread::hardware_concurrency());
+
 }
 
 int Crystal::reflectionCount() {
@@ -496,8 +539,8 @@ void Crystal::addProjector(Projector* p) {
   foreach (AbstractMarkerItem* item, p->getAllMarkers())
     emit markerAdded(item);
   updateWavevectorsFromProjectors();
-  foreach (Projector* p, getConnectedProjectors())
-    p->enableProjection(updateEnabled);
+  foreach (Projector* _p, getConnectedProjectors())
+    _p->enableProjection(updateEnabled);
 }
 
 void Crystal::removeProjector(Projector* p) {
@@ -586,26 +629,26 @@ Spacegroup* Crystal::getSpacegroup() {
   return &spaceGroup;
 }
 
-void Crystal::enableUpdate(bool b) {
-  updateEnabled=b;
+void Crystal::enableUpdate(bool value) {
+  updateEnabled=value;
   foreach (Projector* p, getConnectedProjectors())
     p->enableProjection(updateEnabled);
 }
 
-void Crystal::synchronUpdate(bool b) {
-  updateIsSynchron=b;
+void Crystal::synchronUpdate(bool value) {
+  updateIsSynchron=value;
 }
 
 QList<double> Crystal::calcEulerAngles(bool inDegrees) {
   double omega, chi, phi;
   omega=-atan2(MRot(0,1),MRot(1,1));
   //chi=asin(MRot[2][1]);
-  double s=sin(omega);
-  double c=cos(omega);
-  if (fabs(c)>fabs(s)) {
-    chi=atan2(MRot(2,1), MRot(1,1)/c);
+  double sinValue=sin(omega);
+  double cosValue=cos(omega);
+  if (fabs(cosValue)>fabs(sinValue)) {
+    chi=atan2(MRot(2,1), MRot(1,1)/cosValue);
   } else {
-    chi=atan2(MRot(2,1), MRot(0,1)/s);
+    chi=atan2(MRot(2,1), MRot(0,1)/sinValue);
   }
   Mat3D M(Mat3D(Vec3D(1,0,0), -chi)*Mat3D(Vec3D(0,0,1), -omega)*MRot);
   phi=atan2(M(0,2),M(0,0));
@@ -643,25 +686,25 @@ void Crystal::slotSetSGConstrains() {
 
 
 void Crystal::convertRtoH() {
-  Vec3D a = uvw2Real( 1,-1, 0);
-  //    b = uvw2Real( 0, 1,-1);
-  Vec3D c = uvw2Real( 1, 1, 1);
-  double a_norm = a.norm();
-  double c_norm = c.norm();
+  Vec3D hexA = uvw2Real( 1,-1, 0);
+  //    hexB = uvw2Real( 0, 1,-1);
+  Vec3D hexC = uvw2Real( 1, 1, 1);
+  double hexA_norm = hexA.norm();
+  double hexC_norm = hexC.norm();
 
-  MRot.lmult(VectorPairRotation(MRot*Vec3D(1,0,0), MRot*Vec3D(0,0,1), a/a_norm, c/c_norm));
+  MRot.lmult(VectorPairRotation(MRot*Vec3D(1,0,0), MRot*Vec3D(0,0,1), hexA/hexA_norm, hexC/hexC_norm));
 
-  setCell(a_norm, a_norm, c_norm, 90, 90, 120);
+  setCell(hexA_norm, hexA_norm, hexC_norm, 90, 90, 120);
 }
 
 void Crystal::convertHtoR() {
-  Vec3D a = uvw2Real( 2, 1, 1)/3;
-  Vec3D b = uvw2Real(-1, 1, 1)/3;
-  //    c = uvw2Real(-1,-2, 1)/3;
-  double l=a.norm();
-  double ang=180*M_1_PI*acos(a*b/l/l);
+  Vec3D rhomA = uvw2Real( 2, 1, 1)/3;
+  Vec3D rhomB = uvw2Real(-1, 1, 1)/3;
+  //    rhomC = uvw2Real(-1,-2, 1)/3;
+  double l=rhomA.norm();
+  double ang=180*M_1_PI*acos(rhomA*rhomB/l/l);
 
-  MRot.lmult(VectorPairRotation(MRot*Vec3D(1,0,0), MRot*Vec3D(cos(M_PI/180*ang), sin(M_PI/180*ang), 0), a/l, b/l));
+  MRot.lmult(VectorPairRotation(MRot*Vec3D(1,0,0), MRot*Vec3D(cos(M_PI/180*ang), sin(M_PI/180*ang), 0), rhomA/l, rhomB/l));
   setCell(l,l,l,ang,ang,ang);
 }
 
@@ -723,18 +766,18 @@ bool Crystal::loadFromXML(QDomElement base) {
     if (e.tagName()==Settings_Spacegroup) {
       if (!spaceGroup.setGroupSymbol(e.attribute(XML_Crystal_Spacegroup_symbol))) return false;
     } else if (e.tagName()==XML_Crystal_Cell) {
-      double a = readDouble(e, XML_Crystal_Cell_a, ok);
-      double b = readDouble(e, XML_Crystal_Cell_b, ok);
-      double c = readDouble(e, XML_Crystal_Cell_c, ok);
-      double alpha = readDouble(e, XML_Crystal_Cell_alpha, ok);
-      double beta = readDouble(e, XML_Crystal_Cell_beta, ok);
-      double gamma = readDouble(e, XML_Crystal_Cell_gamma, ok);
-      if (ok) internalSetCell(a,b,c,alpha, beta, gamma);
+      double _a = readDouble(e, XML_Crystal_Cell_a, ok);
+      double _b = readDouble(e, XML_Crystal_Cell_b, ok);
+      double _c = readDouble(e, XML_Crystal_Cell_c, ok);
+      double _alpha = readDouble(e, XML_Crystal_Cell_alpha, ok);
+      double _beta = readDouble(e, XML_Crystal_Cell_beta, ok);
+      double _gamma = readDouble(e, XML_Crystal_Cell_gamma, ok);
+      if (ok) internalSetCell(_a,_b,_c,_alpha, _beta, _gamma);
     } else if (e.tagName()==XML_Crystal_Orientation) {
-      double omega = M_PI/180.0*readDouble(e, XML_Crystal_Orientation_omega, ok);
-      double chi = M_PI/180.0*readDouble(e, XML_Crystal_Orientation_chi, ok);
-      double phi = M_PI/180.0*readDouble(e, XML_Crystal_Orientation_phi, ok);
-      if (ok) setEulerAngles(omega, chi, phi);
+      double _omega = M_PI/180.0*readDouble(e, XML_Crystal_Orientation_omega, ok);
+      double _chi = M_PI/180.0*readDouble(e, XML_Crystal_Orientation_chi, ok);
+      double _phi = M_PI/180.0*readDouble(e, XML_Crystal_Orientation_phi, ok);
+      if (ok) setEulerAngles(_omega, _chi, _phi);
     } else if (e.tagName()==XML_Crystal_Rotation) {
       double x = readDouble(e, XML_Crystal_Rotation_x, ok);
       double y = readDouble(e, XML_Crystal_Rotation_y, ok);

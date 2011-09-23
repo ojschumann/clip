@@ -57,8 +57,8 @@ const char XML_LPP_DetOffset[] = "DetOffset";
 const char XML_LPP_DetOffset_x[] = "xOffset";
 const char XML_LPP_DetOffset_y[] = "yOffset";
 
-LauePlaneProjector::LauePlaneProjector(QObject* parent):
-    Projector(parent),
+LauePlaneProjector::LauePlaneProjector(QObject* _parent):
+    Projector(_parent),
     localCoordinates(),
     distGroup(this),
     orientationGroup(this),
@@ -198,11 +198,11 @@ bool LauePlaneProjector::project(const Reflection &r, QPointF& p) {
 }
 
 
-void LauePlaneProjector::setDetSize(double dist, double width, double height) {
-  if ((detDist!=dist) or (detWidth!=width) or (detHeight!=height)) {
-    detDist=dist;
-    detWidth=width;
-    detHeight=height;
+void LauePlaneProjector::setDetSize(double _dist, double _width, double _height) {
+  if ((detDist!=_dist) or (detWidth!=_width) or (detHeight!=_height)) {
+    detDist=_dist;
+    detWidth=_width;
+    detHeight=_height;
 
     scene.setSceneRect(QRectF(-0.5*sceneBlowup*detWidth/detDist, -0.5*sceneBlowup*detHeight/detDist, sceneBlowup*detWidth/detDist, sceneBlowup*detHeight/detDist));
 
@@ -214,18 +214,18 @@ void LauePlaneProjector::setDetSize(double dist, double width, double height) {
   }
 }
 
-void LauePlaneProjector::setDetOrientation(double omega, double chi, double phi) {
-  if ((detOmega!=omega) or (detChi!=chi) or (detPhi!=phi)) {
+void LauePlaneProjector::setDetOrientation(double _omega, double _chi, double _phi) {
+  if ((detOmega!=_omega) or (detChi!=_chi) or (detPhi!=_phi)) {
     
     // Save detector offsets
     Vec3D w1 = localCoordinates * Vec3D(1, 0, 0);
 
-    detOmega=omega;
-    detChi=chi;
-    detPhi=phi;
-    localCoordinates =Mat3D(Vec3D(0,0,1), M_PI*(omega-180.0)/180.0);
-    localCoordinates*=Mat3D(Vec3D(0,1,0), M_PI*chi/180.0);
-    localCoordinates*=Mat3D(Vec3D(1,0,0), M_PI*phi/180.0);
+    detOmega=_omega;
+    detChi=_chi;
+    detPhi=_phi;
+    localCoordinates =Mat3D(Vec3D(0,0,1), M_PI*(_omega-180.0)/180.0);
+    localCoordinates*=Mat3D(Vec3D(0,1,0), M_PI*_chi/180.0);
+    localCoordinates*=Mat3D(Vec3D(1,0,0), M_PI*_phi/180.0);
 
     //
     Vec3D w2 = localCoordinates * Vec3D(1, 0, 0);
@@ -526,9 +526,9 @@ double LauePlaneProjector::maxCos(Vec3D n) const {
   double dx = 0.5*width()/dist();
   double dy = 0.5*height()/dist();
 
-  bool b;
-  QPointF p=scattered2det(n, b);
-  if (b and (fabs(p.x())<dx) and (fabs(p.y())<dy))
+  bool ok;
+  QPointF p=scattered2det(n, ok);
+  if (ok and (fabs(p.x())<dx) and (fabs(p.y())<dy))
     return 1.0;
 
   // The four corners of the plane, vectors are normalized!

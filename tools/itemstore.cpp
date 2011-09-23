@@ -29,8 +29,8 @@
 
 using namespace std;
 
-template <class T> ItemStore<T>::ItemStore(QObject* parent) :
-    AbstractItemStore(parent),
+template <class T> ItemStore<T>::ItemStore(QObject* _parent) :
+    AbstractItemStore(_parent),
     items()
 {
 
@@ -54,11 +54,11 @@ template <class T> int ItemStore<T>::size() {
 
 template <class T> T* ItemStore<T>::at(int n) {
   if (n<size()) return items.at(n);
-  return NULL;
+  return nullptr;
 }
 
 template <class T> T* ItemStore<T>::last() {
-  if (items.isEmpty()) return NULL;
+  if (items.isEmpty()) return nullptr;
   return items.last();
 }
 

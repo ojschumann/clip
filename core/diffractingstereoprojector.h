@@ -29,7 +29,7 @@ class DiffractingStereoProjector : public StereoProjector
 {
   Q_OBJECT
 public:
-  explicit DiffractingStereoProjector(QObject *parent = 0);
+  explicit DiffractingStereoProjector(QObject* _parent = nullptr);
   static Projector* getInstance();
   virtual QPointF scattered2det(const Vec3D&) const;
   virtual QPointF scattered2det(const Vec3D&, bool& b) const;

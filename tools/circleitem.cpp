@@ -31,8 +31,8 @@
 
 using namespace std;
 
-CircleItem::CircleItem(double r, QGraphicsItem *parent) :
-    QGraphicsObject(parent)
+CircleItem::CircleItem(double r, QGraphicsItem *_parent) :
+    QGraphicsObject(_parent)
 {
   skipNextPosChange=false;
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);

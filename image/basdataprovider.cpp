@@ -56,8 +56,8 @@ const char BasDataProvider::INF_Suffix[] = "inf";
 const char BasDataProvider::IMG_Suffix[] = "img";
 
 
-BasDataProvider::BasDataProvider(QObject *parent) :
-    DataProvider(parent)
+BasDataProvider::BasDataProvider(QObject* _parent) :
+    DataProvider(_parent)
 {
 }
 
@@ -69,15 +69,15 @@ QStringList BasDataProvider::Factory::fileFormatFilters() {
   return QStringList() << IMG_Suffix << INF_Suffix;
 }
 
-DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataStore* store, QObject *parent) {
+DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataStore* store, QObject* _parent) {
   QFileInfo info(filename);
 
   // Return if file does not exist
-  if (!info.exists() || !info.isReadable()) return NULL;
+  if (!info.exists() || !info.isReadable()) return nullptr;
 
   // Check if suffix is .inf or .img
   QString suffix = info.suffix().toLower();
-  if (suffix!=IMG_Suffix && suffix!=INF_Suffix) return NULL;
+  if (suffix!=IMG_Suffix && suffix!=INF_Suffix) return nullptr;
 
   // search the second file (img or inf)
   QString secondSuffix = (suffix==IMG_Suffix)?INF_Suffix:IMG_Suffix;
@@ -93,16 +93,16 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
       break;
     }
   }
-  if (!ok) return NULL;
+  if (!ok) return nullptr;
 
   QFile infFile((suffix==INF_Suffix)?info.filePath():info2.filePath());
   QFile imgFile((suffix==IMG_Suffix)?info.filePath():info2.filePath());
 
-  if (!infFile.open(QFile::ReadOnly) || !imgFile.open(QFile::ReadOnly)) return NULL;
+  if (!infFile.open(QFile::ReadOnly) || !imgFile.open(QFile::ReadOnly)) return nullptr;
 
   QTextStream inf(&infFile);
 
-  if (inf.readLine()!="BAS_IMAGE_FILE") return NULL;
+  if (inf.readLine()!="BAS_IMAGE_FILE") return nullptr;
 
   QStringList keyValues;
   keyValues << Info_OriginalFilename << Info_IPSize << Info_XPixelSize << Info_YPixelSize
@@ -116,13 +116,13 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
 
   QMap<QString, QVariant> headerData;
   foreach(QString key, keyValues) {
-    if (inf.atEnd()) return NULL;
+    if (inf.atEnd()) return nullptr;
     QString s = inf.readLine();
     if (key!="") {
       if (intKeyValues.contains(key)) {
         bool ok;
         headerData.insert(key, QVariant(s.toInt(&ok)));
-        if (!ok) return NULL;
+        if (!ok) return nullptr;
       } else {
         headerData.insert(key, QVariant(s));
       }
@@ -142,7 +142,7 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
   int pixelCount = headerData[Info_Width].toInt()*headerData[Info_Height].toInt();
   int bytesPerPixel = (headerData[Info_BitsPerPixel].toInt()>8)?2:1;
   int dataSize = pixelCount * bytesPerPixel;
-  if (dataSize != imgFile.size()) return NULL;
+  if (dataSize != imgFile.size()) return nullptr;
 
 
   QVector<float> pixelData(pixelCount);
@@ -191,7 +191,7 @@ DataProvider* BasDataProvider::Factory::getProvider(QString filename, ImageDataS
   headerData.remove(Info_XPixelSize);
   headerData.remove(Info_YPixelSize);
 
-  BasDataProvider* provider = new BasDataProvider(parent);
+  BasDataProvider* provider = new BasDataProvider(_parent);
   provider->insertFileInformation(filename);
   provider->providerInformation.unite(headerData);
   provider->pixelData = pixelData;

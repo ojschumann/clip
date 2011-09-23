@@ -39,7 +39,7 @@ class Reorient : public QWidget
   Q_OBJECT
 
 public:
-  explicit Reorient(QWidget *parent = 0);
+  explicit Reorient(QWidget* _parent = nullptr);
   virtual ~Reorient();
   virtual QSize sizeHint() const;
 public slots:

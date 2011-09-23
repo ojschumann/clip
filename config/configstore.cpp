@@ -24,8 +24,8 @@
 
 #include <QSettings>
 
-ConfigStore::ConfigStore(QObject *parent) :
-    QObject(parent)
+ConfigStore::ConfigStore(QObject* _parent) :
+    QObject(_parent)
 {
  /* SpotMarker = 0,
     SpotMarkerHighlight = 1,
@@ -74,10 +74,10 @@ ConfigStore::~ConfigStore() {
   settings.setValue("InitialWorkspaceFile", initialCWSFile);
 }
 
-ConfigStore* ConfigStore::instance = 0;
+ConfigStore* ConfigStore::instance = nullptr;
 
 ConfigStore* ConfigStore::getInstance() {
-  if (instance==0) {
+  if (instance==nullptr) {
     instance = new ConfigStore();
   }
   return instance;
@@ -86,7 +86,7 @@ ConfigStore* ConfigStore::getInstance() {
 void ConfigStore::clearInstance() {
   if (instance) {
     delete instance;
-    instance = 0;
+    instance = nullptr;
   }
 }
 

@@ -30,7 +30,7 @@ class SpotItem : public CircleItem, public AbstractProjectorMarkerItem
 {
   Q_OBJECT
 public:
-  explicit SpotItem(Projector* p, double r, QGraphicsItem* parent = 0);
+  explicit SpotItem(Projector* p, double r, QGraphicsItem* _parent = nullptr);
   virtual Vec3D getMarkerNormal() const;
   virtual void highlight(bool b);
 

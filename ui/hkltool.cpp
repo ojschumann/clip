@@ -30,8 +30,8 @@
 #include "ui/indexdisplay.h"
 #include "ui/fitdisplay.h"
 
-HKLTool::HKLTool(Crystal* c, QWidget *parent) :
-    QMainWindow(parent),
+HKLTool::HKLTool(Crystal* c, QWidget* _parent) :
+    QMainWindow(_parent),
     ui(new Ui::HKLTool)
 {
   ui->setupUi(this);

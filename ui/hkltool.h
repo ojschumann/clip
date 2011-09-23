@@ -36,7 +36,7 @@ class HKLTool : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit HKLTool(Crystal* c, QWidget *parent = 0);
+  explicit HKLTool(Crystal* c, QWidget* _parent = nullptr);
   ~HKLTool();
 protected slots:
   void highlightMarkers();

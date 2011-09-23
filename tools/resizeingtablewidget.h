@@ -29,7 +29,7 @@ class ResizingTableWidget : public QTableWidget
 {
     Q_OBJECT
 public:
-    explicit ResizingTableWidget(QWidget *parent = 0);
+    explicit ResizingTableWidget(QWidget* _parent = nullptr);
     virtual QSize sizeHint() const;
     virtual QSize minimumSizeHint() const;
 signals:

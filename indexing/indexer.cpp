@@ -187,7 +187,6 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
       if (m.getIndexDeviationScore()>maxHKLDeviation) return;
       optRot.addVectorPair(m.getIndexNormal(), m.getMarkerNormal());
     }
-    Mat3D T = optRot.getOptimalRotation();
     if (optRot.getOptimalRotation()==R) break;
     if (shouldStop) return;
     if (loops>25) {

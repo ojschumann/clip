@@ -49,7 +49,7 @@ public:
   public:
     ImageFactoryClass() {}
     virtual QStringList fileFormatFilters()=0;
-    virtual DataProvider* getProvider(QString, ImageDataStore*, QObject* = 0)=0;
+    virtual DataProvider* getProvider(QString, ImageDataStore*, QObject* = nullptr)=0;
   };
 
   static DataProvider* loadImage(const QString&);
@@ -77,7 +77,7 @@ public:
 
 
 protected:
-  explicit DataProvider(QObject *parent = 0);
+  explicit DataProvider(QObject* _parent = nullptr);
   QMap<QString, QVariant> providerInformation;
 
 private:

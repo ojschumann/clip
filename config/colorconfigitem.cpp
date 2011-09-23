@@ -24,9 +24,9 @@
 
 #include <QSettings>
 
-ColorConfigItem::ColorConfigItem(QString name, QColor defaultColor, QObject* parent):
-    QObject(parent),
-    _name(name)
+ColorConfigItem::ColorConfigItem(QString n, QColor defaultColor, QObject* _parent):
+    QObject(_parent),
+    _name(n)
 {
   QSettings settings;
   setColor(settings.value(QString("colors/%1").arg(_name), defaultColor).value<QColor>());

@@ -26,8 +26,8 @@
 #include <QGraphicsView>
 #include <core/stereoprojector.h>
 
-StereoCfg::StereoCfg(StereoProjector* p, QWidget *parent) :
-    QWidget(parent),    
+StereoCfg::StereoCfg(StereoProjector* p, QWidget *_parent) :
+    QWidget(_parent),
     ui(new Ui::StereoCfg),
     projector(p)
 {

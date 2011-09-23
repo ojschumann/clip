@@ -52,13 +52,16 @@
 #include "core/crystal.h"
 #include "tools/webkittextobject.h"
 
+int numberOfDecimalPlaces(double d);
+void doReplace(QString &code, const QStringList &fields, const QList<double> &values, int maxDigits, bool handleAngles);
+
 class ZoomFactorValidator : public QDoubleValidator
 {
 public:
-  ZoomFactorValidator(QObject* parent)
-    : QDoubleValidator(parent) {}
-  ZoomFactorValidator(qreal bottom, qreal top, int decimals, QObject *parent)
-    : QDoubleValidator(bottom, top, decimals, parent) {}
+  ZoomFactorValidator(QObject* _parent)
+    : QDoubleValidator(_parent) {}
+  ZoomFactorValidator(qreal _bottom, qreal _top, int _decimals, QObject* _parent)
+    : QDoubleValidator(_bottom, _top, _decimals, _parent) {}
 
   State validate(QString &input, int &pos) const
   {
@@ -83,8 +86,8 @@ public:
 
 
 
-PrintDialog::PrintDialog(Projector* p, QWidget *parent) :
-    QMainWindow(parent),
+PrintDialog::PrintDialog(Projector* p, QWidget* _parent) :
+    QMainWindow(_parent),
     ui(new Ui::PrintDialog),
     projector(p)
 {
@@ -248,8 +251,8 @@ void PrintDialog::setupTextActions()
   comboSize->setEditable(true);
 
   QFontDatabase db;
-  foreach(int size, db.standardSizes())
-    comboSize->addItem(QString::number(size));
+  foreach(int fontSize, db.standardSizes())
+    comboSize->addItem(QString::number(fontSize));
 
   connect(comboSize, SIGNAL(activated(QString)),
           this, SLOT(textSize(QString)));
@@ -318,63 +321,63 @@ void PrintDialog::textSize(const QString &p)
 
 void PrintDialog::textStyle(int styleIndex)
 {
-  QTextCursor cursor = ui->textEdit->textCursor();
+  QTextCursor textCursor = ui->textEdit->textCursor();
 
   if (styleIndex != 0) {
-    QTextListFormat::Style style = QTextListFormat::ListDisc;
+    QTextListFormat::Style newStyle = QTextListFormat::ListDisc;
 
     switch (styleIndex) {
     default:
     case 1:
-      style = QTextListFormat::ListDisc;
+      newStyle = QTextListFormat::ListDisc;
       break;
     case 2:
-      style = QTextListFormat::ListCircle;
+      newStyle = QTextListFormat::ListCircle;
       break;
     case 3:
-      style = QTextListFormat::ListSquare;
+      newStyle = QTextListFormat::ListSquare;
       break;
     case 4:
-      style = QTextListFormat::ListDecimal;
+      newStyle = QTextListFormat::ListDecimal;
       break;
     case 5:
-      style = QTextListFormat::ListLowerAlpha;
+      newStyle = QTextListFormat::ListLowerAlpha;
       break;
     case 6:
-      style = QTextListFormat::ListUpperAlpha;
+      newStyle = QTextListFormat::ListUpperAlpha;
       break;
     case 7:
-      style = QTextListFormat::ListLowerRoman;
+      newStyle = QTextListFormat::ListLowerRoman;
       break;
     case 8:
-      style = QTextListFormat::ListUpperRoman;
+      newStyle = QTextListFormat::ListUpperRoman;
       break;
     }
 
-    cursor.beginEditBlock();
+    textCursor.beginEditBlock();
 
-    QTextBlockFormat blockFmt = cursor.blockFormat();
+    QTextBlockFormat blockFmt = textCursor.blockFormat();
 
     QTextListFormat listFmt;
 
-    if (cursor.currentList()) {
-      listFmt = cursor.currentList()->format();
+    if (textCursor.currentList()) {
+      listFmt = textCursor.currentList()->format();
     } else {
       listFmt.setIndent(blockFmt.indent() + 1);
       blockFmt.setIndent(0);
-      cursor.setBlockFormat(blockFmt);
+      textCursor.setBlockFormat(blockFmt);
     }
 
-    listFmt.setStyle(style);
+    listFmt.setStyle(newStyle);
 
-    cursor.createList(listFmt);
+    textCursor.createList(listFmt);
 
-    cursor.endEditBlock();
+    textCursor.endEditBlock();
   } else {
     // ####
     QTextBlockFormat bfmt;
     bfmt.setObjectIndex(-1);
-    cursor.mergeBlockFormat(bfmt);
+    textCursor.mergeBlockFormat(bfmt);
   }
 }
 
@@ -424,10 +427,10 @@ void PrintDialog::clipboardDataChanged()
 
 void PrintDialog::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
 {
-  QTextCursor cursor = ui->textEdit->textCursor();
-  if (!cursor.hasSelection())
-    cursor.select(QTextCursor::WordUnderCursor);
-  cursor.mergeCharFormat(format);
+  QTextCursor textCursor = ui->textEdit->textCursor();
+  if (!textCursor.hasSelection())
+    textCursor.select(QTextCursor::WordUnderCursor);
+  textCursor.mergeCharFormat(format);
   ui->textEdit->mergeCurrentCharFormat(format);
 }
 
@@ -560,12 +563,12 @@ void PrintDialog::handleImageStatus() {
 }
 
 void PrintDialog::imageMenuTrggered(QAction *a) {
-  QTextCursor cursor = ui->textEdit->textCursor();
+  QTextCursor textCursor = ui->textEdit->textCursor();
 
-  cursor.beginEditBlock();
-  cursor.insertText(a->data().toString());
-  cursor.endEditBlock();
-  ui->textEdit->setTextCursor(cursor);
+  textCursor.beginEditBlock();
+  textCursor.insertText(a->data().toString());
+  textCursor.endEditBlock();
+  ui->textEdit->setTextCursor(textCursor);
 }
 
 int numberOfDecimalPlaces(double d) {
@@ -726,7 +729,7 @@ PrintDialog::PaintDeviceFactory::~PaintDeviceFactory() {
 
 QString PrintDialog::PaintDeviceFactory::getFilename(const QString &title, const QString &suffix) {
 
-  QString fileName = QFileDialog::getSaveFileName(NULL, title, QSettings().value("LastDirectory").toString(), QLatin1Char('*') + suffix);
+  QString fileName = QFileDialog::getSaveFileName(nullptr, title, QSettings().value("LastDirectory").toString(), QLatin1Char('*') + suffix);
   if (fileName.isEmpty()) return QString::null;
   ;
 
@@ -745,7 +748,7 @@ public:
       format(f) {}
   ~PrinterDevice() { printer->setOutputFormat(QPrinter::NativeFormat); }
   virtual QPaintDevice* getDevice(int) {
-    if (fileChooserAborted) return NULL;
+    if (fileChooserAborted) return nullptr;
     printer->setOutputFormat(format);
     printer->setOutputFileName(filename);
     return printer;
@@ -760,11 +763,11 @@ private:
 class ImageDevice: public PrintDialog::PaintDeviceFactory {
 public:
   ImageDevice(Projector* p, const QString& description, const QString& suffix);
-  ~ImageDevice() { if (device) { delete device; device=0; } }
+  ~ImageDevice() { if (device) { delete device; device=nullptr; } }
   virtual double desiredTextWidth() const { return 80*QFontMetrics(QFont("Courier New", 8)).averageCharWidth(); }
   virtual int deviceWidth() const { return imageSize.width(); }
   QPaintDevice* getDevice(int textHeight) {
-    if (filename.isNull()) return NULL;
+    if (filename.isNull()) return nullptr;
     if (!device) setupDevice(textHeight);
     return device;
   }
@@ -775,7 +778,7 @@ protected:
   QPaintDevice* device;
 };
 
-ImageDevice::ImageDevice(Projector *projector, const QString& description, const QString& suffix): PaintDeviceFactory(description, suffix), device(0) {
+ImageDevice::ImageDevice(Projector *projector, const QString& description, const QString& suffix): PaintDeviceFactory(description, suffix), device(nullptr) {
   if (projector && !projector->getScene()->views().isEmpty()) {
     QGraphicsView *const firstView = projector->getScene()->views().at(0);
     QRectF visibleSceneRectF = QRectF(firstView->mapToScene(0, 0), firstView->mapToScene(firstView->viewport()->width(), firstView->viewport()->height())).normalized();

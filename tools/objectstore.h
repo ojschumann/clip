@@ -30,7 +30,7 @@
 class ObjectStore: public QObject {
     Q_OBJECT
     public:
-        ObjectStore(QObject* parent=0);
+        ObjectStore(QObject* _parent=nullptr);
         int size();
         QObject* at(int i);
         
@@ -38,8 +38,8 @@ class ObjectStore: public QObject {
         void addObject(QObject *o);
         void removeObject(QObject *o);
     signals:
-        void objectAdded(QObject *o=0);
-        void objectRemoved(QObject *o=0);
+        void objectAdded(QObject *o=nullptr);
+        void objectRemoved(QObject *o=nullptr);
     private:
         QList<QObject *> set;
 };

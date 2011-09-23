@@ -31,8 +31,8 @@
 
 
 
-RulerModel::RulerModel(ItemStore<RulerItem>& r, LaueImage* img, QObject* parent):
-    QAbstractTableModel(parent),
+RulerModel::RulerModel(ItemStore<RulerItem>& r, LaueImage* img, QObject* _parent):
+    QAbstractTableModel(_parent),
     rulers(r),
     image(img)
 {
@@ -43,11 +43,11 @@ RulerModel::RulerModel(ItemStore<RulerItem>& r, LaueImage* img, QObject* parent)
   connect(&rulers, SIGNAL(itemRemoved(int)), this, SLOT(rulerRemoved(int)));
 }
 
-int RulerModel::rowCount(const QModelIndex& /*parent*/ ) const {
+int RulerModel::rowCount(const QModelIndex& /*_parent*/ ) const {
   return rulers.size();
 }
 
-int RulerModel::columnCount(const QModelIndex& /*parent*/  ) const {
+int RulerModel::columnCount(const QModelIndex& /*_parent*/  ) const {
   return 5;
 }
 

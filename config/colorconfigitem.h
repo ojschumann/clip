@@ -30,7 +30,7 @@
 class ColorConfigItem: public QObject {
   Q_OBJECT
 public:
-  ColorConfigItem(QString name, QColor defaultColor, QObject* parent=0);
+  ColorConfigItem(QString name, QColor defaultColor, QObject* _parent=nullptr);
   ~ColorConfigItem();
   QColor color() const;
   QString name() const;

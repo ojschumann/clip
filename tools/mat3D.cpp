@@ -464,7 +464,6 @@ template <typename T> int TMat3D<T>::fastsvd(TMat3D<T>& L, TMat3D<T>& R) {
     for (int i=0; i<2; i++) sumOffdiag+=fabs((*this)(i,i+1));
 
   } while (maxLoops-- and sumDiag<1e20*sumOffdiag);
-  TMat3D<T> XX = L * (*this) * R;
   return maxLoops;
 }
 

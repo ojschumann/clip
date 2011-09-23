@@ -32,11 +32,11 @@ QDomDocument readXMLFile(QString filename);
 
 template <class R> void RectToTag(QDomElement base, QString name, R rect);
 
-QRectF TagToRect(QDomElement element, QRectF defaultValue, bool* _ok=0);
-QRect TagToRect(QDomElement element, QRect defaultValue, bool obeyGeometryReadSettings = true, bool* _ok=0);
+QRectF TagToRect(QDomElement element, QRectF defaultValue, bool* _ok=nullptr);
+QRect TagToRect(QDomElement element, QRect defaultValue, bool obeyGeometryReadSettings = true, bool* _ok=nullptr);
 
 void PointToTag(QDomElement base, QString name, const QPointF& p);
-QPointF TagToPoint(QDomElement element, const QPointF& defaultValue, bool* _ok=0);
+QPointF TagToPoint(QDomElement element, const QPointF& defaultValue, bool* _ok=nullptr);
 
 QDomElement ensureElement(QDomElement base, QString name);
 

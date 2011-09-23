@@ -27,8 +27,8 @@
 #include <QPair>
 #include <core/laueplaneprojector.h>
 
-LauePlaneCfg::LauePlaneCfg(LauePlaneProjector* p, QWidget *parent) :
-    QWidget(parent),
+LauePlaneCfg::LauePlaneCfg(LauePlaneProjector* p, QWidget* _parent) :
+    QWidget(_parent),
     ui(new Ui::LauePlaneCfg),
     projector(p)
 {

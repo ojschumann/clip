@@ -36,7 +36,7 @@ public:
 protected:
   virtual QRgb getRGB(const QPointF &);
 private:
-  explicit SimpleRGBScaler(DataProvider* dp, QObject *parent = 0);
+  explicit SimpleRGBScaler(DataProvider* dp, QObject* _parent = nullptr);
   SimpleRGBScaler(const SimpleRGBScaler&);
   QRgb const* data;
   int datawidth;

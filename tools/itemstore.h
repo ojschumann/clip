@@ -31,7 +31,7 @@
 class AbstractItemStore: public QObject {
   Q_OBJECT
 public:
-  AbstractItemStore(QObject* parent=0): QObject(parent) {}
+  AbstractItemStore(QObject* _parent=nullptr): QObject(_parent) {}
   virtual ~AbstractItemStore() {}
 signals:
   void itemAdded(int);
@@ -54,7 +54,7 @@ friend class Projector;
 public:
   typedef T* value_type;
 
-  explicit ItemStore(QObject* parent=0);
+  explicit ItemStore(QObject* _parent=nullptr);
   ItemStore(const ItemStore<T>&);
   virtual ~ItemStore() {}
   int size();

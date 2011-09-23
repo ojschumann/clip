@@ -36,8 +36,8 @@
 
 using namespace std;
 
-NelderMead::NelderMead(Crystal* c, QObject *parent) :
-    QObject(parent),
+NelderMead::NelderMead(Crystal* c, QObject* _parent) :
+    QObject(_parent),
     liveCrystal(c),
     shouldStop(false)
 {

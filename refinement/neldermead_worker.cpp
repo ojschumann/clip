@@ -33,8 +33,8 @@
 
 #include <Eigen/Dense>
 
-NMWorker::NMWorker(Crystal* c, QObject* parent):
-    QObject(parent),
+NMWorker::NMWorker(Crystal* c, QObject* _parent):
+    QObject(_parent),
     liveCrystal(c)
 {
   initParameter();

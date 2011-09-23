@@ -23,8 +23,8 @@
 #include "sadeasteregg.h"
 #include "ui_sadeasteregg.h"
 
-SadEasterEgg::SadEasterEgg(QWidget *parent) :
-    QDialog(parent),
+SadEasterEgg::SadEasterEgg(QWidget* _parent) :
+    QDialog(_parent),
     ui(new Ui::SadEasterEgg)
 {
     ui->setupUi(this);

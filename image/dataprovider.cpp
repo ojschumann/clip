@@ -32,8 +32,8 @@
 
 using namespace std;
 
-DataProvider::DataProvider(QObject *parent) :
-    QObject(parent)
+DataProvider::DataProvider(QObject* _parent) :
+    QObject(_parent)
 {
 }
 
@@ -41,11 +41,11 @@ DataProvider::~DataProvider() {
 }
 
 DataProvider* DataProvider::openDevice() {
-  return NULL;
+  return nullptr;
 }
 
 DataProvider* DataProvider::loadImage(const QString &) {
-  return NULL;
+  return nullptr;
 }
 
 void DataProvider::insertFileInformation(const QString &filename) {

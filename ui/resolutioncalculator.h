@@ -39,7 +39,7 @@ class ResolutionCalculator : public QWidget
   Q_OBJECT
 
 public:
-  explicit ResolutionCalculator(ItemStore<RulerItem>& r, LaueImage* img, QWidget *parent = 0);
+  explicit ResolutionCalculator(ItemStore<RulerItem>& r, LaueImage* img, QWidget* _parent = nullptr);
   virtual ~ResolutionCalculator();
   virtual QSize sizeHint() const;
 public slots:

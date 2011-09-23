@@ -35,7 +35,7 @@ public:
   public:
     Factory() {}
     QStringList fileFormatFilters();
-    DataProvider* getProvider(QString, ImageDataStore*, QObject* = 0);
+    DataProvider* getProvider(QString, ImageDataStore*, QObject* = nullptr);
   };
 
   static const char Info_Format[];
@@ -48,7 +48,7 @@ public:
   virtual int pixelCount();
   virtual Format format();
 private:
-  explicit BrukerProvider(QObject *parent = 0);
+  explicit BrukerProvider(QObject* _parent = nullptr);
   BrukerProvider(const BrukerProvider&);
   BrukerProvider& operator=(const BrukerProvider&);
 signals:

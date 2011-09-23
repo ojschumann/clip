@@ -41,7 +41,7 @@ public:
   public:
     Factory() {}
     QStringList fileFormatFilters();
-    DataProvider* getProvider(QString, ImageDataStore*, QObject* = 0);
+    DataProvider* getProvider(QString, ImageDataStore*, QObject* = nullptr);
   };
 
   virtual ~MWDataProvider();
@@ -52,7 +52,7 @@ public:
   virtual int pixelCount();
   virtual Format format();
 private:
-  explicit MWDataProvider(QObject *parent = 0);
+  explicit MWDataProvider(QObject* _parent = nullptr);
   MWDataProvider(const MWDataProvider&);
   MWDataProvider& operator=(const MWDataProvider&);
 signals:

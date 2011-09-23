@@ -34,7 +34,7 @@ class SadEasterEgg : public QDialog
     Q_OBJECT
 
 public:
-    explicit SadEasterEgg(QWidget *parent = 0);
+    explicit SadEasterEgg(QWidget* _parent = nullptr);
     ~SadEasterEgg();
 
 private:

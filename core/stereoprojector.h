@@ -28,7 +28,7 @@
 class StereoProjector: public Projector {
   Q_OBJECT
 public:
-  StereoProjector(QObject* parent=0);
+  StereoProjector(QObject* _parent=nullptr);
   static Projector* getInstance();
 
   virtual QPointF scattered2det(const Vec3D&) const;

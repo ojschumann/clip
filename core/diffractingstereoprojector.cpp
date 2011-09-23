@@ -25,8 +25,8 @@
 #include "ui/stereocfg.h"
 #include "diffractingstereoprojector.h"
 
-DiffractingStereoProjector::DiffractingStereoProjector(QObject *parent) :
-    StereoProjector(parent)
+DiffractingStereoProjector::DiffractingStereoProjector(QObject* _parent) :
+    StereoProjector(_parent)
 {
 }
 

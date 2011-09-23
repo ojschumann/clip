@@ -45,20 +45,20 @@ DataProviderFactory& DataProviderFactory::getInstance() {
   return instance;
 }
 
-DataProvider* DataProviderFactory::loadImage(const QString &filename, ImageDataStore* store, QObject* parent) {
-  foreach (int key, imageLoaders.uniqueKeys()) {
-    foreach (DataProvider::ImageFactoryClass* loader, imageLoaders.values(key)) {
-      DataProvider* dp = loader->getProvider(filename, store, parent);
+DataProvider* DataProviderFactory::loadImage(const QString &filename, ImageDataStore* store, QObject* _parent) {
+  for (int key: imageLoaders.uniqueKeys()) {
+    for (auto loader: imageLoaders.values(key)) {
+      DataProvider* dp = loader->getProvider(filename, store, _parent);
       if (dp) return dp;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 QStringList DataProviderFactory::registeredImageFormats() {
   QStringList formats;
-  foreach (int key, imageLoaders.uniqueKeys()) {
-    foreach (DataProvider::ImageFactoryClass* loader, imageLoaders.values(key)) {
+  for (int key: imageLoaders.uniqueKeys()) {
+    for (auto loader: imageLoaders.values(key)) {
       formats += loader->fileFormatFilters();
     }
   }

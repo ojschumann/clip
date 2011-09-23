@@ -25,6 +25,9 @@
 
  
 #ifdef __DEBUG__
+
+#include <iostream>
+
 using namespace std;
 
 template<class T> void printRect(const T& r) {

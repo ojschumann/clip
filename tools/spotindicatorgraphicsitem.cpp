@@ -40,7 +40,7 @@ SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem():
   setCacheMode(NoCache);
   cacheNeedsUpdate = true;
   setCachedPainting();
-  cache = 0;
+  cache = nullptr;
   for (int i=0; i<QThread::idealThreadCount(); i++) {
     Worker* w = new Worker(this, i);
     w->start();

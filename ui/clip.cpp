@@ -46,8 +46,8 @@
 #include "ui/clipconfig.h"
 #include "config/configstore.h"
 
-Clip::Clip(QWidget *parent) :
-    QMainWindow(parent),
+Clip::Clip(QWidget *_parent) :
+    QMainWindow(_parent),
     ui(new Ui::Clip)
 {
   ui->setupUi(this);
@@ -73,19 +73,19 @@ Clip::~Clip(){
   delete ui;
 }
 
-Clip* Clip::instance = 0;
+Clip* Clip::instance = nullptr;
 
 Clip* Clip::getInstance() {
-  if (!instance)
+  if (instance==nullptr)
     instance = new Clip();
   return instance;
 }
 
 void Clip::clearInstance() {
   ConfigStore::clearInstance();
-  if (instance) {
+  if (instance!=nullptr) {
     delete instance;
-    instance = 0;
+    instance = nullptr;
   }
 }
 
@@ -130,29 +130,29 @@ Projector* Clip::connectToLastCrystal(Projector *p) {
 Crystal* Clip::getMostRecentCrystal(bool checkProjectors) {
   QList<QMdiSubWindow*> mdiWindows = ui->mdiArea->subWindowList(QMdiArea::StackingOrder);
   while (!mdiWindows.empty()) {
-    QMdiSubWindow* window = mdiWindows.takeLast();
+    QMdiSubWindow* mdiWindow = mdiWindows.takeLast();
     CrystalDisplay* cd;
     ProjectionPlane* pp;
-    if ((cd=dynamic_cast<CrystalDisplay*>(window->widget()))!=NULL) {
+    if ((cd=dynamic_cast<CrystalDisplay*>(mdiWindow->widget()))!=nullptr) {
       return cd->getCrystal();
-    } else if (checkProjectors && ((pp=dynamic_cast<ProjectionPlane*>(window->widget()))!=NULL)) {
+    } else if (checkProjectors && ((pp=dynamic_cast<ProjectionPlane*>(mdiWindow->widget()))!=nullptr)) {
       Crystal* c = pp->getProjector()->getCrystal();
       if (c) return c;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 Projector* Clip::getMostRecentProjector(bool withCrystal) {
   QList<QMdiSubWindow*> mdiWindows = ui->mdiArea->subWindowList(QMdiArea::StackingOrder);
   while (!mdiWindows.empty()) {
-    QMdiSubWindow* window = mdiWindows.takeLast();
+    QMdiSubWindow* mdiWindow = mdiWindows.takeLast();
     ProjectionPlane* pp;
-    if (((pp=dynamic_cast<ProjectionPlane*>(window->widget()))!=NULL) && (!withCrystal || pp->getProjector()->getCrystal())) {
+    if (((pp=dynamic_cast<ProjectionPlane*>(mdiWindow->widget()))!=nullptr) && (!withCrystal || pp->getProjector()->getCrystal())) {
       return pp->getProjector();
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 QMdiSubWindow* Clip::addMdiWindow(QWidget* w, bool deleteOnClose) {
@@ -164,15 +164,15 @@ QMdiSubWindow* Clip::addMdiWindow(QWidget* w, bool deleteOnClose) {
   return m;
 }
 
-void Clip::setActiveSubWindow(QWidget *window) {
-  if (!window)
+void Clip::setActiveSubWindow(QWidget *W) {
+  if (!W)
     return;
-  QMdiSubWindow* mdiWin= qobject_cast<QMdiSubWindow *>(window);
+  QMdiSubWindow* mdiWin= qobject_cast<QMdiSubWindow *>(W);
   if (mdiWin) {
     ui->mdiArea->setActiveSubWindow(mdiWin);
   } else {
     foreach (mdiWin, ui->mdiArea->subWindowList()) {
-      if (mdiWin->widget()==window) {
+      if (mdiWin->widget()==W) {
         ui->mdiArea->setActiveSubWindow(mdiWin);
       }
     }
@@ -290,7 +290,7 @@ template <class T> T* Clip::raiseOrCreateToolWindow() {
     if (dynamic_cast<T*>(mdi->widget())) {
       mdi->raise();
       ui->mdiArea->setActiveSubWindow(mdi);
-      return NULL;
+      return nullptr;
     }
   }
   T* tool = new T();
@@ -357,12 +357,12 @@ bool Clip::loadWorkspaceFile(QString filename) {
 void Clip::on_actionSave_Workspace_triggered() {
   QDomDocument doc(XML_Clip_Workspace);
   QDomElement docElement = doc.appendChild(doc.createElement(XML_Clip_Workspace)).toElement();
-  foreach (QMdiSubWindow* mdi, ui->mdiArea->subWindowList()) {
+  for (QMdiSubWindow* mdi: ui->mdiArea->subWindowList()) {
     if (CrystalDisplay* cd = dynamic_cast<CrystalDisplay*>(mdi->widget())) {
       QDomElement connection = docElement.appendChild(doc.createElement(XML_Clip_CrystalConnection)).toElement();
       cd->saveToXML(connection.appendChild(doc.createElement(XML_Clip_ConnectedCrystal)).toElement());
       QDomElement connectedProjectors = connection.appendChild(doc.createElement(XML_Clip_ConnectedProjectors)).toElement();
-      foreach (Projector* p, cd->getCrystal()->getConnectedProjectors()) {
+      for (Projector* p: cd->getCrystal()->getConnectedProjectors()) {
         if (ProjectionPlane* pp = dynamic_cast<ProjectionPlane*>(p->parent())) {
           pp->saveToXML(connectedProjectors);
         }

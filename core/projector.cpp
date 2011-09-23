@@ -73,8 +73,8 @@ const char XML_Projector_ZoneMarkers[] = "ZoneMarkers";
 
 using namespace std;
 
-Projector::Projector(QObject *parent):
-    FitObject(parent),
+Projector::Projector(QObject* _parent):
+    FitObject(_parent),
     decorationItems(),
     textMarkerItems(),
     spotMarkerStore(this),

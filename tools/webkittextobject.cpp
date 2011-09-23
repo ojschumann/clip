@@ -36,7 +36,7 @@ typedef QCache<QPair<int, QString>, QPicture> PictureCacheClass;
 
 
 
-WebkitTextObject::WebkitTextObject(QObject* parent): QObject(parent)  {
+WebkitTextObject::WebkitTextObject(QObject* _parent): QObject(_parent)  {
 }
 
 WebkitTextObject::~WebkitTextObject()  {

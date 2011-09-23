@@ -28,14 +28,14 @@
 #include "tools/indexparser.h"
 #include "tools/tools.h"
 
-RotateCrystal::RotateCrystal(QWidget *parent) :
-    QWidget(parent),
+RotateCrystal::RotateCrystal(QWidget* _parent) :
+    QWidget(_parent),
     ui(new Ui::RotateCrystal),
     axisChangeFromEdit(false)
 {
   ui->setupUi(this);
 
-  paramsLoadedFromCrystal=0;
+  paramsLoadedFromThisCrystal=nullptr;
 
   buttonMapper.setMapping(ui->but1Neg, 0);
   buttonMapper.setMapping(ui->but1Pos, 1);
@@ -100,7 +100,7 @@ void RotateCrystal::addRotation(int id) {
 
 void RotateCrystal::loadAxisFromCrystal() {
   if (Crystal* c = Clip::getInstance()->getMostRecentCrystal(true)) {
-    paramsLoadedFromCrystal = c;
+    paramsLoadedFromThisCrystal = c;
     if (c->getRotationAxisType()==Crystal::LabSystem) {
       Vec3D v(c->getRotationAxis());
       if (v==Vec3D(1, 0, 0)) {
@@ -127,10 +127,10 @@ void RotateCrystal::loadAxisFromCrystal() {
 }
 
 void RotateCrystal::windowChanged() {
-  if (paramsLoadedFromCrystal!=Clip::getInstance()->getMostRecentCrystal(true)) {
-    if (paramsLoadedFromCrystal) paramsLoadedFromCrystal->disconnect(this, SLOT(rotAxisChanged()));
+  if (paramsLoadedFromThisCrystal!=Clip::getInstance()->getMostRecentCrystal(true)) {
+    if (paramsLoadedFromThisCrystal) paramsLoadedFromThisCrystal->disconnect(this, SLOT(rotAxisChanged()));
     rotAxisChanged();
-    connect(paramsLoadedFromCrystal, SIGNAL(rotationAxisChanged()), this, SLOT(rotAxisChanged()), Qt::UniqueConnection);
+    connect(paramsLoadedFromThisCrystal, SIGNAL(rotationAxisChanged()), this, SLOT(rotAxisChanged()), Qt::UniqueConnection);
   }
 }
 

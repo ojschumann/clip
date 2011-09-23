@@ -37,7 +37,7 @@ class ZoneItem : public PropagatingGraphicsObject, public AbstractProjectorMarke
 {
   Q_OBJECT
 public:
-  ZoneItem(const QPointF&, const QPointF&, Projector* p, QGraphicsItem* parent=0);
+  ZoneItem(const QPointF&, const QPointF&, Projector* p, QGraphicsItem* _parent = nullptr);
   virtual ~ZoneItem();
   QRectF boundingRect() const;
   QPainterPath shape () const;

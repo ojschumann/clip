@@ -37,11 +37,13 @@
 
 using namespace std;
 
+QVector<unsigned int> readArrayFromSfrm(QFile& f, int len, int bytes);
+int padTo(int value, int pad);
 
 const char BrukerProvider::Info_Format[] = "FORMAT";
 
-BrukerProvider::BrukerProvider(QObject *parent) :
-    DataProvider(parent)
+BrukerProvider::BrukerProvider(QObject* _parent) :
+    DataProvider(_parent)
 {
 }
 
@@ -87,10 +89,10 @@ int padTo(int value, int pad) {
   return value;
 }
 
-DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject *parent) {
+DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject* _parent) {
   QFile imgFile(filename);
 
-  if (!imgFile.open(QFile::ReadOnly)) return NULL;
+  if (!imgFile.open(QFile::ReadOnly)) return nullptr;
 
   // Read header fields. Field #3 is HDRBLKS, read at least until this.
 
@@ -116,7 +118,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
 
     if (key==Info_Format) {
       headerData.insert(key, QVariant(value.toInt(&ok)));
-      if (!ok) return NULL;
+      if (!ok) return nullptr;
     } else {
       if (headerData.contains(key)) {
         headerData[key] = QVariant(headerData[key].toString() + " " + value);
@@ -134,20 +136,20 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
       (!headerData.contains("NOVERFL")) ||
       (!headerData.contains("NEXP")) ||
       (!headerData.contains("NPIXELB")))
-    return NULL;
+    return nullptr;
 
   int rows = headerData["NROWS"].toInt(&ok);
-  if (!ok) return NULL;
+  if (!ok) return nullptr;
   int cols = headerData["NCOLS"].toInt(&ok);
-  if (!ok) return NULL;
+  if (!ok) return nullptr;
 
 
   QStringList byteCounts = headerData["NPIXELB"].toString().split(' ');
   QStringList overflowNumbers = headerData["NOVERFL"].toString().split(' ');
-  if (byteCounts.size()<1) return NULL;
+  if (byteCounts.size()<1) return nullptr;
 
   int bytesPerPixel = byteCounts.at(0).toInt(&ok);
-  if (!ok) return NULL;
+  if (!ok) return nullptr;
 
   // Calculate the size of data, overflow and underflow tables.
   int dataSize = cols*rows*bytesPerPixel;
@@ -155,34 +157,34 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
   int bytesPerUnderflow = 0;
   int numberUnderflow = 0;
   if (headerData[Info_Format].toInt()>=100) {
-    if (byteCounts.size()<2) return NULL;
+    if (byteCounts.size()<2) return nullptr;
     bytesPerUnderflow = byteCounts.at(1).toInt(&ok);
-    if (!ok) return NULL;
+    if (!ok) return nullptr;
 
-    if (overflowNumbers.size()<1) return NULL;
+    if (overflowNumbers.size()<1) return nullptr;
     // strangely sometimes zero...
     numberUnderflow = qMax(overflowNumbers.at(0).toInt(&ok), 0);
-    if (!ok) return NULL;
+    if (!ok) return nullptr;
   }
 
   int underflowTableSize = padTo(bytesPerUnderflow * numberUnderflow, 16);
 
   int overflowTableSize = 0;
   if (headerData[Info_Format].toInt()<100) {
-    if (overflowNumbers.size()!=1) return NULL;
+    if (overflowNumbers.size()!=1) return nullptr;
     overflowTableSize = 16*overflowNumbers.at(0).toInt(&ok);
-    if (!ok) return NULL;
+    if (!ok) return nullptr;
   } else {
     int twoByteOverflowCount = 0;
     int fourByteOverflowCount = 0;
-    if (overflowNumbers.size()!=3) return NULL;
+    if (overflowNumbers.size()!=3) return nullptr;
     if (bytesPerPixel==1) {
       twoByteOverflowCount = overflowNumbers.at(1).toInt(&ok);
-      if (!ok) return NULL;
+      if (!ok) return nullptr;
     }
     if (bytesPerPixel<=2) {
       fourByteOverflowCount = overflowNumbers.at(2).toInt(&ok);
-      if (!ok) return NULL;
+      if (!ok) return nullptr;
     }
     overflowTableSize  = padTo(2*twoByteOverflowCount, 16);
     overflowTableSize += padTo(4*fourByteOverflowCount, 16);
@@ -190,7 +192,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
 
   // check is filesize matches calculated size
   if ((headerSize+dataSize+underflowTableSize+overflowTableSize)!=imgFile.size())
-    return NULL;
+    return nullptr;
 
   // Read pixel data
   QVector<unsigned int> pixelData;
@@ -234,7 +236,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
 
   store->setData(ImageDataStore::PixelSize, QSizeF(rows, cols));
 
-  BrukerProvider* provider = new BrukerProvider(parent);
+  BrukerProvider* provider = new BrukerProvider(_parent);
   provider->insertFileInformation(filename);
   provider->providerInformation.unite(headerData);
   provider->pixelData = pixelData;

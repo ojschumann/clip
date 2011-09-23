@@ -36,7 +36,7 @@ public:
     scatteredOk=false;
     nearestOk=false;
     lockOnNearest=false;
-    projector=0;
+    projector=nullptr;
     detQMin=0.0;
     detQMax=0.0;
   }

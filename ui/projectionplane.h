@@ -47,7 +47,7 @@ class ProjectionPlane : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit ProjectionPlane(Projector*, QWidget *parent = 0);
+  explicit ProjectionPlane(Projector*, QWidget* _parent = nullptr);
   virtual ~ProjectionPlane();
   virtual void resizeEvent(QResizeEvent *);
   virtual void mousePressEvent(QMouseEvent *);

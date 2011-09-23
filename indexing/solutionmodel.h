@@ -33,9 +33,9 @@ class SolutionModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
-  SolutionModel(QObject* parent=0);
-  virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
-  virtual int columnCount(const QModelIndex & parent = QModelIndex()) const ;
+  SolutionModel(QObject* _parent=nullptr);
+  virtual int rowCount(const QModelIndex & _parent= QModelIndex()) const;
+  virtual int columnCount(const QModelIndex & _parent= QModelIndex()) const ;
   virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
   virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) ;

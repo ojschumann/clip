@@ -59,7 +59,7 @@ class SpotIndicatorGraphicsItem;
 class Projector: public FitObject {
   Q_OBJECT
 public:
-  Projector(QObject* parent=0);
+  Projector(QObject* _parent=nullptr);
   virtual ~Projector();
 
   virtual Projector& operator=(const Projector& o);
@@ -251,7 +251,7 @@ protected:
 
   QGraphicsScene scene;
 
-  // Parent for Items "living" on the image, e.g. in the Rect(0,0)->(1,1)
+  // _parentfor Items "living" on the image, e.g. in the Rect(0,0)->(1,1)
   QGraphicsPixmapItem* imageItemsPlane;
 
   // Projected Spots, drawing is done multithreaded

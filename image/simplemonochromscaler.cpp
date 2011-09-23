@@ -33,8 +33,8 @@
 #include "image/dataprovider.h"
 
 
-template <typename T> SimpleMonochromScaler<T>::SimpleMonochromScaler(DataProvider* dp, QObject *parent) :
-    AbstractMonoScaler(dp, parent)
+template <typename T> SimpleMonochromScaler<T>::SimpleMonochromScaler(DataProvider* dp, QObject* _parent) :
+    AbstractMonoScaler(dp, _parent)
 {
   histogramEqualisation = false;
   datawidth = dp->size().width();
@@ -47,8 +47,8 @@ template <typename T> SimpleMonochromScaler<T>::SimpleMonochromScaler(const Simp
 template <typename T> SimpleMonochromScaler<T>::~SimpleMonochromScaler() {
 }
 
-template <typename T> DataScaler* SimpleMonochromScaler<T>::getScaler(DataProvider *dp, QObject* parent) {
-  return new SimpleMonochromScaler(dp, parent);
+template <typename T> DataScaler* SimpleMonochromScaler<T>::getScaler(DataProvider *dp, QObject* _parent) {
+  return new SimpleMonochromScaler(dp, _parent);
 }
 
 template <typename T> QRgb SimpleMonochromScaler<T>::getRGB(const QPointF &p) {
@@ -102,7 +102,7 @@ template <typename T> void SimpleMonochromScaler<T>::makeValueIndex() {
     cummulativeHistogram[n] = cumHistScale*histogramSum;
     valueCount[n] = u.indexes.size();
     histogramSum += valueCount[n];
-    foreach (int i, u.indexes)
+    for (int i: u.indexes)
       imagePosToPixelValue[i]=n;
     n++;
   }
