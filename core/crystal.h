@@ -28,10 +28,12 @@
 #include <QFutureWatcher>
 #include <QDomElement>
 #include <QXmlStreamWriter>
+#include <atomic>
 
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
 #include "tools/objectstore.h"
+#include "tools/threadrunner.h"
 #include "refinement/fitobject.h"
 #include "refinement/fitparametergroup.h"
 #include "core/spacegroup.h"
@@ -193,12 +195,26 @@ private:
   class UpdateRef {
   public:
     UpdateRef(const Crystal* _c);
-    void operator()(Reflection&);
+    void operator()(Reflection&) const;
   private:
     Mat3D MRot;
     double Qmin;
     double Qmax;
   };
+
+  class UpdateLoadBalancer {
+  public:
+    UpdateLoadBalancer(Reflection* _d, int _size, const UpdateRef &_u);
+    void operator()();
+  private:
+    Reflection* d;
+    int size;
+    const UpdateRef& u;
+    std::atomic<int> wp;
+    int chunkSize;
+  };
+
+  ThreadRunner reflectionsUpdater;
 
   // FitParameterGroups for fitting
   class CellGroup: public FitParameterGroup {

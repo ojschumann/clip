@@ -34,7 +34,9 @@ using namespace std;
 SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem():
     QGraphicsObject(),
     workerPermission(0),
-    workerSync(0)
+    workerSync(0),
+    tWorker(this),
+    threadRunner(tWorker)
 {
   ConfigStore::getInstance()->ensureColor(ConfigStore::SpotIndicators, this, SLOT(setColor(QColor)));
   setCacheMode(NoCache);
@@ -71,8 +73,14 @@ void SpotIndicatorGraphicsItem::setColor(QColor c) {
   update();
 }
 
+
+#include "defs.h"
+
 void SpotIndicatorGraphicsItem::updateCache() {
   if (cacheNeedsUpdate) {
+
+    unsigned long long t1 = rdtsctime();
+
     workN = 0;
     workerPermission.release(workers.size());
     cache->fill(QColor(0,0,0,0));
@@ -86,9 +94,27 @@ void SpotIndicatorGraphicsItem::updateCache() {
         qDebug() << "No chache for Worker:" << workers.indexOf(worker);
       }
     }
+    p.end();
+
+    unsigned long long t2 = rdtsctime();
+
+    cache->fill(QColor(0,0,0,0));
+    tWorker.wp=0;
+    threadRunner.start();
+    threadRunner.join();
+
+    unsigned long long t3 = rdtsctime();
+
+    qDebug() << "TPaint" << t2-t1 << t3-t2;
+
     cacheNeedsUpdate=false;
   }
 }
+
+
+
+
+
 
 void SpotIndicatorGraphicsItem::paint(QPainter *p, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
   if (cachedPainting) {
@@ -199,3 +225,45 @@ void SpotIndicatorGraphicsItem::Worker::run() {
 
 }
 
+
+SpotIndicatorGraphicsItem::TWorker::TWorker(SpotIndicatorGraphicsItem *s):
+    wp(0),
+    spotIndicator(s)
+  {}
+
+void SpotIndicatorGraphicsItem::TWorker::operator ()() {
+  int size = spotIndicator->coordinates.size();
+  int chunkSize = std::max(size/16, 1);
+
+  if (localCache.get()==nullptr || localCache->size()!=spotIndicator->cache->size()) {
+    localCache.reset(new QImage(spotIndicator->cache->size(), QImage::Format_ARGB32_Premultiplied));
+  }
+  QImage* lc = localCache.get();
+  lc->fill(QColor(0,0,0,0).rgba());
+
+  double rx = spotIndicator->transform.m11()*spotIndicator->spotSize;
+  double ry = spotIndicator->transform.m22()*spotIndicator->spotSize;
+
+  QPainter painter(lc);
+  QList<QGraphicsView*> l = spotIndicator->scene()->views();
+  if (l.size())
+    painter.setRenderHints(l.at(0)->renderHints());
+  painter.setPen(spotIndicator->spotColor);
+
+  int n;
+  int s=0;
+  while ((n=wp++)*chunkSize<size) {
+    for (int i=chunkSize*n; i<std::min(size, chunkSize*(n+1)); i++) {
+      painter.drawEllipse(spotIndicator->transform.map(spotIndicator->coordinates.at(i)), rx, ry);
+      s++;
+    }
+  }
+  painter.end();
+
+  m.lock();
+  painter.begin(spotIndicator->cache);
+  painter.drawImage(0, 0, *lc);
+  painter.end();
+  qDebug() << s << size << chunkSize;
+  m.unlock();
+}

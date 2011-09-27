@@ -12,6 +12,7 @@ TEMPLATE = app
 win32:CONFIG(debug, debug|release) {
      CONFIG += console
 }
+CONFIG += console
 
 DEFFILE = $(OBJECTS_DIR)/defs.o
 win32 {
@@ -135,7 +136,8 @@ SOURCES += main.cpp\
     ui/resolutioncalculator.cpp \
     ui/rotatecrystal.cpp \
     ui/sadeasteregg.cpp \
-    ui/stereocfg.cpp 
+    ui/stereocfg.cpp \ 
+    tools/threadrunner.cpp
 
 HEADERS  += ui/clip.h \
     config/colorbutton.h \
@@ -222,6 +224,7 @@ HEADERS  += ui/clip.h \
     ui/rotatecrystal.h \
     ui/sadeasteregg.h \
     ui/stereocfg.h \
+    tools/threadrunner.h
 
 FORMS    += ui/clip.ui \
     ui/clipconfig.ui \

@@ -28,6 +28,7 @@
 #include <QtConcurrentMap>
 #include <QtConcurrentRun>
 #include <QSettings>
+#include <atomic>
 
 #include <boost/thread.hpp>
 
@@ -382,7 +383,7 @@ Crystal::UpdateRef::UpdateRef(const Crystal *c) {
   Qmax = c->Qmax;
 }
 
-void Crystal::UpdateRef::operator()(Reflection &r) {
+void Crystal::UpdateRef::operator()(Reflection &r) const {
   r.normal=MRot*r.normalLocal;
   r.lowestDiffOrder=0;
   r.highestDiffOrder=0;
@@ -409,55 +410,33 @@ void Crystal::UpdateRef::operator()(Reflection &r) {
     r.scatteredRay = Vec3D();
 }
 
+Crystal::UpdateLoadBalancer::UpdateLoadBalancer(Reflection* _d, int _size, const UpdateRef &_u):
+    d(_d),
+    size(_size),
+    u(_u),
+    wp(0)
+{
+  chunkSize = std::max(size/16, 1);
+}
+
+void Crystal::UpdateLoadBalancer::operator ()() {
+  int n;
+  while ((n=wp++)*chunkSize<size) {
+    for (int i=chunkSize*n; i<std::min(size, chunkSize*(n+1)); i++) {
+      u(*(d+i));
+    }
+  }
+}
+
+
 void Crystal::updateRotation() {
-  static int nthreads = 0;
-  nthreads++;
   if (not updateEnabled)
     return;
-  UpdateRef updateRef(this);
 
-  long long t1 = rdtsctime();
-
-  for (int i=0; i<reflections.size(); i++) {
-    updateRef(reflections[i]);
-  }
-
-  long long t2 = rdtsctime();
-
-  long long t3 = rdtsctime();
-
-  QList<boost::thread*> workers;
-  int chunkSize = reflections.size()/nthreads + 1;
-  for (int p=0; p<nthreads; p++) {
-    int start = p * chunkSize;
-    int length = qMin(start + chunkSize, reflections.size()) - start;
-    //qDebug() << chunkSize << p << reflections.size() << length << start;
-    Reflection* r = reflections.data() + start;
-    boost::thread* t = new boost::thread([r, length] {
-      UpdateRef update(this);
-      Reflection* ref = r;
-      for (int n=0; n<length; n++, ref++) {
-        update(*ref);
-      }
-
-    });
-
-    workers << t;
-  }
-  while (!workers.empty()) {
-    boost::thread* t = workers.takeLast();
-    t->join();
-    delete t;
-  }
-
-  long long t4 = rdtsctime();
-
-  qDebug() << nthreads << "Update times:" << t2-t1 << t3-t2 << t4-t3 << "speed:" << (t4-t3)*nthreads << "len:" << reflections.size();
+  reflectionsUpdater.start(UpdateLoadBalancer(reflections.data(), reflections.size(), UpdateRef(this)));
+  reflectionsUpdater.join();
 
   emit reflectionsUpdate();
-
-  nthreads %= 2*qMax(1u, boost::thread::hardware_concurrency());
-
 }
 
 int Crystal::reflectionCount() {

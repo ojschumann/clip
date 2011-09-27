@@ -47,7 +47,6 @@ extern const char* BUILD_TIME;
 
 #define VER_COMPANYDOMAIN_STR       "clip.berlios.de"
 
-#ifndef __DEBUG__
 static inline unsigned long long rdtsctime()
 {
      unsigned int eax, edx;
@@ -59,6 +58,5 @@ static inline unsigned long long rdtsctime()
      val += eax;
      return val;
 }
-#endif
 
 #endif // DEFS_H

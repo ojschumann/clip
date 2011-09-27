@@ -28,6 +28,9 @@
 #include <QWaitCondition>
 #include <QSemaphore>
 #include <QThread>
+#include <atomic>
+
+#include "tools/threadrunner.h"
 
 class SpotIndicatorGraphicsItem: public QGraphicsObject {
   Q_OBJECT
@@ -62,6 +65,18 @@ protected:
   QSemaphore workerSync;
   QAtomicInt workN;
 
+  class TWorker {
+  public:
+    TWorker(SpotIndicatorGraphicsItem* s);
+    void operator()();
+    void init();
+    void done();
+    std::atomic<int> wp;
+    SpotIndicatorGraphicsItem* spotIndicator;
+    boost::thread_specific_ptr<QImage> localCache;
+    boost::mutex m;
+  };
+
   class Worker: public QThread {
   public:
     Worker(SpotIndicatorGraphicsItem* s, int t):
@@ -79,6 +94,9 @@ protected:
     Worker& operator=(const Worker&);
   };
   QList<Worker*> workers;
+
+  TWorker tWorker;
+  ThreadRunner threadRunner;
 };
 
 #endif // SPOTINDICATORGRAPHICSITEM_H
