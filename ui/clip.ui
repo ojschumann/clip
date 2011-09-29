@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>628</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -63,6 +63,7 @@
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionAbout_Qt"/>
+    <addaction name="actionDebug"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="title">
@@ -152,6 +153,14 @@
   <action name="newDiffStereo">
    <property name="text">
     <string>New Stereographic Projection</string>
+   </property>
+  </action>
+  <action name="actionDebug">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Debug</string>
    </property>
   </action>
  </widget>

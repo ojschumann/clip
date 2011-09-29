@@ -31,6 +31,19 @@
 
 using namespace std;
 
+#include <cmath>
+
+struct Mean {
+  Mean(): N(0), sum(0), sumSq(0) {};
+
+  void add(double value) { N++; sum += value; sumSq += value*value; }
+  double mean() { return sum/N; }
+  double var() { return sqrt(sumSq/N - sum/N*sum/N); }
+  int N;
+  double sum;
+  double sumSq;
+};
+
 SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem():
     QGraphicsObject(),
     workerPermission(0),
@@ -82,15 +95,13 @@ void SpotIndicatorGraphicsItem::setColor(QColor c) {
 void SpotIndicatorGraphicsItem::updateCache() {
   if (cacheNeedsUpdate) {
 
-    static double sum = 0.0;
-    static int N = 0;
-
-    static double runtimes = 0;
-    static int runs = 0;
+    static Mean QThreadTime;
+    static Mean TWorkerTime;
+    static Mean relative;
 
     unsigned long long t1 = rdtsctime();
 
-
+    static Mean runtimes;
 
     workN = 0;
     workerPermission.release(workers.size());
@@ -111,22 +122,26 @@ void SpotIndicatorGraphicsItem::updateCache() {
     unsigned long long dtstart = (startTimes[0] > startTimes[1]) ? startTimes[0] - startTimes[1] : startTimes[1] - startTimes[0];
     unsigned long long dtstop = (stopTimes[0] > stopTimes[1]) ? stopTimes[0] - stopTimes[1] : stopTimes[1] - stopTimes[0];
 
-    runtimes += stopTimes[0]-startTimes[0] + stopTimes[1]-startTimes[1];
-    runs += 2;
+    runtimes.add(stopTimes[0]-startTimes[0]);
+    runtimes.add(stopTimes[1]-startTimes[1]);
 
-    qDebug() << "QThread delta" << startTimes.size() << dtstart << dtstop << stopTimes[0]-startTimes[0] << stopTimes[1]-startTimes[1] << runtimes/runs;
+    qDebug() << "QThread delta" << startTimes.size() << dtstart << dtstop << stopTimes[0]-startTimes[0] << stopTimes[1]-startTimes[1] << runtimes.mean() << runtimes.var();
     unsigned long long t2 = rdtsctime();
 
-    cache->fill(QColor(0,0,0,0));
     threadRunner.start();
+    cache->fill(QColor(0,0,0,0));
     threadRunner.join();
     unsigned long long t3 = rdtsctime();
 
     double s = 1.0*(t2-t1)/(t3-t2);
-    sum += s;
-    N++;
+    QThreadTime.add(t2-t1);
+    TWorkerTime.add(t3-t2);
+    relative.add(s);
 
-    qDebug() << "TPaint" << t2-t1 << t3-t2 << s << sum/N;
+    double delta = std::abs(TWorkerTime.mean()-QThreadTime.mean());
+    double ddelta = sqrt(TWorkerTime.var()*TWorkerTime.var()+QThreadTime.var()*QThreadTime.var());
+
+    qDebug() << "TP" << QThreadTime.mean() << QThreadTime.var() << TWorkerTime.mean() << TWorkerTime.var() << relative.mean() << relative.var() << delta << ddelta;
 
     cacheNeedsUpdate=false;
   }

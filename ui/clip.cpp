@@ -339,6 +339,8 @@ bool Clip::loadWorkspaceFile(QString filename) {
     if (e.isNull()) continue;
     CrystalDisplay* crystalDisplay = new CrystalDisplay();
     addMdiWindow(crystalDisplay)->systemMenu()->addAction("Save as Default", crystalDisplay->getCrystal(), SLOT(saveParametersAsDefault()));
+    //TODO: Remove
+    connect(ui->actionDebug, SIGNAL(triggered(bool)), crystalDisplay->getCrystal(), SLOT(enableDebug(bool)));
     crystalDisplay->loadFromXML(e);
     e = crystalConnection.elementsByTagName(XML_Clip_ConnectedProjectors).at(0).toElement();
     for (e=e.firstChildElement(); !e.isNull(); e=e.nextSiblingElement()) {

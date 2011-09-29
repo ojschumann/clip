@@ -919,3 +919,19 @@ void Crystal::saveParametersAsDefault() {
   settings.setValue("EulerPhi", euler[2]);
   settings.endGroup();
 }
+
+#include <QTimer>
+void Crystal::enableDebug(bool b) {
+  debugEnabled = b;
+  if (debugEnabled) {
+    QTimer::singleShot(0, this, SLOT(debugSlot()));
+  }
+}
+
+
+void Crystal::debugSlot() {
+  Vec3D a(1.0-2.0*qrand()/RAND_MAX, 1.0-2.0*qrand()/RAND_MAX, 1.0-2.0*qrand()/RAND_MAX);
+  addRotation(a.normalized(), 0.1*qrand()/RAND_MAX);
+  if (debugEnabled)
+    QTimer::singleShot(0, this, SLOT(debugSlot()));
+}

@@ -124,7 +124,11 @@ public slots:
   void generateReflections();
   void saveParametersAsDefault();
 
-
+  //TODO: Remove
+  void enableDebug(bool b);
+  void debugSlot();
+private:
+  bool debugEnabled;
 private slots:
   void convertHtoR();
   void convertRtoH();
