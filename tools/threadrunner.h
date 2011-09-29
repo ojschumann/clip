@@ -65,22 +65,59 @@ private:
 
   class BaseThreadFunctor {
   public:
-    virtual void run()=0;
-    virtual void init()=0;
-    virtual void done()=0;
+    virtual void run(int threadId)=0;
+    virtual void init(int numberOfThreads)=0;
+    virtual void done(int numberOfThreads)=0;
   };
 
   template <typename WORKER> class ThreadFunctor: public BaseThreadFunctor {
   public:
-    ThreadFunctor(WORKER&& w): worker(static_cast<WORKER&&>(w)) {}
-    virtual void run() { worker(); }
-    template <typename T> void callInit(decltype(&boost::remove_reference<T>::type::init)) { worker.init(); }
-    template <typename T> void callInit(...) {  }
-    virtual void init() { callInit<WORKER>(0); }
+    typedef typename boost::remove_cv<typename boost::remove_reference<WORKER>::type>::type PURE_WORKER;
 
-    template <typename T> void callDone(decltype(&boost::remove_reference<T>::type::init)) { worker.done(); }
-    template <typename T> void callDone(...) {  }
-    virtual void done() { callDone<WORKER>(0); }
+    ThreadFunctor(WORKER&& w): worker(static_cast<WORKER&&>(w)) {}
+
+    template <typename T> struct Helper {};
+
+    template <class T> void callWorker(int threadId, Helper<decltype((*((T*)nullptr))(0))>*) {
+      worker(threadId);
+    }
+    template <typename T> void callWorker(int, Helper<decltype((*((T*)nullptr))())>*) {
+      worker();
+    }
+    virtual void run(int threadNumber) {
+      //worker();
+      callWorker<typename boost::remove_cv<typename boost::remove_reference<WORKER>::type>::type>(threadNumber, nullptr);
+    }
+
+    template <class T> void callInit(int numberOfThreads, decltype(((T*)nullptr)->init(0)) (T::*)(int)) {
+      //std::cout << "init auto (T::*)(int)" << std::endl;
+      worker.init(numberOfThreads);
+    };
+    template <class T> void callInit(int numberOfThreads, decltype(((T*)nullptr)->init()) (T::*)()) {
+      //std::cout << "init auto (T::*)() sig" << std::endl;
+      worker.init();
+    };
+    template <class T> void callInit(...) {
+      //std::cout << "init catch" << std::endl;
+    };
+    virtual void init(int numberOfThreads) {
+      callInit<typename boost::remove_cv<typename boost::remove_reference<WORKER>::type>::type>(numberOfThreads, 0);
+    }
+
+    template <class T> void callDone(int numberOfThreads, decltype(((T*)nullptr)->done(0)) (T::*)(int)) {
+      //std::cout << "done auto (T::*)(int)" << std::endl;
+      worker.done(numberOfThreads);
+    };
+    template <class T> void callDone(int numberOfThreads, decltype(((T*)nullptr)->done()) (T::*)()) {
+      //std::cout << "done auto (T::*)()" << std::endl;
+      worker.done();
+    };
+    template <class T> void callDone(...) {
+      //std::cout << "done catch" << std::endl;
+    };
+    virtual void done(int numberOfThreads) {
+      callDone<typename boost::remove_cv<typename boost::remove_reference<WORKER>::type>::type>(numberOfThreads, 0);
+    }
 
   private:
     WORKER worker;

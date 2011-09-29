@@ -39,7 +39,7 @@ void ThreadRunner::initThreads() {
   int N = std::max(boost::thread::hardware_concurrency(), 1u);
   workStepsTodo = N;
   for (int n=0; n<N; n++) {
-    threads.push_back(new boost::thread(&ThreadRunner::workFunction, this, n+1));
+    threads.push_back(new boost::thread(&ThreadRunner::workFunction, this, n));
   }
   join();
 }
@@ -86,7 +86,7 @@ void ThreadRunner::workFunction(int id) {
     }
 
     // Call Worker here
-    if (f) f->run();
+    if (f) f->run(id);
 
   }
 }
@@ -97,7 +97,7 @@ void ThreadRunner::start() {
   workStepsTodo = 2*threads.size();
 
   if (f) {
-    f->init();
+    f->init(threads.size());
     workerInitPending = true;
   }
 
@@ -112,7 +112,7 @@ void ThreadRunner::join() {
 
   if (f) {
     if (workerInitPending) {
-      f->done();
+      f->done(threads.size());
       workerInitPending = false;
     }
   }

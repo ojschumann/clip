@@ -65,16 +65,29 @@ protected:
   QSemaphore workerSync;
   QAtomicInt workN;
 
+  std::vector<unsigned long long> startTimes;
+  std::vector<unsigned long long> stopTimes;
+
   class TWorker {
   public:
+    typedef QImage CacheType;
     TWorker(SpotIndicatorGraphicsItem* s);
-    void operator()();
-    void init();
-    void done();
-    std::atomic<int> wp;
+    ~TWorker();
+    void operator()(int id);
+    void init(int numberOfThreads);
+    void done(int numberOfThreads);
+
+    //std::atomic<int> wp;
+    QAtomicInt wp;
+
     SpotIndicatorGraphicsItem* spotIndicator;
-    boost::thread_specific_ptr<QImage> localCache;
-    boost::mutex m;
+    std::vector<CacheType*> threadCaches;
+    std::vector<unsigned long long> startTimes;
+    std::vector<unsigned long long> stopTimes;
+
+    double runtimes;
+    int runs;
+
   };
 
   class Worker: public QThread {
