@@ -23,6 +23,7 @@
 #include "configstore.h"
 
 #include <QSettings>
+#include <QMetaMethod>
 
 ConfigStore::ConfigStore(QObject* _parent) :
     QObject(_parent)
@@ -106,10 +107,19 @@ void ConfigStore::setColor(int t, const QColor& color) {
   colors.at(t)->setColor(color);
 }
 
-void ConfigStore::ensureColor(int t, const QObject* receiver, const char *method) {
-  connect(this, SIGNAL(tmpColorChanged(QColor)), receiver, method);
-  emit tmpColorChanged(color(t));
-  disconnect(SIGNAL(tmpColorChanged(QColor)));
+QByteArray sig2Name(const char* method) {
+  // Normalize name and convert the char* to a QByteArray
+  QByteArray name = QMetaObject::normalizedSignature(method);
+  // Remove the trailing digit
+  name.remove(0, 1);
+  // Remove the arguments, starting with "("
+  name.remove(name.indexOf('('), name.length());
+  return name;
+}
+
+#include <QDebug>
+void ConfigStore::ensureColor(int t, QObject* receiver, const char *method) {
+  QMetaObject::invokeMethod(receiver, sig2Name(method), Qt::DirectConnection, Q_ARG(QColor, color(t)));
   connect(colors.at(t), SIGNAL(colorChanged(QColor)), receiver, method);
 }
 

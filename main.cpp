@@ -40,6 +40,7 @@ Q_IMPORT_PLUGIN(qmng)
 Q_IMPORT_PLUGIN(qsvg)
 #endif
 
+
 int main(int argc, char *argv[]) {
 
   QApplication a(argc, argv);

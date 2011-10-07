@@ -58,7 +58,7 @@ public:
   QColor color(int t) const;
   QString colorName(int t) const;
   void setColor(int t, const QColor& color);
-  void ensureColor(int t, const QObject* receiver, const char * method);
+  void ensureColor(int t, QObject* receiver, const char * method);
   void setColorChanger(int t, const QObject * sender, const char * signal);
   double getZoneMarkerWidth() const;
   bool loadPositionFromWorkspace();

@@ -29,6 +29,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QTimer>
+#include <QDesktopServices>
 
 #include "defs.h"
 #include "core/projector.h"
@@ -60,6 +61,7 @@ Clip::Clip(QWidget *_parent) :
   connect(ui->menuWindows, SIGNAL(aboutToShow()), this, SLOT(slotUpdateWindowMenu()));
   connect(ui->mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SIGNAL(windowChanged()));
 
+  QDesktopServices::setUrlHandler("call", this, "showSEE");
 
   QTimer::singleShot(0, this, SLOT(loadInitialWorkspace()));
 }
@@ -401,4 +403,10 @@ void Clip::on_actionToggleMarkerEnabled_triggered() {
 
 void Clip::on_actionConfiguration_triggered() {
   addMdiWindow(new ClipConfig(this));
+}
+
+#include "ui/sadeasteregg.h"
+void Clip::showSEE(QUrl) {
+  SadEasterEgg see;
+  see.exec();
 }

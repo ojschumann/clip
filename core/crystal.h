@@ -33,7 +33,6 @@
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
 #include "tools/objectstore.h"
-#include "tools/threadrunner.h"
 #include "refinement/fitobject.h"
 #include "refinement/fitparametergroup.h"
 #include "core/spacegroup.h"
@@ -41,7 +40,7 @@
 
 class Projector;
 class AbstractMarkerItem;
-
+class ThreadRunner;
 
 class Crystal: public FitObject {
   Q_OBJECT
@@ -218,7 +217,7 @@ private:
     int chunkSize;
   };
 
-  ThreadRunner reflectionsUpdater;
+  ThreadRunner* reflectionsUpdater;
 
   // FitParameterGroups for fitting
   class CellGroup: public FitParameterGroup {

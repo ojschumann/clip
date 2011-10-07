@@ -33,16 +33,7 @@ using namespace std;
 
 #include <cmath>
 
-struct Mean {
-  Mean(): N(0), sum(0), sumSq(0) {};
 
-  void add(double value) { N++; sum += value; sumSq += value*value; }
-  double mean() { return sum/N; }
-  double var() { return sqrt(sumSq/N - sum/N*sum/N); }
-  int N;
-  double sum;
-  double sumSq;
-};
 
 SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem():
     QGraphicsObject(),
@@ -62,8 +53,6 @@ SpotIndicatorGraphicsItem::SpotIndicatorGraphicsItem():
     workers << w;
   }
 
-  startTimes.resize(workers.size());
-  stopTimes.resize(workers.size());
 };
 
 SpotIndicatorGraphicsItem::~SpotIndicatorGraphicsItem() {
@@ -97,11 +86,12 @@ void SpotIndicatorGraphicsItem::updateCache() {
 
     static Mean QThreadTime;
     static Mean TWorkerTime;
+    static Mean TDelta;
     static Mean relative;
+    static int Tfaster=0;
+    static int Tslower=0;
 
-    unsigned long long t1 = rdtsctime();
-
-    static Mean runtimes;
+    signed long long t1 = rdtsctime();
 
     workN = 0;
     workerPermission.release(workers.size());
@@ -118,30 +108,35 @@ void SpotIndicatorGraphicsItem::updateCache() {
     }
     p.end();
 
-
-    unsigned long long dtstart = (startTimes[0] > startTimes[1]) ? startTimes[0] - startTimes[1] : startTimes[1] - startTimes[0];
-    unsigned long long dtstop = (stopTimes[0] > stopTimes[1]) ? stopTimes[0] - stopTimes[1] : stopTimes[1] - stopTimes[0];
-
-    runtimes.add(stopTimes[0]-startTimes[0]);
-    runtimes.add(stopTimes[1]-startTimes[1]);
-
-    qDebug() << "QThread delta" << startTimes.size() << dtstart << dtstop << stopTimes[0]-startTimes[0] << stopTimes[1]-startTimes[1] << runtimes.mean() << runtimes.var();
-    unsigned long long t2 = rdtsctime();
+    signed long long t2 = rdtsctime();
 
     threadRunner.start();
     cache->fill(QColor(0,0,0,0));
     threadRunner.join();
-    unsigned long long t3 = rdtsctime();
+
+    signed long long t3 = rdtsctime();
 
     double s = 1.0*(t2-t1)/(t3-t2);
     QThreadTime.add(t2-t1);
     TWorkerTime.add(t3-t2);
     relative.add(s);
+    TDelta.add(1.0*(2*t2-t1-t3));
+
+    if ((t2-t1)<(t3-t2))
+      Tfaster++;
+    else
+      Tslower++;
 
     double delta = std::abs(TWorkerTime.mean()-QThreadTime.mean());
     double ddelta = sqrt(TWorkerTime.var()*TWorkerTime.var()+QThreadTime.var()*QThreadTime.var());
 
-    qDebug() << "TP" << QThreadTime.mean() << QThreadTime.var() << TWorkerTime.mean() << TWorkerTime.var() << relative.mean() << relative.var() << delta << ddelta;
+    qDebug() << "TP" << QThreadTime.mean() << QThreadTime.var() << TWorkerTime.mean() << TWorkerTime.var() << relative.mean() << relative.var();
+    qDebug() << delta << ddelta << TDelta.mean() << TDelta.var() << Tfaster << Tslower  ;
+    qDebug() << time1.mean() << time1.var() << tWorker.time1.mean() << tWorker.time1.var();
+    qDebug() << time2.mean() << time2.var() << tWorker.time2.mean() << tWorker.time2.var();
+    qDebug() << time3.mean() << time3.var() << tWorker.time3.mean() << tWorker.time3.var();
+    qDebug() << time4.mean() << time4.var() << tWorker.time4.mean() << tWorker.time4.var();
+    qDebug() << workDone.mean() << workDone.var() << tWorker.workDone.mean() << tWorker.workDone.var();
 
     cacheNeedsUpdate=false;
   }
@@ -234,29 +229,54 @@ void SpotIndicatorGraphicsItem::Worker::run() {
       return;
     }
 
+    unsigned long long t1 = rdtsctime();
+
     if (!localCache || localCache->size()!=spotIndicator->cache->size()) {
       if (localCache) delete localCache;
       localCache = new QImage(spotIndicator->cache->size(), QImage::Format_ARGB32_Premultiplied);
     }
+
+    unsigned long long t2 = rdtsctime();
+
     double rx = spotIndicator->transform.m11()*spotIndicator->spotSize;
     double ry = spotIndicator->transform.m22()*spotIndicator->spotSize;
     localCache->fill(QColor(0,0,0,0).rgba());
+
+    unsigned long long t3 = rdtsctime();
+
     QPainter painter(localCache);
     QList<QGraphicsView*> l = spotIndicator->scene()->views();
     if (l.size())
       painter.setRenderHints(l.at(0)->renderHints());
     painter.setPen(spotIndicator->spotColor);
     int i;
-    int maxCoo = spotIndicator->coordinates.size();
-    unsigned long long tstart = rdtsctime();
-    while ((i=spotIndicator->workN.fetchAndAddOrdered(1))<maxCoo) {
+    int n=0;
+    int size = spotIndicator->coordinates.size();
+
+
+    unsigned long long t4 = rdtsctime();
+
+
+    while ((i=spotIndicator->workN.fetchAndAddOrdered(1))<size) {
+      n++;
       painter.drawEllipse(spotIndicator->transform.map(spotIndicator->coordinates.at(i)), rx, ry);
     }
-    unsigned long long tstop = rdtsctime();
+
+
+
     painter.end();
 
-    spotIndicator->startTimes[threadNr] = tstart;
-    spotIndicator->stopTimes[threadNr] = tstop;
+    unsigned long long t5 = rdtsctime();
+
+    //qDebug() << "Q" << t2-t1 << t3-t2 << t4-t3 << t5-t4;
+
+    spotIndicator->m.lock();
+    spotIndicator->time1.add(t2-t1);
+    spotIndicator->time2.add(t3-t2);
+    spotIndicator->time3.add(t4-t3);
+    spotIndicator->time4.add(t5-t4);
+    spotIndicator->workDone.add(n);
+    spotIndicator->m.unlock();
 
     spotIndicator->workerSync.release();
 
@@ -267,9 +287,7 @@ void SpotIndicatorGraphicsItem::Worker::run() {
 
 SpotIndicatorGraphicsItem::TWorker::TWorker(SpotIndicatorGraphicsItem *s):
     wp(0),
-    spotIndicator(s),
-    runtimes(0),
-    runs(0)
+    spotIndicator(s)
   {}
 
 SpotIndicatorGraphicsItem::TWorker::~TWorker() {
@@ -285,34 +303,30 @@ void SpotIndicatorGraphicsItem::TWorker::init(int numberOfThreads) {
       threadCaches.push_back(nullptr);
   }
 
-  startTimes.resize(numberOfThreads);
-  stopTimes.resize(numberOfThreads);
-
-  wp = 0;
+  //wp = 0;
   spotIndicator->workN = 0;
 }
 
 void SpotIndicatorGraphicsItem::TWorker::operator ()(int id) {
 
+  unsigned long long t1 = rdtsctime();
+
 
   CacheType* localCache = threadCaches[id];
   if (localCache==nullptr || localCache->size()!=spotIndicator->cache->size()) {
-    if (localCache==nullptr) delete localCache;
+    if (localCache!=nullptr) delete localCache;
     localCache = new CacheType(spotIndicator->cache->size(), QImage::Format_ARGB32_Premultiplied);
-    qDebug() << "new cache";
-    //localCache = new CacheType(spotIndicator->cache->size());
     threadCaches[id] = localCache;
   }
 
-  int size = spotIndicator->coordinates.size();
-  int chunkSize = std::max(size/4, 1);
+  unsigned long long t2 = rdtsctime();
 
+  double rx = spotIndicator->transform.m11()*spotIndicator->spotSize;
+  double ry = spotIndicator->transform.m22()*spotIndicator->spotSize;
   localCache->fill(QColor(0,0,0,0).rgba());
   //localCache->fill(QColor(0,0,0,0));
 
-  QTransform t = spotIndicator->transform;
-  double rx = t.m11()*spotIndicator->spotSize;
-  double ry = t.m22()*spotIndicator->spotSize;
+  unsigned long long t3 = rdtsctime();
 
   QPainter painter(localCache);
   QList<QGraphicsView*> l = spotIndicator->scene()->views();
@@ -321,6 +335,7 @@ void SpotIndicatorGraphicsItem::TWorker::operator ()(int id) {
   painter.setPen(spotIndicator->spotColor);
 
   int i;
+  int n=0;
 /*  while ((n=wp.fetchAndAddOrdered(1))*chunkSize<size) {
     QPointF const* p = spotIndicator->coordinates.constData()+n*chunkSize;
     int count = std::min(size, chunkSize*(n+1))-chunkSize*n;
@@ -329,33 +344,35 @@ void SpotIndicatorGraphicsItem::TWorker::operator ()(int id) {
     }
   }*/
 
-  unsigned long long tstart = rdtsctime();
+  int size = spotIndicator->coordinates.size();
+
+  unsigned long long t4 = rdtsctime();
+
+  //int chunkSize = std::max(size/4, 1);
   while ((i=spotIndicator->workN.fetchAndAddOrdered(1))<size) {
+    n++;
     painter.drawEllipse(spotIndicator->transform.map(spotIndicator->coordinates.at(i)), rx, ry);
   }
-  unsigned long long tstop = rdtsctime();
 
   painter.end();
+  unsigned long long t5 = rdtsctime();
+  //qDebug() << "T" << t2-t1 << t3-t2 << t4-t3 << t5-t4;
+  m.lock();
+  time1.add(t2-t1);
+  time2.add(t3-t2);
+  time3.add(t4-t3);
+  time4.add(t5-t4);
+  workDone.add(n);
+  m.unlock();
 
-  startTimes[id] = tstart;
-  stopTimes[id] = tstop;
 }
 
 void SpotIndicatorGraphicsItem::TWorker::done(int numberOfThreads) {
   QPainter painter(spotIndicator->cache);
   for (CacheType* c: threadCaches) {
-    painter.drawImage(0, 0, *c);
+    painter.drawImage(QPoint(0, 0), *c);
     //painter.drawPixmap(0, 0, *c);
   }
   painter.end();
-
-  unsigned long long dtstart = (startTimes[0] > startTimes[1]) ? startTimes[0] - startTimes[1] : startTimes[1] - startTimes[0];
-  unsigned long long dtstop = (stopTimes[0] > stopTimes[1]) ? stopTimes[0] - stopTimes[1] : stopTimes[1] - stopTimes[0];
-  runtimes += stopTimes[0]-startTimes[0] + stopTimes[1]-startTimes[1];
-  runs += 2;
-
-  qDebug() << "TWorker delta" << startTimes.size() << dtstart << dtstop << stopTimes[0]-startTimes[0] << stopTimes[1]-startTimes[1] << runtimes/runs;
-
-
 }
 

@@ -32,6 +32,17 @@
 
 #include "tools/threadrunner.h"
 
+struct Mean {
+  Mean(): N(0), sum(0), sumSq(0) {};
+
+  void add(double value) { N++; sum += value; sumSq += value*value; }
+  double mean() { return sum/N; }
+  double var() { return sqrt(sumSq/N - sum/N*sum/N); }
+  int N;
+  double sum;
+  double sumSq;
+};
+
 class SpotIndicatorGraphicsItem: public QGraphicsObject {
   Q_OBJECT
 public:
@@ -64,9 +75,13 @@ protected:
   QSemaphore workerPermission;
   QSemaphore workerSync;
   QAtomicInt workN;
+  Mean time1;
+  Mean time2;
+  Mean time3;
+  Mean time4;
+  Mean workDone;
+  boost::mutex m;
 
-  std::vector<unsigned long long> startTimes;
-  std::vector<unsigned long long> stopTimes;
 
   class TWorker {
   public:
@@ -82,12 +97,13 @@ protected:
 
     SpotIndicatorGraphicsItem* spotIndicator;
     std::vector<CacheType*> threadCaches;
-    std::vector<unsigned long long> startTimes;
-    std::vector<unsigned long long> stopTimes;
 
-    double runtimes;
-    int runs;
-
+    Mean time1;
+    Mean time2;
+    Mean time3;
+    Mean time4;
+    Mean workDone;
+    boost::mutex m;
   };
 
   class Worker: public QThread {
@@ -111,5 +127,7 @@ protected:
   TWorker tWorker;
   ThreadRunner threadRunner;
 };
+
+
 
 #endif // SPOTINDICATORGRAPHICSITEM_H

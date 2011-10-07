@@ -25,6 +25,7 @@
 
 #include <QMainWindow>
 #include <QSignalMapper>
+#include <QUrl>
 
 #include "tools/mousepositioninfo.h"
 
@@ -102,6 +103,7 @@ private slots:
     void on_actionReorientation_triggered();
     void on_actionRotation_triggered();
     void on_actionReflection_Info_triggered();
+    void showSEE(QUrl);
 };
 
 #endif // CLIP_H

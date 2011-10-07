@@ -42,6 +42,7 @@
 #include "tools/abstractmarkeritem.h"
 #include "refinement/fitparameter.h"
 #include "defs.h"
+#include "tools/threadrunner.h"
 
 using namespace std;
 
@@ -139,6 +140,8 @@ Crystal::Crystal(QObject* _parent):
   restartReflectionUpdate = false;
   generateReflections();
 
+  reflectionsUpdater = new ThreadRunner;
+
   addParameterGroup(&cellGroup);
   addParameterGroup(&orientationGroup);
 
@@ -160,7 +163,9 @@ Crystal& Crystal::operator=(const Crystal& o) {
   return *this;
 }
 
-Crystal::~Crystal() {}
+Crystal::~Crystal() {
+  delete reflectionsUpdater;
+}
 
 QString Crystal::FitObjectName() {
   return Settings_Group;
@@ -433,8 +438,8 @@ void Crystal::updateRotation() {
   if (not updateEnabled)
     return;
 
-  reflectionsUpdater.start(UpdateLoadBalancer(reflections.data(), reflections.size(), UpdateRef(this)));
-  reflectionsUpdater.join();
+  reflectionsUpdater->start(UpdateLoadBalancer(reflections.data(), reflections.size(), UpdateRef(this)));
+  reflectionsUpdater->join();
 
   emit reflectionsUpdate();
 }

@@ -27,15 +27,29 @@
 #include <vector>
 #include <thread>
 
+#define USE_QTHREADS 1
+#define USE_SEMAPHORE_SYNC 1
 
+#if USE_QTHREADS
+#include <QThread>
+#endif
+
+#if USE_SEMAPHORE_SYNC
+#include <QSemaphore>
+#endif
 
 class ThreadRunner {
 public:
   template <class WORKER> ThreadRunner(WORKER&& w):
-      shouldStop(false),
+#if USE_SEMAPHORE_SYNC
+      workerPermission(0),
+      workerSync(0),
+#else
       workSerial(0),
-      workerInitPending(false),
       workStepsTodo(0),
+#endif
+      shouldStop(false),
+      workerInitPending(false),
       f(makeFunctor(w)) {
     initThreads();
   }
@@ -54,14 +68,24 @@ private:
   void initThreads();
   void workFunction(int id);
 
+#if USE_QTHREADS
+  std::vector<QThread*> threads;
+#else
   std::vector<boost::thread*> threads;
+#endif
+
+#if USE_SEMAPHORE_SYNC
+  QSemaphore workerPermission;
+  QSemaphore workerSync;
+#else
   boost::mutex waitMutex;
   boost::condition_variable condition;
+  int workSerial;
+  int workStepsTodo;
+#endif
 
   bool shouldStop;
-  int workSerial;
   int workerInitPending;
-  int workStepsTodo;
 
   class BaseThreadFunctor {
   public:
@@ -122,11 +146,22 @@ private:
   private:
     WORKER worker;
   };
-  template <typename WORKER> ThreadRunner::BaseThreadFunctor* makeFunctor(WORKER&& w) {
+
+#if USE_QTHREADS
+  class WorkerThread: public QThread {
+  public:
+    WorkerThread(ThreadRunner* _tr, int _id): tr(_tr), id(_id) {}
+    void run() { tr->workFunction(id); }
+    ThreadRunner* tr;
+    int id;
+  };
+#endif
+
+  template <typename WORKER> static ThreadRunner::BaseThreadFunctor* makeFunctor(WORKER&& w) {
     return new ThreadRunner::ThreadFunctor< WORKER >(w);
   }
 
-  ThreadRunner::BaseThreadFunctor* makeFunctor(void (*f)());
+  static ThreadRunner::BaseThreadFunctor* makeFunctor(void (*f)());
 
   BaseThreadFunctor* f;
 };
