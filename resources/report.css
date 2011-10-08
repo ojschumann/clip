@@ -1,0 +1,5 @@
+.celltable { border-style:solid; border-color:#000000 }
+.header { font-weight:bold }
+.value { padding-right:5px }
+.sgheader { font-weight:bold }
+.sgvalue { padding-left: 10px }

@@ -1,0 +1,945 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CrystalDisplay</class>
+ <widget class="QMainWindow" name="CrystalDisplay">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>200</width>
+    <height>269</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>200</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
+  <property name="windowTitle">
+   <string>Crystal</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/resources.qrc">
+    <normaloff>:/icons/icons/crystal.png</normaloff>:/icons/icons/crystal.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout">
+    <property name="margin">
+     <number>0</number>
+    </property>
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <item row="0" column="0" colspan="3">
+     <layout class="QHBoxLayout">
+      <item>
+       <widget class="QLabel" name="label_Spacegroup">
+        <property name="text">
+         <string>Spacegroup</string>
+        </property>
+        <property name="buddy">
+         <cstring>Spacegroup</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="Spacegroup">
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Spacegroup symbol. Recognized syntax is:&lt;/span&gt;&lt;/p&gt;
+&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; font-size:8pt;&quot; style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Numbers from the International Tables of Crystalography&lt;br /&gt;from 1 (=P1) to 230 (=Ia3d)&lt;/li&gt;
+&lt;li style=&quot; font-size:8pt;&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Hermann-Mauguin symbols. In addition to the standard settings from the international tables, all non-standard settings are recognized (e.g. Pnma, Pmnb, Pbnm, Pcmn, Pmcn and Pnam denote all space group #62). Furthermore the monocline space groups accept all cell centering symbols (e.g. A1, I1, C1).&lt;/li&gt;
+&lt;li style=&quot; font-size:8pt;&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Hall symbols like -P 2ac 2n for space group #62&lt;/li&gt;&lt;/ul&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;The rhombohedral space groups could be suffixed by :H and :R (R3m:H or R3m:R) to indicate the hexagonal (default) or rhombohedral setting, respectively. The space group is changed between the two settings, the cell and crystal orientation is changed acordingly.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0" colspan="3">
+     <layout class="QHBoxLayout">
+      <property name="spacing">
+       <number>1</number>
+      </property>
+      <item>
+       <layout class="QVBoxLayout">
+        <item>
+         <widget class="QLabel" name="Label_A">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>A</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buddy">
+           <cstring>latticeA</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="NumberEdit" name="latticeA">
+          <property name="toolTip">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Cell constant &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;a&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; in Angstroem&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="correctionMode">
+           <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+          </property>
+          <property name="prefix">
+           <string/>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>75.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>5.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="Label_Alpha">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Alpha</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buddy">
+           <cstring>latticeAlpha</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="NumberEdit" name="latticeAlpha">
+          <property name="toolTip">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Angle between &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;b&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; and &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; in degrees&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>179.900000000000006</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>90.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout">
+        <item>
+         <widget class="QLabel" name="label_B">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>B</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buddy">
+           <cstring>latticeB</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="NumberEdit" name="latticeB">
+          <property name="toolTip">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Cell constant &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;b&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; in Angstroem&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>75.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>5.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_Beta">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Beta</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buddy">
+           <cstring>latticeBeta</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="NumberEdit" name="latticeBeta">
+          <property name="toolTip">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Angle between &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;a&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; and &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; in degrees&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>179.900000000000006</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>90.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout">
+        <item>
+         <widget class="QLabel" name="label_C">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>C</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buddy">
+           <cstring>latticeC</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="NumberEdit" name="latticeC">
+          <property name="toolTip">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Cell constant &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; in Angstroem&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>75.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>5.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_Gamma">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Gamma</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buddy">
+           <cstring>latticeGamma</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="NumberEdit" name="latticeGamma">
+          <property name="toolTip">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Angle between &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;a&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; and &lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;b&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt; in degrees&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>179.900000000000006</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>90.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0" colspan="3">
+     <widget class="QLabel" name="label_OMat">
+      <property name="text">
+       <string>orientation matrix</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="3">
+     <widget class="QTableWidget" name="orientationMatrix">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="toolTip">
+       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Reciprocal orientation matrix in the orthogonal laboratory system. &lt;span style=&quot; font-weight:600;&quot;&gt;-x&lt;/span&gt; is the direction of the primary beam, &lt;span style=&quot; font-weight:600;&quot;&gt;y&lt;/span&gt; points horizontaly and &lt;span style=&quot; font-weight:600;&quot;&gt;z&lt;/span&gt; upwards. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="autoScroll">
+       <bool>false</bool>
+      </property>
+      <property name="showDropIndicator" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="gridStyle">
+       <enum>Qt::SolidLine</enum>
+      </property>
+      <property name="rowCount">
+       <number>3</number>
+      </property>
+      <property name="columnCount">
+       <number>3</number>
+      </property>
+      <attribute name="horizontalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <row/>
+      <row/>
+      <row/>
+      <column/>
+      <column/>
+      <column/>
+      <item row="0" column="0">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </item>
+      <item row="0" column="1">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </item>
+      <item row="0" column="2">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </item>
+      <item row="1" column="0">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </item>
+      <item row="1" column="1">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </item>
+      <item row="1" column="2">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </item>
+      <item row="2" column="0">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </item>
+      <item row="2" column="1">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </item>
+      <item row="2" column="2">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <layout class="QVBoxLayout">
+      <item>
+       <widget class="QLabel" name="label_Omega">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Omega</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="buddy">
+         <cstring>rotationOmega</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="NumberEdit" name="rotationOmega">
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Euler angle of the crystal rotation&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="1">
+     <layout class="QVBoxLayout">
+      <item>
+       <widget class="QLabel" name="label_Chi">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Chi</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="buddy">
+         <cstring>rotationChi</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="NumberEdit" name="rotationChi">
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Euler angle of the crystal rotation&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="2">
+     <layout class="QVBoxLayout">
+      <item>
+       <widget class="QLabel" name="label_Phi">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Phi</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="buddy">
+         <cstring>rotationPhi</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="NumberEdit" name="rotationPhi">
+        <property name="toolTip">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Euler angle of the crystal rotation&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="toolTip">
+    <string/>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionLoad"/>
+   <addaction name="actionSave"/>
+   <addaction name="actionIndex"/>
+   <addaction name="actionDrag"/>
+  </widget>
+  <action name="actionLoad">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/fileopen.png</normaloff>:/icons/icons/fileopen.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Load the cell data from disk&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/filesave.png</normaloff>:/icons/icons/filesave.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Save the cell data to Disk&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="actionIndex">
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/index.png</normaloff>:/icons/icons/index.png</iconset>
+   </property>
+   <property name="text">
+    <string>Index</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Start the Indexation and Refinement tool&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+  <action name="actionDrag">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/resources.qrc">
+     <normaloff>:/icons/icons/crystal.png</normaloff>:/icons/icons/crystal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Drag</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Drag from here to copy the data from this crystal to another one or connect this crystal to a projection plane.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NumberEdit</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>tools/numberedit.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>Spacegroup</tabstop>
+  <tabstop>latticeA</tabstop>
+  <tabstop>latticeB</tabstop>
+  <tabstop>latticeC</tabstop>
+  <tabstop>latticeAlpha</tabstop>
+  <tabstop>latticeBeta</tabstop>
+  <tabstop>latticeGamma</tabstop>
+  <tabstop>orientationMatrix</tabstop>
+  <tabstop>rotationOmega</tabstop>
+  <tabstop>rotationChi</tabstop>
+  <tabstop>rotationPhi</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../resources/resources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>rotationOmega</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotRotationChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>25</x>
+     <y>268</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>201</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rotationChi</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotRotationChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>92</x>
+     <y>268</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>202</x>
+     <y>260</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rotationPhi</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotRotationChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>180</x>
+     <y>269</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>204</x>
+     <y>68</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Spacegroup</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotSpacegroupChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>42</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>99</x>
+     <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeGamma</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>181</x>
+     <y>136</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>205</x>
+     <y>209</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeBeta</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>116</x>
+     <y>134</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>205</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeAlpha</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>46</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>204</x>
+     <y>130</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeC</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>158</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>200</x>
+     <y>86</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeB</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>86</x>
+     <y>84</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>203</x>
+     <y>94</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>latticeA</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotCellChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>36</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>202</x>
+     <y>102</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionIndex</sender>
+   <signal>triggered()</signal>
+   <receiver>CrystalDisplay</receiver>
+   <slot>slotStartIndexing()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>99</x>
+     <y>129</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slotCellChanged()</slot>
+  <slot>slotRotationChanged()</slot>
+  <slot>slotSpacegroupChanged(QString)</slot>
+  <slot>slotStartIndexing()</slot>
+ </slots>
+</ui>
