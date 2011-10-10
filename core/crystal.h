@@ -28,6 +28,7 @@
 #include <QFutureWatcher>
 #include <QDomElement>
 #include <QXmlStreamWriter>
+#include <QTime>
 #include <atomic>
 
 #include "tools/vec3D.h"
@@ -128,6 +129,11 @@ public slots:
   void debugSlot();
 private:
   bool debugEnabled;
+  int debugIterations;
+  int debugFPS_N;
+  double debugFPS;
+  double debugFPS2;
+  QTime debugTimer;
 private slots:
   void convertHtoR();
   void convertRtoH();
@@ -254,11 +260,6 @@ private:
   OrientationGroup orientationGroup;
 
 };
-
-//struct CrystalPointer {
-//  Crystal* data;
-//};
-
 
 Q_DECLARE_METATYPE(Crystal*)
 

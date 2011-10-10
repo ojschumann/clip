@@ -234,10 +234,12 @@ ItemStore<QGraphicsRectItem>& Projector::infoItems() {
   return infoStore;
 }
 
-
+#include "defs.h"
 void Projector::doProjection() {
   if (crystal.isNull() or !isProjectionEnabled())
     return;
+
+  //qDebug() << QString("%1::doProject()").arg(projectorName());
 
   // Remove the textmarkeritems from the scene
   foreach (QGraphicsItem* item, textMarkerItems) {
@@ -253,11 +255,13 @@ void Projector::doProjection() {
   // Resize the array, that caches the Information if a reflection is actually projected
   reflectionIsProjected.resize(refs.size());
 
+  unsigned long long t1 = rdtsctime();
+
   QPointF p;
   // Loop over all reflections
   for (int i=0; i<refs.size(); i++) {
     // Do the actual projection and store, if reflection could be projected
-    if ((reflectionIsProjected[i] = project(refs[i], p))) {
+    if ((reflectionIsProjected[i] = project(refs.at(i), p))) {
       // Save the projected coordinate
       spotIndicator->coordinates << p;
       // If hklSum is below limit, add a textitem to the scene
@@ -276,6 +280,11 @@ void Projector::doProjection() {
       }
     }
   }
+
+  unsigned long long t2 = rdtsctime();
+
+  //qDebug() << "project: " << t2-t1;
+
 
   updateSpotHighlightMarker();
 

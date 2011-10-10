@@ -29,8 +29,9 @@
 #include <QSemaphore>
 #include <QThread>
 #include <atomic>
+#include <cmath>
 
-#include "tools/threadrunner.h"
+class ThreadRunner;
 
 struct Mean {
   Mean(): N(0), sum(0), sumSq(0) {};
@@ -72,17 +73,6 @@ protected:
   double spotSize;
   QTransform transform;
 
-  QSemaphore workerPermission;
-  QSemaphore workerSync;
-  QAtomicInt workN;
-  Mean time1;
-  Mean time2;
-  Mean time3;
-  Mean time4;
-  Mean workDone;
-  boost::mutex m;
-
-
   class TWorker {
   public:
     typedef QImage CacheType;
@@ -97,35 +87,10 @@ protected:
 
     SpotIndicatorGraphicsItem* spotIndicator;
     std::vector<CacheType*> threadCaches;
-
-    Mean time1;
-    Mean time2;
-    Mean time3;
-    Mean time4;
-    Mean workDone;
-    boost::mutex m;
   };
-
-  class Worker: public QThread {
-  public:
-    Worker(SpotIndicatorGraphicsItem* s, int t):
-        spotIndicator(s),
-        threadNr(t),
-        localCache(0),
-        shouldStop(false) {}
-    void run();
-    SpotIndicatorGraphicsItem* spotIndicator;
-    int threadNr;
-    QImage* localCache;
-    bool shouldStop;
-  private:
-    Worker(const Worker&);
-    Worker& operator=(const Worker&);
-  };
-  QList<Worker*> workers;
 
   TWorker tWorker;
-  ThreadRunner threadRunner;
+  ThreadRunner* threadRunner;
 };
 
 

@@ -106,6 +106,7 @@ Crystal::Crystal(QObject* _parent):
     rotationAxis(1,0,0),
     spaceGroup(this),
     reflections(),
+    reflectionsUpdater(new ThreadRunner),
     cellGroup(this),
     orientationGroup(this)
 {
@@ -140,7 +141,6 @@ Crystal::Crystal(QObject* _parent):
   restartReflectionUpdate = false;
   generateReflections();
 
-  reflectionsUpdater = new ThreadRunner;
 
   addParameterGroup(&cellGroup);
   addParameterGroup(&orientationGroup);
@@ -929,14 +929,29 @@ void Crystal::saveParametersAsDefault() {
 void Crystal::enableDebug(bool b) {
   debugEnabled = b;
   if (debugEnabled) {
+    debugIterations = 0;
+    debugFPS_N=0;
+    debugFPS=0;
+    debugFPS2=0;
+    debugTimer.start();
     QTimer::singleShot(0, this, SLOT(debugSlot()));
   }
 }
 
 
 void Crystal::debugSlot() {
+  debugIterations++;
   Vec3D a(1.0-2.0*qrand()/RAND_MAX, 1.0-2.0*qrand()/RAND_MAX, 1.0-2.0*qrand()/RAND_MAX);
   addRotation(a.normalized(), 0.1*qrand()/RAND_MAX);
-  if (debugEnabled)
+  if (debugEnabled) {
+    if (debugTimer.elapsed()>1000) {
+      double fps = 1000.0*debugIterations/debugTimer.restart();
+      debugIterations = 0;
+      debugFPS_N++;
+      debugFPS += fps;
+      debugFPS2 += fps*fps;
+      qDebug() << "FPS: " << debugFPS/debugFPS_N << sqrt(debugFPS2/debugFPS_N-debugFPS/debugFPS_N*debugFPS/debugFPS_N);
+    }
     QTimer::singleShot(0, this, SLOT(debugSlot()));
+  }
 }
