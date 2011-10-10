@@ -188,13 +188,13 @@ void SpotIndicatorGraphicsItem::TWorker::operator ()(int id) {
     painter.setRenderHints(l.at(0)->renderHints());
   painter.setPen(spotIndicator->spotColor);
 
-  int n;
   int size = spotIndicator->coordinates.size();
   int chunkSize = std::max(size/static_cast<int>(threadCaches.size()), 1);
   QTransform t = spotIndicator->transform;
 
+  int n=id;
   //while ((n=wp.fetchAndAddOrdered(1))*chunkSize<size) {
-    QPointF const* p = spotIndicator->coordinates.constData()+id*chunkSize;
+    QPointF const* p = spotIndicator->coordinates.constData()+n*chunkSize;
     int count = std::min(size, chunkSize*(n+1))-chunkSize*n;
     for (int i=0; i<count; i++) {
       painter.drawEllipse(t.map(*(p++)), rx, ry);

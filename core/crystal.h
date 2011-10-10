@@ -31,6 +31,7 @@
 #include <QTime>
 #include <atomic>
 
+#include "defs.h"
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
 #include "tools/objectstore.h"
@@ -130,9 +131,7 @@ public slots:
 private:
   bool debugEnabled;
   int debugIterations;
-  int debugFPS_N;
-  double debugFPS;
-  double debugFPS2;
+  Mean debugMean;
   QTime debugTimer;
 private slots:
   void convertHtoR();

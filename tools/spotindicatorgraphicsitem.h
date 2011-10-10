@@ -33,16 +33,7 @@
 
 class ThreadRunner;
 
-struct Mean {
-  Mean(): N(0), sum(0), sumSq(0) {};
 
-  void add(double value) { N++; sum += value; sumSq += value*value; }
-  double mean() { return sum/N; }
-  double var() { return sqrt(sumSq/N - sum/N*sum/N); }
-  int N;
-  double sum;
-  double sumSq;
-};
 
 class SpotIndicatorGraphicsItem: public QGraphicsObject {
   Q_OBJECT

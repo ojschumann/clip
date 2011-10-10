@@ -930,9 +930,9 @@ void Crystal::enableDebug(bool b) {
   debugEnabled = b;
   if (debugEnabled) {
     debugIterations = 0;
-    debugFPS_N=0;
-    debugFPS=0;
-    debugFPS2=0;
+    debugMean.N=0;
+    debugMean.M1=0;
+    debugMean.M2=0;
     debugTimer.start();
     QTimer::singleShot(0, this, SLOT(debugSlot()));
   }
@@ -947,10 +947,8 @@ void Crystal::debugSlot() {
     if (debugTimer.elapsed()>1000) {
       double fps = 1000.0*debugIterations/debugTimer.restart();
       debugIterations = 0;
-      debugFPS_N++;
-      debugFPS += fps;
-      debugFPS2 += fps*fps;
-      qDebug() << "FPS: " << debugFPS/debugFPS_N << sqrt(debugFPS2/debugFPS_N-debugFPS/debugFPS_N*debugFPS/debugFPS_N);
+      debugMean.add(fps);
+      qDebug() << "FPS: " << debugMean.mean() << debugMean.var() << debugMean.unbiasedVar();
     }
     QTimer::singleShot(0, this, SLOT(debugSlot()));
   }

@@ -21,6 +21,7 @@
  **********************************************************************/
 
 #include "defs.h"
+#include <cmath>
 
 
 const char* HG_REPRO_ID = __HG_REPRO_ID__;
@@ -28,3 +29,11 @@ const char* HG_REPRO_REV = __HG_REPRO_REV__;
 const char* HG_REPRO_DATE = __HG_REPRO_DATE__;
 const char* BUILD_DATE = __DATE__ ;
 const char* BUILD_TIME = __TIME__ ;
+
+
+
+Mean::Mean(): N(0), M1(0), M2(0) {};
+void Mean::add(double value) { N++; double oldM1 = M1; M1 += (value-M1)/N; M2 += (value-M1)*(value-oldM1); }
+double Mean::mean() { return M1; }
+double Mean::var() { return N>0 ? sqrt(M2/N) : 0.0; }
+double Mean::unbiasedVar() { return N>1 ? sqrt(M2/(N-1)) : 0.0 ; }

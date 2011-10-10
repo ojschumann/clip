@@ -59,4 +59,16 @@ static inline unsigned long long rdtsctime()
      return val;
 }
 
+struct Mean {
+  Mean();
+  void add(double value);
+  double mean();
+  double var();
+  double unbiasedVar();
+  int N;
+  double M1;
+  double M2;
+};
+
+
 #endif // DEFS_H
