@@ -2,7 +2,7 @@
   Copyright (C) 2011 schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -26,6 +26,8 @@
 #include <boost/thread.hpp>
 #include <vector>
 #include <thread>
+
+#include "config.h"
 
 #define USE_QTHREADS 1
 #define USE_SEMAPHORE_SYNC 1

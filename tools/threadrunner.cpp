@@ -2,7 +2,7 @@
   Copyright (C) 2011 schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -41,7 +41,11 @@ ThreadRunner::ThreadRunner():
 
 
 void ThreadRunner::initThreads() {
+#if USE_QTHREADS
+  int N = std::max(QThread::idealThreadCount(), 1);
+#else
   int N = std::max(boost::thread::hardware_concurrency(), 1u);
+#endif
   for (int n=0; n<N; n++) {
 #if USE_QTHREADS
     QThread* t = new WorkerThread(this, n);

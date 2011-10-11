@@ -2,7 +2,7 @@
   Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -255,8 +255,6 @@ void Projector::doProjection() {
   // Resize the array, that caches the Information if a reflection is actually projected
   reflectionIsProjected.resize(refs.size());
 
-  unsigned long long t1 = rdtsctime();
-
   QPointF p;
   // Loop over all reflections
   for (int i=0; i<refs.size(); i++) {
@@ -280,11 +278,6 @@ void Projector::doProjection() {
       }
     }
   }
-
-  unsigned long long t2 = rdtsctime();
-
-  //qDebug() << "project: " << t2-t1;
-
 
   updateSpotHighlightMarker();
 

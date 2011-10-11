@@ -224,7 +224,8 @@ HEADERS  += ui/clip.h \
     ui/rotatecrystal.h \
     ui/sadeasteregg.h \
     ui/stereocfg.h \
-    tools/threadrunner.h
+    tools/threadrunner.h \
+    config.h
 
 FORMS    += ui/clip.ui \
     ui/clipconfig.ui \

@@ -2,7 +2,7 @@
   Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 #include <QPainter>
 #include <QGraphicsView>
- 
+#include <cmath>
 #include <QDebug>
 
 #include "config/configstore.h"
@@ -32,7 +32,6 @@
 
 using namespace std;
 
-#include <cmath>
 
 
 
@@ -66,14 +65,9 @@ void SpotIndicatorGraphicsItem::updateCache() {
   if (cacheNeedsUpdate) {
     //qDebug() << "SpotIndicatorGraphicsItem::updateCache()";
 
-    unsigned long long t1 = rdtsctime();
-
     threadRunner->start();
     cache->fill(QColor(0,0,0,0));
     threadRunner->join();
-
-    unsigned long long t2 = rdtsctime();
-    //qDebug() << "SI::Update" << t2-t1;
 
     cacheNeedsUpdate=false;
   }
@@ -159,7 +153,7 @@ SpotIndicatorGraphicsItem::TWorker::~TWorker() {
 
 void SpotIndicatorGraphicsItem::TWorker::init(int numberOfThreads) {
   if (threadCaches.size()!=numberOfThreads) {
-    for (CacheType* c: threadCaches)
+    foreach (CacheType* c, threadCaches)
       delete c;
     threadCaches.clear();
     for (int n=0; n<numberOfThreads; n++)
@@ -207,7 +201,7 @@ void SpotIndicatorGraphicsItem::TWorker::operator ()(int id) {
 
 void SpotIndicatorGraphicsItem::TWorker::done(int numberOfThreads) {
   QPainter painter(spotIndicator->cache);
-  for (CacheType* c: threadCaches) {
+  foreach (CacheType* c, threadCaches) {
     painter.drawImage(QPoint(0, 0), *c);
     //painter.drawPixmap(0, 0, *c);
   }
