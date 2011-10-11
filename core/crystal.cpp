@@ -28,7 +28,6 @@
 #include <QtConcurrentMap>
 #include <QtConcurrentRun>
 #include <QSettings>
-#include <atomic>
 
 #include <boost/thread.hpp>
 
@@ -432,7 +431,7 @@ Crystal::UpdateLoadBalancer::UpdateLoadBalancer(Reflection* _d, int _size, const
 
 void Crystal::UpdateLoadBalancer::operator ()() {
   int n;
-  while ((n=wp++)*chunkSize<size) {
+  while ((n=wp.fetchAndAddOrdered(1))*chunkSize<size) {
     for (int i=chunkSize*n; i<std::min(size, chunkSize*(n+1)); i++) {
       u(*(d+i));
     }
@@ -931,11 +930,12 @@ void Crystal::saveParametersAsDefault() {
   settings.endGroup();
 }
 
+#ifdef __DEBUG__
 #include <QTimer>
 void Crystal::enableDebug(bool b) {
   debugEnabled = b;
   if (debugEnabled) {
-    debugIterations = 0;
+    debugCallsInActualSecond = 0;
     debugMean.N=0;
     debugMean.M1=0;
     debugMean.M2=0;
@@ -946,16 +946,17 @@ void Crystal::enableDebug(bool b) {
 
 
 void Crystal::debugSlot() {
-  debugIterations++;
+  debugCallsInActualSecond++;
   Vec3D a(1.0-2.0*qrand()/RAND_MAX, 1.0-2.0*qrand()/RAND_MAX, 1.0-2.0*qrand()/RAND_MAX);
   addRotation(a.normalized(), 0.1*qrand()/RAND_MAX);
   if (debugEnabled) {
     if (debugTimer.elapsed()>1000) {
-      double fps = 1000.0*debugIterations/debugTimer.restart();
-      debugIterations = 0;
+      double fps = 1000.0*debugCallsInActualSecond/debugTimer.restart();
+      debugCallsInActualSecond = 0;
       debugMean.add(fps);
       qDebug() << "FPS: " << debugMean.mean() << debugMean.var() << debugMean.unbiasedVar();
     }
     QTimer::singleShot(0, this, SLOT(debugSlot()));
   }
 }
+#endif

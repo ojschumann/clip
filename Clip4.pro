@@ -12,7 +12,6 @@ TEMPLATE = app
 win32:CONFIG(debug, debug|release) {
      CONFIG += console
 }
-CONFIG += console
 
 DEFFILE = $(OBJECTS_DIR)/defs.o
 win32 {

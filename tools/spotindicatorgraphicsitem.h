@@ -28,7 +28,6 @@
 #include <QWaitCondition>
 #include <QSemaphore>
 #include <QThread>
-#include <atomic>
 #include <cmath>
 
 class ThreadRunner;

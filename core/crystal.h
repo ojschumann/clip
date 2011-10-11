@@ -29,7 +29,6 @@
 #include <QDomElement>
 #include <QXmlStreamWriter>
 #include <QTime>
-#include <atomic>
 
 #include "defs.h"
 #include "tools/vec3D.h"
@@ -124,9 +123,6 @@ public slots:
   void slotSetSGConstrains();
   void generateReflections();
   void saveParametersAsDefault();
-  int debugIterations;
-  Mean debugMean;
-  QTime debugTimer;
 private slots:
   void convertHtoR();
   void convertRtoH();
@@ -212,7 +208,8 @@ private:
     Reflection* d;
     int size;
     const UpdateRef& u;
-    std::atomic<int> wp;
+    //std::atomic<int> wp;
+    QAtomicInt wp;
     int chunkSize;
   };
 
@@ -259,6 +256,9 @@ public slots:
   void debugSlot();
 private:
   bool debugEnabled;
+  int debugCallsInActualSecond;
+  Mean debugMean;
+  QTime debugTimer;
 #endif
 };
 
