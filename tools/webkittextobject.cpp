@@ -2,7 +2,7 @@
   Copyright (C) 2011 schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #include "webkittextobject.h"
 
 
-#include <QtGui>
 #include <QSharedPointer>
 #include <QCache>
 #include <QPicture>
@@ -31,6 +30,8 @@
 #include <QWebSettings>
 #include <QWebPage>
 #include <QWebFrame>
+#include <QPainter>
+#include <QTextEdit>
 
 typedef QCache<QPair<int, QString>, QPicture> PictureCacheClass;
 

@@ -2,7 +2,7 @@
   Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -20,13 +20,12 @@
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
 
-#include <QtGui/QApplication>
-#include <ui/clip.h>
-
+#include <QApplication>
 #include <QTime>
- 
-#include <cmath>
 #include <QDebug>
+#include <cmath>
+ 
+#include "ui/clip.h"
 
 using namespace std;
 
@@ -46,7 +45,7 @@ int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
 
   a.setApplicationName("Clip");
-  a.setOrganizationDomain("clip.berlios.de");
+  a.setOrganizationDomain("clip4.sf.net");
   a.setOrganizationName("O.J.Schumann");
 
   Clip* w = Clip::getInstance();

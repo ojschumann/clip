@@ -2,7 +2,7 @@
   Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -935,14 +935,27 @@ void Crystal::saveParametersAsDefault() {
 void Crystal::enableDebug(bool b) {
   debugEnabled = b;
   if (debugEnabled) {
+    debugIterations = 0;
+    debugMean.N=0;
+    debugMean.M1=0;
+    debugMean.M2=0;
+    debugTimer.start();
     QTimer::singleShot(0, this, SLOT(debugSlot()));
   }
 }
 
 
 void Crystal::debugSlot() {
+  debugIterations++;
   Vec3D a(1.0-2.0*qrand()/RAND_MAX, 1.0-2.0*qrand()/RAND_MAX, 1.0-2.0*qrand()/RAND_MAX);
   addRotation(a.normalized(), 0.1*qrand()/RAND_MAX);
-  if (debugEnabled)
+  if (debugEnabled) {
+    if (debugTimer.elapsed()>1000) {
+      double fps = 1000.0*debugIterations/debugTimer.restart();
+      debugIterations = 0;
+      debugMean.add(fps);
+      qDebug() << "FPS: " << debugMean.mean() << debugMean.var() << debugMean.unbiasedVar();
+    }
     QTimer::singleShot(0, this, SLOT(debugSlot()));
+  }
 }

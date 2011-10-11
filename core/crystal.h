@@ -2,7 +2,7 @@
   Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -28,8 +28,10 @@
 #include <QFutureWatcher>
 #include <QDomElement>
 #include <QXmlStreamWriter>
+#include <QTime>
 #include <atomic>
 
+#include "defs.h"
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
 #include "tools/objectstore.h"
@@ -122,6 +124,9 @@ public slots:
   void slotSetSGConstrains();
   void generateReflections();
   void saveParametersAsDefault();
+  int debugIterations;
+  Mean debugMean;
+  QTime debugTimer;
 private slots:
   void convertHtoR();
   void convertRtoH();
@@ -256,11 +261,6 @@ private:
   bool debugEnabled;
 #endif
 };
-
-//struct CrystalPointer {
-//  Crystal* data;
-//};
-
 
 Q_DECLARE_METATYPE(Crystal*)
 

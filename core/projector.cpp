@@ -2,7 +2,7 @@
   Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -234,10 +234,12 @@ ItemStore<QGraphicsRectItem>& Projector::infoItems() {
   return infoStore;
 }
 
-
+#include "defs.h"
 void Projector::doProjection() {
   if (crystal.isNull() or !isProjectionEnabled())
     return;
+
+  //qDebug() << QString("%1::doProject()").arg(projectorName());
 
   // Remove the textmarkeritems from the scene
   foreach (QGraphicsItem* item, textMarkerItems) {
@@ -257,7 +259,7 @@ void Projector::doProjection() {
   // Loop over all reflections
   for (int i=0; i<refs.size(); i++) {
     // Do the actual projection and store, if reflection could be projected
-    if ((reflectionIsProjected[i] = project(refs[i], p))) {
+    if ((reflectionIsProjected[i] = project(refs.at(i), p))) {
       // Save the projected coordinate
       spotIndicator->coordinates << p;
       // If hklSum is below limit, add a textitem to the scene

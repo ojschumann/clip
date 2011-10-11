@@ -2,7 +2,7 @@
   Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -46,8 +46,8 @@ DataProviderFactory& DataProviderFactory::getInstance() {
 }
 
 DataProvider* DataProviderFactory::loadImage(const QString &filename, ImageDataStore* store, QObject* _parent) {
-  for (int key: imageLoaders.uniqueKeys()) {
-    for (auto loader: imageLoaders.values(key)) {
+  foreach (int key, imageLoaders.uniqueKeys()) {
+    foreach (auto loader, imageLoaders.values(key)) {
       DataProvider* dp = loader->getProvider(filename, store, _parent);
       if (dp) return dp;
     }
@@ -57,8 +57,8 @@ DataProvider* DataProviderFactory::loadImage(const QString &filename, ImageDataS
 
 QStringList DataProviderFactory::registeredImageFormats() {
   QStringList formats;
-  for (int key: imageLoaders.uniqueKeys()) {
-    for (auto loader: imageLoaders.values(key)) {
+  foreach (int key, imageLoaders.uniqueKeys()) {
+    foreach (auto loader, imageLoaders.values(key)) {
       formats += loader->fileFormatFilters();
     }
   }

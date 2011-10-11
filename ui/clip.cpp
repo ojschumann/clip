@@ -2,7 +2,7 @@
   Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -372,12 +372,12 @@ bool Clip::loadWorkspaceFile(QString filename) {
 void Clip::on_actionSave_Workspace_triggered() {
   QDomDocument doc(XML_Clip_Workspace);
   QDomElement docElement = doc.appendChild(doc.createElement(XML_Clip_Workspace)).toElement();
-  for (QMdiSubWindow* mdi: ui->mdiArea->subWindowList()) {
+  foreach (QMdiSubWindow* mdi, ui->mdiArea->subWindowList()) {
     if (CrystalDisplay* cd = dynamic_cast<CrystalDisplay*>(mdi->widget())) {
       QDomElement connection = docElement.appendChild(doc.createElement(XML_Clip_CrystalConnection)).toElement();
       cd->saveToXML(connection.appendChild(doc.createElement(XML_Clip_ConnectedCrystal)).toElement());
       QDomElement connectedProjectors = connection.appendChild(doc.createElement(XML_Clip_ConnectedProjectors)).toElement();
-      for (Projector* p: cd->getCrystal()->getConnectedProjectors()) {
+      foreach (Projector* p, cd->getCrystal()->getConnectedProjectors()) {
         if (ProjectionPlane* pp = dynamic_cast<ProjectionPlane*>(p->parent())) {
           pp->saveToXML(connectedProjectors);
         }

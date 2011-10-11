@@ -2,7 +2,7 @@
   Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -29,19 +29,11 @@
 #include <QSemaphore>
 #include <QThread>
 #include <atomic>
+#include <cmath>
 
-#include "tools/threadrunner.h"
+class ThreadRunner;
 
-struct Mean {
-  Mean(): N(0), sum(0), sumSq(0) {};
 
-  void add(double value) { N++; sum += value; sumSq += value*value; }
-  double mean() { return sum/N; }
-  double var() { return sqrt(sumSq/N - sum/N*sum/N); }
-  int N;
-  double sum;
-  double sumSq;
-};
 
 class SpotIndicatorGraphicsItem: public QGraphicsObject {
   Q_OBJECT
@@ -72,17 +64,6 @@ protected:
   double spotSize;
   QTransform transform;
 
-  QSemaphore workerPermission;
-  QSemaphore workerSync;
-  QAtomicInt workN;
-  Mean time1;
-  Mean time2;
-  Mean time3;
-  Mean time4;
-  Mean workDone;
-  boost::mutex m;
-
-
   class TWorker {
   public:
     typedef QImage CacheType;
@@ -97,35 +78,10 @@ protected:
 
     SpotIndicatorGraphicsItem* spotIndicator;
     std::vector<CacheType*> threadCaches;
-
-    Mean time1;
-    Mean time2;
-    Mean time3;
-    Mean time4;
-    Mean workDone;
-    boost::mutex m;
   };
-
-  class Worker: public QThread {
-  public:
-    Worker(SpotIndicatorGraphicsItem* s, int t):
-        spotIndicator(s),
-        threadNr(t),
-        localCache(0),
-        shouldStop(false) {}
-    void run();
-    SpotIndicatorGraphicsItem* spotIndicator;
-    int threadNr;
-    QImage* localCache;
-    bool shouldStop;
-  private:
-    Worker(const Worker&);
-    Worker& operator=(const Worker&);
-  };
-  QList<Worker*> workers;
 
   TWorker tWorker;
-  ThreadRunner threadRunner;
+  ThreadRunner* threadRunner;
 };
 
 

@@ -2,7 +2,7 @@
   Copyright (C) 2008-2011 Olaf J. Schumann
 
   This file is part of the Cologne Laue Indexation Program.
-  For more information, see <http://clip.berlios.de>
+  For more information, see <http://clip4.sf.net>
 
   Clip is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ extern const char* BUILD_TIME;
 #define VER_ORIGINALFILENAME_STR    "Clip.exe"
 #define VER_PRODUCTNAME_STR         "Clip"
 
-#define VER_COMPANYDOMAIN_STR       "clip.berlios.de"
+#define VER_COMPANYDOMAIN_STR       "clip4.sf.net"
 
 static inline unsigned long long rdtsctime()
 {
@@ -58,5 +58,17 @@ static inline unsigned long long rdtsctime()
      val += eax;
      return val;
 }
+
+struct Mean {
+  Mean();
+  void add(double value);
+  double mean();
+  double var();
+  double unbiasedVar();
+  int N;
+  double M1;
+  double M2;
+};
+
 
 #endif // DEFS_H
