@@ -24,15 +24,9 @@
 #define SPOTINDICATORGRAPHICSITEM_H
 
 #include <QGraphicsObject>
-#include <QMutex>
-#include <QWaitCondition>
-#include <QSemaphore>
-#include <QThread>
 #include <cmath>
 
 class ThreadRunner;
-
-
 
 class SpotIndicatorGraphicsItem: public QGraphicsObject {
   Q_OBJECT

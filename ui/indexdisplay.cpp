@@ -25,7 +25,6 @@
 
  
  
-#include <QThreadPool>
 #include <QSortFilterProxyModel>
 #include <QShortcut>
 
@@ -33,7 +32,7 @@
 #include "indexing/indexer.h"
 #include "indexing/livemarkermodel.h"
 #include "tools/zipiterator.h"
-
+#include "tools/threadrunner.h"
 
 using namespace std;
 
@@ -41,7 +40,8 @@ IndexDisplay::IndexDisplay(Crystal* _c, QWidget* _parent) :
     QWidget(_parent),
     ui(new Ui::Indexing),
     crystal(_c),
-    solutions()
+    solutions(),
+    threads(new ThreadRunner)
 {
   ui->setupUi(this);
 
@@ -63,6 +63,7 @@ IndexDisplay::~IndexDisplay()
 {
   emit stopIndexer();
   delete ui;
+  delete threads;
 }
 
 int IndexDisplay::maxSearchIndex() {
@@ -102,7 +103,7 @@ void IndexDisplay::on_startButton_clicked()
     solutions.clear();
     indexRunning = true;
 
-    QThreadPool::globalInstance()->start(indexer);
+    threads->start(*indexer);
   }
 }
 

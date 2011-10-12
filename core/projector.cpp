@@ -31,7 +31,6 @@
 #include <QTextStream>
 #include <QPainter>
 #include <QWidget>
-#include <QThreadPool>
 #include <QGraphicsView>
 #include <QMetaObject>
 #include <QSettings>

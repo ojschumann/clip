@@ -22,14 +22,13 @@
 
 #include "indexer.h"
 
-#include <QThreadPool>
 #include <QMutexLocker>
  
 
 #include <cmath>
 #include <QtAlgorithms>
 #include <QDebug>
-
+#include <QThread>
 
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
@@ -43,7 +42,6 @@ using namespace std;
 
 Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal, const Mat3D& _MReziprocal, double maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup):
     QObject(),
-    QRunnable(),
     candidatePos(0),
     candidates(_MReal, _MReziprocal),
     MReal(_MReal),
@@ -84,15 +82,10 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
 }
 
 Indexer::~Indexer() {
-  shouldStop = true;
-  while (runningThreads.fetchAndAddOrdered(0)>0) {
-    qDebug() << "wait on threads";
-  }
 }
 
 void Indexer::run() {
   runningThreads.ref();
-  QThreadPool::globalInstance()->tryStart(this);
 
   ThreadLocalData localData;
   localData.solutionsPublishedInRateCycle = 0;
@@ -109,7 +102,10 @@ void Indexer::run() {
     CandidateGenerator::Candidate c1 = cList.takeLast();
     for (int j=0; j<cList.size(); j++) {
       if (shouldStop) {
-        runningThreads.deref();
+        if (!runningThreads.deref()) {
+          deleteLater();
+        }
+
         return;
       }
       if (nice.elapsed()>100) {

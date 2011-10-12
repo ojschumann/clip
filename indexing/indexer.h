@@ -28,7 +28,6 @@
 #include <QAtomicInt>
 #include <QReadWriteLock>
 #include <QTime>
-#include <QThreadStorage>
 
 #include "tools/vec3D.h"
 #include "indexing/candidategenerator.h"
@@ -36,7 +35,7 @@
 
 class Solution;
 
-class Indexer: public QObject, public QRunnable {
+class Indexer: public QObject {
   Q_OBJECT
 public:
   class AngleInfo {
@@ -56,6 +55,8 @@ public:
   virtual ~Indexer();
 
   void run();
+  void operator()() { run(); }
+
 public slots:
   void stop();
 

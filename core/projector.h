@@ -33,7 +33,6 @@
 #include <QString>
 #include <QWaitCondition>
 #include <QSemaphore>
-#include <QThread>
 #include <QWidget>
 #include <QSignalMapper>
 #include <QRunnable>

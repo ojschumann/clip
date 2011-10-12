@@ -27,6 +27,8 @@
 
 #include "indexing/solutionmodel.h"
 
+class ThreadRunner;
+
 namespace Ui {
     class Indexing;
 }
@@ -51,6 +53,8 @@ private:
 
     bool indexRunning;
 
+    ThreadRunner* threads;
+
 private slots:
     void on_startButton_clicked();
     void updateSolutionDisplay(QModelIndex, QModelIndex);
@@ -58,6 +62,7 @@ private slots:
     void showMajorIndex(int);
     void showNumberOfSolutions(int);
     void setProgress(int);
+
 };
 
 #endif // INDEXDISPLAY_H
