@@ -70,7 +70,7 @@ protected:
     ~TWorker();
     void operator()(int id);
     void init(int numberOfThreads);
-    void done(int numberOfThreads);
+    void done();
 
     //std::atomic<int> wp;
     QAtomicInt wp;

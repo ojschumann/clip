@@ -199,7 +199,7 @@ void SpotIndicatorGraphicsItem::TWorker::operator ()(int id) {
 
 }
 
-void SpotIndicatorGraphicsItem::TWorker::done(int numberOfThreads) {
+void SpotIndicatorGraphicsItem::TWorker::done() {
   QPainter painter(spotIndicator->cache);
   foreach (CacheType* c, threadCaches) {
     painter.drawImage(QPoint(0, 0), *c);

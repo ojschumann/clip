@@ -25,7 +25,7 @@
 
 
 #ifndef nullptr
-#define nullptr 0
+#define nullptr NULL
 #endif
 
 #endif // CONFIG_H
