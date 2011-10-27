@@ -34,6 +34,7 @@ namespace Ui {
 }
 
 class Crystal;
+class Indexer;
 
 class IndexDisplay : public QWidget
 {
@@ -44,24 +45,22 @@ public:
     virtual ~IndexDisplay();
     int maxSearchIndex();
 signals:
-    void stopIndexer();
     void maxSearchIndexChanged(int);
 private:
     Ui::Indexing *ui;
     Crystal* crystal;
     SolutionModel solutions;
 
-    bool indexRunning;
-
+    Indexer* indexer;
     ThreadRunner* threads;
 
 private slots:
     void on_startButton_clicked();
     void updateSolutionDisplay(QModelIndex, QModelIndex);
-    void indexerDestroyed();
     void showMajorIndex(int);
     void showNumberOfSolutions(int);
     void setProgress(int);
+    void stopIndexer();
 
 };
 

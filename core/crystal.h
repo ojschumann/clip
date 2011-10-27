@@ -143,7 +143,9 @@ signals:
 private:
   // Do the real work. Does not use possible uninitial values of objects variables
   void internalSetCell(double a, double b, double c, double alpha, double beta, double gamma);
-  QVector<Reflection> doGeneration();
+
+  // define as static to avoid accidential use of this-ptr
+  static QVector<Reflection> doGeneration(Crystal* c);
 
 
   // Real and reziprocal orientation Matrix
@@ -251,7 +253,6 @@ private:
 
 #ifdef __DEBUG__
 public slots:
-  //TODO: Remove
   void enableDebug(bool b);
   void debugSlot();
 private:

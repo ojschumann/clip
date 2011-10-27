@@ -28,6 +28,11 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QTimer>
+#include <QBitmap>
+
+#if defined(Q_WS_WIN)
+#include <windows.h>
+#endif
 
 #include "config/configstore.h"
 
@@ -61,7 +66,36 @@ CropMarker::CropMarker(const QPointF& /*pCenter*/, double /*_dx*/, double /*_dy*
   handles.at(5)->setCursor(QCursor(Qt::SizeAllCursor));
   handles.at(6)->setCursor(QCursor(Qt::SizeAllCursor));
   handles.at(7)->setCursor(QCursor(Qt::SizeAllCursor));
-  handles.at(8)->setCursor(QCursor(QPixmap(":/cursor_rot.png")));
+  handles.at(8)->setCursor(QCursor(QPixmap(":/icons/icons/cursor_rot.png"), 10, 8));
+
+
+  sizeVerCursorPixmap = QPixmap(":/icons/icons/cursor_hor.png");
+  cursorHotspot = QPoint(sizeVerCursorPixmap.width()/2, sizeVerCursorPixmap.height()/2);
+#if defined(Q_WS_WIN)
+  ICONINFO iconinfo;
+  // Load Iconinfo from Cursor HCURSOR handle
+  bool result = GetIconInfo(QCursor(Qt::SizeHorCursor).handle(), &iconinfo);
+  if (result) {
+    // If it is a color Icon, iconinfo.hbmColor contains the color pixmap and iconinfo.hbmMask the cursor mask
+    // else, iconinfo.hbmColor is a null ptr
+    if (iconinfo.hbmColor) {
+      sizeVerCursorPixmap = QPixmap::fromWinHBITMAP(iconinfo.hbmColor);
+      sizeVerCursorPixmap.setMask(QBitmap(QPixmap::fromWinHBITMAP(iconinfo.hbmMask)));
+    } else {
+      // Monochrome icon, upper half of iconinfo.hbmMask contains the Mask, lower half the actal icon
+      QPixmap p = QPixmap::fromWinHBITMAP(iconinfo.hbmMask);
+      int w = p.width();
+      int h = p.height()/2;
+      sizeVerCursorPixmap = QPixmap::fromImage(p.toImage().copy(0, h, w, h));
+      sizeVerCursorPixmap .setMask(QBitmap(QPixmap::fromImage(p.toImage().copy(0, 0, w, h))));
+    }
+    cursorHotspot = QPoint(iconinfo.xHotspot, iconinfo.yHotspot);
+  }
+#elif defined(Q_WS_X11)
+  //TODO: implement
+#elif defined(Q_WS_MAC)
+  //TODO: implement
+#endif
 
   positionHandles();
   setCursors();
@@ -77,7 +111,7 @@ CropMarker::~CropMarker() {
 void CropMarker::positionHandles() {
   double w = size.width()/2;
   double h = size.height()/2;
-  double d = 2.0*handleSize;
+  double d = 3.0*handleSize;
 
   handles.at(0)->setRect(-w+d, h-d, (w-d)*2, d);
   handles.at(1)->setRect(-w+d, -h, (w-d)*2, d);
@@ -91,22 +125,19 @@ void CropMarker::positionHandles() {
 
   handles.at(8)->setRect(-d, h-2*d, 2*d, 2*d);
 }
-
 void CropMarker::setCursors() {
 
-  QPixmap cursorPixmap(":/cursor_hor.png");
 
-  QTransform t;
-  t.rotate(-rotation());
-  cursorPixmap = cursorPixmap.transformed(t, Qt::SmoothTransformation);
 
-  QCursor newCursor(cursorPixmap);
+  QTransform t = QPixmap::trueMatrix(QTransform().rotate(-rotation()), sizeVerCursorPixmap.width(), sizeVerCursorPixmap.height());
+  QPoint p = t.map(cursorHotspot);
+  QCursor newCursor(sizeVerCursorPixmap.transformed(t, Qt::SmoothTransformation), p.x(), p.y());
   handles.at(2)->setCursor(newCursor);
   handles.at(3)->setCursor(newCursor);
 
-  t.reset();
-  t.rotate(90);
-  newCursor=QCursor(cursorPixmap.transformed(t));
+  t = QPixmap::trueMatrix(QTransform().rotate(90.0-rotation()), sizeVerCursorPixmap.width(), sizeVerCursorPixmap.height());
+  p = t.map(cursorHotspot);
+  newCursor=QCursor(sizeVerCursorPixmap.transformed(t, Qt::SmoothTransformation), p.x(), p.y());
   handles.at(0)->setCursor(newCursor);
   handles.at(1)->setCursor(newCursor);
 }
@@ -120,7 +151,7 @@ QPolygonF CropMarker::getRect() {
 void CropMarker::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
   double w = size.width()/2;
   double h = size.height()/2;
-  double d = 2.0*handleSize;
+  double d = 3.0*handleSize;
 
   QPen pen = painter->pen();
   pen.setStyle(Qt::DashLine);

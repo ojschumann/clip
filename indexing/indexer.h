@@ -51,7 +51,7 @@ public:
     int index2;
   };
 
-  Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& MReal, const Mat3D& MReziprocal, double _maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup);
+  Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& MReal, const Mat3D& MReziprocal, double _maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup, QObject* parent);
   virtual ~Indexer();
 
   void run();

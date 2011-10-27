@@ -1,8 +1,1 @@
-Crop marker
-  # Handle Cursor generation
-  # Larger resize handles (size of cursor?)
-
-Printing
-  Print with increased linewidth of spot indicators
-
 Implement a faster MonochromeScaler

@@ -233,7 +233,7 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
         r.normalize();
         projector->addRotation(r, acos(v1*v2));
 
-#ifdef _WIN32
+#if defined(Q_WS_WIN)
         // Process screen updates. Otherwise on Windows no updates are prosessed if
         // two projectors are active and the mouse moves fast.
         // Otherwise, on Linux this produces stange effects.
@@ -358,7 +358,7 @@ void ProjectionPlane::generateMousePositionInfo(QPointF p, bool lock) {
   info.projector = projector;
 
   /*
-   TODO: Get original pixel image position (and pixel value)
+   //TODO: Get original pixel image position (and pixel value)
   if (projector->getLaueImage()) {
     QSizeF s = projector->getLaueImage()->transformedSize();
     info.imagePos.rx() *= s.width();

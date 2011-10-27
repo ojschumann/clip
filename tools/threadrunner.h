@@ -93,6 +93,7 @@ private:
   class BaseThreadFunctor {
   public:
     virtual void run(int threadId)=0;
+    //virtual void stop()=0;
     virtual void init(int numberOfThreads)=0;
     virtual void done(int numberOfThreads)=0;
   };
@@ -105,6 +106,8 @@ private:
 
     template <typename T> struct make { static T&& f(); };
 
+
+    // ##################### Call Worker ###########################################
     template <class T> void callWorker(int threadId, decltype(make<T>::f()(0))* = nullptr) {
       worker(threadId);
     }
@@ -115,6 +118,17 @@ private:
       callWorker<WORKER>(threadNumber);
     }
 
+    // #################### Call Stop ################################################
+    /*template <class T> void callStop(int, decltype(make<T>::f().stop())* = nullptr) {
+      worker.stop();
+    }
+    template <class T> void callStop(...) {}
+    virtual void stop() {
+      callStop<WORKER>(0);
+    }*/
+
+
+    // #################### Call Init  ################################################
     template <class T> void callInit(int numberOfThreads, decltype(make<T>::f().init(0))* = nullptr) {
       worker.init(numberOfThreads);
     }
@@ -126,6 +140,7 @@ private:
       callInit<WORKER>(numberOfThreads);
     }
 
+    // #################### Call Done ################################################
     template <class T> void callDone(int numberOfThreads, decltype(make<T>::f().done(0))* = nullptr) {
       worker.done(numberOfThreads);
     }

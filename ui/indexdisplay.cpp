@@ -41,6 +41,7 @@ IndexDisplay::IndexDisplay(Crystal* _c, QWidget* _parent) :
     ui(new Ui::Indexing),
     crystal(_c),
     solutions(),
+    indexer(nullptr),
     threads(new ThreadRunner)
 {
   ui->setupUi(this);
@@ -55,13 +56,12 @@ IndexDisplay::IndexDisplay(Crystal* _c, QWidget* _parent) :
   connect(ui->SolutionSelector->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(updateSolutionDisplay(QModelIndex,QModelIndex)));
   connect(&solutions, SIGNAL(solutionNumberChanged(int)), this, SLOT(showNumberOfSolutions(int)));
   connect(ui->maxIndex, SIGNAL(valueChanged(int)), this, SIGNAL(maxSearchIndexChanged(int)));
-  indexRunning = false;
 
 }
 
 IndexDisplay::~IndexDisplay()
 {
-  emit stopIndexer();
+  stopIndexer();
   delete ui;
   delete threads;
 }
@@ -80,40 +80,42 @@ void IndexDisplay::updateSolutionDisplay(QModelIndex index, QModelIndex /*prev*/
 
 void IndexDisplay::on_startButton_clicked()
 {
-  if (indexRunning) {
-    emit stopIndexer();
+  if (indexer) {
+    stopIndexer();
   } else {
     ui->startButton->setText("Stop");
     ui->progress->setEnabled(true);
     ui->progress->setValue(0);
 
-    Indexer* indexer = new Indexer(crystal->getMarkers(),
+    indexer = new Indexer(crystal->getMarkers(),
                                    crystal->getRealOrientationMatrix(),
                                    crystal->getReziprocalOrientationMatrix(),
                                    M_PI/180.0*ui->AngDev->value(),
                                    0.01*ui->IntDev->value(),
                                    ui->maxIndex->value(),
-                                   crystal->getSpacegroup()->getLauegroup());
+                                   crystal->getSpacegroup()->getLauegroup(),
+                                   this);
     connect(indexer, SIGNAL(publishSolution(Solution)), &solutions, SLOT(addSolution(Solution)));
     connect(indexer, SIGNAL(publishMultiSolutions(QList<Solution>)), &solutions, SLOT(addSolutions(QList<Solution>)));
-    connect(indexer, SIGNAL(destroyed()), this, SLOT(indexerDestroyed()));
     connect(indexer, SIGNAL(nextMajorIndex(int)), this, SLOT(showMajorIndex(int)));
     connect(indexer, SIGNAL(progressInfo(int)), this, SLOT(setProgress(int)));
-    connect(this, SIGNAL(stopIndexer()), indexer, SLOT(stop()));
     solutions.clear();
-    indexRunning = true;
 
     threads->start(*indexer);
   }
 }
 
-void IndexDisplay::indexerDestroyed() {
-  indexRunning=false;
-  ui->startButton->setText("Start");
-  ui->maxIndexDisplay->setText("");
-  ui->progress->setEnabled(false);
-  ui->progress->setValue(0);
-
+void IndexDisplay::stopIndexer() {
+  if (indexer) {
+    indexer->stop();
+    threads->join();
+    delete indexer;
+    indexer = nullptr;
+    ui->startButton->setText("Start");
+    ui->maxIndexDisplay->setText("");
+    ui->progress->setEnabled(false);
+    ui->progress->setValue(0);
+  }
 }
 
 void IndexDisplay::showMajorIndex(int n) {

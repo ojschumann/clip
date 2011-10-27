@@ -32,7 +32,7 @@
 
 class DataProvider;
 class BezierCurve;
-
+class ThreadRunner;
 
 class DataScaler : public QObject
 {
@@ -60,11 +60,24 @@ protected:
   virtual void redrawCache();
   virtual QRgb getRGB(const QPointF&)=0;
 
+  class Mapper {
+  public:
+    Mapper(DataScaler*);
+    void init();
+    void operator()(int);
+  private:
+    DataScaler* scaler;
+    QTransform t;
+    QAtomicInt line;
+  };
+
+
   DataProvider* provider;
   QImage* cache;
   QPolygonF sourceRect;
   QTransform sqareToRaw;
   QList<BezierCurve*> transferCurves;
+  ThreadRunner* threads;
 };
 
 #endif // DATASCALER_H

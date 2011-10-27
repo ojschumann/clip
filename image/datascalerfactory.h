@@ -25,8 +25,10 @@
 
 #include <QObject>
 #include <QMap>
-#include <image/datascaler.h>
-#include <image/dataprovider.h>
+
+#include "image/dataprovider.h"
+
+class DataScaler;
 
 class DataScalerFactory {
 public:

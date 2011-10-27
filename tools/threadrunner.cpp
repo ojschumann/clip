@@ -144,22 +144,9 @@ void ThreadRunner::start() {
 #endif
 }
 
-
-
-/*
 void ThreadRunner::join() {
+  //if (f) f->stop();
 
-  if (f) {
-    if (workerInitPending) {
-      f->done(threads.size());
-      workerInitPending = false;
-    }
-  }
-}
-
-*/
-
-void ThreadRunner::join() {
 #if USE_SEMAPHORE_SYNC
   workerSync.acquire(threads.size());
 #else

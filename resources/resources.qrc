@@ -65,6 +65,8 @@
         <file>icons/viewmag-.png</file>
         <file>icons/zone.png</file>
         <file>icons/zoom.png</file>
+        <file>icons/cursor_rot.png</file>
+        <file>icons/cursor_hor.png</file>
     </qresource>
     <qresource prefix="/">
         <file>DefaultWorkspace.cws</file>

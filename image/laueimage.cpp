@@ -34,7 +34,7 @@
 #include "tools/xmltools.h"
 #include "tools/zipiterator.h"
 #include "image/beziercurve.h"
-#include "image/imagedatastore.h"
+#include "image/datascaler.h"
 
 using namespace std;
 

@@ -40,8 +40,8 @@ using namespace std;
 
 
 
-Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal, const Mat3D& _MReziprocal, double maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup):
-    QObject(),
+Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal, const Mat3D& _MReziprocal, double maxAngularDeviation, double _maxHKLDeviation, int _maxHKL, QList< TMat3D<int> > _lauegroup, QObject* parent):
+    QObject(parent),
     candidatePos(0),
     candidates(_MReal, _MReziprocal),
     MReal(_MReal),
@@ -81,7 +81,9 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
   connect(&candidates, SIGNAL(progessInfo(int)), this, SIGNAL(progressInfo(int)));
 }
 
+#include <QDebug>
 Indexer::~Indexer() {
+   qDebug() << "~Indexer";
 }
 
 void Indexer::run() {
@@ -102,10 +104,7 @@ void Indexer::run() {
     CandidateGenerator::Candidate c1 = cList.takeLast();
     for (int j=0; j<cList.size(); j++) {
       if (shouldStop) {
-        if (!runningThreads.deref()) {
-          deleteLater();
-        }
-
+        runningThreads.deref();
         return;
       }
       if (nice.elapsed()>100) {
@@ -115,7 +114,7 @@ void Indexer::run() {
         localData.publishSingleSolution = ((localData.solutionsPublishedInRateCycle + localData.unpublishedSolutions.size()) <= 10);
         if (localData.unpublishedSolutions.size()>0) {
           qDebug() << "publish multi solutions" << localData.solutionsPublishedInRateCycle << localData.unpublishedSolutions.size();
-          publishMultiSolutions(localData.unpublishedSolutions);
+          emit publishMultiSolutions(localData.unpublishedSolutions);
           localData.unpublishedSolutions.clear();
         }
         localData.solutionsPublishedInRateCycle = 0;

@@ -82,11 +82,8 @@ protected:
   explicit DataProvider(QObject* _parent = nullptr);
   QMap<QString, QVariant> providerInformation;
 
-private:
-
 signals:
   void newDataAvailable();
-public slots:
 
 };
 

@@ -347,12 +347,10 @@ bool Clip::loadWorkspaceFile(QString filename) {
     CrystalDisplay* crystalDisplay = new CrystalDisplay();
     addMdiWindow(crystalDisplay)->systemMenu()->addAction("Save as Default", crystalDisplay->getCrystal(), SLOT(saveParametersAsDefault()));
 #ifdef __DEBUG__
-    //TODO: Remove
     foreach (QAction* a, ui->menuHelp->actions()) {
       if (a->text()=="Debug")
         connect(a, SIGNAL(triggered(bool)), crystalDisplay->getCrystal(), SLOT(enableDebug(bool)));
     }
-
 #endif
     crystalDisplay->loadFromXML(e);
     e = crystalConnection.elementsByTagName(XML_Clip_ConnectedProjectors).at(0).toElement();

@@ -21,7 +21,6 @@
  **********************************************************************/
 
 #include "simplemonochromscaler.h"
-#include "image/datascalerfactory.h"
 
 #include <set>
 #include <tr1/unordered_set>
@@ -30,7 +29,7 @@
 #include <cmath>
 
 #include "image/beziercurve.h"
-#include "image/dataprovider.h"
+#include "image/datascalerfactory.h"
 
 
 template <typename T> SimpleMonochromScaler<T>::SimpleMonochromScaler(DataProvider* dp, QObject* _parent) :

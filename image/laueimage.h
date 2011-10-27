@@ -30,9 +30,11 @@
 #include <QFuture>
 #include <QFutureWatcher>
 
-#include "image/dataprovider.h"
-#include "image/datascaler.h"
 #include "image/imagedatastore.h"
+
+class DataProvider;
+class DataScaler;
+class BezierCurve;
 
 class LaueImage : public QObject
 {

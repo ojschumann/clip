@@ -23,7 +23,7 @@
 #ifndef SIMPLEMONOCHROMSCALER_H
 #define SIMPLEMONOCHROMSCALER_H
 
-#include <image/datascaler.h>
+#include "image/datascaler.h"
 
 using namespace std;
 

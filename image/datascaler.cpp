@@ -28,13 +28,13 @@
 #include "image/dataprovider.h"
 #include "image/beziercurve.h"
 #include "tools/xmltools.h"
-
+#include "tools/threadrunner.h"
 using namespace std;
 
 
 DataScaler::DataScaler(DataProvider* dp, QObject* _parent) :
     QObject(_parent),
-    provider(dp), cache(nullptr), sourceRect()
+    provider(dp), cache(nullptr), sourceRect(), threads(new ThreadRunner())
 {
   for (int n=0; n<4; n++) {
     BezierCurve* curve = new BezierCurve();
@@ -48,6 +48,7 @@ DataScaler::~DataScaler() {
   for (int n=0; n<4; n++)
     delete transferCurves[n];
   transferCurves.clear();
+  delete threads;
 }
 
 #include "tools/debug.h"
@@ -83,29 +84,43 @@ QImage DataScaler::getImage(const QSize &size, const QPolygonF &_sourceRect) {
   return *cache;
 }
 
-void DataScaler::redrawCache() {
-  if (cache==nullptr) return;
+DataScaler::Mapper::Mapper(DataScaler* s): scaler(s) {}
 
-  QRgb* data = (QRgb*)cache->bits();
+void DataScaler::Mapper::init() {
+  line = 0;
 
-  int w = cache->width();
-  int h = cache->height();
-
-
-  QPolygonF poly2(QRectF(0,0,w,h));
+  QPolygonF poly2(QRectF(0,0,scaler->cache->width(),scaler->cache->height()));
   poly2.pop_back();
 
   QTransform out2sqare;
-  QTransform::quadToQuad(poly2, sourceRect, out2sqare);
-  QTransform t = QTransform::fromTranslate(0.5, 0.5) * out2sqare * QTransform(1,0,0,-1,0,1) * sqareToRaw;
+  QTransform::quadToQuad(poly2, scaler->sourceRect, out2sqare);
+  t = QTransform::fromTranslate(0.5, 0.5) * out2sqare * QTransform(1,0,0,-1,0,1) * scaler->sqareToRaw;
 
-  // TODO: Multithreaded implementation
-  for (int y=0; y<h; y++) {
+}
+
+void DataScaler::Mapper::operator()(int threadId) {
+  int w = scaler->cache->width();
+  int h = scaler->cache->height();
+  int y;
+  QRgb* data = reinterpret_cast<QRgb*>(scaler->cache->bits());
+
+  QPointF dx = t.map(QPointF(1, 0))-t.map(QPointF(0, 0));
+  while ((y = line.fetchAndAddOrdered(1))<h) {
+    QRgb* d = data+y*w;
+    QPointF p = t.map(QPointF(0, y));
     for (int x=0; x<w; x++) {
-      *data = getRGB(t.map(QPointF(x, y)));
-      data++;
+      *(d++) = scaler->getRGB(p);
+      p+=dx;
     }
   }
+}
+
+
+void DataScaler::redrawCache() {
+  if (cache==nullptr) return;
+
+  threads->start(Mapper(this));
+  threads->join();
 }
 
 QList<QWidget*> DataScaler::toolboxPages() {

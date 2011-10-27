@@ -25,11 +25,8 @@
 
 #include <QTime>
 #include <QMetaObject>
-#include <QtConcurrentMap>
 #include <QtConcurrentRun>
 #include <QSettings>
-
-#include <boost/thread.hpp>
 
 #include "tools/tools.h"
 #include "core/crystal.h"
@@ -272,12 +269,12 @@ void Crystal::generateReflections() {
   if (not updateEnabled)
     return;
   if (updateIsSynchron) {
-    reflections = doGeneration();
+    reflections = doGeneration(this);
     emit reflectionsUpdate();
   } else if (reflectionFuture.isRunning()) {
     restartReflectionUpdate = true;
   } else {
-    reflectionFuture.setFuture(QtConcurrent::run(this, &Crystal::doGeneration));
+    reflectionFuture.setFuture(QtConcurrent::run(&Crystal::doGeneration, this));
   }
 }
 
@@ -290,22 +287,24 @@ void Crystal::reflectionGenerated() {
   emit reflectionsUpdate();
 }
 
-QVector<Reflection> Crystal::doGeneration() {
-  Vec3D savedAstar(this->astar);
-  Vec3D savedBstar(this->bstar);
-  Vec3D savedCstar(this->cstar);
-  Mat3D savedMReziprocal(this->MReziprocal);
-  double savedQMax(this->Qmax);
+QVector<Reflection> Crystal::doGeneration(Crystal* c) {
+  Mat3D savedMReziprocal(c->MReziprocal);
+  double savedQMax(c->Qmax);
+  Spacegroup sg(c->spaceGroup);
+
+  Vec3D savedAstar(savedMReziprocal(0));
+  Vec3D savedBstar(savedMReziprocal(1));
+  Vec3D savedCstar(savedMReziprocal(2));
 
   // Qmax =2*pi/lambda_min
   // n*lambda=2*d*sin(theta) => n_max=2*d/lambda = Qmax*d/pi
-  int hMax = int(M_1_PI*a*savedQMax);
+  // MReal(0,0) == a
+  int hMax = int(M_1_PI*savedQMax/savedMReziprocal(0,0));
   // predicted number of reflections
-  double prediction = 4.0/3.0*M_1_PI*M_1_PI*savedQMax*savedQMax*savedQMax*MReal.det();
-  Crystal::UpdateRef updateRef(this);
+  double prediction = 4.0/3.0*M_1_PI*M_1_PI*savedQMax*savedQMax*savedQMax/savedMReziprocal.det();
+  Crystal::UpdateRef updateRef(c);
   QVector<Reflection> refs;
-  refs.reserve(int(1.1*predictionFactor*prediction));
-  Spacegroup sg(spaceGroup);
+  refs.reserve(int(1.1*c->predictionFactor*prediction));
   for (int h=-hMax; h<hMax; h++) {
     //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
     // k^2 +2*k*h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
@@ -356,7 +355,7 @@ QVector<Reflection> Crystal::doGeneration() {
       }
     }
   }
-  predictionFactor = 0.8 * predictionFactor + 0.2 * (refs.size()/prediction);
+  c->predictionFactor = 0.8 * c->predictionFactor + 0.2 * (refs.size()/prediction);
   return refs;
 }
 

@@ -110,7 +110,7 @@ private:
     GroupElement(int m11, int m12, int m13, int m21, int m22, int m23, int m31, int m32, int m33, int t1, int t2, int t3);
     GroupElement(const TMat3D<int>&, const TVec3D<int>&);
     void normalize();
-    //void print() const;
+    QString toString() const;
     GroupElement operator*(const GroupElement&) const;
     bool operator==(const GroupElement&) const;
     TMat3D<int> M;
@@ -132,13 +132,6 @@ private:
   bool generateGroup(QString);
   template <class T> void addToGroup(QList<T>& group, const T&);
 
-  /*struct PGElem{
-        Mat3D R;
-        Vec3D t;
-    };
-
-    QList<PGElem> pointgroup;
-*/
 };
 
 

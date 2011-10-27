@@ -89,6 +89,25 @@ int padTo(int value, int pad) {
   return value;
 }
 
+template <typename DATA, typename TABLE, typename VALUE, typename F> bool replaceSpecialDataWithTableValue(DATA& data, const TABLE& table, VALUE specialValue, F f) {
+  unsigned int tablePos=0;
+
+  for (unsigned int n=0; n<static_cast<unsigned int>(data.size()); n++) {
+    if (data.at(n)==specialValue) {
+      if (tablePos>static_cast<unsigned int>(data.size())) return false;
+      data[n]=table.at(tablePos++);
+    } else {
+      f(data[n]);
+    }
+  }
+  return true;
+}
+
+template <typename DATA, typename TABLE, typename VALUE> bool replaceSpecialDataWithTableValue(DATA& data, const TABLE& table, VALUE specialValue) {
+  return replaceSpecialDataWithTableValue(data, table, specialValue, [](VALUE){});
+}
+
+
 DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataStore *store, QObject* _parent) {
   QFile imgFile(filename);
 
@@ -101,7 +120,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
   int headerSize = 0;
   QMap<QString, QVariant> headerData;
   for (int i=0; i<maxHeaderFields; i++) {
-    // Read one field
+    // Read one field, 80 bytes long, one colon, 72 bytes data
     QByteArray data = imgFile.read(80);
     QString headerfield(data);
     // Split to 7 character key and 72 character value (omiting one colon)
@@ -112,10 +131,11 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
       break;
     } else if (key=="HDRBLKS") {
       // If HDRBLKS is found, set headersize and maximal headerfields nr acordingly
-      headerSize = 512*value.toInt();
+      headerSize = 512*value.toInt(); // header length is multiple of 512 bytes
       maxHeaderFields = headerSize/80;
     }
 
+    // Store format as integer, reoccuring keys as one concatenated string and the rest as Variants
     if (key==Info_Format) {
       headerData.insert(key, QVariant(value.toInt(&ok)));
       if (!ok) return nullptr;
@@ -138,22 +158,29 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
       (!headerData.contains("NPIXELB")))
     return nullptr;
 
+  // Number of rows and cols in the image
   int rows = headerData["NROWS"].toInt(&ok);
   if (!ok) return nullptr;
   int cols = headerData["NCOLS"].toInt(&ok);
   if (!ok) return nullptr;
 
-
+  // Contains bytes per pixel for pixel data (and for unterflow table, if format>=100)
   QStringList byteCounts = headerData["NPIXELB"].toString().split(' ');
-  QStringList overflowNumbers = headerData["NOVERFL"].toString().split(' ');
   if (byteCounts.size()<1) return nullptr;
 
+  // Parse Bytes per Pixel
   int bytesPerPixel = byteCounts.at(0).toInt(&ok);
   if (!ok) return nullptr;
 
   // Calculate the size of data, overflow and underflow tables.
   int dataSize = cols*rows*bytesPerPixel;
 
+  // if format>=100: Number of underflows, 2 bytes overflows and 4 bytes overflows
+  // else just number of overflows
+  QStringList overflowNumbers = headerData["NOVERFL"].toString().split(' ');
+  if (overflowNumbers.size()<1) return nullptr;
+
+  // Get number and size of entries in Underflowtable
   int bytesPerUnderflow = 0;
   int numberUnderflow = 0;
   if (headerData[Info_Format].toInt()>=100) {
@@ -161,14 +188,12 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
     bytesPerUnderflow = byteCounts.at(1).toInt(&ok);
     if (!ok) return nullptr;
 
-    if (overflowNumbers.size()<1) return nullptr;
-    // strangely sometimes zero...
     numberUnderflow = qMax(overflowNumbers.at(0).toInt(&ok), 0);
     if (!ok) return nullptr;
   }
-
   int underflowTableSize = padTo(bytesPerUnderflow * numberUnderflow, 16);
 
+  // Get number and size of entries in Overflowtable
   int overflowTableSize = 0;
   if (headerData[Info_Format].toInt()<100) {
     if (overflowNumbers.size()!=1) return nullptr;
@@ -195,44 +220,120 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
     return nullptr;
 
   // Read pixel data
-  QVector<unsigned int> pixelData;
   imgFile.seek(headerSize);
-  pixelData = readArrayFromSfrm(imgFile, rows*cols, bytesPerPixel);
+  QVector<unsigned int> pixelData = readArrayFromSfrm(imgFile, rows*cols, bytesPerPixel);
 
-  //TODO: check underflowdata
+  int overflowSpecialAdd=0;
+  // Handle Overflows
   if (headerData[Info_Format].toInt()<100) {
-    // TODO implement old overflow format
+    // Not tested, as I have no images in this format ;-)
+
+    // convert already checked...
+    int overflowRecords = overflowNumbers.at(0).toInt();
+
+    // Seek to overflow table
+    imgFile.seek(headerSize+dataSize+underflowTableSize);
+
+    // each record consists of 16 characters ascii numerical data,
+    // first 9 characters for the true value and then 7 characters for the position to replace
+    for (int n=0; n<overflowRecords; n++) {
+      // read the two strings
+      QByteArray valueStr = imgFile.read(9);
+      QByteArray posStr = imgFile.read(7);
+
+      //check, if read was successful
+      if (valueStr.size()!=9 && posStr.size()!=7) return nullptr;
+
+      // convert them to ints and check their range
+      int value = valueStr.toInt(&ok);
+      if (!ok or value<0) return nullptr;
+      int pos = posStr.toInt(&ok);
+      if (!ok or pos<0 or pos>pixelData.size()) return nullptr;
+
+      // replace the overflown pixel
+      pixelData[pos]=value;
+    }
+
   } else {
+    // 1 byte pixel data has 2 byte and 4 byte overflow tables
+    // 2 byte pixel data has only 4 byte overflow table
+    // 4 byte pixel data has no overflow table
+
+    // Already checked, thus conversion is ok
     int twoByteOverflowCount = overflowNumbers.at(1).toInt();
     int fourByteOverflowCount = overflowNumbers.at(2).toInt();
+
+    // build combined overflow table
     QVector<unsigned int> overflowData;
     unsigned int sigVal=0;
     if (bytesPerPixel==1) {
+      // One byte per pixel value, thus two overflow tables. if pixel value is 0xFF, replace it with the next value
+      // from the two byte Overflow table, if it is then 0xFFFF, replace it with the next value from
+      // the four byte overflow table.
+
+      // special value in pixelData is 0xFF
       sigVal = 0xFF;
+
+      // Seek to two byte overflow table and read it
       imgFile.seek(headerSize+dataSize+underflowTableSize);
       overflowData = readArrayFromSfrm(imgFile, twoByteOverflowCount, 2);
 
-      QVector<unsigned int> fourByteOverflowData;
+      // seek to four byte overflow table and read it
       imgFile.seek(headerSize+dataSize+underflowTableSize+padTo(2*twoByteOverflowCount, 16));
-      fourByteOverflowData = readArrayFromSfrm(imgFile, fourByteOverflowCount, 4);
-      int i=0;
-      for (int n=0; n<overflowData.size(); n++) {
-        if (overflowData.at(n)==0xFFFF) {
-          overflowData[n]=fourByteOverflowData.at(i++);
-        }
-      }
+      QVector<unsigned int> fourByteOverflowData = readArrayFromSfrm(imgFile, fourByteOverflowCount, 4);
+
+      // Calculated precission images very large numbers in the 4 byte overflow table.
+      // Presumabely a bug where the calculation module passes a signed array to the writer module expecting
+      // an unsigned array, thus converting negative signed numbers to unsigned ones. these end up in very large numbers in the
+      // overflow table e.g. 0xFFFFFFF8)
+      // as Bugfix, find the lowest negative number here and add the absolute value later to the pixel data
+      // (0xFFFFFFF8 == -8, 0xFFFFFFF8 + 8 == 0) thus shifting all numbers to the positive range.
+      foreach (int v, fourByteOverflowData)
+        if (v<0 && -v>overflowSpecialAdd) overflowSpecialAdd = -v;
+
+      // replace the 0xFFFF in the two byte overflow table with the corresponding values in
+      // four byte overflow table
+      if (!replaceSpecialDataWithTableValue(overflowData, fourByteOverflowData, 0xFFFFu))
+        return nullptr;
     } else if (bytesPerPixel==2) {
+      // Two byte per pixel value, thus only one overflow table. Pixel values of 0xFFFF are replaced with the next value
+      // from the four byte overflow table.
+
+      // special value in pixelData is 0xFFFF
       sigVal = 0xFFFF;
+
+      // seek to four byte overflow table and read it
       imgFile.seek(headerSize+dataSize+underflowTableSize);
       overflowData = readArrayFromSfrm(imgFile, fourByteOverflowCount, 4);
     }
-    int i=0;
-    for (int n=0; n<pixelData.size(); n++) {
-      if (pixelData.at(n)==sigVal) {
-        pixelData[n]=overflowData.at(i++);
-      }
-    }
+
+    // replace special values in pixelData with items from the overflow table
+    if (!replaceSpecialDataWithTableValue(pixelData, overflowData, sigVal))
+      return nullptr;
   }
+
+  // AFTER overflows handle underflows, the order is important
+  // a pixel value of 0xFF has to be first replaced with the overflow value.
+  // otherwise, the base line offset is added first, giving a different special value value
+  if (numberUnderflow>0) { // Format is definitively >=100, as otherwise, underflow is not present
+    // Read Baselineoffset as third entry in NEXP header
+    QStringList exposureInfo = headerData["NEXP"].toString().split(' ');
+    if (exposureInfo.size()<3) return nullptr;
+    int exposureBaseline = exposureInfo.at(2).toInt(&ok);
+    if (!ok) return nullptr;
+
+    // Read Underflow table
+    imgFile.seek(headerSize+dataSize);
+    QVector<unsigned int> underflowData = readArrayFromSfrm(imgFile, numberUnderflow, bytesPerUnderflow);
+
+    // Replace every occurence of 0 in pixeldata with an entry in the underflow table, increase every other pixel by exposureBaseline
+    if (!replaceSpecialDataWithTableValue(pixelData, underflowData, 0u, [exposureBaseline](unsigned int& v){ v += exposureBaseline; } ))
+        return nullptr;
+  }
+
+  for (int n=0; n<pixelData.size(); n++)
+    pixelData[n]+=overflowSpecialAdd;
+
 
   store->setData(ImageDataStore::PixelSize, QSizeF(rows, cols));
 

@@ -69,6 +69,9 @@ protected:
   QList<QGraphicsRectItem*> handles;
   QColor outlineColor;
   QColor interiorColor;
+
+  QPixmap sizeVerCursorPixmap;
+  QPoint cursorHotspot;
 };
 
 #endif // CROPMARKER_H

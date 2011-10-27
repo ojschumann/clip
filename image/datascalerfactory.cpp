@@ -21,7 +21,9 @@
  **********************************************************************/
 
 #include "datascalerfactory.h"
- 
+
+#include "image/datascaler.h"
+
 
 using namespace std;
 

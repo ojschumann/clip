@@ -46,7 +46,7 @@
 #include <QCoreApplication>
 
 #include "image/laueimage.h"
-#include "image/imagedatastore.h"
+#include "image/dataprovider.h"
 #include "core/projector.h"
 #include "tools/combolineedit.h"
 #include "core/crystal.h"

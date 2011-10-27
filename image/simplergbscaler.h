@@ -24,8 +24,7 @@
 #define SIMPLERGBSCALER_H
 
 #include <QObject>
-#include <image/datascaler.h>
-#include <image/dataprovider.h>
+#include "image/datascaler.h"
 
 class SimpleRGBScaler : public DataScaler
 {

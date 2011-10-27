@@ -160,12 +160,11 @@ void Spacegroup::GroupElement::normalize() {
   }
 }
 
-// TODO: convert to QString toString();
-/*void Spacegroup::GroupElement::print() const {
-  QStringList l;
+QString Spacegroup::GroupElement::toString() const {
+  QString result;
+  QStringList l = QStringList() << "x" << "y" << "z";
   TMat3D<int> O(M);
   O.transpose();
-  l << "x" << "y" << "z";
   for (int i=0; i<3; i++) {
     bool first=true;
     TVec3D<int> v;
@@ -173,22 +172,23 @@ void Spacegroup::GroupElement::normalize() {
     v=O*v;
     for (int j=0; j<3; j++) {
       if (v(j)==1) {
-        if (!first) cout << "+";
-        cout << qPrintable(l[j]);
+        if (!first) result += "+";
+        result += l[j];
         first = false;
       } else if (v(j)==-1) {
-        cout << "-" << qPrintable(l[j]);
+        result += "-";
+        result += l[j];
         first=false;
       }
     }
     if (t(i)!=0) {
       int d = ggt(t(i), MOD);
-      cout << "+" << t(i)/d << "/" << MOD/d;
+      result += QString("+%1/%2").arg(t(i)/d).arg(MOD/d);
     }
-    cout << ", ";
+    if (i<2) result += ", ";
   }
-  cout << endl;
-}*/
+  return result;
+}
 
 Spacegroup::GroupElement Spacegroup::GroupElement::operator*(const Spacegroup::GroupElement& o) const {
   return Spacegroup::GroupElement(M*o.M, M*o.t + t);
