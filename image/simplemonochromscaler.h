@@ -34,6 +34,7 @@ public:
   virtual ~AbstractMonoScaler() {}
 protected slots:
   virtual void setHistogramEqualisation(bool)=0;
+  virtual void setLogarithmicMapping(bool)=0;
 };
 
 template <typename T> class SimpleMonochromScaler : public AbstractMonoScaler
@@ -46,6 +47,7 @@ public:
 protected:
   virtual QRgb getRGB(const QPointF &);
   virtual void setHistogramEqualisation(bool);
+  virtual void setLogarithmicMapping(bool);
 private:
   explicit SimpleMonochromScaler(DataProvider* dp, QObject* _parent = nullptr);
   SimpleMonochromScaler(const SimpleMonochromScaler&);
@@ -69,10 +71,15 @@ private:
     std::size_t operator()(const UniqueHelper& v) const { return (std::size_t)v.key; }
   };
 
+  // Dispaly logarithm of values
+  bool logarithmicMapping;
+  // Equalize the histogram befor applying the transfer curves
   bool histogramEqualisation;
 
   // Vector of the original, ordered and distinct pixel values scaled to 0..1
   QVector<float> unmappedPixelValues;
+  // Vector of the log of original, ordered and distinct pixel values scaled to 0..1
+  QVector<float> logMappedPixelValues;
   // cummulative Histogram scaled to 0..1
   QVector<float> cummulativeHistogram;
   // Number of values per Pixel count (basically a histogram)

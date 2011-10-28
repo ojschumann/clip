@@ -30,11 +30,12 @@
 
 #include "image/beziercurve.h"
 #include "image/datascalerfactory.h"
-
+#include "ui/monoscalercfg.h"
 
 template <typename T> SimpleMonochromScaler<T>::SimpleMonochromScaler(DataProvider* dp, QObject* _parent) :
     AbstractMonoScaler(dp, _parent)
 {
+  logarithmicMapping = false;
   histogramEqualisation = false;
   datawidth = dp->size().width();
   dataheight = dp->size().height();
@@ -85,6 +86,7 @@ template <typename T> void SimpleMonochromScaler<T>::makeValueIndex() {
 
   // indexSet.size() is now the number of distinct pixel values
   unmappedPixelValues.resize(indexSet.size());
+  logMappedPixelValues.resize(indexSet.size());
   cummulativeHistogram.resize(indexSet.size());
   mappedPixelValues.resize(indexSet.size());
   valueCount.resize(indexSet.size());
@@ -92,12 +94,14 @@ template <typename T> void SimpleMonochromScaler<T>::makeValueIndex() {
 
   float minPixelValue = static_cast<float>(indexSet.begin()->key);
   float pixelValueRange = static_cast<float>(indexSet.rbegin()->key) - minPixelValue;
+  float logRange = log(pixelValueRange+0.5f)-log(0.5f);
 
   int n=0;
   int histogramSum=0;
   float cumHistScale = 1.0/(provider->pixelCount() - indexSet.rbegin()->indexes.size());
   foreach (UniqueHelper u, indexSet) {
     unmappedPixelValues[n]=(static_cast<float>(u.key)-minPixelValue)/pixelValueRange;
+    logMappedPixelValues[n]=(log(static_cast<float>(u.key)-minPixelValue+0.5f)-log(0.5f))/logRange;
     cummulativeHistogram[n] = cumHistScale*histogramSum;
     valueCount[n] = u.indexes.size();
     histogramSum += valueCount[n];
@@ -113,7 +117,7 @@ template <typename T> void SimpleMonochromScaler<T>::updateContrastMapping() {
   QList<QVector<int> > channels;
   channels << QVector<int>(256) << QVector<int>(256) << QVector<int>(256);
 
-  QVector<float> vMap = transferCurves[0]->mapSorted((histogramEqualisation) ? cummulativeHistogram : unmappedPixelValues);
+  QVector<float> vMap = transferCurves[0]->mapSorted((histogramEqualisation) ? cummulativeHistogram : (logarithmicMapping) ? logMappedPixelValues : unmappedPixelValues);
   int Hints[3] = {0, 0, 0};
   float scale = 256.0*(1.0-1.0/mappedPixelValues.size());
   for (int n=0; n<vMap.size(); n++) {
@@ -132,21 +136,30 @@ template <typename T> void SimpleMonochromScaler<T>::updateContrastMapping() {
   emit histogramChanged(channels[0], channels[1], channels[2]);
 }
 
+#include <QFormLayout>
+#include <QWidget>
+#include <QCheckBox>
 template <typename T> QList<QWidget*> SimpleMonochromScaler<T>::toolboxPages() {
   QList<QWidget*> pages;
 
-  /*QCheckBox* b = new QCheckBox("Histogram Equilisation");
-  b->setChecked(histogramEqualisation);
-  b->setObjectName("Scaler");
-  connect(b, SIGNAL(toggled(bool)), this, SLOT(setHistogramEqualisation(bool)));
-  pages << b;
-  */
+  MonoScalerCfg* cfg = new MonoScalerCfg(histogramEqualisation, logarithmicMapping);
+  connect(cfg, SIGNAL(histogramEq(bool)), this, SLOT(setHistogramEqualisation(bool)));
+  connect(cfg, SIGNAL(logMapping(bool)), this, SLOT(setLogarithmicMapping(bool)));
+  pages << cfg;
+
   return pages;
 }
 
 template <typename T> void SimpleMonochromScaler<T>::setHistogramEqualisation(bool b) {
   if (b!=histogramEqualisation) {
     histogramEqualisation = b;
+    updateContrastMapping();
+  }
+}
+
+template <typename T> void SimpleMonochromScaler<T>::setLogarithmicMapping(bool b) {
+  if (b!=logarithmicMapping) {
+    logarithmicMapping = b;
     updateContrastMapping();
   }
 }

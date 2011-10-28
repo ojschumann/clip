@@ -90,17 +90,17 @@ int padTo(int value, int pad) {
 }
 
 template <typename DATA, typename TABLE, typename VALUE, typename F> bool replaceSpecialDataWithTableValue(DATA& data, const TABLE& table, VALUE specialValue, F f) {
-  unsigned int tablePos=0;
+  decltype(table.size()) tablePos=0;
 
-  for (unsigned int n=0; n<static_cast<unsigned int>(data.size()); n++) {
+  for (decltype(data.size()) n=0; n<data.size(); n++) {
     if (data.at(n)==specialValue) {
-      if (tablePos>static_cast<unsigned int>(data.size())) return false;
+      if (tablePos>data.size()) return false;
       data[n]=table.at(tablePos++);
     } else {
       f(data[n]);
     }
   }
-  return true;
+  return tablePos==table.size();
 }
 
 template <typename DATA, typename TABLE, typename VALUE> bool replaceSpecialDataWithTableValue(DATA& data, const TABLE& table, VALUE specialValue) {
@@ -197,7 +197,7 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
   int overflowTableSize = 0;
   if (headerData[Info_Format].toInt()<100) {
     if (overflowNumbers.size()!=1) return nullptr;
-    overflowTableSize = 16*overflowNumbers.at(0).toInt(&ok);
+    overflowTableSize = padTo(16*overflowNumbers.at(0).toInt(&ok), 512);
     if (!ok) return nullptr;
   } else {
     int twoByteOverflowCount = 0;
@@ -226,8 +226,6 @@ DataProvider* BrukerProvider::Factory::getProvider(QString filename, ImageDataSt
   int overflowSpecialAdd=0;
   // Handle Overflows
   if (headerData[Info_Format].toInt()<100) {
-    // Not tested, as I have no images in this format ;-)
-
     // convert already checked...
     int overflowRecords = overflowNumbers.at(0).toInt();
 

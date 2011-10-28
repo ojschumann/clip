@@ -136,7 +136,8 @@ SOURCES += main.cpp\
     ui/rotatecrystal.cpp \
     ui/sadeasteregg.cpp \
     ui/stereocfg.cpp \ 
-    tools/threadrunner.cpp
+    tools/threadrunner.cpp \
+    ui/monoscalercfg.cpp
 
 HEADERS  += ui/clip.h \
     config/colorbutton.h \
@@ -224,7 +225,8 @@ HEADERS  += ui/clip.h \
     ui/sadeasteregg.h \
     ui/stereocfg.h \
     tools/threadrunner.h \
-    config.h
+    config.h \
+    ui/monoscalercfg.h
 
 FORMS    += ui/clip.ui \
     ui/clipconfig.ui \
@@ -242,7 +244,8 @@ FORMS    += ui/clip.ui \
     ui/resolutioncalculator.ui \
     ui/rotatecrystal.ui \
     ui/sadeasteregg.ui \
-    ui/stereocfg.ui
+    ui/stereocfg.ui \
+    ui/monoscalercfg.ui
 
 RESOURCES += resources/resources.qrc
 
