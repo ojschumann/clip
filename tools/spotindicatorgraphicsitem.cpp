@@ -152,7 +152,7 @@ SpotIndicatorGraphicsItem::TWorker::~TWorker() {
 }
 
 void SpotIndicatorGraphicsItem::TWorker::init(int numberOfThreads) {
-  if (threadCaches.size()!=numberOfThreads) {
+  if (threadCaches.size()!=static_cast<unsigned int>(numberOfThreads)) {
     foreach (CacheType* c, threadCaches)
       delete c;
     threadCaches.clear();

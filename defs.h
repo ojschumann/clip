@@ -30,11 +30,11 @@ extern const char* HG_REPRO_DATE;
 extern const char* BUILD_DATE;
 extern const char* BUILD_TIME;
 
-#define VER_FILEVERSION             4,0,0,2
-#define VER_FILEVERSION_STR         "4.0.0.2\0"
+#define VER_FILEVERSION             4,0,0,3
+#define VER_FILEVERSION_STR         "4.0.0.3\0"
 
-#define VER_PRODUCTVERSION          4,0,0,2
-#define VER_PRODUCTVERSION_STR      "4.0beta2\0"
+#define VER_PRODUCTVERSION          4,0,0,3
+#define VER_PRODUCTVERSION_STR      "4.0 RC1\0"
 
 #define VER_COMPANYNAME_STR         ""
 #define VER_FILEDESCRIPTION_STR     "Software for evaluation of Laue diffraction images"

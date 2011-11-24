@@ -269,17 +269,20 @@ void Crystal::generateReflections() {
   if (not updateEnabled)
     return;
   if (updateIsSynchron) {
-    reflections = doGeneration(this);
+    QPair<QVector<Reflection>, double> result = doGeneration(GenerationParameters(this));
+    reflections = result.first;
+    predictionFactor = result.second;
     emit reflectionsUpdate();
   } else if (reflectionFuture.isRunning()) {
     restartReflectionUpdate = true;
   } else {
-    reflectionFuture.setFuture(QtConcurrent::run(&Crystal::doGeneration, this));
+    reflectionFuture.setFuture(QtConcurrent::run(&Crystal::doGeneration, GenerationParameters(this)));
   }
 }
 
 void Crystal::reflectionGenerated() {
-  reflections = reflectionFuture.result();
+  reflections = reflectionFuture.result().first;
+  predictionFactor = reflectionFuture.result().second;
   if (restartReflectionUpdate) {
     restartReflectionUpdate = false;
     generateReflections();
@@ -287,31 +290,39 @@ void Crystal::reflectionGenerated() {
   emit reflectionsUpdate();
 }
 
-QVector<Reflection> Crystal::doGeneration(Crystal* c) {
-  Mat3D savedMReziprocal(c->MReziprocal);
-  double savedQMax(c->Qmax);
-  Spacegroup sg(c->spaceGroup);
+Crystal::GenerationParameters::GenerationParameters(Crystal* c):
+    MRot(c->MRot),
+    MReziprocal(c->MReziprocal),
+    spacegroup(c->spaceGroup),
+    qMin(c->Qmin),
+    qMax(c->Qmax),
+    predictionFactor(c->predictionFactor)
+{
 
-  Vec3D savedAstar(savedMReziprocal(0));
-  Vec3D savedBstar(savedMReziprocal(1));
-  Vec3D savedCstar(savedMReziprocal(2));
+}
+
+QPair<QVector<Reflection>, double> Crystal::doGeneration(const GenerationParameters& parameters) {
+
+  Vec3D savedAstar(parameters.MReziprocal(0));
+  Vec3D savedBstar(parameters.MReziprocal(1));
+  Vec3D savedCstar(parameters.MReziprocal(2));
 
   // Qmax =2*pi/lambda_min
   // n*lambda=2*d*sin(theta) => n_max=2*d/lambda = Qmax*d/pi
   // MReal(0,0) == a
-  int hMax = int(M_1_PI*savedQMax/savedMReziprocal(0,0));
+  int hMax = int(M_1_PI*parameters.qMax/parameters.MReziprocal(0,0));
   // predicted number of reflections
-  double prediction = 4.0/3.0*M_1_PI*M_1_PI*savedQMax*savedQMax*savedQMax/savedMReziprocal.det();
-  Crystal::UpdateRef updateRef(c);
+  double prediction = 4.0/3.0*M_1_PI*M_1_PI*parameters.qMax*parameters.qMax*parameters.qMax/parameters.MReziprocal.det();
+  Crystal::UpdateRef updateRef(parameters.MRot, parameters.qMin, parameters.qMax);
   QVector<Reflection> refs;
-  refs.reserve(int(1.1*c->predictionFactor*prediction));
+  refs.reserve(int(1.1*parameters.predictionFactor*prediction));
   for (int h=-hMax; h<hMax; h++) {
     //|h*as+k*bs|^2=h^2*|as|^2+k^2*|bs|^2+2*h*k*as*bs==(2*Qmax)^2
     // k^2 +2*k*h*as*bs/|bs|^2 + (h^2*|as|^2-4*Qmax^2)/|bs|^2 == 0
     double ns = 1.0/savedBstar.norm_sq();
     double p = savedAstar*savedBstar*ns*h;
     double q1 = savedAstar.norm_sq()*ns*h*h;
-    double q2 = M_1_PI*M_1_PI*ns*savedQMax*savedQMax;
+    double q2 = M_1_PI*M_1_PI*ns*parameters.qMax*parameters.qMax;
     double s = p*p-q1+q2;
     int kMin = (s>0)?int(-p-sqrt(s)):0;
     int kMax = (s>0)?int(-p+sqrt(s)):0;
@@ -320,11 +331,11 @@ QVector<Reflection> Crystal::doGeneration(Crystal* c) {
 
       int hk_ggt = ggt(h,k);
 
-      Vec3D v = savedMReziprocal*Vec3D(h,k,0);
+      Vec3D v = parameters.MReziprocal*Vec3D(h,k,0);
       ns = 1.0/savedCstar.norm_sq();
       p = v*savedCstar*ns;
       q1 = v.norm_sq()*ns;
-      q2 = M_1_PI*M_1_PI*ns*savedQMax*savedQMax;
+      q2 = M_1_PI*M_1_PI*ns*parameters.qMax*parameters.qMax;
       s = p*p-q1+q2;
       int lMin = (s>0)?int(-p-sqrt(s)):0;
       int lMax = (s>0)?int(-p+sqrt(s)):0;
@@ -332,7 +343,7 @@ QVector<Reflection> Crystal::doGeneration(Crystal* c) {
       for (int l=lMin; l<=lMax; l++) {
         // store only lowest order reflections
         if (ggt(hk_ggt, l)==1) {
-          v=savedMReziprocal*Vec3D(h,k,l);
+          v=parameters.MReziprocal*Vec3D(h,k,l);
           double Q = 2.0*M_PI*v.norm();
 
           Reflection r;
@@ -342,8 +353,8 @@ QVector<Reflection> Crystal::doGeneration(Crystal* c) {
           r.hklSqSum=h*h+k*k+l*l;
           r.Q=Q;
           r.d = 2.0*M_PI/Q;
-          for (int i=1; i<=int(M_1_PI*savedQMax*r.d+0.999); i++) {
-            if (!sg.isExtinct(TVec3D<int>(i*h, i*k, i*l)))
+          for (int i=1; i<=int(M_1_PI*parameters.qMax*r.d+0.999); i++) {
+            if (!parameters.spacegroup.isExtinct(TVec3D<int>(i*h, i*k, i*l)))
               r.orders.push_back(i);
           }
           if (r.orders.size()>0) {
@@ -355,8 +366,8 @@ QVector<Reflection> Crystal::doGeneration(Crystal* c) {
       }
     }
   }
-  c->predictionFactor = 0.8 * c->predictionFactor + 0.2 * (refs.size()/prediction);
-  return refs;
+  double newPredictionFactor = 0.8 * parameters.predictionFactor + 0.2 * (refs.size()/prediction);
+  return qMakePair(refs, newPredictionFactor);
 }
 
 
@@ -391,6 +402,12 @@ Crystal::UpdateRef::UpdateRef(const Crystal *c) {
   Qmin = c->Qmin;
   Qmax = c->Qmax;
 }
+
+Crystal::UpdateRef::UpdateRef(const Mat3D &rot, double qmin, double qmax):
+    MRot(rot),
+    Qmin(qmin),
+    Qmax(qmax)
+{}
 
 void Crystal::UpdateRef::operator()(Reflection &r) const {
   r.normal=MRot*r.normalLocal;

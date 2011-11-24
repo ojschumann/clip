@@ -144,8 +144,19 @@ private:
   // Do the real work. Does not use possible uninitial values of objects variables
   void internalSetCell(double a, double b, double c, double alpha, double beta, double gamma);
 
+
+  struct GenerationParameters {
+    GenerationParameters(Crystal*);
+    Mat3D MRot;
+    Mat3D MReziprocal;
+    Spacegroup spacegroup;
+    double qMin;
+    double qMax;
+    double predictionFactor;
+  };
+
   // define as static to avoid accidential use of this-ptr
-  static QVector<Reflection> doGeneration(Crystal* c);
+  static QPair<QVector<Reflection>, double> doGeneration(const GenerationParameters&);
 
 
   // Real and reziprocal orientation Matrix
@@ -178,7 +189,7 @@ private:
   // List of Reflections
   QVector<Reflection> reflections;
   // Flag, that indicates an running update of the reflection list.
-  QFutureWatcher<QVector<Reflection> > reflectionFuture;
+  QFutureWatcher<QPair<QVector<Reflection>, double> > reflectionFuture;
   // flag to restart generation of reflections immediately
   bool restartReflectionUpdate;
   // flag to immediately update the rotation on newly generated reflections
@@ -195,6 +206,7 @@ private:
   class UpdateRef {
   public:
     UpdateRef(const Crystal* _c);
+    UpdateRef(const Mat3D& rot, double qmin, double qmax);
     void operator()(Reflection&) const;
   private:
     Mat3D MRot;
