@@ -34,6 +34,7 @@
 #include "tools/histogramitem.h"
 #include "tools/zipiterator.h"
 
+static const double sceneBlowup = 1000.0;
 
 ContrastCurves::ContrastCurves(LaueImage* img, QWidget* _parent) :
     QWidget(_parent),
@@ -54,7 +55,7 @@ ContrastCurves::ContrastCurves(LaueImage* img, QWidget* _parent) :
   }
 
 
-  scene.setSceneRect(0,0,1,1);
+  scene.setSceneRect(0,0,sceneBlowup,sceneBlowup);
   ui->gv->setScene(&scene);
   ui->gv->scale(1, -1);
 
@@ -63,9 +64,9 @@ ContrastCurves::ContrastCurves(LaueImage* img, QWidget* _parent) :
   connect(laueImage, SIGNAL(histogramChanged(QVector<int>,QVector<int>,QVector<int>)), histogram, SLOT(setHistogram(QVector<int>,QVector<int>,QVector<int>)));
 
   QPen decoPen(Qt::gray, 0, Qt::DotLine);
-  foreach (double d, QList<double>() << 0.0 << 0.25 << 0.5 << 0.75 << 1.0) {
-    scene.addLine(0, d, 1, d);
-    scene.addLine(d, 0, d, 1);
+  foreach (double d, QList<double>() << 0.0 << 0.25*sceneBlowup << 0.5*sceneBlowup << 0.75*sceneBlowup << 1.0*sceneBlowup) {
+    scene.addLine(0, d, sceneBlowup, d);
+    scene.addLine(d, 0, d, sceneBlowup);
   }
 
   QList<QColor> cl = QList<QColor>() << Qt::black << Qt::red << Qt::green << Qt::blue;
@@ -97,16 +98,16 @@ void ContrastCurves::changeToCurve(int n) {
   foreach (QPointF p, curve->getPoints()) {
     newMarker(p);
   }
-  handleMarkers.first()->setBBox(QRectF(0,0,0,1));
+  handleMarkers.first()->setBBox(QRectF(0,0,0,sceneBlowup));
   handleMarkers.first()->setAcceptedMouseButtons(Qt::LeftButton|Qt::RightButton);
-  handleMarkers.last()->setBBox(QRectF(1,0,0,1));
+  handleMarkers.last()->setBBox(QRectF(sceneBlowup,0,0,sceneBlowup));
   handleMarkers.last()->setAcceptedMouseButtons(Qt::LeftButton|Qt::RightButton);
 
 }
 
 void ContrastCurves::newMarker(const QPointF& p) {
   ContrastCurves::BoundedEllipse* item = new ContrastCurves::BoundedEllipse();
-  item->setPosNoSig(p);
+  item->setPosNoSig(p*sceneBlowup);
   scene.addItem(item);
   item->setBBox(scene.sceneRect());
   item->setZValue(10);
@@ -118,7 +119,7 @@ void ContrastCurves::newMarker(const QPointF& p) {
 void ContrastCurves::updateCurveLines(int n) {
   if (n<0 || laueImage.isNull() || n>=laueImage->getTransferCurves().size()) return;
   BezierCurve* curve = laueImage->getTransferCurves()[n];
-  QList<QPointF> pathPoints = curve->pointRange(0.0, 0.01, 101);
+  QList<QPointF> pathPoints = curve->pointRange(0.0, 0.01*sceneBlowup, 101);
   QPainterPath path(pathPoints[0]);
   for (int i=1; i<pathPoints.size(); i++) {
     path.lineTo(pathPoints[i]);
@@ -131,7 +132,7 @@ void ContrastCurves::markerChanged() {
     return;
   QMap<double, QPointF> points;
   foreach (QGraphicsItem* item, handleMarkers)
-    points.insert(item->x(), item->pos());
+    points.insert(item->x()/sceneBlowup, item->pos()/sceneBlowup);
 
   if (laueImage.isNull()) return;
   BezierCurve* curve = laueImage->getTransferCurves()[activeCurve];

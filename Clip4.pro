@@ -22,7 +22,8 @@ win32 {
 }
 static {
   QMAKE_LFLAGS += -static-libgcc
-  QTPLUGIN += qjpeg qgif qmng qtiff qico qsvg
+  #QTPLUGIN += qjpeg qgif qmng qtiff qico qsvg
+  QTPLUGIN += qgif qico qsvg
   DEFINES += __STATIC__
 }
 

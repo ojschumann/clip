@@ -40,6 +40,7 @@ const char XML_Stereo_Frame[] = "Frame";
 const char XML_Stereo_Frame_Mxx[] = "M%1%2";
 const char XML_Stereo_NonScattering[] = "DisplayNonScattering";
 
+static const double sceneBlowup = 1000.0;
 
 using namespace std;
 
@@ -66,7 +67,7 @@ StereoProjector::StereoProjector(QObject* _parent):
 
   settings.endGroup();
 
-  scene.setSceneRect(QRectF(-1.0, -1.0, 2.0, 2.0));
+  scene.setSceneRect(QRectF(-1.0*sceneBlowup, -1.0*sceneBlowup, 2.0*sceneBlowup, 2.0*sceneBlowup));
   connect(this, SIGNAL(textSizeChanged(double)), this, SLOT(decorateScene()));
 }
 
@@ -103,26 +104,26 @@ Vec3D StereoProjector::det2scattered(const QPointF& p, bool& b) const {
 QPointF StereoProjector::normal2det(const Vec3D& n) const {
   Vec3D v=localCoordinates*n;
   double s=1.0+v.x();
-  return (s>1e-5) ? QPointF(v.y()/s, v.z()/s) : QPointF();
+  return (s>1e-5) ? QPointF(sceneBlowup*v.y()/s, sceneBlowup*v.z()/s) : QPointF();
 }
 
 QPointF StereoProjector::normal2det(const Vec3D& n, bool& b) const {
   Vec3D v=localCoordinates*n;
   double s=1.0+v.x();
   b = (s>1e-5);
-  return (b) ? QPointF(v.y()/s, v.z()/s) : QPointF();
+  return (b) ? QPointF(sceneBlowup*v.y()/s, sceneBlowup*v.z()/s) : QPointF();
 }
 
 Vec3D StereoProjector::det2normal(const QPointF& p) const {
-  double x=p.x();
-  double y=p.y();
+  double x=p.x()/sceneBlowup;
+  double y=p.y()/sceneBlowup;
   double n=1.0/(x*x+y*y+1.0);
   return localCoordinates.transposed()*Vec3D(n*(1.0-x*x-y*y), 2*x*n, 2*y*n);
 }
 
 Vec3D StereoProjector::det2normal(const QPointF& p, bool& b) const {
-  double x=p.x();
-  double y=p.y();
+  double x=p.x()/sceneBlowup;
+  double y=p.y()/sceneBlowup;
   double n=1.0/(x*x+y*y+1.0);
   b=true;
   return localCoordinates.transposed()*Vec3D(n*(1.0-x*x-y*y), 2*x*n, 2*y*n);
@@ -151,8 +152,8 @@ bool StereoProjector::project(const Reflection &r, QPointF &p) {
   double s=1.0+v.x();
   if (s>1e-5) {
     s=1.0/s;
-    p.setX(v.y()*s);
-    p.setY(v.z()*s);
+    p.setX(sceneBlowup*v.y()*s);
+    p.setY(sceneBlowup*v.z()*s);
     return true;
   }
   return false;
@@ -166,12 +167,12 @@ void StereoProjector::decorateScene() {
     scene.removeItem(item);
     delete item;
   }
-  decorationItems.append(scene.addEllipse(-1.0, -1.0, 2.0, 2.0, QPen(Qt::gray)));
-  decorationItems.append(scene.addLine(-1.0, 0.0, 1.0, 0.0, QPen(Qt::gray)));
-  decorationItems.append(scene.addLine(0.0, -1.0, 0.0, 1.0, QPen(Qt::gray)));
+  decorationItems.append(scene.addEllipse(-1.0*sceneBlowup, -1.0*sceneBlowup, 2.0*sceneBlowup, 2.0*sceneBlowup, QPen(Qt::gray)));
+  decorationItems.append(scene.addLine(-1.0*sceneBlowup, 0.0, 1.0*sceneBlowup, 0.0, QPen(Qt::gray)));
+  decorationItems.append(scene.addLine(0.0, -1.0*sceneBlowup, 0.0, 1.0*sceneBlowup, QPen(Qt::gray)));
 
   QList<QPointF> items;
-  items << QPointF(1,0) << QPointF(-1,0) << QPointF(0,1) << QPointF(0,-1);
+  items << QPointF(sceneBlowup,0) << QPointF(-sceneBlowup,0) << QPointF(0,sceneBlowup) << QPointF(0,-sceneBlowup);
   foreach (QPointF p, items) {
 
     Vec3D c = det2normal(p);
@@ -200,10 +201,10 @@ void StereoProjector::decorateScene() {
     double sc=getTextSize()/std::min(r.width(), r.height());
     ti->scale(sc,sc);
 
-    ti->moveBy( std::min(1.0-ti->sceneBoundingRect().right(), 0.0), 0);
-    ti->moveBy(-std::min(1.0+ti->sceneBoundingRect().left() , 0.0), 0);
-    ti->moveBy(0,  std::min(1.0-ti->sceneBoundingRect().bottom(), 0.0));
-    ti->moveBy(0, -std::min(1.0+ti->sceneBoundingRect().top(), 0.0));
+    ti->moveBy( std::min(sceneBlowup-ti->sceneBoundingRect().right(), 0.0), 0);
+    ti->moveBy(-std::min(sceneBlowup+ti->sceneBoundingRect().left() , 0.0), 0);
+    ti->moveBy(0,  std::min(sceneBlowup-ti->sceneBoundingRect().bottom(), 0.0));
+    ti->moveBy(0, -std::min(sceneBlowup+ti->sceneBoundingRect().top(), 0.0));
 
     scene.addItem(ti);
     decorationItems << ti;
