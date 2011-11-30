@@ -46,6 +46,7 @@ public:
     explicit ContrastCurves(LaueImage* img, QWidget* _parent = nullptr);
     virtual ~ContrastCurves();
     void mousePressEvent(QMouseEvent *);
+    virtual QSize sizeHint() const;
   public slots:
     void loadFromFile(const QString&);
     void saveToFile(const QString&);

@@ -43,7 +43,6 @@
 
 using namespace std;
 
-static const double sceneBlowup = 1000.0;
 
 const char XML_LPP_DetSize[] = "DetSize";
 const char XML_LPP_DetSize_dist[] = "dist";
@@ -112,7 +111,7 @@ QPointF LauePlaneProjector::scattered2det(const Vec3D &v) const{
   if (w.x()<=0.0) {
     return QPointF();
   }
-  return QPointF(sceneBlowup*(w.y()/w.x()+detDx), sceneBlowup*(w.z()/w.x()+detDy));
+  return QPointF(SCENEBLOWUP(w.y()/w.x()+detDx), SCENEBLOWUP(w.z()/w.x()+detDy));
 }
 
 QPointF LauePlaneProjector::scattered2det(const Vec3D &v, bool& b) const{
@@ -122,17 +121,17 @@ QPointF LauePlaneProjector::scattered2det(const Vec3D &v, bool& b) const{
     return QPointF();
   }
   b=true;
-  return QPointF(sceneBlowup*(w.y()/w.x()+detDx), sceneBlowup*(w.z()/w.x()+detDy));
+  return QPointF(SCENEBLOWUP(w.y()/w.x()+detDx), SCENEBLOWUP(w.z()/w.x()+detDy));
 }
 
 Vec3D LauePlaneProjector::det2scattered(const QPointF& p) const{
-  Vec3D v(1.0 , p.x()/sceneBlowup-detDx, p.y()/sceneBlowup-detDy);
+  Vec3D v(1.0 , SCENECOMPRESS(p.x())-detDx, SCENECOMPRESS(p.y())-detDy);
   v.normalize();
   return localCoordinates.transposed()*v;
 }
 
 Vec3D LauePlaneProjector::det2scattered(const QPointF& p, bool& b) const{
-  Vec3D v(1.0 , p.x()/sceneBlowup-detDx, p.y()/sceneBlowup-detDy);
+  Vec3D v(1.0 , SCENECOMPRESS(p.x())-detDx, SCENECOMPRESS(p.y())-detDy);
   v.normalize();
   b=true;
   return localCoordinates.transposed()*v;
@@ -192,8 +191,8 @@ bool LauePlaneProjector::project(const Reflection &r, QPointF& p) {
 
 
   s=1.0/s;
-  p.setX((v.y()*s+detDx)*sceneBlowup);
-  p.setY((v.z()*s+detDy)*sceneBlowup);
+  p.setX(SCENEBLOWUP(v.y()*s+detDx));
+  p.setY(SCENEBLOWUP(v.z()*s+detDy));
   return true;
 }
 
@@ -204,7 +203,7 @@ void LauePlaneProjector::setDetSize(double _dist, double _width, double _height)
     detWidth=_width;
     detHeight=_height;
 
-    scene.setSceneRect(QRectF(-0.5*sceneBlowup*detWidth/detDist, -0.5*sceneBlowup*detHeight/detDist, sceneBlowup*detWidth/detDist, sceneBlowup*detHeight/detDist));
+    scene.setSceneRect(QRectF(SCENEBLOWUP(-0.5*detWidth/detDist), SCENEBLOWUP(-0.5*detHeight/detDist), SCENEBLOWUP(detWidth/detDist), SCENEBLOWUP(detHeight/detDist)));
 
     emit projectionRectSizeChanged();
     emit projectionParamsChanged();
@@ -355,7 +354,7 @@ void LauePlaneProjector::movedPrimaryBeamMarker() {
     q=scattered2det(Vec3D(-1,0,0), b);
   }
   if (b) {
-    setDetOffset(xOffset()+(p.x()-q.x())*dist()/sceneBlowup, yOffset()+(p.y()-q.y())*dist()/sceneBlowup);
+    setDetOffset(xOffset()+SCENECOMPRESS((p.x()-q.x())*dist()), yOffset()+SCENECOMPRESS((p.y()-q.y())*dist()));
   }
 }
 
