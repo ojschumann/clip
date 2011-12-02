@@ -35,9 +35,6 @@
 
 using namespace std;
 
-bool PointSort(const QPointF& p1, const QPointF& p2);
-QPolygonF getPath(const QPointF& from, const QPointF& to, QRectF on, bool clockwise, QPointF& via);
-
 ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphicsItem* _parent):
     PropagatingGraphicsObject(_parent),
     AbstractProjectorMarkerItem(p, AbstractMarkerItem::ZoneMarker),
@@ -48,16 +45,16 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
   highlight(false);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
   QList<CircleItem*> l = QList<CircleItem*>() << startHandle << endHandle;
-  connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updateOptimalZone()));
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updatePolygon()));
+  connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updateOptimalZone()));
   foreach (CircleItem* item, l) {
     ConfigStore::getInstance()->ensureColor(ConfigStore::ZoneMarkerHandles, item, SLOT(setColor(QColor)));
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
     connect(item, SIGNAL(itemClicked()),     this, SIGNAL(itemClicked()));
     connect(item, SIGNAL(positionChanged()), this, SIGNAL(positionChanged()));
-    connect(item, SIGNAL(positionChanged()), this, SLOT(updateOptimalZone()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updatePolygon()));
+    connect(item, SIGNAL(positionChanged()), this, SLOT(updateOptimalZone()));
     connect(projector, SIGNAL(spotSizeChanged(double)), item, SLOT(setRadius(double)));
   }
   connect(this, SIGNAL(positionChanged()), this, SLOT(slotInvalidateCache()));
@@ -114,37 +111,6 @@ void ZoneItem::paint(QPainter *p, const QStyleOptionGraphicsItem *, QWidget *) {
 
 }
 
-
-bool PointSort(const QPointF& p1, const QPointF& p2) {
-  return atan2(p1.y()-0.5, p1.x()-0.5)<atan2(p2.y()-0.5, p2.x()-0.5);
-}
-
-QPolygonF getPath(const QPointF& from, const QPointF& to, QRectF on, bool clockwise, QPointF& via) {
-  QPolygonF path;
-  path << from;
-  int quadrant = int(M_2_PI*(atan2(from.y()-0.5, from.x()-0.5)+5*M_PI/4))%4;
-  int quadrant_to = int(M_2_PI*(atan2(to.y()-0.5, to.x()-0.5)+5*M_PI/4))%4;
-
-  QPolygonF corners;
-  corners << on.topLeft() << on.topRight() << on.bottomRight() << on.bottomLeft();
-
-  while (quadrant!=quadrant_to) {
-    if (clockwise) {
-      path << corners[quadrant];
-      quadrant = (quadrant+1)%4;
-    } else {
-      quadrant = (quadrant+3)%4;
-      path << corners[quadrant];
-    }
-  }
-
-  path << to;
-
-  via = 0.5*(path[0]+path[1]);
-
-  return path;
-}
-
 void ZoneItem::updatePolygon() {
   zonePolys.clear();
   if ((startHandle->pos()!=endHandle->pos()) && projector->isProjectionEnabled()) {
@@ -189,6 +155,12 @@ void ZoneItem::updatePolygon() {
       v = R*v;
       u = R*u;
       z = R*z;
+    }
+
+    if (!zonePolys.empty()) {
+      tightBoundingRect = zonePolys.first().boundingRect();
+      foreach (QPolygonF p, zonePolys)
+        tightBoundingRect = tightBoundingRect.united(p.boundingRect());
     }
   }
 
