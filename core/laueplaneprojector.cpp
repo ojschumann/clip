@@ -29,7 +29,6 @@
 
 #include <typeinfo>
 
-#include "defs.h"
 #include "ui/laueplanecfg.h"
 #include "core/reflection.h"
 #include "core/projectorfactory.h"

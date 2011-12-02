@@ -23,9 +23,32 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-
 #ifndef nullptr
-#define nullptr NULL
+#  define nullptr NULL
+#endif
+
+#include <QtGlobal>
+
+#if QT_VERSION >= QT_VERSION_CHECK(4,7,0)
+#  define SCENEBLOWUP(x) ((x)*1000.0)
+#  define SCENECOMPRESS(x) ((x)/1000.0)
+#else
+#  define SCENEBLOWUP(x) (x)
+#  define SCENECOMPRESS(x) (x)
+#endif
+
+
+// Eigen lib has a bug concerning the stack alignment on Win32 with MinGW prior to 4.5
+// see http://eigen.tuxfamily.org/dox/TopicWrongStackAlignment.html
+#if defined _WIN32 && defined __GNUC__
+#  define GCC_VERSION ((__GNUC__<<16)|(__GNUC_MINOR__<<8)|(__GNUC_PATCHLEVEL__))
+#  if GCC_VERSION < 0x40500
+#    define CLIP_EIGEN_STACK_ALIGN __attribute__((force_align_arg_pointer))
+#  endif
+#endif
+
+#ifndef CLIP_EIGEN_STACK_ALIGN
+#  define CLIP_EIGEN_STACK_ALIGN
 #endif
 
 #endif // CONFIG_H

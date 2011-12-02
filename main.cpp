@@ -29,19 +29,20 @@
 
 using namespace std;
 
-#ifdef __STATIC__
+#ifdef CLIP_STATIC
 #include <QtPlugin>
-//Q_IMPORT_PLUGIN(qjpeg)
+Q_IMPORT_PLUGIN(qjpeg)
 Q_IMPORT_PLUGIN(qgif)
-//Q_IMPORT_PLUGIN(qtiff)
+Q_IMPORT_PLUGIN(qtiff)
 Q_IMPORT_PLUGIN(qico)
-//Q_IMPORT_PLUGIN(qmng)
+Q_IMPORT_PLUGIN(qmng)
 Q_IMPORT_PLUGIN(qsvg)
 #endif
 
+#include "config.h"
+
 
 int main(int argc, char *argv[]) {
-
   QApplication a(argc, argv);
 
   a.setApplicationName("Clip");

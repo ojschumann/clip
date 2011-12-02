@@ -59,8 +59,6 @@ void SpotIndicatorGraphicsItem::setColor(QColor c) {
 }
 
 
-#include "defs.h"
-
 void SpotIndicatorGraphicsItem::updateCache() {
   if (cacheNeedsUpdate) {
     //qDebug() << "SpotIndicatorGraphicsItem::updateCache()";

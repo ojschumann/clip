@@ -27,6 +27,7 @@
  
 #include <QPointF>
 
+#include <QDebug>
 #include "core/projector.h"
 #include "tools/circleitem.h"
 #include "tools/xmltools.h"
@@ -47,16 +48,16 @@ ZoneItem::ZoneItem(const QPointF& p1, const QPointF& p2, Projector* p, QGraphics
   highlight(false);
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
   QList<CircleItem*> l = QList<CircleItem*>() << startHandle << endHandle;
-  connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updatePolygon()));
   connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updateOptimalZone()));
+  connect(projector, SIGNAL(projectionParamsChanged()), this, SLOT(updatePolygon()));
   foreach (CircleItem* item, l) {
     ConfigStore::getInstance()->ensureColor(ConfigStore::ZoneMarkerHandles, item, SLOT(setColor(QColor)));
     item->setFlag(QGraphicsItem::ItemIsMovable);
     item->setCursor(QCursor(Qt::SizeAllCursor));
     connect(item, SIGNAL(itemClicked()),     this, SIGNAL(itemClicked()));
     connect(item, SIGNAL(positionChanged()), this, SIGNAL(positionChanged()));
-    connect(item, SIGNAL(positionChanged()), this, SLOT(updatePolygon()));
     connect(item, SIGNAL(positionChanged()), this, SLOT(updateOptimalZone()));
+    connect(item, SIGNAL(positionChanged()), this, SLOT(updatePolygon()));
     connect(projector, SIGNAL(spotSizeChanged(double)), item, SLOT(setRadius(double)));
   }
   connect(this, SIGNAL(positionChanged()), this, SLOT(slotInvalidateCache()));
@@ -147,124 +148,48 @@ QPolygonF getPath(const QPointF& from, const QPointF& to, QRectF on, bool clockw
 void ZoneItem::updatePolygon() {
   zonePolys.clear();
   if ((startHandle->pos()!=endHandle->pos()) && projector->isProjectionEnabled()) {
-
     Vec3D u = projector->det2normal(projector->img2det.map(startHandle->pos()));
     Vec3D v = projector->det2normal(projector->img2det.map(endHandle->pos()));
     // Vector perpendicular to u and v
-    Vec3D z = u%v;
-    z.normalize();
+    Vec3D n = u%v;
+    n.normalize();
     // Maximal scattering angle in this zone
-    Vec3D n(-1,0,0);
-    n = n-z*(z*n);
-    if (n.norm()<1e-8) {
-      n = Vec3D(0,0,1);
+    Vec3D z(-1,0,0);
+    z = z-n*(n*z);
+    if (z.norm()<1e-8) {
+      z = Vec3D(0,0,1);
     } else {
-      n.normalize();
+      z.normalize();
     }
 
     // Rotate u markerWidth deg out of plane
-    Mat3D R = Mat3D(z%n, markerWidth);
-    v = R*n;
-    u = R.transposed()*n;
-
-    QList<QPolygonF> polys;
-    polys << generatePolygon(z*(-1), u) << generatePolygon(z, v);
-
-    QList<QPointF> borderPoints;
-    QRectF sImgRect = imgRect.adjusted(0.0001, 0.0001, -0.0001, -0.0001);
-    //QRectF sImgRect = imgRect.adjusted(-0.01, -0.01, 0.01, 0.01);
-    foreach (QPolygonF q, polys) {
-      if (!sImgRect.contains(q.first())) borderPoints << q.first();
-      if (!sImgRect.contains(q.last())) borderPoints << q.last();
-    }
-    qSort(borderPoints.begin(), borderPoints.end(), PointSort);
-
-    while (borderPoints.size()>1) {
-      QPointF p = borderPoints.takeFirst();
-      QPointF q;
-      QPointF via;
+    Mat3D R = Mat3D(n%z, markerWidth);
+    v = R*z;
+    u = R.transposed()*z;
+    bool ok1 = false;
+    bool ok2 = false;
+    QPolygonF lastPoly;
+    QPolygonF imgPoly(imgRect);
+    z = Mat3D(n, -M_PI/400)*z;
+    R = Mat3D(n, 2.0*M_PI/400);
+    for (int i=0; i<401; i++) {
       bool ok;
-      QPolygonF cornerPath = getPath(p, borderPoints.first(), imgRect, true, via);
-      Vec3D v = projector->det2normal(projector->img2det.map(via), ok);
-      if (!ok || fabs(v*z)>sin(markerWidth)) {
-        cornerPath = getPath(p, borderPoints.last(), imgRect, false, via);
-        q = borderPoints.takeLast();
-      } else {
-        q = borderPoints.takeFirst();
-      }
-      QPolygonF res;
-      foreach (QPolygonF poly, polys) {
-        if (poly.last()==p) {
-          res << poly;
-          polys.removeOne(poly);
-          break;
-        } else if (poly.first()==p) {
-          for (int n=poly.size(); n--; ) res << poly[n];
-          polys.removeOne(poly);
-          break;
-        }
-      }
-      res << cornerPath;
-      if (res.first()!=q) {
-        foreach (QPolygonF poly, polys) {
-          if (poly.first()==q) {
-            res << poly;
-            polys.removeOne(poly);
-            break;
-          } else if (poly.last()==q) {
-            for (int n=poly.size(); n--; ) res << poly[n];
-            polys.removeOne(poly);
-            break;
-          }
-        }
-      }
-      polys << res;
+      QPointF p1 = projector->det2img.map(projector->normal2det(u, ok1));
+      QPointF p2 = projector->det2img.map(projector->normal2det(v, ok2));
+      QPointF p  = projector->det2img.map(projector->normal2det(z, ok ));
+      if (ok1) lastPoly << p1;
+      if (ok2) lastPoly << p2;
 
+      if (i && ok && lastPoly.size()>2 && lastPoly.containsPoint(p, Qt::OddEvenFill)) zonePolys << imgPoly.intersected(lastPoly);
+
+      lastPoly.clear();
+      if (ok2) lastPoly << p2;
+      if (ok1) lastPoly << p1;
+
+      v = R*v;
+      u = R*u;
+      z = R*z;
     }
-
-
-    QList<QPolygonF> closedItems;
-    QPolygonF bigPoly;
-    foreach (QPolygonF p, polys)
-      if (p.isClosed()) {
-      closedItems << p;
-    } else {
-      bigPoly << p;
-    }
-    if (!bigPoly.isEmpty())
-      zonePolys << bigPoly;
-
-    for (int n=0; n<closedItems.size(); n++) {
-      for (int m=0; m<closedItems.size(); m++) {
-        if (m==n) continue;
-        bool allContained=true;
-        foreach (QPointF p, closedItems[m]) {
-          if (!closedItems[n].contains(p)) {
-            allContained = false;
-            break;
-          }
-        }
-        if (allContained) {
-          QPolygonF poly;
-          closedItems[n] << closedItems[m];
-          closedItems[m].clear();
-        }
-      }
-    }
-    bool firstPoly = true;
-    foreach (QPolygonF p, closedItems) {
-      if (!p.empty()) {
-        zonePolys<< p;
-        if (firstPoly) {
-          firstPoly=false;
-          tightBoundingRect = p.boundingRect();
-        } else {
-          tightBoundingRect = tightBoundingRect.united(p.boundingRect());
-        }
-
-      }
-    }
-
   }
 
 
@@ -370,9 +295,10 @@ QList<QPolygonF> ZoneItem::generatePolygon(const Vec3D& n, const Vec3D& _v) {
     if (i==1) firstOk=ok;
     v = M*v;
   }
-  if (firstOk && ok && !zonePoly.empty()) zonePoly << zonePolys.takeFirst();
+  if (firstOk && ok && !zonePolys.empty()) zonePoly << zonePolys.takeFirst();
   if (zonePoly.size()==400) zonePoly << zonePoly.first();
   if (zonePoly.size()>1) zonePolys << zonePoly;
+
 
   return zonePolys;
 }

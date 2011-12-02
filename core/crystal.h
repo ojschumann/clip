@@ -20,8 +20,8 @@
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
 
-#ifndef __CRYSTAL_H__
-#define __CRYSTAL_H__
+#ifndef CRYSTAL_H
+#define CRYSTAL_H
 
 #include <QObject>
 #include <QMetaType>
@@ -30,7 +30,7 @@
 #include <QXmlStreamWriter>
 #include <QTime>
 
-#include "defs.h"
+#include "tools/tools.h"
 #include "tools/vec3D.h"
 #include "tools/mat3D.h"
 #include "tools/objectstore.h"
@@ -263,7 +263,7 @@ private:
   CellGroup cellGroup;
   OrientationGroup orientationGroup;
 
-#ifdef __DEBUG__
+#ifdef CLIP_DEBUG
 public slots:
   void enableDebug(bool b);
   void debugSlot();

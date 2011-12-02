@@ -15,16 +15,15 @@ win32:CONFIG(debug, debug|release) {
 
 DEFFILE = $(OBJECTS_DIR)/defs.o
 win32 {
-  DEFFILE = $(OBJECTS_DIR)\defs.o
+  DEFFILE = $(OBJECTS_DIR)\\defs.o
   PATH += C:/Program Files (x86)/TortoiseHg
   PATH += C:/Programme/TortoiseHG
   PATH += C:/Program Files/TortoiseHg
 }
 static {
   QMAKE_LFLAGS += -static-libgcc
-  #QTPLUGIN += qjpeg qgif qmng qtiff qico qsvg
-  QTPLUGIN += qgif qico qsvg
-  DEFINES += __STATIC__
+  QTPLUGIN += qjpeg qgif qmng qtiff qico qsvg
+  DEFINES += CLIP_STATIC
 }
 
 defs.commands = -\$(DEL_FILE) $$DEFFILE
@@ -32,16 +31,19 @@ QMAKE_EXTRA_TARGETS += defs
 PRE_TARGETDEPS += defs
 
 CONFIG(debug, debug|release) {
-  DEFINES += __DEBUG__ __SOURCEDIR__="\"\\\"$$PWD\\\"\""
+  DEFINES += CLIP_DEBUG CLIP_DEBUG_SOURCEDIR="\"\\\"$$PWD\\\"\""
 }
 
-DEFINES += __HG_REPRO_ID__="\\\"\$(shell hg -R \"$$PWD\" -q id)\\\""
-DEFINES += __HG_REPRO_REV__="\\\"\$(shell hg -R \"$$PWD\" -q parent --template {rev})\\\""
-DEFINES += __HG_REPRO_DATE__="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\\\"\""
+DEFINES += CLIP_HG_REPRO_ID="\\\"\$(shell hg -R \"$$PWD\" -q id)\\\""
+DEFINES += CLIP_HG_REPRO_REV="\\\"\$(shell hg -R \"$$PWD\" -q parent --template {rev})\\\""
+DEFINES += CLIP_HG_REPRO_DATE="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\\\"\""
+#DEFINES += CLIP_HG_REPRO_ID="\$(shell hg -R \"$$PWD\" -q id)"
+#DEFINES += CLIP_HG_REPRO_REV="\$(shell hg -R \"$$PWD\" -q parent --template {rev})"
+#DEFINES += CLIP_HG_REPRO_DATE="\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\""
 
 
 QMAKE_CXXFLAGS += -std=gnu++0x
-LIBS += -lboost_thread
+#LIBS += -lboost_thread
 
 # Eigen linear Algebra library
 INCLUDEPATH += ../eigen

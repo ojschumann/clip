@@ -51,6 +51,29 @@ static inline double fasthypot(double a, double b) {
   }
 }
 
+static inline unsigned long long rdtsctime()
+{
+     unsigned int eax, edx;
+     unsigned long long val;
+     __asm__ __volatile__("cpuid": : : "ax", "bx", "cx", "dx");
+     __asm__ __volatile__("rdtsc":"=a"(eax), "=d"(edx));
+     val = edx;
+     val = val << 32;
+     val += eax;
+     return val;
+}
+
+struct Mean {
+  Mean();
+  void add(double value);
+  double mean();
+  double var();
+  double unbiasedVar();
+  int N;
+  double M1;
+  double M2;
+};
+
 void setPaletteForStatus(QWidget* widget, bool ok);
 
 QSizeF transformSize(const QSizeF& s, const QTransform& t);

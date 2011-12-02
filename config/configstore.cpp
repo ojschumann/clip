@@ -117,9 +117,26 @@ QByteArray sig2Name(const char* method) {
   return name;
 }
 
+QByteArray sig2Args(const char* method) {
+  // Normalize name and convert the char* to a QByteArray
+  QByteArray args = QMetaObject::normalizedSignature(method);
+  // Remove the trailing digit, the name and the opening "("
+  args.remove(0, args.indexOf('(')+1);
+  // Remove the trailing ")"
+  args.remove(args.lastIndexOf(')'), args.length());
+  return args;
+}
+
+
 #include <QDebug>
 void ConfigStore::ensureColor(int t, QObject* receiver, const char *method) {
-  QMetaObject::invokeMethod(receiver, sig2Name(method), Qt::DirectConnection, Q_ARG(QColor, color(t)));
+  if (sig2Args(method)=="QColor") {
+    QMetaObject::invokeMethod(receiver, sig2Name(method), Qt::DirectConnection, Q_ARG(QColor, color(t)));
+  } else if (sig2Args(method)=="") {
+    QMetaObject::invokeMethod(receiver, sig2Name(method), Qt::DirectConnection);
+  } else {
+    qDebug() << "Unknown Signature in ConfigStore::ensureColor()" << method;
+  }
   connect(colors.at(t), SIGNAL(colorChanged(QColor)), receiver, method);
 }
 

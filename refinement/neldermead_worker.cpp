@@ -237,7 +237,7 @@ void NMWorker::doOneIteration() {
   calcDeviation();
 }
 
-QList<double> NMWorker::calcDeviation() {
+CLIP_EIGEN_STACK_ALIGN QList<double> NMWorker::calcDeviation() {
 
   const int N = parameters.size();
 

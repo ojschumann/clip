@@ -20,10 +20,10 @@
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
 
-#ifndef __TVEC3D_CPP__
-#define __TVEC3D_CPP__
+#ifndef TVEC3D_CPP
+#define TVEC3D_CPP
 
-#ifdef __TVEC3D_H__
+#ifdef TVEC3D_H
 
 
 #include <cmath>

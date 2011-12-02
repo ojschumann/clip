@@ -20,8 +20,8 @@
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
 
-#ifndef __INDEXER_H__
-#define __INDEXER_H__
+#ifndef INDEXER_H
+#define INDEXER_H
 
 #include <QRunnable>
 #include <QMutex>

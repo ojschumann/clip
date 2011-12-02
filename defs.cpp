@@ -21,19 +21,37 @@
  **********************************************************************/
 
 #include "defs.h"
-#include <cmath>
+
+#define STR(s) #s
+#define SSTR(s) STR(s)
+#define DEFINE_HG_VARIABLE(name) const char* HG_REPRO_ ## name = strcmp(SSTR(CLIP_HG_REPRO_ ## name), STR(CLIP_HG_REPRO_ ## name)) ? SSTR(CLIP_HG_REPRO_ ## name) : "n/a";
 
 
-const char* HG_REPRO_ID = __HG_REPRO_ID__;
-const char* HG_REPRO_REV = __HG_REPRO_REV__;
-const char* HG_REPRO_DATE = __HG_REPRO_DATE__;
+//DEFINE_HG_VARIABLE(ID)
+//DEFINE_HG_VARIABLE(REV)
+//DEFINE_HG_VARIABLE(DATE)
+
+const char* HG_REPRO_ID =
+#ifdef CLIP_HG_REPRO_ID
+    CLIP_HG_REPRO_ID;
+#else
+    "n/a";
+#endif
+
+const char* HG_REPRO_REV =
+#ifdef CLIP_HG_REPRO_REV
+    CLIP_HG_REPRO_REV;
+#else
+"n/a";
+#endif
+
+const char* HG_REPRO_DATE =
+#ifdef CLIP_HG_REPRO_DATE
+    CLIP_HG_REPRO_DATE;
+#else
+"n/a";
+#endif
+
 const char* BUILD_DATE = __DATE__ ;
 const char* BUILD_TIME = __TIME__ ;
 
-
-
-Mean::Mean(): N(0), M1(0), M2(0) {};
-void Mean::add(double value) { N++; double oldM1 = M1; M1 += (value-M1)/N; M2 += (value-M1)*(value-oldM1); }
-double Mean::mean() { return M1; }
-double Mean::var() { return N>0 ? sqrt(M2/N) : 0.0; }
-double Mean::unbiasedVar() { return N>1 ? sqrt(M2/(N-1)) : 0.0 ; }

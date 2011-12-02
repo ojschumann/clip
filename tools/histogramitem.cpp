@@ -26,7 +26,6 @@
 #include <cmath>
 #include <QTimer>
  
-
 using namespace std;
 
 HistogramItem::HistogramItem(QGraphicsItem *_parent) :
@@ -37,7 +36,7 @@ HistogramItem::HistogramItem(QGraphicsItem *_parent) :
 
 
 QRectF HistogramItem::boundingRect() const {
-  return QRectF(0,0,1,1);
+  return QRectF(0,0,SCENEBLOWUP(1),SCENEBLOWUP(1));
 }
 
 void HistogramItem::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
@@ -54,7 +53,7 @@ void HistogramItem::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*o
 
   painter->setPen(Qt::NoPen);
 
-  painter->setTransform(QTransform::fromScale(1, 1.0/maxValue), true);
+  painter->setTransform(QTransform::fromScale(SCENEBLOWUP(1.0), SCENEBLOWUP(1.0)/maxValue), true);
   foreach (QPainterPath path, pathes) {
     painter->setBrush(QBrush(l.takeFirst()));
     painter->drawPath(path);

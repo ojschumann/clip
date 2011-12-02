@@ -20,8 +20,8 @@
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
 
-#ifndef __BEZIERCURVE_H__
-#define __BEZIERCURVE_H__
+#ifndef BEZIERCURVE_H
+#define BEZIERCURVE_H
 
 #include <QPointF>
 #include <QList>

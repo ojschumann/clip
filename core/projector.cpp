@@ -233,7 +233,6 @@ ItemStore<QGraphicsRectItem>& Projector::infoItems() {
   return infoStore;
 }
 
-#include "defs.h"
 void Projector::doProjection() {
   if (crystal.isNull() or !isProjectionEnabled())
     return;

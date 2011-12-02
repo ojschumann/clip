@@ -29,7 +29,6 @@
 #include <QMouseEvent>
 #include <QFileDialog>
 
-#include "defs.h"
 #include "image/beziercurve.h"
 #include "image/laueimage.h"
 #include "tools/histogramitem.h"

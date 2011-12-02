@@ -20,8 +20,8 @@
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
 
-#ifndef __PROJECTOR_H__
-#define __PROJECTOR_H__
+#ifndef PROJECTOR_H
+#define PROJECTOR_H
 
 #include <QObject>
 #include <QVector>

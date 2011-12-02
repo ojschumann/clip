@@ -599,8 +599,8 @@ void PrintDialog::on_actionInsert_Cell_Table_triggered() {
   if (projector && projector->getCrystal()) {
     Crystal* c = projector->getCrystal();
 
-#ifdef __SOURCEDIR__
-    QFile f(__SOURCEDIR__ "/resources/report_crystal.html");
+#ifdef CLIP_DEBUG_SOURCEDIR
+    QFile f(CLIP_DEBUG_SOURCEDIR "/resources/report_crystal.html");
 #else
     QFile f(":/report_crystal.html");
 #endif
@@ -622,8 +622,8 @@ void PrintDialog::on_actionInsert_Cell_Table_triggered() {
 
 void PrintDialog::on_actionInsert_Projector_Info_triggered() {
   if (projector) {
-#ifdef __SOURCEDIR__
-    QFile f(QString(__SOURCEDIR__"/resources/report_%1.html").arg(projector->projectorName()));
+#ifdef CLIP_DEBUG_SOURCEDIR
+    QFile f(QString(CLIP_DEBUG_SOURCEDIR"/resources/report_%1.html").arg(projector->projectorName()));
 #else
     QFile f(QString(":/report_%1.html").arg(projector->projectorName()));
 #endif
@@ -644,8 +644,8 @@ struct ValueSorter {
 
 void PrintDialog::on_actionInsert_Image_info_triggered() {
   if (projector && projector->getLaueImage()) {
-#ifdef __SOURCEDIR__
-    QFile f(__SOURCEDIR__ "/resources/report_image.html");
+#ifdef CLIP_DEBUG_SOURCEDIR
+    QFile f(CLIP_DEBUG_SOURCEDIR "/resources/report_image.html");
 #else
     QFile f(":/report_image.html");
 #endif

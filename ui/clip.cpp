@@ -61,7 +61,7 @@ Clip::Clip(QWidget *_parent) :
   connect(ui->menuWindows, SIGNAL(aboutToShow()), this, SLOT(slotUpdateWindowMenu()));
   connect(ui->mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SIGNAL(windowChanged()));
 
-#ifdef __DEBUG__
+#ifdef CLIP_DEBUG
   QAction* a = ui->menuHelp->addAction("Debug");
   a->setCheckable(true);
   a->setChecked(false);
@@ -346,7 +346,7 @@ bool Clip::loadWorkspaceFile(QString filename) {
     if (e.isNull()) continue;
     CrystalDisplay* crystalDisplay = new CrystalDisplay();
     addMdiWindow(crystalDisplay)->systemMenu()->addAction("Save as Default", crystalDisplay->getCrystal(), SLOT(saveParametersAsDefault()));
-#ifdef __DEBUG__
+#ifdef CLIP_DEBUG
     foreach (QAction* a, ui->menuHelp->actions()) {
       if (a->text()=="Debug")
         connect(a, SIGNAL(triggered(bool)), crystalDisplay->getCrystal(), SLOT(enableDebug(bool)));

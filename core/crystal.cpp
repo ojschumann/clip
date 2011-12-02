@@ -37,7 +37,6 @@
 #include "tools/xmltools.h"
 #include "tools/abstractmarkeritem.h"
 #include "refinement/fitparameter.h"
-#include "defs.h"
 #include "tools/threadrunner.h"
 
 using namespace std;
@@ -946,7 +945,7 @@ void Crystal::saveParametersAsDefault() {
   settings.endGroup();
 }
 
-#ifdef __DEBUG__
+#ifdef CLIP_DEBUG
 #include <QTimer>
 void Crystal::enableDebug(bool b) {
   debugEnabled = b;

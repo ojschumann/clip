@@ -24,7 +24,7 @@
 #define DEBUG_H
 
  
-#ifdef __DEBUG__
+#ifdef CLIP_DEBUG
 
 #include <iostream>
 

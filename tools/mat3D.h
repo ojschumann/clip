@@ -20,8 +20,8 @@
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
 
-#ifndef __TMAT3D_H__
-#define __TMAT3D_H__
+#ifndef TMAT3D_H
+#define TMAT3D_H
 
 
 #include <vector>

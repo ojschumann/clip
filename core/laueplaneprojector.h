@@ -20,8 +20,8 @@
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
 
-#ifndef __LAUEPLANEPROJECTOR_H__
-#define __LAUEPLANEPROJECTOR_H__
+#ifndef LAUEPLANEPROJECTOR_H
+#define LAUEPLANEPROJECTOR_H
 
 #include "core/projector.h"
 #include "refinement/fitparametergroup.h"

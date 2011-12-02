@@ -20,8 +20,8 @@
   Fifth Floor, Boston, MA 02110-1301, USA.
  **********************************************************************/
 
-#ifndef __REFLECTION_H__
-#define __REFLECTION_H__
+#ifndef REFLECTION_H
+#define REFLECTION_H
 
 #include <QVector>
 #include <tools/mat3D.h>

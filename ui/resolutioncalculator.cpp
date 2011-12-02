@@ -108,12 +108,7 @@ struct RulerData {
   double l;
 };
 
-#ifdef _WIN32
-__attribute__((force_align_arg_pointer)) void ResolutionCalculator::slotCalcResolution() {
-#else
-void ResolutionCalculator::slotCalcResolution() {
-#endif
-
+CLIP_EIGEN_STACK_ALIGN void ResolutionCalculator::slotCalcResolution() {
   // Load all rulers with a valid length in list
   QList<RulerData> rulerWithLengthData;
   QSizeF s = image->data()->getTransformedSizeData(ImageDataStore::PixelSize);
@@ -130,15 +125,15 @@ void ResolutionCalculator::slotCalcResolution() {
     }
   }
 
-  int dim = resolutionsLocked ? 1 : 2;
+  int dimension = resolutionsLocked ? 1 : 2;
   Eigen::Vector2d r;
   bool solutionOK = false;
 
   // If more amount of data is sufficient for problem, do cal
-  if (rulerWithLengthData.size()>=dim) {
+  if (rulerWithLengthData.size()>=dimension) {
 
     // Build linear set of equations M*x =b
-    Eigen::MatrixXd M(rulerWithLengthData.size(), dim);
+    Eigen::MatrixXd M(rulerWithLengthData.size(), dimension);
     Eigen::VectorXd b(rulerWithLengthData.size());
 
     for (int n=0; n<rulerWithLengthData.size(); n++) {
