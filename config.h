@@ -38,17 +38,11 @@
 #endif
 
 
-// Eigen lib has a bug concerning the stack alignment on Win32 with MinGW prior to 4.5
+// Eigen lib has a bug concerning the stack alignment on Win32 with MinGW reported prior to 4.5
 // see http://eigen.tuxfamily.org/dox/TopicWrongStackAlignment.html
+// but MinGW 4.6.1 still has this issue
 #if defined _WIN32 && defined __GNUC__
-#  define GCC_VERSION ((__GNUC__<<16)|(__GNUC_MINOR__<<8)|(__GNUC_PATCHLEVEL__))
-#  if GCC_VERSION < 0x40500
-#    define CLIP_EIGEN_STACK_ALIGN __attribute__((force_align_arg_pointer))
-#  endif
-#endif
-
-#ifndef CLIP_EIGEN_STACK_ALIGN
-#  define CLIP_EIGEN_STACK_ALIGN
+#define CLIP_EIGEN_STACK_ALIGN __attribute__((force_align_arg_pointer))
 #endif
 
 #endif // CONFIG_H

@@ -22,7 +22,10 @@ win32 {
 }
 static {
   QMAKE_LFLAGS += -static-libgcc
-  QTPLUGIN += qjpeg qgif qmng qtiff qico qsvg
+  QTPLUGIN += qgif qico qsvg
+  !contains(QT_VERSION, ^4\\.7\\..*) {
+    QTPLUGIN += qjpeg qmng qtiff
+  }
   DEFINES += CLIP_STATIC
 }
 
@@ -37,13 +40,9 @@ CONFIG(debug, debug|release) {
 DEFINES += CLIP_HG_REPRO_ID="\\\"\$(shell hg -R \"$$PWD\" -q id)\\\""
 DEFINES += CLIP_HG_REPRO_REV="\\\"\$(shell hg -R \"$$PWD\" -q parent --template {rev})\\\""
 DEFINES += CLIP_HG_REPRO_DATE="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\\\"\""
-#DEFINES += CLIP_HG_REPRO_ID="\$(shell hg -R \"$$PWD\" -q id)"
-#DEFINES += CLIP_HG_REPRO_REV="\$(shell hg -R \"$$PWD\" -q parent --template {rev})"
-#DEFINES += CLIP_HG_REPRO_DATE="\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\""
 
 
 QMAKE_CXXFLAGS += -std=gnu++0x
-#LIBS += -lboost_thread
 
 # Eigen linear Algebra library
 INCLUDEPATH += ../eigen

@@ -29,6 +29,9 @@ extern const char* HG_REPRO_REV;
 extern const char* HG_REPRO_DATE;
 extern const char* BUILD_DATE;
 extern const char* BUILD_TIME;
+extern const char* QT_BUILD_VERSION;
+extern const char* QT_RUN_VERSION;
+extern const char* CXX_VERSION_STR;
 
 #define VER_FILEVERSION             4,0,0,3
 #define VER_FILEVERSION_STR         "4.0.0.3\0"

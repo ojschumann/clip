@@ -197,6 +197,9 @@ void Clip::on_actionAbout_triggered(bool) {
   message.replace("<HG_REPRO_DATE/>", QString(HG_REPRO_DATE));
   message.replace("<BUILD_DATE/>", QString(BUILD_DATE));
   message.replace("<BUILD_TIME/>", QString(BUILD_TIME));
+  message.replace("<QT_BUILD_VERSION/>", QString(QT_BUILD_VERSION));
+  message.replace("<QT_RUN_VERSION/>", QString(QT_RUN_VERSION));
+  message.replace("<CXX_VERSION/>", QString(CXX_VERSION_STR));
 
   QMessageBox::about(this, "Cologne Laue Indexation Program", message);
 }

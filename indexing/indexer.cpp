@@ -81,9 +81,7 @@ Indexer::Indexer(QList<AbstractMarkerItem*> crystalMarkers, const Mat3D& _MReal,
   connect(&candidates, SIGNAL(progessInfo(int)), this, SIGNAL(progressInfo(int)));
 }
 
-#include <QDebug>
 Indexer::~Indexer() {
-   qDebug() << "~Indexer";
 }
 
 void Indexer::run() {
@@ -113,7 +111,6 @@ void Indexer::run() {
         nice.restart();
         localData.publishSingleSolution = ((localData.solutionsPublishedInRateCycle + localData.unpublishedSolutions.size()) <= 10);
         if (localData.unpublishedSolutions.size()>0) {
-          qDebug() << "publish multi solutions" << localData.solutionsPublishedInRateCycle << localData.unpublishedSolutions.size();
           emit publishMultiSolutions(localData.unpublishedSolutions);
           localData.unpublishedSolutions.clear();
         }
@@ -185,7 +182,6 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
     if (optRot.getOptimalRotation()==R) break;
     if (shouldStop) return;
     if (loops>25) {
-      qDebug() << "FlipFlop ?";
       return;
     }
     R = optRot.getOptimalRotation();

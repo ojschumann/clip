@@ -211,7 +211,6 @@ void ProjectionPlane::mouseMoveEvent(QMouseEvent *e) {
         }
       } else {
         // event resposibilitz not not sucessfully transfered to the created itemm, strange...
-        qDebug() << "not transfered";
         if (ui->rulerAction->isChecked()) {
           projector->rulers().last()->setEnd(projector->det2img.map(p));
         } else if (ui->markZonesAction->isChecked()) {

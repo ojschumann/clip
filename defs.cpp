@@ -21,6 +21,7 @@
  **********************************************************************/
 
 #include "defs.h"
+#include <Qt>
 
 #define STR(s) #s
 #define SSTR(s) STR(s)
@@ -50,6 +51,23 @@ const char* HG_REPRO_DATE =
     CLIP_HG_REPRO_DATE;
 #else
 "n/a";
+#endif
+
+#define HH(x) #x
+#define HHH(x) HH(x)
+const char* QT_BUILD_VERSION = QT_VERSION_STR;
+const char* QT_RUN_VERSION = qVersion();
+const char* CXX_VERSION_STR =
+#if defined __GNUC__
+    #if defined _WIN32
+    #  define GCC_NAME "MinGW "
+    #else
+    #  define GCC_NAME "gcc "
+    #endif
+    #define T GCC_NAME HHH(__GNUC__) "." HHH(__GNUC_MINOR__) "." HHH(__GNUC_PATCHLEVEL__)
+    T;
+#else
+    "n/a";
 #endif
 
 const char* BUILD_DATE = __DATE__ ;

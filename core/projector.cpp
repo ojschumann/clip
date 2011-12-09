@@ -237,8 +237,6 @@ void Projector::doProjection() {
   if (crystal.isNull() or !isProjectionEnabled())
     return;
 
-  //qDebug() << QString("%1::doProject()").arg(projectorName());
-
   // Remove the textmarkeritems from the scene
   foreach (QGraphicsItem* item, textMarkerItems) {
     scene.removeItem(item);

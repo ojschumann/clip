@@ -223,6 +223,12 @@ void ContrastCurves::makeHScale() {
 ContrastCurves::BoundedEllipse::BoundedEllipse(QGraphicsItem *_parent): CircleItem(5, _parent) {
   setFlag(QGraphicsItem::ItemIsMovable);
   setFlag(QGraphicsItem::ItemIgnoresTransformations);
+#if (QT_VERSION >= QT_VERSION_CHECK(4,6,4)) && (QT_VERSION < QT_VERSION_CHECK(4,7,0))
+  // Bugfix for QGraphicsItem::ItemIgnoresTransformations and mouseMovedEvent
+  // Here, a pointer to transformation infos might be nullptr and the program crashes
+  // e.g. setScale initialized this pointer and everything works fine
+  setScale(1.0);
+#endif
   setAcceptedMouseButtons(Qt::LeftButton);
   setCursor(QCursor(Qt::SizeAllCursor));
 }

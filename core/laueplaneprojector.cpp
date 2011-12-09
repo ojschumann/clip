@@ -95,8 +95,6 @@ Projector& LauePlaneProjector::operator=(const Projector& _o) {
     setDetSize(o->dist(), o->width(), o->height());
     setDetOrientation(o->omega(), o->chi(), o->phi());
     setDetOffset(o->xOffset(), o->yOffset());
-  } else {
-    qDebug() << "Copy operator on LauePlaneProjector ";
   }
   return *this;
 }

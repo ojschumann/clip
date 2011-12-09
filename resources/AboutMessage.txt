@@ -4,7 +4,11 @@ It is dedicated to my late <a href="call://see">dad</a>.<br><br>
 Version: <VER_PRODUCTVERSION_STR/> <br>
 Mercurial ID: <HG_REPRO_ID/> Revision: <HG_REPRO_REV/><br>
 Mercurial Date: <HG_REPRO_DATE/><br>
-Build Date: <BUILD_DATE/> <BUILD_TIME/><br><br>
+Build Date: <BUILD_DATE/> <BUILD_TIME/><br>
+Compiler Version: <CXX_VERSION/><br>
+Qt Build Version: <QT_BUILD_VERSION/><br>
+Qt Run Version: <QT_RUN_VERSION/><br>
+<br>
 Copyright &copy; 2008-2011 O.J.Schumann (<a href="mailto:o.j.schumann@gmail.com">o.j.schumann@gmail.com</a>)</p>
 
 <p>This program is free software: you can redistribute it and/or modify

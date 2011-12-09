@@ -22,7 +22,6 @@
 
 #include <QApplication>
 #include <QTime>
-#include <QDebug>
 #include <cmath>
  
 #include "ui/clip.h"
@@ -31,11 +30,13 @@ using namespace std;
 
 #ifdef CLIP_STATIC
 #include <QtPlugin>
+#  if QT_VERSION<QT_VERSION_CHECK(4,7,0)
 Q_IMPORT_PLUGIN(qjpeg)
-Q_IMPORT_PLUGIN(qgif)
 Q_IMPORT_PLUGIN(qtiff)
-Q_IMPORT_PLUGIN(qico)
 Q_IMPORT_PLUGIN(qmng)
+#  endif
+Q_IMPORT_PLUGIN(qgif)
+Q_IMPORT_PLUGIN(qico)
 Q_IMPORT_PLUGIN(qsvg)
 #endif
 

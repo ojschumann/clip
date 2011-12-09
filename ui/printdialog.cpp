@@ -649,7 +649,6 @@ void PrintDialog::on_actionInsert_Image_info_triggered() {
 #else
     QFile f(":/report_image.html");
 #endif
-    qDebug() << f.fileName();
     if (f.open(QIODevice::ReadOnly)) {
       QString tableCode = QString(f.readAll());
       f.close();
