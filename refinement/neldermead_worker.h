@@ -42,6 +42,10 @@ public:
   double worstScore();
 
   void restart();
+
+  bool valid() const;
+  int parameterCount() const;
+  int markerCount() const;
 protected slots:
   void updateTransformationMatrices();
 protected:

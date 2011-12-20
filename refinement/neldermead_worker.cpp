@@ -80,6 +80,19 @@ double NMWorker::worstScore() {
   return simplex.last().score;
 }
 
+bool NMWorker::valid() const {
+  return parameterCount()>0 && markerCount()>0;
+}
+
+int NMWorker::parameterCount() const {
+  return parameters.size();
+}
+
+int NMWorker::markerCount() const {
+  return markers.size();
+}
+
+
 QList<double> NMWorker::bestSolution() {
   return simplex.first().coordinates.toList();
 }

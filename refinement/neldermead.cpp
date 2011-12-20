@@ -68,35 +68,37 @@ bool NelderMead::isRunning() {
 
 void NelderMead::run() {
   NMWorker* worker = new NMWorker(liveCrystal);
-  int loops = 0;
-  int noImprovmentLoops=0;
-  QTime rateLimiter;
-  double bestEmitedScore=worker->bestScore();
-  rateLimiter.start();
-  forever {
-    loops++;
-    noImprovmentLoops++;
-    threadLock.lockForRead();
-    bool _shouldStop = shouldStop;
-    threadLock.unlock();
-    if (_shouldStop) {
-      break;
-    }
+  if (worker->valid()) {
+    int loops = 0;
+    int noImprovmentLoops=0;
+    QTime rateLimiter;
+    double bestEmitedScore=worker->bestScore();
+    rateLimiter.start();
+    forever {
+      loops++;
+      noImprovmentLoops++;
+      threadLock.lockForRead();
+      bool _shouldStop = shouldStop;
+      threadLock.unlock();
+      if (_shouldStop) {
+        break;
+      }
 
-    double lastScore = worker->bestScore();
-    worker->doOneIteration();
-    if (worker->bestScore()<bestEmitedScore && rateLimiter.elapsed()>50) {
-      bestEmitedScore = worker->bestScore();
-      emit bestSolutionScore(worker->bestScore());
-      emit bestSolution(worker->bestSolution(), worker->calcDeviation());
-      rateLimiter.restart();
-    }
-    if (lastScore/worker->bestScore()>1.001) {
-      noImprovmentLoops = 0;
-    }
-    double relativeScoreDifference = (worker->worstScore() - worker->bestScore())/worker->worstScore();
-    if ((noImprovmentLoops>75) || (relativeScoreDifference < 1e-4)) {
-      break;
+      double lastScore = worker->bestScore();
+      worker->doOneIteration();
+      if (worker->bestScore()<bestEmitedScore && rateLimiter.elapsed()>50) {
+        bestEmitedScore = worker->bestScore();
+        emit bestSolutionScore(worker->bestScore());
+        emit bestSolution(worker->bestSolution(), worker->calcDeviation());
+        rateLimiter.restart();
+      }
+      if (lastScore/worker->bestScore()>1.001) {
+        noImprovmentLoops = 0;
+      }
+      double relativeScoreDifference = (worker->worstScore() - worker->bestScore())/worker->worstScore();
+      if ((noImprovmentLoops>75) || (relativeScoreDifference < 1e-4)) {
+        break;
+      }
     }
   }
   emit bestSolutionScore(worker->bestScore());
