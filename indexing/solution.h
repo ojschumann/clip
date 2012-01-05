@@ -36,16 +36,21 @@ public:
   Solution& operator=(const Solution& s);
 
   Mat3D bestRotation;
-  double hklDeviation;
+  double indexDeviation;
+  double indexDeviationSq;
   double indexMean;
   double indexRMS;
+
+  // Used in sorting the solutionmodel for updating the PersistentModelIndices
+  int solutionIndex;
 
   double allIndexRMS() const;
   double allIndexMean() const;
   double hklDeviationSum() const;
+  double hklDeviationSqSum() const;
 
   QList< TVec3D<int> > markerIdx;
-  QList<double> markerScore;
+  QList<Vec3D> markerRationalIdx;
 
 };
 

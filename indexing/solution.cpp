@@ -27,7 +27,8 @@
 #include "tools/optimalrotation.h"
 
 Solution::Solution() {
-  hklDeviation = -1.0;
+  indexDeviation = -1.0;
+  indexDeviationSq = -1.0;
   indexMean = -1.0;
   indexRMS = -1.0;
 }
@@ -38,22 +39,47 @@ Solution::Solution(const Solution &s) {
 
 Solution& Solution::operator=(const Solution& s) {
   bestRotation = s.bestRotation;
-  hklDeviation = s.hklDeviation;
+  indexDeviation = s.indexDeviation;
+  indexDeviationSq = s.indexDeviationSq;
   indexMean = s.indexMean;
   indexRMS = s.indexRMS;
+  solutionIndex = s.solutionIndex;
   markerIdx = s.markerIdx;
-  markerScore = s.markerScore;
+  markerRationalIdx = s.markerRationalIdx;
+
   return *this;
 }
 
 double Solution::hklDeviationSum() const {
-  return hklDeviation;
+  if (indexDeviation<0) {
+    double tmpIndexDeviation = 0.0;
+    for (int n=0; n<markerIdx.size(); n++) {
+      tmpIndexDeviation += (markerRationalIdx.at(n) - markerIdx.at(n).toType<double>()).norm();
+    }
+    tmpIndexDeviation /= markerIdx.size();
+    const_cast<Solution*>(this)->indexDeviation = tmpIndexDeviation;
+  }
+
+  return indexDeviation;
+}
+
+double Solution::hklDeviationSqSum() const {
+  if (indexDeviationSq<0) {
+    double tmpIndexDeviation = 0.0;
+    for (int n=0; n<markerIdx.size(); n++) {
+      tmpIndexDeviation += (markerRationalIdx.at(n) - markerIdx.at(n).toType<double>()).norm_sq();
+    }
+    tmpIndexDeviation /= 3.0*markerIdx.size();
+    const_cast<Solution*>(this)->indexDeviationSq = sqrt(tmpIndexDeviation);
+  }
+
+  return indexDeviationSq;
 }
 
 double Solution::allIndexMean() const {
   if (indexMean<0) {
     double tmpIndexMean = 0.0;
-    foreach (TVec3D<int> idx, markerIdx) {
+    foreach (Vec3D idx, markerRationalIdx) {
       tmpIndexMean += qAbs(idx.x()) + qAbs(idx.y()) + qAbs(idx.z());
     }
     tmpIndexMean /= 3.0*markerIdx.size();
@@ -64,7 +90,7 @@ double Solution::allIndexMean() const {
 double Solution::allIndexRMS() const {
   if (indexRMS<0) {
     double tmpIndexRMS= 0.0;
-    foreach (TVec3D<int> idx, markerIdx) {
+    foreach (Vec3D idx, markerRationalIdx) {
       tmpIndexRMS += idx.norm_sq();
     }
     tmpIndexRMS /= 3.0*markerIdx.size();

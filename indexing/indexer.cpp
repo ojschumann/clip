@@ -189,21 +189,20 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
 
   Solution solution;
   solution.bestRotation = R;
-  solution.hklDeviation = 0.0;
   foreach (Marker m, localData.markers) {
     solution.markerIdx << m.getIntegerIndex();
-    solution.hklDeviation += m.getIndexDeviationScore();
+    solution.markerRationalIdx << m.getRationalIndex();
   }
 
   Mat3D bestinv(solution.bestRotation.transposed());
   int n=0;
   uniqLock.lockForRead();
-  bool duplicate = symmetryEquivalentSolutionPresent(bestinv, solution.hklDeviation, n);
+  bool duplicate = symmetryEquivalentSolutionPresent(bestinv, solution.indexDeviation, n);
   uniqLock.unlock();
   if (duplicate) return;
 
   uniqLock.lockForWrite();
-  duplicate = symmetryEquivalentSolutionPresent(bestinv, solution.hklDeviation, n);
+  duplicate = symmetryEquivalentSolutionPresent(bestinv, solution.indexDeviation, n);
   if (!duplicate) {
     uniqSolutions << solution;
     if (localData.publishSingleSolution && (localData.solutionsPublishedInRateCycle<5)) {
@@ -218,7 +217,7 @@ void Indexer::checkGuess(const CandidateGenerator::Candidate& c1, const Candidat
 
 bool Indexer::symmetryEquivalentSolutionPresent(const Mat3D &R, double hklDeviation, int &n) {
   for (; n<uniqSolutions.size(); n++) {
-    if ((fabs(uniqSolutions.at(n).hklDeviation - hklDeviation) / hklDeviation)<1e-4) {;
+    if ((fabs(uniqSolutions.at(n).indexDeviation - hklDeviation) / hklDeviation)<1e-4) {;
       Mat3D T(R*uniqSolutions.at(n).bestRotation);
       foreach (Mat3D G, lauegroup)  {
         if ((G-T).sqSum()<1e-4) {

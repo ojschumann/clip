@@ -25,6 +25,8 @@
 #include <QApplication>
 #include <QVector>
 
+
+
 SolutionModel::SolutionModel(QObject* _parent):
   QAbstractTableModel(_parent)
 {
@@ -38,15 +40,20 @@ int SolutionModel::columnCount(const QModelIndex& /*_parent*/) const {
   return 3;
 }
 
+double SolutionModel::columnDataFromSolution(const Solution& s, int column) {
+  if (column==0) {
+    return 100.0*s.hklDeviationSqSum();
+  } else if (column==1) {
+    return s.allIndexRMS();
+  } else if (column==2) {
+    return 100.0*s.hklDeviationSqSum()*s.allIndexRMS();
+  }
+  return 0.0;
+}
+
 QVariant SolutionModel::data(const QModelIndex & index, int role) const {
   if (role==Qt::DisplayRole) {
-    if (index.column()==0) {
-      return QVariant(QString::number(100.0*solutions.at(index.row()).hklDeviationSum(), 'f', 2));
-    } else if (index.column()==1) {
-      return QVariant(QString::number(solutions.at(index.row()).allIndexMean(), 'f', 2));
-    } else if (index.column()==2) {
-      return QVariant(QString::number(solutions.at(index.row()).allIndexRMS(), 'f', 2));
-    }
+    return QVariant(QString::number(columnDataFromSolution(solutions.at(index.row()), index.column()), 'f', 2));
   } else if (role==Qt::TextAlignmentRole) {
     return QVariant(Qt::AlignRight);
   }
@@ -57,79 +64,56 @@ QVariant SolutionModel::headerData(int section, Qt::Orientation orientation, int
   if (role==Qt::DisplayRole) {
     if (orientation==Qt::Horizontal) {
       if (section==0) {
-        return QVariant("Deviation");
+        return QVariant("Idx Dev");
       } else if (section==1) {
-        return QVariant("Idx mean");
-      } else if (section==2) {
         return QVariant("Idx rms");
+      } else if (section==2) {
+        return QVariant("Combination");
       }
     } else {
       return QVariant(section+1);
+    }
+  } else if (role==Qt::ToolTipRole && orientation==Qt::Horizontal) {
+    if (section==0) {
+      return QVariant("<html>Root mean square of the fractional part of the rational index componentes. Favors good matching solutions.</html>");
+    } else if (section==1) {
+      return QVariant("<html>Root mean square of the index components. Favors low indexed solutions.</html>");
+    } else if (section==2) {
+      return QVariant("<html>Combination of <i>Idx&nbsp;Dev</i> and <i>Idx&nbsp;rms</i></html>");
     }
   }
   return QVariant();
 }
 
-QList<double> SolutionModel::getSortDataList() const {
-  QList<double> list;
-  for (int row=0; row<solutions.size(); row++) {
-    list << getSortData(solutions.at(row));
-  }
-  return list;
-}
-
-double SolutionModel::getSortData(const Solution& s) const {
-  double sign = (sortOrder==Qt::AscendingOrder) ? 1.0 : -1.0;
-  if (sortColumn==0) {
-    return sign*s.hklDeviationSum();
-  } else if (sortColumn==1) {
-    return sign*s.allIndexMean();
-  } else if (sortColumn==2) {
-    return sign*s.allIndexRMS();
-  }
-  return 0.0;
-}
-
-
-struct SortFunctor {
-  SortFunctor(double v, int i): value(v), id(i) {}
-  bool operator<(const SortFunctor& o) const { return value<o.value; }
-  double value;
-  int id;
-};
-
 void SolutionModel::sort(int column, Qt::SortOrder order) {
   sortColumn = column;
   sortOrder = order;
 
-  QList<SortFunctor> values;
-  QList<double> v = getSortDataList();
-  for (int i=0; i<v.size(); i++) {
-    values << SortFunctor(v.at(i), i);
-  }
+  for (int i=0; i<solutions.size(); i++)
+    solutions[i].solutionIndex = i;
 
-  qStableSort(values);
+  emit layoutAboutToBeChanged();
 
-  QVector<int> ids(values.size());
-  QList<Solution> tmpSolutions;
+  qStableSort(solutions.begin(), solutions.end(), SolutionCompare(sortColumn, sortOrder));
+
+  QVector<int> ids(solutions.size());
   for (int i=0; i<solutions.size(); i++) {
-    tmpSolutions << solutions.at(values.at(i).id);
-    ids[values.at(i).id]=i;
+    ids[solutions.at(i).solutionIndex]=i;
   }
-  solutions = tmpSolutions;
 
-  QModelIndexList newIndices;
-  foreach (QModelIndex idx, persistentIndexList()) {
-    newIndices << index(ids.at(idx.row()), idx.column(), idx.parent());
+  QModelIndexList oldPersistentIndices = persistentIndexList();
+  QModelIndexList newPersistentIndices;
+  foreach (QModelIndex idx, oldPersistentIndices) {
+    newPersistentIndices << index(ids.at(idx.row()), idx.column(), idx.parent());
   }
-  changePersistentIndexList(persistentIndexList(), newIndices);
-  emit dataChanged(index(0, 0), index(rowCount()-1, columnCount()-1));
+  changePersistentIndexList(oldPersistentIndices, newPersistentIndices);
+  //emit dataChanged(index(0, 0), index(rowCount()-1, columnCount()-1));
+  emit layoutChanged();
 }
 
 
 void SolutionModel::addSolution(Solution s) {
-  QList<double> solutionScore = getSortDataList();
-  int idx=qLowerBound(solutionScore, getSortData(s))-solutionScore.begin();
+  int idx=qLowerBound(solutions.begin(), solutions.end(), s, SolutionCompare(sortColumn, sortOrder))-solutions.begin();
   beginInsertRows(QModelIndex(),idx,idx);
   solutions.insert(idx, s);
   endInsertRows();
@@ -137,12 +121,9 @@ void SolutionModel::addSolution(Solution s) {
 }
 
 void SolutionModel::addSolutions(QList<Solution> newSolutions) {
-  QList<double> solutionScore = getSortDataList();
   foreach (Solution s, newSolutions) {
-    double solScore = getSortData(s);
-    int idx=qLowerBound(solutionScore, solScore)-solutionScore.begin();
+    int idx=qLowerBound(solutions.begin(), solutions.end(), s, SolutionCompare(sortColumn, sortOrder))-solutions.begin();
     beginInsertRows(QModelIndex(),idx,idx);
-    solutionScore.insert(idx, solScore);
     solutions.insert(idx, s);
     endInsertRows();
   }
@@ -159,21 +140,15 @@ Solution SolutionModel::getSolution(unsigned int n) {
   return solutions[n];
 }
 
-SolutionModel::SolSort::SolSort(int col, Qt::SortOrder order) {
-  sortColumn=col;
+SolutionModel::SolutionCompare::SolutionCompare(int column, Qt::SortOrder order) {
+  sortColumn=column;
   sortOrder=order;
 };
 
-bool SolutionModel::SolSort::operator()(const Solution& s1,const Solution& s2) {
-  bool b=true;
-  if (sortColumn==0) {
-    b=s1.allIndexMean()<s2.allIndexMean();
-  } else if (sortColumn==1) {
-    b=s1.allIndexRMS()<s2.allIndexRMS();
-  } else if (sortColumn==2) {
-    b=s1.hklDeviationSum()<s2.hklDeviationSum();
-  }
-  if (sortOrder==Qt::DescendingOrder)
-    b=not b;
-  return b;
+bool SolutionModel::SolutionCompare::operator()(const Solution& s1,const Solution& s2) {
+  double v1 = SolutionModel::columnDataFromSolution(s1, sortColumn);
+  double v2 = SolutionModel::columnDataFromSolution(s2, sortColumn);
+  if (sortOrder==Qt::AscendingOrder)
+    return v1<v2;
+  return v2<v1;
 }

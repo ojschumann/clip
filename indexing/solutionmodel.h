@@ -38,8 +38,9 @@ public:
   virtual int columnCount(const QModelIndex & _parent= QModelIndex()) const ;
   virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-  virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) ;
+  virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
+  static double columnDataFromSolution(const Solution& s, int column);
 
   Solution getSolution(unsigned int n);
 
@@ -51,18 +52,14 @@ public slots:
   void clear();
 
 private:
-  QList<double> getSortDataList() const;
-  double getSortData(const Solution& s) const;
-
-  class SolSort {
-  public:
-    SolSort(int col, Qt::SortOrder order);
-    bool operator()(const Solution& s1,const Solution& s2);
-            private:
-    int sortColumn;
-    Qt::SortOrder sortOrder;
+  class SolutionCompare {
+    public:
+      SolutionCompare(int col, Qt::SortOrder order);
+      bool operator()(const Solution& s1, const Solution& s2);
+    private:
+      int sortColumn;
+      Qt::SortOrder sortOrder;
   };
-
 
   QList<Solution> solutions;
   int sortColumn;
