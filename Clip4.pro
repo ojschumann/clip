@@ -41,7 +41,6 @@ DEFINES += CLIP_HG_REPRO_ID="\\\"\$(shell hg -R \"$$PWD\" -q id)\\\""
 DEFINES += CLIP_HG_REPRO_REV="\\\"\$(shell hg -R \"$$PWD\" -q parent --template {rev})\\\""
 DEFINES += CLIP_HG_REPRO_DATE="\"\\\"\$(shell hg -R \"$$PWD\" -q parent --template \"{date|date}\")\\\"\""
 
-
 QMAKE_CXXFLAGS += -std=gnu++0x
 
 # Eigen linear Algebra library
